@@ -524,12 +524,14 @@ function bukaModalTransaksi(tipe, namaBarang, harga, stokMaksimal = 0) {
         document.getElementById('modal-title').innerText = `Beli ${namaBarang}`; 
         document.getElementById('btn-confirm-transaction').innerText = 'Konfirmasi Beli'; 
         let maxMampuBeli = Math.floor(uang / harga); 
-        maxQtyAllowed = Math.min(99, maxMampuBeli); 
+        maxQtyAllowed = Math.min(99, maxMampuBeli); // Pembelian tetap dibatasi 99 agar aman
         if (maxQtyAllowed < 1) maxQtyAllowed = 1; 
     } else if (tipe === 'jual') {
         document.getElementById('modal-title').innerText = `Jual ${namaBarang}`; 
         document.getElementById('btn-confirm-transaction').innerText = 'Konfirmasi Jual'; 
-        maxQtyAllowed = Math.min(99, stokMaksimal); 
+        
+        // Penjualan sekarang diubah batas maksimalnya menjadi 999 item atau sesuai stok
+        maxQtyAllowed = Math.min(999, stokMaksimal); 
     } 
     
     currentQty = (maxQtyAllowed > 0) ? 1 : 0; 
@@ -537,7 +539,7 @@ function bukaModalTransaksi(tipe, namaBarang, harga, stokMaksimal = 0) {
     updateModalDisplay(); 
     
     document.getElementById('transaction-modal').style.display = 'flex'; 
-} 
+}
 
 function tutupModalTransaksi() {
     document.getElementById('transaction-modal').style.display = 'none'; 
