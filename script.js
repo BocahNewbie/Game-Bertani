@@ -431,11 +431,16 @@ async function initGame() {
     const response = await fetch(SCRIPT_URL);
     libraryTanaman = await response.json();
     
-    updateFluktuasiHarga();
-    setInterval(updateFluktuasiHarga, 60000); // Update harga pasar (beli & jual) tiap 1 menit
-    
-    renderPasar();
-    renderLahan();
+    // Pastikan data benar-benar ada sebelum menghitung harga & render
+    if (libraryTanaman && libraryTanaman.length > 0) {
+      updateFluktuasiHarga();
+      setInterval(updateFluktuasiHarga, 60000); // Update harga pasar per 1 menit
+      
+      renderPasar();
+      renderLahan();
+    } else {
+      pasarContainer.innerHTML = '<p style="color:red; text-align:center;">Spreadsheet kosong atau format kolom tidak sesuai!</p>';
+    }
   } catch (error) {
     pasarContainer.innerHTML = '<p style="color:red; text-align:center;">Gagal memuat data dari Spreadsheet. Pastikan URL benar & sudah dideploy untuk "Siapa saja".</p>';
   }
