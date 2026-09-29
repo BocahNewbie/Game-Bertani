@@ -230,3 +230,16 @@ body {
     color: #f44336;
     font-weight: bold;
 }
+
+/* Styling Tambahan untuk Modal Pop-up */
+.modal-overlay {
+    backdrop-filter: blur(2px);
+    transition: opacity 0.3s ease;
+}
+.modal-card {
+    animation: scaleUp 0.2s ease-in-out;
+}
+@keyframes scaleUp {
+    from { transform: scale(0.9); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
