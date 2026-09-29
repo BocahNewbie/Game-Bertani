@@ -70,13 +70,13 @@ let cuacaAktif = {
 
 const daftarCuaca = [
     { nama: 'Cerah', ikon: '☀️', efekPersen: 0 },
-    { nama: 'Panas', ikon: '🔥', efekPersen: -3 },        // Mengurangi hasil panen 3%
-    { nama: 'Mendung', ikon: '☁️', efekPersen: 7 },       // Menambah hasil panen 7%
-    { nama: 'Gerimis', ikon: '🌦️', efekPersen: 30 },      // Menambah hasil panen 30%
-    { nama: 'Hujan', ikon: '🌧️', efekPersen: 120 },       // Menambah hasil panen 120%
-    { nama: 'Angin Kencang', ikon: '🌬️', efekPersen: -50 },// Mengurangi hasil panen 50%
-    { nama: 'Storm / Badai', ikon: '⚡', efekPersen: -70 }, // Mengurangi hasil panen 70%
-    { nama: 'Badai Petir Berat', ikon: '🌪️', efekPersen: -90 }// Mengurangi hasil panen 90%
+    { nama: 'Panas', ikon: '🔥', efekPersen: -3 },
+    { nama: 'Mendung', ikon: '☁️', efekPersen: 7 },
+    { nama: 'Gerimis', ikon: '🌦️', efekPersen: 30 },
+    { nama: 'Hujan', ikon: '🌧️', efekPersen: 120 },
+    { nama: 'Angin Kencang', ikon: '🌬️', efekPersen: -50 },
+    { nama: 'Storm / Badai', ikon: '⚡', efekPersen: -70 },
+    { nama: 'Badai Petir Berat', ikon: '🌪️', efekPersen: -90 }
 ];
 
 function ubahCuacaSecaraAcak() {
@@ -127,7 +127,6 @@ let hargaBeliAktif = {};
 let hargaJualAktif = {}; 
 let playerName = "Petani Pintar";
 
-// Sistem Fluktuasi Harga Pasar Real-Time (Per 1 Menit)
 function updateFluktuasiHarga() {
     libraryTanaman.forEach(tanaman => {
         let baseBeli = Number(tanaman.BasehargaBeli) || 0; 
@@ -260,7 +259,7 @@ function renderTabAksesori() {
 
         html += `
             <div class="inventory-item" style="flex-direction: column; align-items: flex-start; gap: 8px; padding: 14px;">
-                <div style="display: flex; justify-content: space-width; width: 100%; align-items: center;">
+                <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
                     <span style="font-size: 15px;">${acc.icon} <strong style="color: #1e293b;">${acc.nama}</strong> <span style="font-size: 11px; background: #e2e8f0; padding: 2px 6px; border-radius: 4px; color: #475569; margin-left: 6px;">[${acc.slot.toUpperCase()}]</span></span>
                     ${actionBtn}
                 </div>
@@ -305,13 +304,11 @@ function renderPasar() {
     html += `<h4 style="margin: 15px 0 8px 0; color: #1e293b; font-size: 14px;">🎩 Toko Aksesori Petani</h4>`;
     listAksesori.forEach(acc => {
         let sudahDimiliki = aksesoriDimiliki.includes(acc.id);
-        let sedangDipakai = slotAktif[acc.slot] === acc.id;
         
         let actionBtn = '';
-        if (sedangDipakai) {
-            actionBtn = `<button class="btn-submit" style="background-color: #10b981;" disabled>Dipakai</button>`;
-        } else if (sudahDimiliki) {
-            actionBtn = `<button class="btn-submit" style="background-color: #3b82f6;" onclick="pakaiAksesori('${acc.id}')">Pakai</button>`;
+        if (sudahDimiliki) {
+            // Tanda bahwa barang sudah dibeli di pasar
+            actionBtn = `<button class="btn-submit" style="background-color: #64748b; padding: 6px 12px; cursor: default;" disabled>Sudah Punya</button>`;
         } else {
             actionBtn = `<button class="btn-buy" onclick="beliAksesori('${acc.id}', ${acc.harga})">Beli</button>`;
         }
@@ -350,7 +347,6 @@ function beliAksesori(id, harga) {
     
     let acc = listAksesori.find(a => a.id === id);
     if (acc) {
-        // Validasi khusus Celana Joger: Tidak boleh dipakai jika Jas Anti Badai belum dipakai di badan
         if (acc.id === 'joger' && slotAktif.badan !== 'jas') {
             showToast("Berhasil dibeli! (Celana Joger belum bisa dipakai karena Jas Anti Badai tidak aktif di badan)", "success");
         } else {
@@ -369,7 +365,6 @@ function pakaiAksesori(id) {
     let acc = listAksesori.find(a => a.id === id);
     if (!acc) return;
 
-    // VALIDASI SYARAT: Celana Joger wajib dipasangkan dengan Jas Anti Badai di slot badan
     if (acc.id === 'joger' && slotAktif.badan !== 'jas') {
         showToast("Celana Joger tidak bisa dipakai! Kamu harus mengenakan Jas Anti Badai terlebih dahulu di slot Badan.", "error");
         return;
@@ -585,23 +580,19 @@ function gunakanPupukMassal() {
     showToast(`Pupuk Massal digunakan! Semua lahan dipercepat ${itemSpesial.efekWaktu / 1000} Detik!`, 'success');
 } 
 
-// --- PANEN DENGAN PERHITUNGAN EFEK CUACA, PENANGKAL, & VALIDASI SINERGI JOGER ---
 function panenTanaman(index) {
     let l = lahan[index]; 
     if (l.status !== 'siap_panen') return; 
     
-    // Validasi Keamanan: Jika Celana Joger dipakai tapi Jas Anti Badai dilepas di tengah jalan, lepas paksa Joger
     if (slotAktif.kaki === 'joger' && slotAktif.badan !== 'jas') {
         slotAktif.kaki = null;
         updatePanelAksesoriInfo();
         showToast("Celana Joger dilepas otomatis karena Jas Anti Badai tidak aktif!", "error");
     }
 
-    // 1. Bonus dasar dari aksesori yang dipakai
     let totalBonusPersenAcc = hitungTotalBonusPersen(); 
     let jumlahDasarDanAcc = l.jumlahBibit + Math.floor(l.jumlahBibit * (totalBonusPersenAcc / 100));
 
-    // 2. Terapkan efek persentase cuaca aktif dengan memperhitungkan penangkal
     let efekCuacaEfektif = cuacaAktif.efekPersen;
 
     if (cuacaAktif.nama.includes('Badai') && slotAktif.badan === 'jas') {
@@ -623,7 +614,6 @@ function panenTanaman(index) {
     let penyesuaianCuaca = Math.round(jumlahDasarDanAcc * (efekCuacaEfektif / 100));
     let jumlahPanenTotal = jumlahDasarDanAcc + penyesuaianCuaca;
 
-    // 3. Sinergi Celana Joger + Jas Anti Badai (+100% saat badai)
     if (cuacaAktif.nama.includes('Badai') && slotAktif.badan === 'jas' && slotAktif.kaki === 'joger') {
         let jogerObj = listAksesori.find(a => a.id === 'joger');
         if (jogerObj && jogerObj.sinergiJas) {
@@ -632,7 +622,6 @@ function panenTanaman(index) {
         }
     }
 
-    // 4. Helm Full Face (+150% saat Badai Petir Berat)
     if (cuacaAktif.nama === 'Badai Petir Berat' && slotAktif.kepala === 'helmet') {
         let helmetObj = listAksesori.find(a => a.id === 'helmet');
         if (helmetObj && helmetObj.bonusBadaiPetir) {
