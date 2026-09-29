@@ -318,3 +318,25 @@ body {
   font-weight: 600;
   color: #333;
 }
+
+/* Grid Multi Lahan */
+.lahan-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.farm-land {
+  background: #5d4037;
+  border-radius: 8px;
+  padding: 16px 10px;
+  text-align: center;
+  color: #fff8e1;
+  min-height: 150px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border: 2px dashed #8d6e63;
+  margin-top: 0; /* Override margin bawaan */
+}
