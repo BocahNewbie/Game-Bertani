@@ -41,7 +41,7 @@
           <strong>🌱 Bibit Semangka</strong><br>
           <small>Harga Beli: Rp 800 | Waktu: 24 Jam</small>
         </div>
-        <button class="btn-buy" onclick="beliBibit('Bibit Semangka', 800)">Beli</button>
+        <button class="btn-buy" onclick="bukaModalBeli('Bibit Semangka', 800)">Beli</button>
       </div>
 
       <div class="card-item">
@@ -49,7 +49,7 @@
           <strong>🌱 Bibit Melon</strong><br>
           <small>Harga Beli: Rp 500 | Waktu: 18 Jam</small>
         </div>
-        <button class="btn-buy" onclick="beliBibit('Bibit Melon', 500)">Beli</button>
+        <button class="btn-buy" onclick="bukaModalBeli('Bibit Melon', 500)">Beli</button>
       </div>
     </div>
 
@@ -60,6 +60,28 @@
       <br>
       <div id="inventory-list">
         <p style="color: #777; font-style: italic;">Inventory masih kosong.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL PEMBELIAN MODERN -->
+  <div id="buy-modal" class="modal-overlay">
+    <div class="modal-card">
+      <h3 id="modal-title">Beli Bibit</h3>
+      <p id="modal-price" style="font-size: 13px; color: #666; margin: 4px 0 16px 0;"></p>
+      
+      <div class="modal-input-group">
+        <label for="modal-qty">Jumlah (1 - 99 pcs):</label>
+        <input type="number" id="modal-qty" min="1" max="99" value="1" oninput="hitungTotalModal()">
+      </div>
+
+      <div class="modal-total-preview">
+        Total: <strong id="modal-total-price">Rp 0</strong>
+      </div>
+
+      <div class="modal-buttons">
+        <button class="btn-cancel" onclick="tutupModalBeli()">Batal</button>
+        <button class="btn-confirm" onclick="konfirmasiBeli()">Konfirmasi Beli</button>
       </div>
     </div>
   </div>
