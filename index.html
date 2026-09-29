@@ -6,7 +6,6 @@
     <title>Game Bertani Sederhana</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        /* Tambahan styling modern untuk layout baru */
         .player-panel {
             background: linear-gradient(135deg, #2e7d32, #43a047);
             color: white;
@@ -48,20 +47,21 @@
 <body>
 
     <div class="game-container">
-        <!-- 1. Header Game -->
+        <!-- Header Game -->
         <header class="game-header" style="text-align: center; margin-bottom: 12px;">
             <h2 style="margin: 0; font-size: 22px; color: #2e7d32; display: flex; align-items: center; justify-content: center; gap: 8px;">🌾 Game Bertani</h2>
         </header>
 
-        <!-- 2. Panel Nickname, Saldo, & Tombol Simpan -->
+        <!-- Panel Nickname & Saldo -->
         <div class="player-panel">
             <div class="player-info-row">
                 <div>
-                    <span style="font-size: 12px; opacity: 0.9; display: block;">PENGELOLA LAHAN</span>
-                    <h3 id="player-nickname" style="cursor: pointer;" onclick="ubahNickname()" title="Klik untuk ubah nickname">👨‍🌾 Petani Pintar ✏️</h3>
+                    <span style="font-size: 11px; opacity: 0.9; display: block;">PENGELOLA LAHAN</span>
+                    <!-- ID player-nickname diberikan isi awal lengkap dengan ikon petani -->
+                    <h3 id="player-nickname" style="cursor: pointer;" onclick="bukaModalNickname()" title="Klik untuk ubah nickname">👨‍🌾 Petani Pintar ✏️</h3>
                 </div>
                 <div style="text-align: right;">
-                    <span style="font-size: 12px; opacity: 0.9; display: block;">SALDO KAS</span>
+                    <span style="font-size: 11px; opacity: 0.9; display: block;">SALDO KAS</span>
                     <strong id="player-koin" style="font-size: 18px; color: #ffeb3b;">Rp 3.500</strong>
                 </div>
             </div>
@@ -69,15 +69,15 @@
             <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.2); margin: 10px 0;">
             
             <div class="player-info-row" style="margin-bottom: 0;">
-                <span style="font-size: 11px; opacity: 0.8;">💾 Data otomatis tersimpan di perangkat</span>
+                <span style="font-size: 11px; opacity: 0.8;">💾 Data otomatis tersimpan</span>
                 <div class="save-load-btns">
-                    <button class="btn-action-small" onclick="simpanGame()">Simpan Progres</button>
+                    <button class="btn-action-small" onclick="simpanGame()">Simpan</button>
                     <button class="btn-action-small" onclick="resetGame()" style="background: rgba(211, 47, 47, 0.5);">Reset</button>
                 </div>
             </div>
         </div>
 
-        <!-- 3. Navigasi Tab Game di Bawahnya -->
+        <!-- Navigasi Tab Game -->
         <div class="nav-tabs">
             <button class="tab-btn active" onclick="openGameTab('menanam')">🌽 Menanam</button>
             <button class="tab-btn" onclick="openGameTab('inventory')">🎒 Inventory</button>
@@ -105,7 +105,7 @@
         </div>
     </div>
 
-    <!-- Modal Transaksi -->
+    <!-- Modal Transaksi Beli/Jual -->
     <div id="transaction-modal" class="modal-overlay" style="display: none;">
         <div class="modal-card">
             <h3 id="modal-title">Transaksi</h3>
@@ -123,6 +123,19 @@
             <div style="display: flex; gap: 10px;">
                 <button id="btn-confirm-transaction" class="btn-submit" onclick="konfirmasiTransaksi()" style="flex: 1; background-color: #2e7d32;">Konfirmasi</button>
                 <button class="btn-submit" onclick="tutupModalTransaksi()" style="flex: 1; background-color: #d32f2f;">Batal</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Ubah Nickname Baru -->
+    <div id="nickname-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-card" style="text-align: center;">
+            <h3>Ubah Nama Petani</h3>
+            <p style="margin: 10px 0; font-size: 13px; color: #555;">Masukkan nama panggilan baru untuk profilmu:</p>
+            <input type="text" id="input-new-nickname" placeholder="Nama Petani..." style="width: 80%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; margin-bottom: 15px; text-align: center;">
+            <div style="display: flex; gap: 10px;">
+                <button class="btn-submit" onclick="simpanNicknameBaru()" style="flex: 1; background-color: #2e7d32;">Simpan</button>
+                <button class="btn-submit" onclick="tutupModalNickname()" style="flex: 1; background-color: #d32f2f;">Batal</button>
             </div>
         </div>
     </div>
