@@ -1,5 +1,6 @@
 let uang = 2500;
 let inventory = [];
+let jumlahPupuk = 0; // Menyimpan stok pupuk kompos
 let bibitDipilih = null;
 let statusLahanGame = 'kosong'; 
 let jenisTanamanAktif = null;
@@ -47,6 +48,13 @@ function updateUangDisplay() {
   document.getElementById('player-koin').innerText = formatRupiah(uang);
 }
 
+function updateTombolPupuk() {
+  let btnPupuk = document.getElementById('btn-pupuk');
+  if (btnPupuk) {
+    btnPupuk.innerText = `Gunakan Pupuk (${jumlahPupuk})`;
+  }
+}
+
 let toastTimeout = null;
 function showToast(message, type = 'success') {
   const overlay = document.getElementById('toast-overlay');
@@ -79,10 +87,10 @@ function openGameTab(tabName) {
   }
 }
 
-function bukaModalBeli(namaBibit, harga) {
-  selectedItemToBuy = { nama: namaBibit, hargaSatuan: harga };
+function bukaModalBeli(namaBarang, harga) {
+  selectedItemToBuy = { nama: namaBarang, hargaSatuan: harga };
   
-  document.getElementById('modal-title').innerText = `Beli ${namaBibit}`;
+  document.getElementById('modal-title').innerText = `Beli ${namaBarang}`;
   document.getElementById('modal-price').innerText = `Harga Satuan: Rp ${formatRupiah(harga)}`;
   document.getElementById('modal-qty').value = 1;
   document.getElementById('modal-qty').max = 99;
@@ -122,7 +130,14 @@ function konfirmasiBeli() {
     uang -= totalHarga;
     updateUangDisplay();
 
-    tambahKeInventory(selectedItemToBuy.nama, qty);
+    // Jika yang dibeli adalah Pupuk Kompos, masukkan ke variabel khusus (bukan inventory)
+    if (selectedItemToBuy.nama === 'Pupuk Kompos') {
+      jumlahPupuk += qty;
+      updateTombolPupuk();
+    } else {
+      tambahKeInventory(selectedItemToBuy.nama, qty);
+    }
+    
     tutupModalBeli();
     showToast(`Berhasil membeli ${qty} ${selectedItemToBuy.nama}!`, 'success');
   } else {
@@ -198,6 +213,10 @@ function pilihBibitUntukDitanam(namaBibit) {
 
   openGameTabeksplisit('menanam');
   document.getElementById('btn-tanam').style.display = 'none';
+  
+  // Tampilkan tombol gunakan pupuk
+  document.getElementById('btn-pupuk').style.display = 'inline-block';
+  updateTombolPupuk();
 
   let durasiMs = waktuTumbuhBibit[bibitDipilih] || 15000;
   waktuSelesaiPanen = new Date().getTime() + durasiMs;
@@ -213,6 +232,7 @@ function pilihBibitUntukDitanam(namaBibit) {
       statusLahanGame = 'siap_panen';
       document.getElementById('status-lahan').innerText = `✨ ${bibitDipilih} sudah siap dipanen!`;
       document.getElementById('btn-panen').style.display = 'inline-block';
+      document.getElementById('btn-pupuk').style.display = 'none'; // Sembunyikan pupuk
     } else {
       let jam = Math.floor((sisaWaktu % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
       let menit = Math.floor((sisaWaktu % (1000 * 60 * 60)) / (1000 * 60));
@@ -222,6 +242,30 @@ function pilihBibitUntukDitanam(namaBibit) {
       document.getElementById('status-lahan').innerText = `🌱 ${bibitDipilih} sedang tumbuh...\n⏱️ Sisa Waktu: ${formatWaktu}`;
     }
   }, 1000);
+}
+
+function gunakanPupuk() {
+  if (statusLahanGame !== 'ditanam') {
+    showToast('Tidak ada tanaman yang sedang tumbuh!', 'error');
+    return;
+  }
+  if (jumlahPupuk <= 0) {
+    showToast('Kamu tidak memiliki Pupuk Kompos!', 'error');
+    return;
+  }
+
+  jumlahPupuk -= 1;
+  updateTombolPupuk();
+
+  // Memotong waktu panen sebanyak 7 detik (7000 milidetik)
+  waktuSelesaiPanen -= 7000;
+  
+  // Jika karena dipupuk waktunya langsung habis
+  if (waktuSelesaiPanen <= new Date().getTime()) {
+    waktuSelesaiPanen = new Date().getTime(); // Set minimal 0 agar interval langsung menyelesaikannya
+  }
+  
+  showToast('Berhasil dipupuk! Waktu dipercepat 7 Detik.', 'success');
 }
 
 function openGameTabeksplisit(tabName) {
@@ -244,6 +288,7 @@ function panenTanaman() {
   jenisTanamanAktif = null;
   document.getElementById('status-lahan').innerText = 'Lahan Kosong';
   document.getElementById('btn-panen').style.display = 'none';
+  document.getElementById('btn-pupuk').style.display = 'none';
 }
 
 function jualHasilPanen(namaBuah) {
