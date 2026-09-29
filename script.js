@@ -94,35 +94,45 @@ function openGameTabeksplisit(tabName) {
   document.querySelectorAll('.nav-tabs .tab-btn')[0].classList.add('active');
 }
 
-// Render Toko Pasar Menggunakan Harga Aktif
 function renderPasar() {
-  const container = document.getElementById('pasar-container');
-  let html = '';
-
-  libraryTanaman.forEach(tanaman => {
-    let hargaToko = hargaBeliAktif[tanaman.namaBibit] || tanaman.baseHargaBeli;
+    const container = document.getElementById('pasar-container');
+    let html = '';
+    
+    libraryTanaman.forEach(tanaman => {
+        let hargaToko = hargaBeliAktif[tanaman.namaBibit] || tanaman.baseHargaBeli;
+        html += `
+            <div class="card-item">
+                <div>
+                    <strong>${tanaman.iconBibit} ${tanaman.namaBibit}</strong><br>
+                    <small>Harga: Rp ${formatRupiah(hargaToko)} | Waktu: ${tanaman.waktuTumbuh / 1000} Detik</small>
+                </div>
+                <button class="btn-buy" onclick="bukaModalTransaksi('beli', '${tanaman.namaBibit}', ${hargaToko})">Beli</button>
+            </div>
+        `;
+    });
+    
     html += `
-      <div class="card-item">
-        <div>
-          <strong>${tanaman.iconBibit} ${tanaman.namaBibit}</strong><br>
-          <small>Harga: Rp ${formatRupiah(hargaToko)} | Waktu: ${tanaman.waktuTumbuh / 1000} Detik</small>
+        <div class="card-item">
+            <div>
+                <strong>${itemSpesial.icon} ${itemSpesial.nama}</strong><br>
+                <small>Harga: Rp ${formatRupiah(itemSpesial.hargaBeli)} | Efek: Cepat ${itemSpesial.efekWaktu / 1000} Detik</small>
+            </div>
+            <button class="btn-buy" style="background-color: #795548;" onclick="bukaModalTransaksi('beli', '${itemSpesial.nama}', ${itemSpesial.hargaBeli})">Beli</button>
         </div>
-        <button class="btn-buy" onclick="bukaModalTransaksi('beli', '${tanaman.namaBibit}', ${hargaToko})">Beli</button>
-      </div>
     `;
-  });
+    
+    container.innerHTML = html;
 
-  html += `
-    <div class="card-item">
-      <div>
-        <strong>${itemSpesial.icon} ${itemSpesial.nama}</strong><br>
-        <small>Harga: Rp ${formatRupiah(itemSpesial.hargaBeli)} | Efek: Cepat ${itemSpesial.efekWaktu / 1000} Detik</small>
-      </div>
-      <button class="btn-buy" style="background-color: #795548;" onclick="bukaModalTransaksi('beli', '${itemSpesial.nama}', ${itemSpesial.hargaBeli})">Beli</button>
-    </div>
-  `;
-
-  container.innerHTML = html;
+    // Atur visibilitas dan teks tombol tambah lahan di tab pasar
+    let btnTambah = document.getElementById('btn-tambah-lahan');
+    if (btnTambah) {
+        if (lahanTambahanDibeli >= limitLahanTambahan) {
+            btnTambah.style.display = 'none';
+        } else {
+            btnTambah.style.display = 'block';
+            btnTambah.innerText = `➕ Lahan (Rp ${formatRupiah(hargaTambahLahan)})`;
+        }
+    }
 }
 
 function renderLahan() {
@@ -160,28 +170,38 @@ function renderLahan() {
 }
 
 function beliLahan() {
-  if (lahanTambahanDibeli >= limitLahanTambahan) {
-    showToast('Batas maksimal lahan tercapai!', 'error');
-    return;
-  }
-  if (uang < hargaTambahLahan) {
-    showToast(`Uang kurang! Butuh Rp ${formatRupiah(hargaTambahLahan)}`, 'error');
-    return;
-  }
-
-  uang -= hargaTambahLahan;
-  updateUangDisplay();
-
-  lahan.push({
-    id: lahan.length + 1,
-    status: 'kosong', tanaman: null, waktuSelesai: 0, timerInterval: null
-  });
-
-  lahanTambahanDibeli++;
-  showToast('Berhasil menambah lahan!', 'success');
-
-  hargaTambahLahan = Math.round(hargaTambahLahan * 2.5);
-  renderLahan();
+    if (lahanTambahanDibeli >= limitLahanTambahan) {
+        showToast('Batas maksimal lahan tercapai!', 'error');
+        return;
+    } 
+    if (uang < hargaTambahLahan) {
+        showToast(`Uang kurang! Butuh Rp ${formatRupiah(hargaTambahLahan)}`, 'error');
+        return;
+    } 
+    
+    uang -= hargaTambahLahan;
+    updateUangDisplay();
+    
+    lahan.push({
+        id: lahan.length + 1, 
+        status: 'kosong', 
+        tanaman: null, 
+        waktuSelesai: 0, 
+        timerInterval: null 
+    });
+    
+    lahanTambahanDibeli++;
+    showToast('Berhasil menambah lahan!', 'success');
+    
+    // Naikkan harga lahan berikutnya (harga tetap tidak diubah rumusnya)
+    hargaTambahLahan = Math.round(hargaTambahLahan * 2.5); 
+    
+    // Update tampilan tombol di tab pasar
+    renderPasar(); 
+    
+    // Otomatis pindah dan buka tab menanam agar lahan baru langsung terlihat
+    openGameTabeksplisit('menanam');
+    renderLahan();
 }
 
 function pilihBibitUntukDitanam(namaBibit) {
