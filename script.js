@@ -41,9 +41,9 @@ let libraryTanaman = [
 ];
 
 const itemSpesial = { 
-    nama: 'Pupuk Kompos', 
-    icon: '💩', 
-    hargaBeli: 100, 
+    nama: 'Pupuk Kompos Massal', 
+    icon: '🧪', 
+    hargaBeli: 300, 
     efekWaktu: 9000 
 }; 
 
@@ -58,9 +58,8 @@ let listAksesori = [
 let uang = 3500; 
 let inventory = []; 
 let jumlahPupuk = 0; 
-let aksesoriDimiliki = []; // ID aksesori yang dibeli
+let aksesoriDimiliki = []; 
 
-// Slot Aksesori Aktif (Kepala, Badan, Kaki, Telapak)
 let slotAktif = {
     kepala: null,
     badan: null,
@@ -68,7 +67,6 @@ let slotAktif = {
     telapak: null
 };
 
-// Struktur Lahan: Mendukung kapasitas hingga 99 bibit per lahan
 let lahan = [
     { id: 1, status: 'kosong', tanaman: null, jumlahBibit: 0, waktuSelesai: 0, timerInterval: null } 
 ]; 
@@ -132,6 +130,8 @@ function updatePanelAksesoriInfo() {
     let kakiEl = document.getElementById('slot-kaki-display');
     let telapakEl = document.getElementById('slot-telapak-display');
     let totalBonusEl = document.getElementById('total-bonus-display');
+
+    if (!kepalaEl) return;
 
     let getInfoAcc = (id) => {
         let a = listAksesori.find(item => item.id === id);
@@ -210,13 +210,12 @@ function renderPasar() {
         <div class="card-item"> 
             <div> 
                 <strong>${itemSpesial.icon} ${itemSpesial.nama}</strong><br> 
-                <small style="color: #64748b;">Harga: Rp ${formatRupiah(itemSpesial.hargaBeli)} | Efek: Cepat ${itemSpesial.efekWaktu / 1000} Detik</small> 
+                <small style="color: #64748b;">Harga: Rp ${formatRupiah(itemSpesial.hargaBeli)} | Efek: Cepat ${itemSpesial.efekWaktu / 1000} Detik (Semua Lahan)</small> 
             </div> 
             <button class="btn-buy" style="background-color: #475569;" onclick="bukaModalTransaksi('beli', '${itemSpesial.nama}', ${itemSpesial.hargaBeli})">Beli</button> 
         </div> 
     `; 
 
-    // Render Toko Aksesori Berdasarkan Slot
     html += `<h4 style="margin: 15px 0 8px 0; color: #1e293b; font-size: 14px;">🎩 Toko Aksesori Petani</h4>`;
     listAksesori.forEach(acc => {
         let sudahDimiliki = aksesoriDimiliki.includes(acc.id);
@@ -264,7 +263,7 @@ function beliAksesori(id, harga) {
     aksesoriDimiliki.push(id);
     
     let acc = listAksesori.find(a => a.id === id);
-    if (acc) slotAktif[acc.slot] = id; // Otomatis pasang ke slotnya
+    if (acc) slotAktif[acc.slot] = id; 
 
     updateUangDisplay();
     updatePanelAksesoriInfo();
@@ -306,18 +305,24 @@ function renderLahan() {
                 </p> 
                 <small id="waktu-lahan-${index}" style="display: ${l.status === 'ditanam' ? 'block' : 'none'}; font-size: 11px; margin-bottom: 8px; color: #3b82f6; font-weight: bold;"></small> 
                 ${l.status === 'kosong' ? `<button class="btn-submit" style="padding: 6px; font-size: 11px;" onclick="bukaModalTanam(${index})">Tanam Bibit</button>` : ''} 
-                ${l.status === 'ditanam' ? `<div style="display:flex; gap:4px;"><button class="btn-submit" style="padding: 6px; font-size: 10px; flex:1;" onclick="bukaModalTambahBibit(${index})">+ Bibit</button><button class="btn-submit" style="padding: 6px; font-size: 10px; flex:1; background-color: #475569;" onclick="gunakanPupuk(${index})">Pupuk</button></div>` : ''} 
+                ${l.status === 'ditanam' && l.jumlahBibit < 99 ? `<button class="btn-submit" style="padding: 6px; font-size: 10px; width: 100%; margin-bottom: 4px;" onclick="bukaModalTambahBibit(${index})">+ Tambah Bibit</button>` : ''} 
                 ${l.status === 'siap_panen' ? `<button class="btn-submit" style="padding: 6px; font-size: 11px; background-color: #d97706;" onclick="panenTanaman(${index})">Panen</button>` : ''} 
             </div> 
         `; 
     }); 
+
+    // Tombol global untuk menggunakan Pupuk Massal ke semua lahan
+    let headerHtml = `
+        <div style="grid-column: span 2; background: #e2e8f0; padding: 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+            <span style="font-size: 12px; font-weight: 600;">🧪 Pupuk Massal (${jumlahPupuk})</span>
+            <button class="btn-submit" style="background-color: #475569; padding: 6px 12px; font-size: 11px;" onclick="gunakanPupukMassal()">Gunakan ke Semua Lahan</button>
+        </div>
+    `;
     
-    container.innerHTML = html; 
+    container.innerHTML = headerHtml + html; 
 } 
 
-// Fungsi khusus untuk memilih dan menanam bibit hingga maksimal 99 dalam 1 lahan
 function bukaModalTanam(indexLahan) {
-    // Cari bibit apa saja yang ada di inventory
     let bibitDiInv = inventory.filter(i => i.nama.includes('Bibit'));
     if (bibitDiInv.length === 0) {
         showToast('Kamu tidak punya bibit di inventory!', 'error');
@@ -325,7 +330,6 @@ function bukaModalTanam(indexLahan) {
         return;
     }
     
-    // Untuk sederhana, ambil bibit pertama yang tersedia atau buat pilihan
     let bibitDipilih = bibitDiInv[0].nama;
     tanamBibitKeLahan(indexLahan, bibitDipilih, 1);
 }
@@ -374,7 +378,7 @@ function bukaModalTambahBibit(indexLahan) {
         return;
     }
 
-    let jumlahTambah = Math.min(sisaKapasitas, item.jumlah, 10); // Tambah sekaligus maksimal 10 atau sisa kapasitas
+    let jumlahTambah = Math.min(sisaKapasitas, item.jumlah, 10); 
     item.jumlah -= jumlahTambah;
     if (item.jumlah <= 0) inventory = inventory.filter(i => i.nama !== namaBibitLengkap);
 
@@ -419,7 +423,7 @@ function beliLahan() {
 function pilihBibitUntukDitanam(namaBibit) {
     let emptyIndex = lahan.findIndex(l => l.status === 'kosong'); 
     if (emptyIndex === -1) {
-        showToast('Semua lahan sedang terisi! Gunakan tombol + Bibit pada lahan aktif.', 'error'); 
+        showToast('Semua lahan sedang terisi! Gunakan tombol Tambah Bibit pada lahan aktif.', 'error'); 
         return; 
     } 
     tanamBibitKeLahan(emptyIndex, namaBibit, 1);
@@ -448,39 +452,46 @@ function mulaiTimerLahan(index) {
     }, 1000); 
 } 
 
-function gunakanPupuk(index) {
-    let l = lahan[index]; 
-    if (l.status !== 'ditanam') return; 
-    
+// --- FITUR PUPUK MASSAL (SATU PUPUK UNTUK SEMUA LAHAN) ---
+function gunakanPupukMassal() {
     if (jumlahPupuk <= 0) {
-        showToast('Pupuk Kompos habis!', 'error'); 
-        return; 
+        showToast('Pupuk Kompos Massal habis! Silakan beli di Pasar.', 'error');
+        return;
     } 
-    
-    jumlahPupuk -= 1; 
-    l.waktuSelesai -= itemSpesial.efekWaktu; 
-    
-    if (l.waktuSelesai <= new Date().getTime()) {
-        l.waktuSelesai = new Date().getTime(); 
-    } 
-    
+
+    let adaLahanDitanam = lahan.some(l => l.status === 'ditanam');
+    if (!adaLahanDitanam) {
+        showToast('Tidak ada lahan yang sedang ditanami saat ini!', 'error');
+        return;
+    }
+
+    jumlahPupuk -= 1;
+    let waktuSekarang = new Date().getTime();
+
+    lahan.forEach(l => {
+        if (l.status === 'ditanam') {
+            l.waktuSelesai -= itemSpesial.efekWaktu;
+            if (l.waktuSelesai <= waktuSekarang) {
+                l.waktuSelesai = waktuSekarang;
+            }
+        }
+    });
+
     simpanGame();
-    renderLahan(); 
-    showToast(`Dipercepat ${itemSpesial.efekWaktu / 1000} Detik!`, 'success'); 
+    renderLahan();
+    showToast(`Pupuk Massal digunakan! Semua lahan dipercepat ${itemSpesial.efekWaktu / 1000} Detik!`, 'success');
 } 
 
-// --- PERHITUNGAN PANEN DENGAN BONUS PERSENTASE AKSESORI ---
 function panenTanaman(index) {
     let l = lahan[index]; 
     if (l.status !== 'siap_panen') return; 
     
-    // Perhitungan: Jumlah bibit awal dikali dengan total bonus persentase aksesori
-    let totalBonusPersen = hitungTotalBonusPersen(); // Contoh: 19 + 8 = 27%
+    let totalBonusPersen = hitungTotalBonusPersen(); 
     let bonusTambahan = Math.floor(l.jumlahBibit * (totalBonusPersen / 100));
     let jumlahPanenTotal = l.jumlahBibit + bonusTambahan;
 
     tambahKeInventory(l.tanaman, jumlahPanenTotal); 
-    showToast(`Panen ${jumlahPanenUrl || jumlahPanenTotal} ${l.tanaman} (+${bonusBonusTeks = bonusTambahan} bonus)!`, 'success'); 
+    showToast(`Panen ${jumlahPanenTotal} ${l.tanaman} (+${bonusTambahan} bonus)!`, 'success'); 
     
     l.status = 'kosong'; 
     l.tanaman = null; 
@@ -682,7 +693,6 @@ function simpanGame() {
         hargaTambahLahan: hargaTambahLahan
     };
     localStorage.setItem('saveGameBertani', JSON.stringify(dataGame));
-    showToast("Progres berhasil disimpan!", "success");
 }
 
 function muatGame() {
