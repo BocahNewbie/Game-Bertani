@@ -7,10 +7,16 @@ let lahan = [
   { id: 1, status: 'kosong', tanaman: null, waktuSelesai: 0, timerInterval: null }
 ];
 let lahanTambahanDibeli = 0;
-const limitLahanTambahan = 6; // Maksimal tambah 6 (total 7 lahan)
+const limitLahanTambahan = 6; 
 let hargaTambahLahan = 5000;
 
-let selectedItemToBuy = { nama: '', hargaSatuan: 0 };
+// Variabel Kontrol Modal Transaksi
+let currentTransactionType = 'beli'; // 'beli' atau 'jual'
+let currentTransactionItem = '';
+let currentTransactionPrice = 0;
+let currentQty = 1;
+let maxQtyAllowed = 99;
+
 const hargaDasarBibit = { 'Semangka': 800, 'Melon': 500 };
 const waktuTumbuhBibit = { 'Semangka': 30 * 1000, 'Melon': 15 * 1000 };
 let hargaJualAktif = { 'Semangka': 0, 'Melon': 0 };
@@ -24,7 +30,7 @@ function updateFluktuasiHarga() {
 }
 
 updateFluktuasiHarga();
-setInterval(updateFluktuasiHarga, 60000); // Update setiap 1 menit
+setInterval(updateFluktuasiHarga, 60000); 
 
 function formatRupiah(angka) {
   return angka.toLocaleString('id-ID');
@@ -120,7 +126,6 @@ function beliLahan() {
   lahanTambahanDibeli++;
   showToast('Berhasil menambah lahan!', 'success');
 
-  // Harga naik 250% (dikali 2.5) dari harga saat ini untuk lahan berikutnya
   hargaTambahLahan = Math.round(hargaTambahLahan * 2.5);
   renderLahan();
 }
@@ -184,7 +189,7 @@ function gunakanPupuk(index) {
   }
 
   jumlahPupuk -= 1;
-  l.waktuSelesai -= 7000; // Potong waktu 7 detik
+  l.waktuSelesai -= 7000;
   if (l.waktuSelesai <= new Date().getTime()) {
     l.waktuSelesai = new Date().getTime();
   }
@@ -208,59 +213,104 @@ function panenTanaman(index) {
   renderLahan();
 }
 
-// ================= FUNGSI PASAR & INVENTORY =================
-function bukaModalBeli(namaBarang, harga) {
-  selectedItemToBuy = { nama: namaBarang, hargaSatuan: harga };
-  document.getElementById('modal-title').innerText = `Beli ${namaBarang}`;
-  document.getElementById('modal-price').innerText = `Harga Satuan: Rp ${formatRupiah(harga)}`;
-  document.getElementById('modal-qty').value = 1;
-  document.getElementById('modal-qty').max = 99;
+// ================= MODAL TRANSAKSI (BELI/JUAL) =================
+function bukaModalTransaksi(tipe, namaBarang, harga, stokMaksimal = 0) {
+  currentTransactionType = tipe;
+  currentTransactionItem = namaBarang;
+  currentTransactionPrice = harga;
   
-  hitungTotalModal();
-  document.getElementById('buy-modal').style.display = 'flex';
+  if (tipe === 'beli') {
+    document.getElementById('modal-title').innerText = `Beli ${namaBarang}`;
+    document.getElementById('btn-confirm-transaction').innerText = 'Konfirmasi Beli';
+    
+    // Kalkulasi maksimal yang bisa dibeli berdasarkan uang
+    let maxMampuBeli = Math.floor(uang / harga);
+    maxQtyAllowed = Math.min(99, maxMampuBeli); // Limit beli maksimal 99 sekaligus
+    if (maxQtyAllowed < 1) maxQtyAllowed = 1; // Supaya tetap bisa melihat harga meski uang tak cukup
+  } else if (tipe === 'jual') {
+    document.getElementById('modal-title').innerText = `Jual ${namaBarang}`;
+    document.getElementById('btn-confirm-transaction').innerText = 'Konfirmasi Jual';
+    maxQtyAllowed = stokMaksimal; // Sesuai total item yang dimiliki di inventory
+  }
+
+  currentQty = (maxQtyAllowed > 0) ? 1 : 0;
+  document.getElementById('modal-price').innerText = `Harga Satuan: Rp ${formatRupiah(harga)}`;
+  
+  updateModalDisplay();
+  document.getElementById('transaction-modal').style.display = 'flex';
 }
 
-function tutupModalBeli() {
-  document.getElementById('buy-modal').style.display = 'none';
+function tutupModalTransaksi() {
+  document.getElementById('transaction-modal').style.display = 'none';
 }
 
-function hitungTotalModal() {
-  let qtyInput = document.getElementById('modal-qty');
-  let qty = parseInt(qtyInput.value) || 1;
+function ubahQty(amount) {
+  currentQty += amount;
+  
+  if (currentQty > maxQtyAllowed) currentQty = maxQtyAllowed;
+  if (currentQty < 1 && maxQtyAllowed > 0) currentQty = 1;
+  if (maxQtyAllowed === 0) currentQty = 0;
+  
+  updateModalDisplay();
+}
 
-  if (qty > 99) { qty = 99; qtyInput.value = 99; } 
-  else if (qty < 1 && qtyInput.value !== "") { qty = 1; qtyInput.value = 1; }
+function setQtyMaks() {
+  currentQty = maxQtyAllowed;
+  if (currentQty === 0 && currentTransactionType === 'beli') currentQty = 1; 
+  updateModalDisplay();
+}
 
-  let total = qty * selectedItemToBuy.hargaSatuan;
+function updateModalDisplay() {
+  document.getElementById('modal-qty-display').innerText = currentQty;
+  let total = currentQty * currentTransactionPrice;
   document.getElementById('modal-total-price').innerText = `Rp ${formatRupiah(total)}`;
 }
 
-function konfirmasiBeli() {
-  let qty = parseInt(document.getElementById('modal-qty').value) || 1;
-  if (qty > 99) qty = 99;
-  if (qty < 1) qty = 1;
+function konfirmasiTransaksi() {
+  if (currentQty <= 0) {
+    showToast('Jumlah tidak valid!', 'error');
+    return;
+  }
 
-  let totalHarga = qty * selectedItemToBuy.hargaSatuan;
+  let totalHarga = currentQty * currentTransactionPrice;
 
-  if (uang >= totalHarga) {
-    uang -= totalHarga;
+  if (currentTransactionType === 'beli') {
+    if (uang >= totalHarga) {
+      uang -= totalHarga;
+      updateUangDisplay();
+
+      if (currentTransactionItem === 'Pupuk Kompos') {
+        jumlahPupuk += currentQty;
+        renderLahan(); 
+      } else {
+        tambahKeInventory(currentTransactionItem, currentQty);
+      }
+      
+      tutupModalTransaksi();
+      showToast(`Membeli ${currentQty} ${currentTransactionItem}!`, 'success');
+    } else {
+      showToast('Uang tidak cukup!', 'error');
+    }
+  } else if (currentTransactionType === 'jual') {
+    let item = inventory.find(i => i.nama === currentTransactionItem);
+    if (!item || item.jumlah < currentQty) {
+      showToast('Item tidak cukup untuk dijual!', 'error');
+      return;
+    }
+
+    item.jumlah -= currentQty;
+    if (item.jumlah <= 0) inventory = inventory.filter(i => i.nama !== currentTransactionItem);
+
+    uang += totalHarga;
     updateUangDisplay();
 
-    if (selectedItemToBuy.nama === 'Pupuk Kompos') {
-      jumlahPupuk += qty;
-      renderLahan(); // Update teks tombol pupuk di lahan yang sedang ditanam
-    } else {
-      tambahKeInventory(selectedItemToBuy.nama, qty);
-    }
-    
-    tutupModalBeli();
-    showToast(`Membeli ${qty} ${selectedItemToBuy.nama}!`, 'success');
-  } else {
-    tutupModalBeli();
-    showToast('Uang tidak cukup!', 'error');
+    tutupModalTransaksi();
+    showToast(`Terjual ${currentQty} item seharga Rp ${formatRupiah(totalHarga)}!`, 'success');
+    renderInventory();
   }
 }
 
+// ================= INVENTORY & DATA =================
 function tambahKeInventory(namaItem, jumlah) {
   let existing = inventory.find(item => item.nama === namaItem);
   if (existing) existing.jumlah += jumlah;
@@ -285,17 +335,18 @@ function renderInventory() {
       if (hasEmptyLand) {
         actionButton = `<button class="btn-submit" style="padding: 6px 10px; font-size: 12px;" onclick="pilihBibitUntukDitanam('${item.nama}')">Tanam</button>`;
       } else {
-         actionButton = `<small style="color:red; font-size: 10px;">Lahan Penuh</small>`;
+        actionButton = `<small style="color:red; font-size: 10px;">Lahan Penuh</small>`;
       }
     } else {
       if (item.nama.includes('Semangka')) icon = '🍉';
       if (item.nama.includes('Melon')) icon = '🍈';
 
       let hargaJualSatuan = hargaJualAktif[item.nama] || 0;
+      // Memanggil modal bukaModalTransaksi tipe 'jual'
       actionButton = `
         <div style="text-align: right;">
           <small style="display: block; color: #555; font-size: 10px;">Jual: Rp ${formatRupiah(hargaJualSatuan)}</small>
-          <button class="btn-sell" onclick="jualHasilPanen('${item.nama}')">Jual</button>
+          <button class="btn-sell" onclick="bukaModalTransaksi('jual', '${item.nama}', ${hargaJualSatuan}, ${item.jumlah})">Jual</button>
         </div>
       `;
     }
@@ -313,20 +364,4 @@ function renderInventory() {
   container.innerHTML = html;
 }
 
-function jualHasilPanen(namaBuah) {
-  let item = inventory.find(i => i.nama === namaBuah);
-  if (!item || item.jumlah <= 0) return;
-
-  let totalPendapatan = hargaJualAktif[namaBuah] || 0;
-  item.jumlah -= 1;
-  if (item.jumlah <= 0) inventory = inventory.filter(i => i.nama !== namaBuah);
-
-  uang += totalPendapatan;
-  updateUangDisplay();
-
-  showToast(`Terjual seharga Rp ${formatRupiah(totalPendapatan)}!`, 'success');
-  renderInventory();
-}
-
-// Inisialisasi awal render lahan saat pertama dibuka
 renderLahan();
