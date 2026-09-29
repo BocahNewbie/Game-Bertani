@@ -272,7 +272,7 @@ body {
   justify-content: center;
   align-items: center;
   z-index: 1000;
-  pointer-events: none;
+  /* pointer-events: none; (Dihapus agar layarnya tidak bisa diklik saat loading/notif muncul) */
 }
 
 .toast-card {
@@ -284,7 +284,7 @@ body {
   align-items: center;
   gap: 14px;
   max-width: 320px;
-  animation: toastFade 0.2s ease-in-out;
+  animation: toastFade 0.1s ease-in-out; /* Animasi dipercepat karena durasinya hanya 0.4 detik */
 }
 
 @keyframes toastFade {
