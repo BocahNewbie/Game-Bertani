@@ -82,17 +82,18 @@ body {
 }
 
 .farm-land {
-  background: #8d6e63;
+  background: #5d4037;
   border-radius: 8px;
   padding: 24px;
   text-align: center;
-  color: white;
+  color: #fff8e1;
   margin-top: 10px;
   min-height: 140px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  border: 2px dashed #8d6e63;
 }
 
 .card-item {
