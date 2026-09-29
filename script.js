@@ -71,7 +71,7 @@ let lahan = [
     { id: 1, status: 'kosong', tanaman: null, jumlahBibit: 0, waktuSelesai: 0, timerInterval: null } 
 ]; 
 let lahanTambahanDibeli = 0; 
-const limitLahanTambahan = 6; 
+const limitLahanTambahan = 7; 
 let hargaTambahLahan = 5000; 
 
 let currentTransactionType = 'beli'; 
