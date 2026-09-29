@@ -47,16 +47,16 @@ const itemSpesial = {
     efekWaktu: 9000 
 }; 
 
-// Daftar Aksesori dengan Slot Spesifik, Bonus Persen, & Efek Cuaca Unik
+// Daftar Aksesori Lengkap dengan Keterangan Efeknya
 let listAksesori = [
-    { id: 'sendal', nama: 'Sendal Jepit', icon: '🩴', slot: 'telapak', harga: 35000, bonusPersen: 3 },
-    { id: 'boots', nama: 'Sepatu Boots', icon: '🥾', slot: 'telapak', harga: 150000, bonusPersen: 2, tangkalAngin: 35 }, // Menghilangkan 35% efek angin kencang
-    { id: 'caping', nama: 'Caping Petani', icon: '👒', slot: 'kepala', harga: 50000, bonusPersen: 8 },
-    { id: 'helmet', nama: 'Helm Full Face', icon: '🪖', slot: 'kepala', harga: 3500000, bonusPersen: 0, bonusBadaiPetir: 150 }, // +150% saat badai petir berat
-    { id: 'boxer', nama: 'Celana Boxer', icon: '🩳', slot: 'kaki', harga: 50000, bonusPersen: 12 },
-    { id: 'joger', nama: 'Celana Joger', icon: '👖', slot: 'kaki', harga: 250000, bonusPersen: 5, sinergiJas: 100 }, // +100% jika dipadukan dengan jas anti badai
-    { id: 'baju', nama: 'Baju Partai', icon: '👕', slot: 'badan', harga: 1200000, bonusPersen: 19 },
-    { id: 'jas', nama: 'Jas Anti Badai', icon: '🧥', slot: 'badan', harga: 5000000, bonusPersen: 4, tangkalBadai: 50 } // Menghilangkan 50% efek badai
+    { id: 'sendal', nama: 'Sendal Jepit', icon: '🩴', slot: 'telapak', harga: 15000, bonusPersen: 3, deskripsi: 'Menambah +3% hasil panen dasar.' },
+    { id: 'boots', nama: 'Sepatu Boots', icon: '🥾', slot: 'telapak', harga: 45000, bonusPersen: 2, tangkalAngin: 35, deskripsi: 'Menambah +2% bonus dasar & menghilangkan 35% efek pengurangan hasil dari cuaca Angin Kencang.' },
+    { id: 'caping', nama: 'Caping Petani', icon: '👒', slot: 'kepala', harga: 50000, bonusPersen: 8, deskripsi: 'Menambah +8% hasil panen dasar.' },
+    { id: 'helmet', nama: 'Helm Full Face', icon: '🪖', slot: 'kepala', harga: 250000, bonusPersen: 0, bonusBadaiPetir: 150, deskripsi: 'Memberikan tambahan bonus besar +150% hasil panen khusus saat terjadi cuaca Badai Petir Berat.' },
+    { id: 'boxer', nama: 'Celana Boxer', icon: '🩳', slot: 'kaki', harga: 150000, bonusPersen: 12, deskripsi: 'Menambah +12% hasil panen dasar.' },
+    { id: 'joger', nama: 'Celana Joger', icon: '👖', slot: 'kaki', harga: 300000, bonusPersen: 5, sinergiJas: 100, deskripsi: 'Menambah +5% bonus dasar. Memberikan tambahan +100% hasil panen jika dipadukan dengan Jas Anti Badai.' },
+    { id: 'baju', nama: 'Baju Partai', icon: '👕', slot: 'badan', harga: 1200000, bonusPersen: 19, deskripsi: 'Menambah +19% hasil panen dasar.' },
+    { id: 'jas', nama: 'Jas Anti Badai', icon: '🧥', slot: 'badan', harga: 500000, bonusPersen: 4, tangkalBadai: 50, deskripsi: 'Menambah +4% bonus dasar & menghilangkan 50% efek pengurangan dari cuaca Storm / Badai.' }
 ];
 
 // ==========================================
@@ -214,6 +214,7 @@ function openGameTab(tabName) {
     event.currentTarget.classList.add('active'); 
     
     if (tabName === 'inventory') renderInventory(); 
+    if (tabName === 'aksesori') renderTabAksesori(); 
     if (tabName === 'menanam') renderLahan(); 
     if (tabName === 'pasar') renderPasar(); 
 } 
@@ -227,8 +228,51 @@ function openGameTabeksplisit(tabName) {
     const navButtons = document.querySelectorAll('.nav-tabs .tab-btn');
     if (tabName === 'menanam' && navButtons[0]) navButtons[0].classList.add('active');
     if (tabName === 'inventory' && navButtons[1]) navButtons[1].classList.add('active');
-    if (tabName === 'pasar' && navButtons[2]) navButtons[2].classList.add('active');
+    if (tabName === 'aksesori' && navButtons[2]) navButtons[2].classList.add('active');
+    if (tabName === 'pasar' && navButtons[3]) navButtons[3].classList.add('active');
 } 
+
+// ==========================================
+// RENDER TAB KOLEKSI & DETAIL AKSESORI
+// ==========================================
+function renderTabAksesori() {
+    const container = document.getElementById('aksesori-list-container');
+    if (!container) return;
+
+    if (aksesoriDimiliki.length === 0) {
+        container.innerHTML = '<p style="color: #64748b; font-style: italic; text-align: center; padding: 20px;">Kamu belum memiliki aksesori apa pun. Silakan beli di Pasar!</p>';
+        return;
+    }
+
+    let html = '';
+    aksesoriDimiliki.forEach(id => {
+        let acc = listAksesori.find(a => a.id === id);
+        if (!acc) return;
+
+        let sedangDipakai = slotAktif[acc.slot] === acc.id;
+        let actionBtn = '';
+
+        if (sedangDipakai) {
+            actionBtn = `<button class="btn-submit" style="background-color: #10b981; padding: 6px 12px;" disabled>Sedang Dipakai</button>`;
+        } else {
+            actionBtn = `<button class="btn-submit" style="background-color: #3b82f6; padding: 6px 12px;" onclick="pakaiAksesori('${acc.id}')">Kenakan</button>`;
+        }
+
+        html += `
+            <div class="inventory-item" style="flex-direction: column; align-items: flex-start; gap: 8px; padding: 14px;">
+                <div style="display: flex; justify-content: space-width; width: 100%; align-items: center;">
+                    <span style="font-size: 15px;">${acc.icon} <strong style="color: #1e293b;">${acc.nama}</strong> <span style="font-size: 11px; background: #e2e8f0; padding: 2px 6px; border-radius: 4px; color: #475569; margin-left: 6px;">[${acc.slot.toUpperCase()}]</span></span>
+                    ${actionBtn}
+                </div>
+                <div style="font-size: 12px; color: #475569; background: #f1f5f9; padding: 8px 10px; border-radius: 6px; width: 100%; box-sizing: border-box; line-height: 1.4;">
+                    <strong>Efek Item:</strong> ${acc.deskripsi}
+                </div>
+            </div>
+        `;
+    });
+
+    container.innerHTML = html;
+}
 
 function renderPasar() {
     const container = document.getElementById('pasar-container'); 
@@ -273,12 +317,12 @@ function renderPasar() {
         }
 
         html += `
-            <div class="card-item">
-                <div>
-                    <strong>${acc.icon} ${acc.nama}</strong><br>
-                    <small style="color: #64748b;">Slot: [${acc.slot.toUpperCase()}] | Bonus: +${acc.bonusPersen}% | Harga: Rp ${formatRupiah(acc.harga)}</small>
+            <div class="card-item" style="flex-direction: column; align-items: flex-start; gap: 6px;">
+                <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
+                    <strong>${acc.icon} ${acc.nama}</strong>
+                    ${actionBtn}
                 </div>
-                ${actionBtn}
+                <small style="color: #64748b; line-height: 1.3;">Slot: [${acc.slot.toUpperCase()}] | Harga: Rp ${formatRupiah(acc.harga)}<br><strong>Efek:</strong> ${acc.deskripsi}</small>
             </div>
         `;
     });
@@ -305,24 +349,40 @@ function beliAksesori(id, harga) {
     aksesoriDimiliki.push(id);
     
     let acc = listAksesori.find(a => a.id === id);
-    if (acc) slotAktif[acc.slot] = id; 
+    if (acc) {
+        // Validasi khusus Celana Joger: Tidak boleh dipakai jika Jas Anti Badai belum dipakai di badan
+        if (acc.id === 'joger' && slotAktif.badan !== 'jas') {
+            showToast("Berhasil dibeli! (Celana Joger belum bisa dipakai karena Jas Anti Badai tidak aktif di badan)", "success");
+        } else {
+            slotAktif[acc.slot] = id;
+            showToast("Berhasil membeli dan mengenakan aksesori!", "success");
+        }
+    }
 
     updateUangDisplay();
     updatePanelAksesoriInfo();
     simpanGame();
     renderPasar();
-    showToast("Berhasil membeli dan mengenakan aksesori!", "success");
 }
 
 function pakaiAksesori(id) {
     let acc = listAksesori.find(a => a.id === id);
-    if (acc) {
-        slotAktif[acc.slot] = id;
-        updatePanelAksesoriInfo();
-        simpanGame();
-        renderPasar();
-        showToast(`Aksesori ${acc.nama} dipasang ke slot ${acc.slot}!`, "success");
+    if (!acc) return;
+
+    // VALIDASI SYARAT: Celana Joger wajib dipasangkan dengan Jas Anti Badai di slot badan
+    if (acc.id === 'joger' && slotAktif.badan !== 'jas') {
+        showToast("Celana Joger tidak bisa dipakai! Kamu harus mengenakan Jas Anti Badai terlebih dahulu di slot Badan.", "error");
+        return;
     }
+
+    slotAktif[acc.slot] = id;
+    updatePanelAksesoriInfo();
+    simpanGame();
+    renderPasar();
+    if (document.getElementById('tab-aksesori').classList.contains('active')) {
+        renderTabAksesori();
+    }
+    showToast(`Aksesori ${acc.nama} dipasang ke slot ${acc.slot}!`, "success");
 }
 
 function renderLahan() {
@@ -525,11 +585,18 @@ function gunakanPupukMassal() {
     showToast(`Pupuk Massal digunakan! Semua lahan dipercepat ${itemSpesial.efekWaktu / 1000} Detik!`, 'success');
 } 
 
-// --- PANEN DENGAN PERHITUNGAN EFEK CUACA, PENANGKAL, & SINERGI AKSESORI ---
+// --- PANEN DENGAN PERHITUNGAN EFEK CUACA, PENANGKAL, & VALIDASI SINERGI JOGER ---
 function panenTanaman(index) {
     let l = lahan[index]; 
     if (l.status !== 'siap_panen') return; 
     
+    // Validasi Keamanan: Jika Celana Joger dipakai tapi Jas Anti Badai dilepas di tengah jalan, lepas paksa Joger
+    if (slotAktif.kaki === 'joger' && slotAktif.badan !== 'jas') {
+        slotAktif.kaki = null;
+        updatePanelAksesoriInfo();
+        showToast("Celana Joger dilepas otomatis karena Jas Anti Badai tidak aktif!", "error");
+    }
+
     // 1. Bonus dasar dari aksesori yang dipakai
     let totalBonusPersenAcc = hitungTotalBonusPersen(); 
     let jumlahDasarDanAcc = l.jumlahBibit + Math.floor(l.jumlahBibit * (totalBonusPersenAcc / 100));
@@ -537,16 +604,14 @@ function panenTanaman(index) {
     // 2. Terapkan efek persentase cuaca aktif dengan memperhitungkan penangkal
     let efekCuacaEfektif = cuacaAktif.efekPersen;
 
-    // Cek Jas Anti Badai (Menghilangkan 50% efek buruk Storm / Badai)
     if (cuacaAktif.nama.includes('Badai') && slotAktif.badan === 'jas') {
         let jasObj = listAksesori.find(a => a.id === 'jas');
         if (jasObj && jasObj.tangkalBadai) {
-            efekCuacaEfektif += jasObj.tangkalBadai; // Menambah balik nilai negatifnya sebesar 50%
+            efekCuacaEfektif += jasObj.tangkalBadai;
             if (efekCuacaEfektif > 0) efekCuacaEfektif = 0;
         }
     }
 
-    // Cek Sepatu Boots (Menghilangkan 35% efek buruk Angin Kencang)
     if (cuacaAktif.nama === 'Angin Kencang' && slotAktif.telapak === 'boots') {
         let bootsObj = listAksesori.find(a => a.id === 'boots');
         if (bootsObj && bootsObj.tangkalAngin) {
@@ -555,11 +620,10 @@ function panenTanaman(index) {
         }
     }
 
-    // 3. Hitung penyesuaian cuaca setelah ditangkal
     let penyesuaianCuaca = Math.round(jumlahDasarDanAcc * (efekCuacaEfektif / 100));
     let jumlahPanenTotal = jumlahDasarDanAcc + penyesuaianCuaca;
 
-    // 4. Cek Sinergi Celana Joger + Jas Anti Badai (+100% saat badai)
+    // 3. Sinergi Celana Joger + Jas Anti Badai (+100% saat badai)
     if (cuacaAktif.nama.includes('Badai') && slotAktif.badan === 'jas' && slotAktif.kaki === 'joger') {
         let jogerObj = listAksesori.find(a => a.id === 'joger');
         if (jogerObj && jogerObj.sinergiJas) {
@@ -568,7 +632,7 @@ function panenTanaman(index) {
         }
     }
 
-    // 5. Cek Helm Full Face (+150% saat Badai Petir Berat)
+    // 4. Helm Full Face (+150% saat Badai Petir Berat)
     if (cuacaAktif.nama === 'Badai Petir Berat' && slotAktif.kepala === 'helmet') {
         let helmetObj = listAksesori.find(a => a.id === 'helmet');
         if (helmetObj && helmetObj.bonusBadaiPetir) {
@@ -577,7 +641,7 @@ function panenTanaman(index) {
         }
     }
 
-    if (jumlahPanenTotal < 1) jumlahPanenTotal = 1; // Minimal hasil panen adalah 1 buah
+    if (jumlahPanenTotal < 1) jumlahPanenTotal = 1; 
 
     tambahKeInventory(l.tanaman, jumlahPanenTotal); 
     showToast(`Panen ${jumlahPanenTotal} ${l.tanaman} (${cuacaAktif.ikon} ${cuacaAktif.nama})!`, 'success'); 
@@ -610,7 +674,7 @@ function bukaModalTransaksi(tipe, namaBarang, harga, stokMaksimal = 0) {
     } else if (tipe === 'jual') {
         document.getElementById('modal-title').innerText = `Jual ${namaBarang}`; 
         document.getElementById('btn-confirm-transaction').innerText = 'Konfirmasi Jual'; 
-        maxQtyAllowed = Math.min(999, stokMaksimal); // Batas jual hingga 999 item
+        maxQtyAllowed = Math.min(999, stokMaksimal); 
     } 
     
     currentQty = (maxQtyAllowed > 0) ? 1 : 0; 
