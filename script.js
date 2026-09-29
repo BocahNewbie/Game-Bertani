@@ -40,20 +40,27 @@ let libraryTanaman = [
     }
 ];
 
-const itemSpesial = { 
-    nama: 'Pupuk Kompos Massal', 
-    icon: '🧪', 
-    hargaBeli: 300, 
-    efekWaktu: 9000 
-}; 
+// Daftar Variasi Pupuk Organik Baru
+let listPupuk = [
+    { id: 'pupuk_ayam', nama: 'Ee Ayam', icon: '🐔', hargaBeli: 250, efekWaktu: 15000 },
+    { id: 'pupuk_domba', nama: 'Ee Domba', icon: '🐑', hargaBeli: 450, efekWaktu: 25000 },
+    { id: 'pupuk_sapi', nama: 'Ee Sapi', icon: '🐮', hargaBeli: 750, efekWaktu: 50000 }
+];
+
+// Inventory khusus menyimpan jumlah masing-masing pupuk
+let stokPupuk = {
+    pupuk_ayam: 0,
+    pupuk_domba: 0,
+    pupuk_sapi: 0
+};
 
 // Daftar Aksesori Lengkap dengan Keterangan Efeknya
 let listAksesori = [
-    { id: 'sendal', nama: 'Sendal Jepit', icon: '🩴', slot: 'telapak', harga: 15000, bonusPersen: 3, deskripsi: 'Menambah +3% hasil panen dasar.' },
+    { id: 'sendal', nama: 'Sendal Jepit', icon: '🩴', slot: 'telapak', harga: 35000, bonusPersen: 3, deskripsi: 'Menambah +3% hasil panen dasar.' },
     { id: 'boots', nama: 'Sepatu Boots', icon: '🥾', slot: 'telapak', harga: 450000, bonusPersen: 2, tangkalAngin: 35, deskripsi: 'Menambah +2% bonus dasar & menghilangkan 35% efek pengurangan hasil dari cuaca Angin Kencang.' },
     { id: 'caping', nama: 'Caping Petani', icon: '👒', slot: 'kepala', harga: 50000, bonusPersen: 8, deskripsi: 'Menambah +8% hasil panen dasar.' },
     { id: 'helmet', nama: 'Helm Full Face', icon: '🪖', slot: 'kepala', harga: 7500000, bonusPersen: 0, bonusBadaiPetir: 150, deskripsi: 'Memberikan tambahan bonus besar +150% hasil panen khusus saat terjadi cuaca Badai Petir Berat.' },
-    { id: 'boxer', nama: 'Celana Boxer', icon: '🩳', slot: 'kaki', harga: 50000, bonusPersen: 12, deskripsi: 'Menambah +12% hasil panen dasar.' },
+    { id: 'boxer', nama: 'Celana Boxer', icon: '🩳', slot: 'kaki', harga: 150000, bonusPersen: 12, deskripsi: 'Menambah +12% hasil panen dasar.' },
     { id: 'joger', nama: 'Celana Joger', icon: '👖', slot: 'kaki', harga: 350000, bonusPersen: 5, sinergiJas: 100, deskripsi: 'Menambah +5% bonus dasar. Memberikan tambahan +100% hasil panen jika dipadukan dengan Jas Anti Badai.' },
     { id: 'baju', nama: 'Baju Partai', icon: '👕', slot: 'badan', harga: 1200000, bonusPersen: 19, deskripsi: 'Menambah +19% hasil panen dasar.' },
     { id: 'jas', nama: 'Jas Anti Badai', icon: '🧥', slot: 'badan', harga: 5000000, bonusPersen: 4, tangkalBadai: 50, deskripsi: 'Menambah +4% bonus dasar & menghilangkan 50% efek pengurangan dari cuaca Storm / Badai.' }
@@ -97,7 +104,6 @@ function renderInfoCuacaDiUI() {
 
 let uang = 3500; 
 let inventory = []; 
-let jumlahPupuk = 0; 
 let aksesoriDimiliki = []; 
 
 let slotAktif = {
@@ -231,9 +237,6 @@ function openGameTabeksplisit(tabName) {
     if (tabName === 'pasar' && navButtons[3]) navButtons[3].classList.add('active');
 } 
 
-// ==========================================
-// RENDER TAB KOLEKSI & DETAIL AKSESORI
-// ==========================================
 function renderTabAksesori() {
     const container = document.getElementById('aksesori-list-container');
     if (!container) return;
@@ -291,15 +294,20 @@ function renderPasar() {
         `; 
     }); 
     
-    html += ` 
-        <div class="card-item"> 
-            <div> 
-                <strong>${itemSpesial.icon} ${itemSpesial.nama}</strong><br> 
-                <small style="color: #64748b;">Harga: Rp ${formatRupiah(itemSpesial.hargaBeli)} | Efek: Cepat ${itemSpesial.efekWaktu / 1000} Detik (Semua Lahan)</small> 
-            </div> 
-            <button class="btn-buy" style="background-color: #475569;" onclick="bukaModalTransaksi('beli', '${itemSpesial.nama}', ${itemSpesial.hargaBeli})">Beli</button> 
-        </div> 
-    `; 
+    // Render Toko Pupuk Organik di Pasar
+    html += `<h4 style="margin: 15px 0 8px 0; color: #1e293b; font-size: 14px;">💩 Toko Pupuk Organik</h4>`;
+    listPupuk.forEach(p => {
+        let stok = stokPupuk[p.id] || 0;
+        html += `
+            <div class="card-item">
+                <div>
+                    <strong>${p.icon} ${p.nama}</strong><br>
+                    <small style="color: #64748b;">Harga: Rp ${formatRupiah(p.hargaBeli)} | Cepat ${p.efekWaktu / 1000} Detik (Stok: ${stok})</small>
+                </div>
+                <button class="btn-buy" style="background-color: #475569;" onclick="bukaModalTransaksi('beli_pupuk', '${p.id}', ${p.hargaBeli})">Beli</button>
+            </div>
+        `;
+    });
 
     html += `<h4 style="margin: 15px 0 8px 0; color: #1e293b; font-size: 14px;">🎩 Toko Aksesori Petani</h4>`;
     listAksesori.forEach(acc => {
@@ -307,7 +315,6 @@ function renderPasar() {
         
         let actionBtn = '';
         if (sudahDimiliki) {
-            // Tanda bahwa barang sudah dibeli di pasar
             actionBtn = `<button class="btn-submit" style="background-color: #64748b; padding: 6px 12px; cursor: default;" disabled>Sudah Punya</button>`;
         } else {
             actionBtn = `<button class="btn-buy" onclick="beliAksesori('${acc.id}', ${acc.harga})">Beli</button>`;
@@ -408,10 +415,15 @@ function renderLahan() {
         `; 
     }); 
 
+    // Panel Tombol Penggunaan Berbagai Jenis Pupuk Organik ke Semua Lahan
     let headerHtml = `
-        <div style="grid-column: span 2; background: #e2e8f0; padding: 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
-            <span style="font-size: 12px; font-weight: 600;">🧪 Pupuk Massal (${jumlahPupuk})</span>
-            <button class="btn-submit" style="background-color: #475569; padding: 6px 12px; font-size: 11px;" onclick="gunakanPupukMassal()">Gunakan ke Semua Lahan</button>
+        <div style="grid-column: span 2; background: #e2e8f0; padding: 10px; border-radius: 8px; display: flex; flex-direction: column; gap: 8px; margin-bottom: 5px;">
+            <div style="font-size: 12px; font-weight: bold; color: #1e293b;">🧪 Panel Pupuk Organik Massal:</div>
+            <div style="display: flex; gap: 5px; justify-content: space-between;">
+                <button class="btn-submit" style="background-color: #d97706; padding: 5px 8px; font-size: 10px; flex: 1;" onclick="gunakanPupuk('pupuk_ayam')">🐔 Ayam (${stokPupuk.pupuk_ayam})</button>
+                <button class="btn-submit" style="background-color: #2563eb; padding: 5px 8px; font-size: 10px; flex: 1;" onclick="gunakanPupuk('pupuk_domba')">🐑 Domba (${stokPupuk.pupuk_domba})</button>
+                <button class="btn-submit" style="background-color: #0f172a; padding: 5px 8px; font-size: 10px; flex: 1;" onclick="gunakanPupuk('pupuk_sapi')">🐮 Sapi (${stokPupuk.pupuk_sapi})</button>
+            </div>
         </div>
     `;
     
@@ -551,11 +563,14 @@ function mulaiTimerLahan(index) {
     }, 1000); 
 } 
 
-function gunakanPupukMassal() {
-    if (jumlahPupuk <= 0) {
-        showToast('Pupuk Kompos Massal habis! Silakan beli di Pasar.', 'error');
+function gunakanPupuk(idPupuk) {
+    let pupukObj = listPupuk.find(p => p.id === idPupuk);
+    if (!pupukObj) return;
+
+    if (stokPupuk[idPupuk] <= 0) {
+        showToast(`${pupukObj.nama} habis! Silakan beli di Pasar.`, 'error');
         return;
-    } 
+    }
 
     let adaLahanDitanam = lahan.some(l => l.status === 'ditanam');
     if (!adaLahanDitanam) {
@@ -563,12 +578,12 @@ function gunakanPupukMassal() {
         return;
     }
 
-    jumlahPupuk -= 1;
+    stokPupuk[idPupuk] -= 1;
     let waktuSekarang = new Date().getTime();
 
     lahan.forEach(l => {
         if (l.status === 'ditanam') {
-            l.waktuSelesai -= itemSpesial.efekWaktu;
+            l.waktuSelesai -= pupukObj.efekWaktu;
             if (l.waktuSelesai <= waktuSekarang) {
                 l.waktuSelesai = waktuSekarang;
             }
@@ -577,7 +592,7 @@ function gunakanPupukMassal() {
 
     simpanGame();
     renderLahan();
-    showToast(`Pupuk Massal digunakan! Semua lahan dipercepat ${itemSpesial.efekWaktu / 1000} Detik!`, 'success');
+    showToast(`${pupukObj.nama} digunakan! Semua lahan dipercepat ${pupukObj.efekWaktu / 1000} Detik!`, 'success');
 } 
 
 function panenTanaman(index) {
@@ -660,6 +675,15 @@ function bukaModalTransaksi(tipe, namaBarang, harga, stokMaksimal = 0) {
         let maxMampuBeli = Math.floor(uang / harga); 
         maxQtyAllowed = Math.min(99, maxMampuBeli); 
         if (maxQtyAllowed < 1) maxQtyAllowed = 1; 
+    } else if (tipe === 'beli_pupuk') {
+        let pObj = listPupuk.find(p => p.id === namaBarang);
+        let namaP = pObj ? pObj.nama : namaBarang;
+        currentTransactionItem = pObj ? pObj.id : namaBarang;
+        document.getElementById('modal-title').innerText = `Beli ${namaP}`;
+        document.getElementById('btn-confirm-transaction').innerText = 'Konfirmasi Beli';
+        let maxMampuBeli = Math.floor(uang / harga);
+        maxQtyAllowed = Math.min(99, maxMampuBeli);
+        if (maxQtyAllowed < 1) maxQtyAllowed = 1;
     } else if (tipe === 'jual') {
         document.getElementById('modal-title').innerText = `Jual ${namaBarang}`; 
         document.getElementById('btn-confirm-transaction').innerText = 'Konfirmasi Jual'; 
@@ -721,20 +745,26 @@ function konfirmasiTransaksi() {
         if (uang >= totalHarga) {
             uang -= totalHarga; 
             updateUangDisplay(); 
-            
-            if (currentTransactionItem === itemSpesial.nama) {
-                jumlahPupuk += currentQty; 
-                renderLahan(); 
-            } else {
-                tambahKeInventory(currentTransactionItem, currentQty); 
-            } 
-            
+            tambahKeInventory(currentTransactionItem, currentQty); 
             tutupModalTransaksi(); 
             simpanGame();
             showToast(`Membeli ${currentQty} ${currentTransactionItem}!`, 'success'); 
         } else {
             showToast('Uang tidak cukup!', 'error'); 
         } 
+    } else if (currentTransactionType === 'beli_pupuk') {
+        if (uang >= totalHarga) {
+            uang -= totalHarga;
+            updateUangDisplay();
+            stokPupuk[currentTransactionItem] += currentQty;
+            tutupModalTransaksi();
+            simpanGame();
+            renderPasar();
+            renderLahan();
+            showToast(`Membeli ${currentQty} pupuk!`, 'success');
+        } else {
+            showToast('Uang tidak cukup!', 'error');
+        }
     } else if (currentTransactionType === 'jual') {
         let item = inventory.find(i => i.nama === currentTransactionItem); 
         if (!item || item.jumlah < currentQty) {
@@ -836,7 +866,7 @@ function simpanGame() {
         playerName: playerName,
         uang: uang,
         inventory: inventory,
-        jumlahPupuk: jumlahPupuk,
+        stokPupuk: stokPupuk,
         aksesoriDimiliki: aksesoriDimiliki,
         slotAktif: slotAktif,
         cuacaAktif: cuacaAktif,
@@ -861,7 +891,11 @@ function muatGame() {
             playerName = data.playerName || "Petani Pintar";
             uang = data.uang !== undefined ? data.uang : 3500;
             inventory = data.inventory || [];
-            jumlahPupuk = data.jumlahPupuk || 0;
+            if (data.stokPupuk) stokPupuk = data.stokPupuk;
+            // Kompatibilitas data lama jika ada jumlahPupuk tunggal
+            if (data.jumlahPupuk !== undefined && data.stokPupuk === undefined) {
+                stokPupuk.pupuk_ayam = data.jumlahPupuk;
+            }
             aksesoriDimiliki = data.aksesoriDimiliki || [];
             slotAktif = data.slotAktif || { kepala: null, badan: null, kaki: null, telapak: null };
             if (data.cuacaAktif) cuacaAktif = data.cuacaAktif;
