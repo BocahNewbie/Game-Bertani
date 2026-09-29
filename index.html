@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Game Bertani Tanpa Login</title>
+  <title>Game Bertani</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -13,12 +13,13 @@
       <div class="player-info">
         <h3>👨‍🌾 Petani</h3>
       </div>
-      <div class="gold-display">💰 <span id="player-koin">100</span> Koin</div>
+      <div class="gold-display">💰 Rp <span id="player-koin">2.500</span></div>
     </div>
 
     <div class="nav-tabs">
       <button class="tab-btn active" onclick="openGameTab('menanam')">Menanam</button>
       <button class="tab-btn" onclick="openGameTab('pasar')">Pasar</button>
+      <button class="tab-btn" onclick="openGameTab('inventory')">Inventory</button>
     </div>
 
     <!-- TAB MENANAM -->
@@ -27,6 +28,7 @@
       <div class="farm-land" id="lahan-1">
         <p id="status-lahan">Lahan Kosong</p>
         <button id="btn-tanam" class="btn-submit" style="width: auto; margin-top: 10px; display: none;" onclick="tanamTanaman()">Tanam Bibit</button>
+        <button id="btn-panen" class="btn-submit" style="width: auto; margin-top: 10px; display: none; background-color: #f57f17;" onclick="panenTanaman()">Panen Hasil</button>
       </div>
     </div>
 
@@ -36,18 +38,27 @@
       <br>
       <div class="card-item">
         <div>
-          <strong>🍉 Semangka</strong><br>
-          <small>Harga: 40 Koin | Waktu: 24 Jam</small>
+          <strong>🍉 Bibit Semangka</strong><br>
+          <small>Harga: Rp 800 | Waktu: 24 Jam</small>
         </div>
-        <button class="btn-buy" onclick="beliBibit('Semangka', 40)">Beli</button>
+        <button class="btn-buy" onclick="beliBibit('Bibit Semangka', 800)">Beli</button>
       </div>
 
       <div class="card-item">
         <div>
-          <strong>🍈 Melon</strong><br>
-          <small>Harga: 30 Koin | Waktu: 18 Jam</small>
+          <strong>🍈 Bibit Melon</strong><br>
+          <small>Harga: Rp 500 | Waktu: 18 Jam</small>
         </div>
-        <button class="btn-buy" onclick="beliBibit('Melon', 30)">Beli</button>
+        <button class="btn-buy" onclick="beliBibit('Bibit Melon', 500)">Beli</button>
+      </div>
+    </div>
+
+    <!-- TAB INVENTORY -->
+    <div id="tab-inventory" class="tab-content">
+      <h4>Inventory Saya</h4>
+      <br>
+      <div id="inventory-list">
+        <p style="color: #777; font-style: italic;">Inventory masih kosong.</p>
       </div>
     </div>
   </div>
