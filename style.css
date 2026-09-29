@@ -259,3 +259,62 @@ body {
 .btn-confirm:hover {
   background-color: #1b5e20;
 }
+
+/* Toast Notification Styles */
+.toast-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.2);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.toast-card {
+  background: white;
+  padding: 16px 24px;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  max-width: 320px;
+  animation: toastFade 0.2s ease-in-out;
+}
+
+@keyframes toastFade {
+  from { transform: translateY(-10px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.toast-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 16px;
+  font-weight: bold;
+  color: white;
+  flex-shrink: 0;
+}
+
+.toast-card.success .toast-icon {
+  background-color: #2e7d32;
+}
+
+.toast-card.error .toast-icon {
+  background-color: #d32f2f;
+}
+
+.toast-message {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
