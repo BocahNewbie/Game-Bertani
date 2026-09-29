@@ -70,9 +70,10 @@ function showToast(message, type = 'success') {
 
   if (toastTimeout) clearTimeout(toastTimeout);
 
+  // Waktu auto-close dikurangi menjadi 400ms (0.4 detik)
   toastTimeout = setTimeout(() => {
     overlay.style.display = 'none';
-  }, 2000);
+  }, 400); 
 }
 
 function openGameTab(tabName) {
