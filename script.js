@@ -1,7 +1,7 @@
 let uang = 2500;
-let inventory = []; // Menyimpan daftar item
+let inventory = [];
 let bibitDipilih = null;
-let statusLahanGame = 'kosong'; // 'kosong', 'ditanam', 'siap_panen'
+let statusLahanGame = 'kosong'; 
 let jenisTanamanAktif = null;
 
 function formatRupiah(angka) {
@@ -29,7 +29,6 @@ function beliBibit(namaBibit, harga) {
     uang -= harga;
     updateUangDisplay();
 
-    // Masukkan bibit ke inventory
     tambahKeInventory(namaBibit, 1);
     alert(`Berhasil membeli ${namaBibit}! Item telah dimasukkan ke Inventory.`);
   } else {
@@ -54,10 +53,20 @@ function renderInventory() {
   }
 
   let html = '';
-  inventory.forEach((item, index) => {
+  inventory.forEach((item) => {
+    // Tentukan ikon berdasarkan nama item (bibit vs buah hasil panen)
+    let icon = '📦';
+    if (item.nama.includes('Bibit')) {
+      icon = '🌱';
+    } else if (item.nama.includes('Semangka')) {
+      icon = '🍉';
+    } else if (item.nama.includes('Melon')) {
+      icon = '🍈';
+    }
+
     html += `
       <div class="inventory-item">
-        <span>📦 <strong>${item.nama}</strong></span>
+        <span>${icon} <strong>${item.nama}</strong></span>
         <span>Jumlah: <strong>${item.jumlah}</strong></span>
         ${item.nama.includes('Bibit') && statusLahanGame === 'kosong' ? `<button class="btn-submit" style="padding: 6px 10px; font-size: 12px;" onclick="pilihBibitUntukDitanam('${item.nama}')">Tanam</button>` : ''}
       </div>
@@ -67,7 +76,6 @@ function renderInventory() {
 }
 
 function pilihBibitUntukDitanam(namaBibit) {
-  // Kurangi jumlah dari inventory
   let item = inventory.find(i => i.nama === namaBibit);
   if (item) {
     item.jumlah -= 1;
@@ -79,37 +87,34 @@ function pilihBibitUntukDitanam(namaBibit) {
   bibitDipilih = namaBibit.replace('Bibit ', '');
   statusLahanGame = 'ditanam';
 
-  // Pindah otomatis ke tab Menanam
   openGameTabeksplisit('menanam');
   
   document.getElementById('status-lahan').innerText = `🌱 ${bibitDipilih} sedang tumbuh... (Klik untuk simulasi panen)`;
   document.getElementById('btn-tanam').style.display = 'none';
 
-  // Simulasi instan siap panen (bisa disesuaikan timer aslinya nanti)
   setTimeout(() => {
     statusLahanGame = 'siap_panen';
     document.getElementById('status-lahan').innerText = `✨ ${bibitDipilih} sudah siap dipanen!`;
     document.getElementById('btn-panen').style.display = 'inline-block';
-  }, 3000); // Simulasi 3 detik untuk uji coba
+  }, 3000); 
 }
 
 function openGameTabeksplisit(tabName) {
   document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
   document.querySelectorAll('.nav-tabs .tab-btn').forEach(btn => btn.classList.remove('active'));
   document.getElementById('tab-' + tabName).classList.add('active');
-  // Highlight tab button menanam
   document.querySelectorAll('.nav-tabs .tab-btn')[0].classList.add('active');
 }
 
 function panenTanaman() {
   if (statusLahanGame !== 'siap_panen') return;
 
+  // Ubah hasil panen menjadi nama buah langsung (tanpa kata Bibit)
   let hasilPanen = jenisTanamanAktif || bibitDipilih || 'Buah';
   tambahKeInventory(hasilPanen, 1);
 
   alert(`Panen berhasil! Mendapatkan 1 ${hasilPanen} yang masuk ke Inventory.`);
 
-  // Reset lahan
   statusLahanGame = 'kosong';
   bibitDipilih = null;
   document.getElementById('status-lahan').innerText = 'Lahan Kosong';
