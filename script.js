@@ -138,7 +138,7 @@ function renderPasar() {
             <div class="card-item"> 
                 <div> 
                     <strong>${tanaman.iconBibit} ${tanaman.namaBibit}</strong><br> 
-                    <small>Harga: Rp ${formatRupiah(hargaToko)} | Waktu: ${tanaman.waktuTumbuh / 1000} Detik</small> 
+                    <small style="color: #64748b;">Harga: Rp ${formatRupiah(hargaToko)} | Waktu: ${tanaman.waktuTumbuh / 1000} Detik</small> 
                 </div> 
                 <button class="btn-buy" onclick="bukaModalTransaksi('beli', '${tanaman.namaBibit}', ${hargaToko})">Beli</button> 
             </div> 
@@ -149,9 +149,9 @@ function renderPasar() {
         <div class="card-item"> 
             <div> 
                 <strong>${itemSpesial.icon} ${itemSpesial.nama}</strong><br> 
-                <small>Harga: Rp ${formatRupiah(itemSpesial.hargaBeli)} | Efek: Cepat ${itemSpesial.efekWaktu / 1000} Detik</small> 
+                <small style="color: #64748b;">Harga: Rp ${formatRupiah(itemSpesial.hargaBeli)} | Efek: Cepat ${itemSpesial.efekWaktu / 1000} Detik</small> 
             </div> 
-            <button class="btn-buy" style="background-color: #795548;" onclick="bukaModalTransaksi('beli', '${itemSpesial.nama}', ${itemSpesial.hargaBeli})">Beli</button> 
+            <button class="btn-buy" style="background-color: #475569;" onclick="bukaModalTransaksi('beli', '${itemSpesial.nama}', ${itemSpesial.hargaBeli})">Beli</button> 
         </div> 
     `; 
     
@@ -178,13 +178,13 @@ function renderLahan() {
         
         html += ` 
             <div class="farm-land"> 
-                <p id="status-lahan-${index}" style="font-size: 13px; font-weight: bold; margin-bottom: 8px;"> 
+                <p id="status-lahan-${index}" style="font-size: 13px; font-weight: bold; margin-bottom: 8px; color: #1e293b;"> 
                     ${l.status === 'kosong' ? 'Lahan Kosong' : l.status === 'siap_panen' ? `✨ ${iconTampil}${l.tanaman}` : `🌱 ${l.tanaman}`} 
                 </p> 
-                <small id="waktu-lahan-${index}" style="display: ${l.status === 'ditanam' ? 'block' : 'none'}; font-size: 11px; margin-bottom: 8px; color: #fff8e1;"></small> 
+                <small id="waktu-lahan-${index}" style="display: ${l.status === 'ditanam' ? 'block' : 'none'}; font-size: 11px; margin-bottom: 8px; color: #3b82f6; font-weight: bold;"></small> 
                 ${l.status === 'kosong' ? `<button class="btn-submit" style="padding: 6px; font-size: 11px;" onclick="openGameTabeksplisit('inventory'); renderInventory();">Tanam Bibit</button>` : ''} 
-                ${l.status === 'ditanam' ? `<button class="btn-submit" style="padding: 6px; font-size: 11px; background-color: #795548;" onclick="gunakanPupuk(${index})">Pupuk (${jumlahPupuk})</button>` : ''} 
-                ${l.status === 'siap_panen' ? `<button class="btn-submit" style="padding: 6px; font-size: 11px; background-color: #f57f17;" onclick="panenTanaman(${index})">Panen</button>` : ''} 
+                ${l.status === 'ditanam' ? `<button class="btn-submit" style="padding: 6px; font-size: 11px; background-color: #475569;" onclick="gunakanPupuk(${index})">Pupuk (${jumlahPupuk})</button>` : ''} 
+                ${l.status === 'siap_panen' ? `<button class="btn-submit" style="padding: 6px; font-size: 11px; background-color: #d97706;" onclick="panenTanaman(${index})">Panen</button>` : ''} 
             </div> 
         `; 
     }); 
@@ -413,7 +413,7 @@ function tambahKeInventory(namaItem, jumlah) {
 function renderInventory() {
     const container = document.getElementById('inventory-list'); 
     if (inventory.length === 0) {
-        container.innerHTML = '<p style="color: #777; font-style: italic;">Inventory masih kosong.</p>'; 
+        container.innerHTML = '<p style="color: #64748b; font-style: italic;">Inventory masih kosong.</p>'; 
         return; 
     } 
     
@@ -429,14 +429,14 @@ function renderInventory() {
             if (hasEmptyLand) {
                 actionButton = `<button class="btn-submit" style="padding: 6px 10px; font-size: 12px;" onclick="pilihBibitUntukDitanam('${item.nama}')">Tanam</button>`; 
             } else {
-                actionButton = `<small style="color:red; font-size: 10px;">Lahan Penuh</small>`; 
+                actionButton = `<small style="color:#ef4444; font-size: 10px; font-weight: 600;">Lahan Penuh</small>`; 
             } 
         } else {
             icon = dataTanaman ? dataTanaman.iconBuah : '📦'; 
             let hargaJualSatuan = hargaJualAktif[item.nama] || 0; 
             actionButton = ` 
                 <div style="text-align: right;"> 
-                    <small style="display: block; color: #555; font-size: 10px;">Jual: Rp ${formatRupiah(hargaJualSatuan)}</small> 
+                    <small style="display: block; color: #64748b; font-size: 10px;">Jual: Rp ${formatRupiah(hargaJualSatuan)}</small> 
                     <button class="btn-sell" onclick="bukaModalTransaksi('jual', '${item.nama}', ${hargaJualSatuan}, ${item.jumlah})">Jual</button> 
                 </div> 
             `; 
@@ -445,8 +445,8 @@ function renderInventory() {
         html += ` 
             <div class="inventory-item"> 
                 <div> 
-                    <span>${icon} <strong>${item.nama}</strong></span><br> 
-                    <small style="color: #666;">Jumlah: <strong>${item.jumlah}</strong></small> 
+                    <span>${icon} <strong style="color: #1e293b;">${item.nama}</strong></span><br> 
+                    <small style="color: #64748b;">Jumlah: <strong>${item.jumlah}</strong></small> 
                 </div> 
                 ${actionButton} 
             </div> 
@@ -535,7 +535,6 @@ function muatGame() {
 // FITUR MODAL RESET GAME
 // ==========================================
 function resetGame() {
-    // Membuka modal konfirmasi kustom yang menarik
     document.getElementById('reset-modal').style.display = 'flex';
 }
 
