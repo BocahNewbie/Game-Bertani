@@ -3,6 +3,8 @@ let inventory = [];
 let bibitDipilih = null;
 let statusLahanGame = 'kosong'; 
 let jenisTanamanAktif = null;
+let waktuSelesaiPanen = 0; 
+let timerInterval = null;  
 
 let selectedItemToBuy = {
   nama: '',
@@ -14,10 +16,10 @@ const hargaDasarBibit = {
   'Melon': 500
 };
 
-// Durasi waktu tumbuh dalam milidetik (30 detik untuk Semangka, 15 detik untuk Melon)
+// Durasi waktu tumbuh (Semangka 30 Detik, Melon 15 Detik)
 const waktuTumbuhBibit = {
-  'Semangka': 30000, 
-  'Melon': 15000     
+  'Semangka': 30 * 1000, 
+  'Melon': 15 * 1000     
 };
 
 let hargaJualAktif = {
@@ -195,19 +197,31 @@ function pilihBibitUntukDitanam(namaBibit) {
   statusLahanGame = 'ditanam';
 
   openGameTabeksplisit('menanam');
-  
-  let durasiTampil = bibitDipilih === 'Semangka' ? '30 detik' : '15 detik';
-  document.getElementById('status-lahan').innerText = `🌱 ${bibitDipilih} sedang tumbuh... (Estimasi: ${durasiTampil})`;
   document.getElementById('btn-tanam').style.display = 'none';
 
-  // Ambil durasi berdasarkan jenis tanaman (dalam milidetik)
   let durasiMs = waktuTumbuhBibit[bibitDipilih] || 15000;
+  waktuSelesaiPanen = new Date().getTime() + durasiMs;
 
-  setTimeout(() => {
-    statusLahanGame = 'siap_panen';
-    document.getElementById('status-lahan').innerText = `✨ ${bibitDipilih} sudah siap dipanen!`;
-    document.getElementById('btn-panen').style.display = 'inline-block';
-  }, durasiMs); 
+  if (timerInterval) clearInterval(timerInterval);
+
+  timerInterval = setInterval(() => {
+    let sekarang = new Date().getTime();
+    let sisaWaktu = waktuSelesaiPanen - sekarang;
+
+    if (sisaWaktu <= 0) {
+      clearInterval(timerInterval);
+      statusLahanGame = 'siap_panen';
+      document.getElementById('status-lahan').innerText = `✨ ${bibitDipilih} sudah siap dipanen!`;
+      document.getElementById('btn-panen').style.display = 'inline-block';
+    } else {
+      let jam = Math.floor((sisaWaktu % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      let menit = Math.floor((sisaWaktu % (1000 * 60 * 60)) / (1000 * 60));
+      let detik = Math.floor((sisaWaktu % (1000 * 60)) / 1000);
+
+      let formatWaktu = `${String(jam).padStart(2, '0')}:${String(menit).padStart(2, '0')}:${String(detik).padStart(2, '0')}`;
+      document.getElementById('status-lahan').innerText = `🌱 ${bibitDipilih} sedang tumbuh...\n⏱️ Sisa Waktu: ${formatWaktu}`;
+    }
+  }, 1000);
 }
 
 function openGameTabeksplisit(tabName) {
