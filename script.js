@@ -539,7 +539,7 @@ function initGame() {
     updateUangDisplay();
     
     let elNick = document.getElementById('player-nickname');
-    if(elNick) elNick.innerText = `${playerName} ✏️`;
+if(elNick) elNick.innerText = `👨‍🌾 ${playerName} ✏️`;
 
     // Jalankan ulang timer untuk lahan yang sedang berjalan
     lahan.forEach((l, index) => {
