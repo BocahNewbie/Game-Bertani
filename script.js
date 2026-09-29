@@ -453,14 +453,87 @@ function renderInventory() {
     container.innerHTML = html; 
 } 
 
+let playerName = "Petani Pintar";
+
+// Fungsi untuk Mengubah Nickname
+function ubahNickname() {
+    let namaBaru = prompt("Masukkan Nickname / Nama Petani baru:", playerName);
+    if (namaBaru && namaBaru.trim() !== "") {
+        playerName = namaBaru.trim();
+        document.getElementById('player-nickname').innerText = `${playerName} ✏️`;
+        simpanGame();
+        showToast("Nickname berhasil diubah!", "success");
+    }
+}
+
+// Fungsi Simpan Progres Game ke LocalStorage Browser
+function simpanGame() {
+    let dataGame = {
+        playerName: playerName,
+        uang: uang,
+        inventory: inventory,
+        jumlahPupuk: jumlahPupuk,
+        lahan: lahan.map(l => ({
+            id: l.id,
+            status: l.status,
+            tanaman: l.tanaman,
+            waktuSelesai: l.waktuSelesai
+        })),
+        lahanTambahanDibeli: lahanTambahanDibeli,
+        hargaTambahLahan: hargaTambahLahan
+    };
+    localStorage.setItem('saveGameBertani', JSON.stringify(dataGame));
+    showToast("Progres berhasil disimpan!", "success");
+}
+
+// Fungsi Memuat Progres Game
+function muatGame() {
+    let savedData = localStorage.getItem('saveGameBertani');
+    if (savedData) {
+        try {
+            let data = JSON.parse(savedData);
+            playerName = data.playerName || "Petani Pintar";
+            uang = data.uang !== undefined ? data.uang : 3500;
+            inventory = data.inventory || [];
+            jumlahPupuk = data.jumlahPupuk || 0;
+            lahanTambahanDibeli = data.lahanTambahanDibeli || 0;
+            hargaTambahLahan = data.hargaTambahLahan || 5000;
+            
+            if (data.lahan && data.lahan.length > 0) {
+                lahan = data.lahan.map(l => ({
+                    id: l.id,
+                    status: l.status,
+                    tanaman: l.tanaman,
+                    waktuSelesai: l.waktuSelesai,
+                    timerInterval: null
+                }));
+            }
+            
+            document.getElementById('player-nickname').innerText = `${playerName} ✏️`;
+        } catch (e) {
+            console.error("Gagal memuat save data", e);
+        }
+    }
+}
+
+// Fungsi Reset Game
+function resetGame() {
+    if (confirm("Yakin ingin mereset semua progres permainan dari awal?")) {
+        localStorage.removeItem('saveGameBertani');
+        location.reload();
+    }
+}
+
 // Inisialisasi Game (Tanpa Fetch Spreadsheet)
 function initGame() {
+    muatGame(); // Muat data tersimpan saat game dibuka
     updateFluktuasiHarga(); 
-    setInterval(updateFluktuasiHarga, 60000); // Update harga pasar per 1 menit 
+    setInterval(updateFluktuasiHarga, 60000); 
     renderPasar(); 
     renderLahan(); 
     updateUangDisplay();
-} 
+    document.getElementById('player-nickname').innerText = `${playerName} ✏️`;
+}
 
 // Jalankan game saat dimuat
 initGame();
