@@ -80,6 +80,10 @@ let currentTransactionPrice = 0;
 let currentQty = 1; 
 let maxQtyAllowed = 99; 
 
+// Variabel untuk proses pemilihan tanam bibit ke lahan
+let selectedLahanIndex = null;
+let selectedBibitNama = '';
+
 let hargaBeliAktif = {}; 
 let hargaJualAktif = {}; 
 let playerName = "Petani Pintar";
@@ -293,7 +297,7 @@ function renderLahan() {
         
         let statusTeks = 'Lahan Kosong';
         if (l.status === 'ditanam') {
-            statusTeks = `🌱 ${l.tanaman} (${l.jumlahBibit}/99)`;
+            statusTeks = `🌱 ${l.tanaman} (${l.jumlahBibit} Bibit)`;
         } else if (l.status === 'siap_panen') {
             statusTeks = `✨ ${iconTampil}${l.tanaman} (${l.jumlahBibit} Siap Panen)`;
         }
@@ -304,14 +308,12 @@ function renderLahan() {
                     ${statusTeks} 
                 </p> 
                 <small id="waktu-lahan-${index}" style="display: ${l.status === 'ditanam' ? 'block' : 'none'}; font-size: 11px; margin-bottom: 8px; color: #3b82f6; font-weight: bold;"></small> 
-                ${l.status === 'kosong' ? `<button class="btn-submit" style="padding: 6px; font-size: 11px;" onclick="bukaModalTanam(${index})">Tanam Bibit</button>` : ''} 
-                ${l.status === 'ditanam' && l.jumlahBibit < 99 ? `<button class="btn-submit" style="padding: 6px; font-size: 10px; width: 100%; margin-bottom: 4px;" onclick="bukaModalTambahBibit(${index})">+ Tambah Bibit</button>` : ''} 
+                ${l.status === 'kosong' ? `<button class="btn-submit" style="padding: 6px; font-size: 11px;" onclick="bukaModalPilihBibit(${index})">Tanam Bibit</button>` : ''} 
                 ${l.status === 'siap_panen' ? `<button class="btn-submit" style="padding: 6px; font-size: 11px; background-color: #d97706;" onclick="panenTanaman(${index})">Panen</button>` : ''} 
             </div> 
         `; 
     }); 
 
-    // Tombol global untuk menggunakan Pupuk Massal ke semua lahan
     let headerHtml = `
         <div style="grid-column: span 2; background: #e2e8f0; padding: 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
             <span style="font-size: 12px; font-weight: 600;">🧪 Pupuk Massal (${jumlahPupuk})</span>
@@ -322,70 +324,77 @@ function renderLahan() {
     container.innerHTML = headerHtml + html; 
 } 
 
-function bukaModalTanam(indexLahan) {
+// --- FITUR MODAL KONFIRMASI JUMLAH BIBIT SAAT MENANAM ---
+function bukaModalPilihBibit(indexLahan) {
     let bibitDiInv = inventory.filter(i => i.nama.includes('Bibit'));
     if (bibitDiInv.length === 0) {
-        showToast('Kamu tidak punya bibit di inventory!', 'error');
+        showToast('Kamu tidak punya bibit di inventory! Beli dulu di Pasar.', 'error');
         openGameTabeksplisit('pasar');
         return;
     }
+
+    selectedLahanIndex = indexLahan;
+    selectedBibitNama = bibitDiInv[0].nama; // Mengambil bibit pertama yang tersedia
+
+    let itemInv = inventory.find(i => i.nama === selectedBibitNama);
+    let stokMaks = itemInv ? itemInv.jumlah : 0;
     
-    let bibitDipilih = bibitDiInv[0].nama;
-    tanamBibitKeLahan(indexLahan, bibitDipilih, 1);
+    // Batasi maksimum penanaman sekali jalan adalah 99 atau sesuai stok di inventory
+    maxQtyAllowed = Math.min(99, stokMaks);
+    currentQty = 1;
+
+    document.getElementById('modal-title').innerText = `Tanam ${selectedBibitNama}`;
+    document.getElementById('modal-price').innerText = `Stok di Inventory: ${stokMaks} | Maksimal 99 per lahan`;
+    
+    // Sembunyikan informasi total harga karena ini penanaman bibit, ubah teks konfirmasi
+    document.getElementById('modal-total-price').parentElement.style.display = 'none';
+    document.getElementById('btn-confirm-transaction').innerText = 'Tanam Sekarang';
+    document.getElementById('btn-confirm-transaction').setAttribute('onclick', 'konfirmasiTanamBibit()');
+
+    updateModalDisplayCustom();
+    document.getElementById('transaction-modal').style.display = 'flex';
 }
 
-function tanamBibitKeLahan(indexLahan, namaBibit, jumlahAwal) {
-    let item = inventory.find(i => i.nama === namaBibit);
-    if (!item || item.jumlah < jumlahAwal) {
-        showToast('Jumlah bibit tidak cukup!', 'error');
+function updateModalDisplayCustom() {
+    document.getElementById('modal-qty-display').innerText = currentQty;
+}
+
+function konfirmasiTanamBibit() {
+    if (currentQty <= 0) {
+        showToast('Jumlah tidak valid!', 'error');
         return;
     }
 
-    item.jumlah -= jumlahAwal;
-    if (item.jumlah <= 0) inventory = inventory.filter(i => i.nama !== namaBibit);
+    let item = inventory.find(i => i.nama === selectedBibitNama);
+    if (!item || item.jumlah < currentQty) {
+        showToast('Stok bibit tidak cukup!', 'error');
+        return;
+    }
 
-    let dataBibit = libraryTanaman.find(t => t.namaBibit === namaBibit);
-    let bibitNamaBersih = dataBibit ? dataBibit.nama : namaBibit.replace('Bibit ', '');
+    item.jumlah -= currentQty;
+    if (item.jumlah <= 0) inventory = inventory.filter(i => i.nama !== selectedBibitNama);
+
+    let dataBibit = libraryTanaman.find(t => t.namaBibit === selectedBibitNama);
+    let bibitNamaBersih = dataBibit ? dataBibit.nama : selectedBibitNama.replace('Bibit ', '');
     let durasiMs = dataBibit ? dataBibit.waktuTumbuh : 15000;
 
-    let targetLahan = lahan[indexLahan];
+    let targetLahan = lahan[selectedLahanIndex];
     targetLahan.status = 'ditanam';
     targetLahan.tanaman = bibitNamaBersih;
-    targetLahan.jumlahBibit = jumlahAwal;
+    targetLahan.jumlahBibit = currentQty;
     targetLahan.waktuSelesai = new Date().getTime() + durasiMs;
+
+    tutupModalTransaksi();
+    
+    // Kembalikan tombol konfirmasi agar normal kembali untuk fungsi beli/jual pasar
+    document.getElementById('modal-total-price').parentElement.style.display = 'block';
+    document.getElementById('btn-confirm-transaction').setAttribute('onclick', 'konfirmasiTransaksi()');
 
     simpanGame();
     openGameTabeksplisit('menanam');
     renderLahan();
-    mulaiTimerLahan(indexLahan);
-    showToast(`Berhasil menanam ${jumlahAwal} ${bibitNamaBersih}!`, 'success');
-}
-
-function bukaModalTambahBibit(indexLahan) {
-    let l = lahan[indexLahan];
-    if (l.status !== 'ditanam') return;
-
-    let sisaKapasitas = 99 - l.jumlahBibit;
-    if (sisaKapasitas <= 0) {
-        showToast('Lahan sudah penuh (maksimal 99 bibit)!', 'error');
-        return;
-    }
-
-    let namaBibitLengkap = `Bibit ${l.tanaman}`;
-    let item = inventory.find(i => i.nama === namaBibitLengkap);
-    if (!item || item.jumlah <= 0) {
-        showToast(`Kamu tidak punya stok ${namaBibitLengkap} di inventory!`, 'error');
-        return;
-    }
-
-    let jumlahTambah = Math.min(sisaKapasitas, item.jumlah, 10); 
-    item.jumlah -= jumlahTambah;
-    if (item.jumlah <= 0) inventory = inventory.filter(i => i.nama !== namaBibitLengkap);
-
-    l.jumlahBibit += jumlahTambah;
-    simpanGame();
-    renderLahan();
-    showToast(`Menambahkan ${jumlahTambah} bibit ke lahan ini!`, 'success');
+    mulaiTimerLahan(selectedLahanIndex);
+    showToast(`Berhasil menanam ${currentQty} ${bibitNamaBersih}!`, 'success');
 }
 
 function beliLahan() {
@@ -423,10 +432,10 @@ function beliLahan() {
 function pilihBibitUntukDitanam(namaBibit) {
     let emptyIndex = lahan.findIndex(l => l.status === 'kosong'); 
     if (emptyIndex === -1) {
-        showToast('Semua lahan sedang terisi! Gunakan tombol Tambah Bibit pada lahan aktif.', 'error'); 
+        showToast('Semua lahan sedang terisi!', 'error'); 
         return; 
     } 
-    tanamBibitKeLahan(emptyIndex, namaBibit, 1);
+    bukaModalPilihBibit(emptyIndex);
 } 
 
 function mulaiTimerLahan(index) {
@@ -452,7 +461,6 @@ function mulaiTimerLahan(index) {
     }, 1000); 
 } 
 
-// --- FITUR PUPUK MASSAL (SATU PUPUK UNTUK SEMUA LAHAN) ---
 function gunakanPupukMassal() {
     if (jumlahPupuk <= 0) {
         showToast('Pupuk Kompos Massal habis! Silakan beli di Pasar.', 'error');
@@ -509,6 +517,8 @@ function bukaModalTransaksi(tipe, namaBarang, harga, stokMaksimal = 0) {
     currentTransactionPrice = harga; 
     
     document.getElementById('modal-qty-container').style.display = 'flex';
+    document.getElementById('modal-total-price').parentElement.style.display = 'block';
+    document.getElementById('btn-confirm-transaction').setAttribute('onclick', 'konfirmasiTransaksi()');
 
     if (tipe === 'beli') {
         document.getElementById('modal-title').innerText = `Beli ${namaBarang}`; 
@@ -538,13 +548,26 @@ function ubahQty(amount) {
     if (currentQty > maxQtyAllowed) currentQty = maxQtyAllowed; 
     if (currentQty < 1 && maxQtyAllowed > 0) currentQty = 1; 
     if (maxQtyAllowed === 0) currentQty = 0; 
-    updateModalDisplay(); 
+    
+    // Cek apakah sedang dalam mode modal penanaman bibit atau transaksi biasa
+    let btnText = document.getElementById('btn-confirm-transaction').innerText;
+    if (btnText === 'Tanam Sekarang') {
+        updateModalDisplayCustom();
+    } else {
+        updateModalDisplay(); 
+    }
 } 
 
 function setQtyMaks() {
     currentQty = maxQtyAllowed; 
     if (currentQty === 0 && currentTransactionType === 'beli') currentQty = 1; 
-    updateModalDisplay(); 
+    
+    let btnText = document.getElementById('btn-confirm-transaction').innerText;
+    if (btnText === 'Tanam Sekarang') {
+        updateModalDisplayCustom();
+    } else {
+        updateModalDisplay(); 
+    }
 } 
 
 function updateModalDisplay() {
