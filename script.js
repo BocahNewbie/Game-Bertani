@@ -1,8 +1,5 @@
 // ==========================================
-// DATA LOKAL TANAMAN (SILAHKAN ATUR DI SINI)
-// ==========================================
-// ==========================================
-// DATA LOKAL TANAMAN (SILAHKAN ATUR DI SINI)
+// DATA LOKAL TANAMAN & AKSESORI
 // ==========================================
 let libraryTanaman = [
     {
@@ -39,7 +36,7 @@ let libraryTanaman = [
         iconBuah: '🍎',
         BasehargaBeli: 1300,
         BasehargaJual: 2150,
-        waktuTumbuh: 90000 // 90 detik
+        waktuTumbuh: 90000
     }
 ];
 
@@ -50,9 +47,19 @@ const itemSpesial = {
     efekWaktu: 9000 
 }; 
 
+// Daftar Aksesori Penambah Hasil Panen
+let listAksesori = [
+    { id: 'sendal', nama: 'Sendal Jepit', icon: '🩴', harga: 1500, bonus: 1 },
+    { id: 'caping', nama: 'Caping Petani', icon: '👒', harga: 5000, bonus: 2 },
+    { id: 'baju', nama: 'Baju Partai', icon: '👕', harga: 12000, bonus: 5 }
+];
+
 let uang = 3500; 
 let inventory = []; 
 let jumlahPupuk = 0; 
+let aksesoriDimiliki = []; // Menyimpan ID aksesori yang sudah dibeli
+let aksesoriAktif = null;  // ID aksesori yang sedang dipakai
+
 let lahan = [
     { id: 1, status: 'kosong', tanaman: null, waktuSelesai: 0, timerInterval: null } 
 ]; 
@@ -97,6 +104,22 @@ function formatRupiah(angka) {
 function updateUangDisplay() {
     document.getElementById('player-koin').innerText = `Rp ${formatRupiah(uang)}`; 
 } 
+
+function updatePanelAksesoriInfo() {
+    let activeDisplay = document.getElementById('active-accessory-display');
+    let bonusDisplay = document.getElementById('active-bonus-display');
+    
+    if (aksesoriAktif) {
+        let item = listAksesori.find(a => a.id === aksesoriAktif);
+        if (item) {
+            activeDisplay.innerText = `${item.icon} ${item.nama}`;
+            bonusDisplay.innerText = `Bonus: +${item.bonus}`;
+            return;
+        }
+    }
+    activeDisplay.innerText = "Belum ada";
+    bonusDisplay.innerText = "Bonus: +0";
+}
 
 let toastTimeout = null; 
 function showToast(message, type = 'success') {
@@ -144,6 +167,7 @@ function renderPasar() {
     const container = document.getElementById('pasar-container'); 
     let html = ''; 
     
+    // Render Bibit Tanaman
     libraryTanaman.forEach(tanaman => {
         let hargaToko = hargaBeliAktif[tanaman.namaBibit] || tanaman.BasehargaBeli; 
         html += ` 
@@ -157,6 +181,7 @@ function renderPasar() {
         `; 
     }); 
     
+    // Render Pupuk Spesial
     html += ` 
         <div class="card-item"> 
             <div> 
@@ -166,6 +191,32 @@ function renderPasar() {
             <button class="btn-buy" style="background-color: #475569;" onclick="bukaModalTransaksi('beli', '${itemSpesial.nama}', ${itemSpesial.hargaBeli})">Beli</button> 
         </div> 
     `; 
+
+    // Render Toko Aksesori
+    html += `<h4 style="margin: 15px 0 8px 0; color: #1e293b; font-size: 14px;">🎩 Toko Aksesori Petani</h4>`;
+    listAksesori.forEach(acc => {
+        let sudahDimiliki = aksesoriDimiliki.includes(acc.id);
+        let sedangDipakai = aksesoriAktif === acc.id;
+        
+        let actionBtn = '';
+        if (sedangDipakai) {
+            actionBtn = `<button class="btn-submit" style="background-color: #10b981;" disabled>Dipakai</button>`;
+        } else if (sudahDimiliki) {
+            actionBtn = `<button class="btn-submit" style="background-color: #3b82f6;" onclick="pakaiAksesori('${acc.id}')">Pakai</button>`;
+        } else {
+            actionBtn = `<button class="btn-buy" onclick="beliAksesori('${acc.id}', ${acc.harga})">Beli</button>`;
+        }
+
+        html += `
+            <div class="card-item">
+                <div>
+                    <strong>${acc.icon} ${acc.nama}</strong><br>
+                    <small style="color: #64748b;">Bonus Hasil: +${acc.bonus} | Harga: Rp ${formatRupiah(acc.harga)}</small>
+                </div>
+                ${actionBtn}
+            </div>
+        `;
+    });
     
     container.innerHTML = html; 
 
@@ -179,6 +230,29 @@ function renderPasar() {
         } 
     } 
 } 
+
+function beliAksesori(id, harga) {
+    if (uang < harga) {
+        showToast("Uang tidak cukup untuk membeli aksesori ini!", "error");
+        return;
+    }
+    uang -= harga;
+    aksesoriDimiliki.push(id);
+    aksesoriAktif = id; // Otomatis pakai setelah dibeli
+    updateUangDisplay();
+    updatePanelAksesoriInfo();
+    simpanGame();
+    renderPasar();
+    showToast("Berhasil membeli dan mengenakan aksesori!", "success");
+}
+
+function pakaiAksesori(id) {
+    aksesoriAktif = id;
+    updatePanelAksesoriInfo();
+    simpanGame();
+    renderPasar();
+    showToast("Aksesori berhasil dipasang!", "success");
+}
 
 function renderLahan() {
     const container = document.getElementById('lahan-container'); 
@@ -307,12 +381,22 @@ function gunakanPupuk(index) {
     showToast(`Dipercepat ${itemSpesial.efekWaktu / 1000} Detik!`, 'success'); 
 } 
 
+// --- BAGIAN UTAMA PENAMBAHAN HASIL PANEN BERDASARKAN AKSESORI ---
 function panenTanaman(index) {
     let l = lahan[index]; 
     if (l.status !== 'siap_panen') return; 
     
-    tambahKeInventory(l.tanaman, 1); 
-    showToast(`Panen 1 ${l.tanaman}!`, 'success'); 
+    // Hitung jumlah hasil panen dasar (1) ditambah bonus aksesori yang aktif
+    let jumlahPanen = 1;
+    if (aksesoriAktif) {
+        let acc = listAksesori.find(a => a.id === aksesoriAktif);
+        if (acc) {
+            jumlahPanen += acc.bonus;
+        }
+    }
+    
+    tambahKeInventory(l.tanaman, jumlahPanen); 
+    showToast(`Panen ${jumlahPanen} ${l.tanaman}!`, 'success'); 
     
     l.status = 'kosong'; 
     l.tanaman = null; 
@@ -328,6 +412,9 @@ function bukaModalTransaksi(tipe, namaBarang, harga, stokMaksimal = 0) {
     currentTransactionItem = namaBarang; 
     currentTransactionPrice = harga; 
     
+    // Sembunyikan kontrol qty jika item spesial (pupuk kompos dibeli satuan atau bisa banyak? Biarkan pakai qty tapi atur maksimalnya)
+    document.getElementById('modal-qty-container').style.display = 'flex';
+
     if (tipe === 'beli') {
         document.getElementById('modal-title').innerText = `Beli ${namaBarang}`; 
         document.getElementById('btn-confirm-transaction').innerText = 'Konfirmasi Beli'; 
@@ -503,6 +590,8 @@ function simpanGame() {
         uang: uang,
         inventory: inventory,
         jumlahPupuk: jumlahPupuk,
+        aksesoriDimiliki: aksesoriDimiliki,
+        aksesoriAktif: aksesoriAktif,
         lahan: lahan.map(l => ({
             id: l.id,
             status: l.status,
@@ -525,6 +614,8 @@ function muatGame() {
             uang = data.uang !== undefined ? data.uang : 3500;
             inventory = data.inventory || [];
             jumlahPupuk = data.jumlahPupuk || 0;
+            aksesoriDimiliki = data.aksesoriDimiliki || [];
+            aksesoriAktif = data.aksesoriAktif || null;
             lahanTambahanDibeli = data.lahanTambahanDibeli || 0;
             hargaTambahLahan = data.hargaTambahLahan || 5000;
             
@@ -573,6 +664,7 @@ function initGame() {
     renderPasar(); 
     renderLahan(); 
     updateUangDisplay();
+    updatePanelAksesoriInfo();
     
     let elNick = document.getElementById('player-nickname');
     if(elNick) elNick.innerText = `👨‍🌾 ${playerName} ✏️`;
