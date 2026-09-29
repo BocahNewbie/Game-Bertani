@@ -33,11 +33,11 @@ body {
 
 .tab-btn {
   flex: 1;
-  padding: 14px;
+  padding: 12px 6px;
   border: none;
   background: transparent;
   color: #c8e6c9;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: bold;
   cursor: pointer;
   transition: background 0.3s, color 0.3s;
@@ -132,4 +132,15 @@ body {
 
 .btn-submit:hover {
   background-color: #1b5e20;
+}
+
+.inventory-item {
+  border: 1px solid #d2e3d0;
+  background-color: #f4f9f3;
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
