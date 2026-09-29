@@ -553,5 +553,33 @@ if(elNick) elNick.innerText = `👨‍🌾 ${playerName} ✏️`;
     });
 } 
 
+// ==========================================
+// PENGATURAN POPUP NICKNAME & LOCALSTORAGE
+// ==========================================
+function bukaModalNickname() {
+    let inputEl = document.getElementById('input-new-nickname');
+    if (inputEl) inputEl.value = playerName;
+    document.getElementById('nickname-modal').style.display = 'flex';
+}
+
+function tutupModalNickname() {
+    document.getElementById('nickname-modal').style.display = 'none';
+}
+
+function simpanNicknameBaru() {
+    let inputEl = document.getElementById('input-new-nickname');
+    let namaBaru = inputEl ? inputEl.value.trim() : "";
+    
+    if (namaBaru !== "") {
+        playerName = namaBaru;
+        let elNick = document.getElementById('player-nickname');
+        if (elNick) elNick.innerText = `👨‍🌾 ${playerName} ✏️`;
+        simpanGame();
+        showToast("Nama petani berhasil diperbarui!", "success");
+        tutupModalNickname();
+    } else {
+        showToast("Nama tidak boleh kosong!", "error");
+    }
+}
 // Jalankan game saat dimuat
 initGame();
