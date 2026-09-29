@@ -88,7 +88,7 @@ let hargaBeliAktif = {};
 let hargaJualAktif = {}; 
 let playerName = "Petani Pintar";
 
-// Sistem Fluktuasi Harga Pasar (Per 1 Menit)
+// Sistem Fluktuasi Harga Pasar Real-Time (Per 1 Menit)
 function updateFluktuasiHarga() {
     libraryTanaman.forEach(tanaman => {
         let baseBeli = Number(tanaman.BasehargaBeli) || 0; 
@@ -103,9 +103,9 @@ function updateFluktuasiHarga() {
         hargaJualAktif[tanaman.nama] = Math.round(hargaJualBaru); 
     }); 
 
-    if (document.getElementById('tab-pasar').classList.contains('active')) {
-        renderPasar(); 
-    } 
+    // Selalu render ulang pasar secara real-time di latar belakang
+    // sehingga harga langsung berubah saat pemain masuk ke tab pasar
+    renderPasar();
 } 
 
 function formatRupiah(angka) {
