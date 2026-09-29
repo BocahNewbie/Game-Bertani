@@ -27,18 +27,18 @@ let libraryTanaman = [
         iconBuah: '🌽',
         BasehargaBeli: 1000,
         BasehargaJual: 1600,
-        waktuTumbuh: 50000
+        waktuTumbuh: 45000
     }
 ];
 
 const itemSpesial = { 
     nama: 'Pupuk Kompos', 
     icon: '💩', 
-    hargaBeli: 200, 
-    efekWaktu: 7000 
+    hargaBeli: 100, 
+    efekWaktu: 9000 
 }; 
 
-let uang = 2500; 
+let uang = 3500; 
 let inventory = []; 
 let jumlahPupuk = 0; 
 let lahan = [
