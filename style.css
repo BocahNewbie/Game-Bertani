@@ -1,397 +1,232 @@
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
+/* Styling Utama Game */
 body {
-  background-color: #eef5ed;
-  color: #2d4030;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  padding: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f0f4f1;
+    margin: 0;
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    color: #333;
 }
 
-.container {
-  width: 100%;
-  max-width: 480px;
-  background: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  overflow: hidden;
-  border: 1px solid #d2e3d0;
+.game-container {
+    width: 100%;
+    max-width: 480px;
+    background: #ffffff;
+    padding: 15px;
+    border-radius: 16px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+    box-sizing: border-box;
 }
 
-/* Tab Navigation */
+/* Panel Header Info Pemain */
+.player-panel {
+    background: linear-gradient(135deg, #2e7d32, #43a047);
+    color: white;
+    padding: 15px 20px;
+    border-radius: 12px;
+    margin-bottom: 15px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
+.player-info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.player-info-row h3 {
+    margin: 0;
+    font-size: 18px;
+}
+
+.save-load-btns {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-action-small {
+    background: rgba(255, 255, 255, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.2s;
+}
+
+.btn-action-small:hover {
+    background: rgba(255, 255, 255, 0.4);
+}
+
+/* Navigasi Tab */
 .nav-tabs {
-  display: flex;
-  background-color: #2e7d32;
+    display: flex;
+    background: #e8f5e9;
+    padding: 5px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    gap: 5px;
 }
 
 .tab-btn {
-  flex: 1;
-  padding: 12px 6px;
-  border: none;
-  background: transparent;
-  color: #c8e6c9;
-  font-size: 14px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background 0.3s, color 0.3s;
+    flex: 1;
+    background: transparent;
+    border: none;
+    padding: 10px;
+    font-size: 13px;
+    font-weight: bold;
+    color: #388e3c;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
 }
 
 .tab-btn.active {
-  background-color: #ffffff;
-  color: #2e7d32;
+    background: #2e7d32;
+    color: white;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
 .tab-content {
-  display: none;
-  padding: 24px;
+    display: none;
 }
 
 .tab-content.active {
-  display: block;
+    display: block;
 }
 
-/* Game Dashboard Styles */
-.game-header {
-  background-color: #e8f5e9;
-  padding: 16px 24px;
-  border-bottom: 1px solid #c8e6c9;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.player-info h3 {
-  font-size: 18px;
-  color: #1b5e20;
-}
-
-.gold-display {
-  font-weight: bold;
-  color: #f57f17;
-  background: #fffde7;
-  padding: 6px 12px;
-  border-radius: 20px;
-  border: 1px solid #fff59d;
+/* Kontainer Grid Lahan */
+.farm-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
 }
 
 .farm-land {
-  background: #5d4037;
-  border-radius: 8px;
-  padding: 24px;
-  text-align: center;
-  color: #fff8e1;
-  margin-top: 10px;
-  min-height: 140px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  border: 2px dashed #8d6e63;
+    background: #e8f5e9;
+    border: 2px dashed #81c784;
+    padding: 12px;
+    border-radius: 10px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 95px;
 }
 
-.card-item {
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  padding: 16px;
-  margin-bottom: 12px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+/* List Inventory & Pasar */
+.inventory-container, .market-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
-.btn-buy {
-  background-color: #ef6c00;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 6px;
-  font-weight: bold;
-  cursor: pointer;
+.inventory-item, .card-item {
+    background: #f9fbe7;
+    border: 1px solid #dcedc8;
+    padding: 12px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
-.btn-buy:hover {
-  background-color: #e65100;
-}
-
+/* Tombol Umum */
 .btn-submit {
-  background-color: #2e7d32;
-  color: white;
-  border: none;
-  padding: 10px 16px;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: bold;
-  cursor: pointer;
+    background-color: #2e7d32;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 12px;
+    transition: background 0.2s;
 }
 
 .btn-submit:hover {
-  background-color: #1b5e20;
+    background-color: #1b5e20;
+}
+
+.btn-buy {
+    background-color: #2e7d32;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
 }
 
 .btn-sell {
-  background-color: #d32f2f;
-  color: white;
-  border: none;
-  padding: 6px 10px;
-  border-radius: 6px;
-  font-size: 12px;
-  font-weight: bold;
-  cursor: pointer;
+    background-color: #f57f17;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-top: 4px;
 }
 
-.btn-sell:hover {
-  background-color: #c62828;
-}
-
-.inventory-item {
-  border: 1px solid #d2e3d0;
-  background-color: #f4f9f3;
-  border-radius: 6px;
-  padding: 12px;
-  margin-bottom: 8px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-/* Modal Modern Styles */
+/* Modal Styling */
 .modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: none;
-  justify-content: center;
-  align-items: center;
-  z-index: 999;
-  padding: 20px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
 }
 
 .modal-card {
-  background: white;
-  width: 100%;
-  max-width: 360px;
-  padding: 24px;
-  border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-  animation: modalScale 0.2s ease-in-out;
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    width: 300px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
 }
 
-@keyframes modalScale {
-  from { transform: scale(0.9); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
-}
-
-.modal-card h3 {
-  color: #1b5e20;
-  font-size: 20px;
-}
-
-.modal-input-group {
-  margin-bottom: 16px;
-}
-
-.modal-input-group label {
-  display: block;
-  font-size: 13px;
-  font-weight: 600;
-  margin-bottom: 6px;
-}
-
-.modal-input-group input {
-  width: 100%;
-  padding: 10px 12px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-size: 16px;
-  font-weight: bold;
-}
-
-.modal-total-preview {
-  background: #f1f8f0;
-  padding: 12px;
-  border-radius: 6px;
-  font-size: 14px;
-  margin-bottom: 20px;
-  color: #2e7d32;
-}
-
-.modal-buttons {
-  display: flex;
-  gap: 10px;
-}
-
-.btn-cancel {
-  flex: 1;
-  background-color: #9e9e9e;
-  color: white;
-  border: none;
-  padding: 10px;
-  border-radius: 6px;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-.btn-cancel:hover {
-  background-color: #757575;
-}
-
-.btn-confirm {
-  flex: 1;
-  background-color: #2e7d32;
-  color: white;
-  border: none;
-  padding: 10px;
-  border-radius: 6px;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-.btn-confirm:hover {
-  background-color: #1b5e20;
-}
-
-/* Toast Notification Styles */
+/* Toast Notifikasi */
 .toast-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.2);
-  display: none;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-  /* pointer-events: none; (Dihapus agar layarnya tidak bisa diklik saat loading/notif muncul) */
+    position: fixed;
+    bottom: 20px;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    z-index: 2000;
+    pointer-events: none;
 }
 
 .toast-card {
-  background: white;
-  padding: 16px 24px;
-  border-radius: 12px;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.15);
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  max-width: 320px;
-  animation: toastFade 0.1s ease-in-out; /* Animasi dipercepat karena durasinya hanya 0.4 detik */
+    background: #323232;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    font-size: 13px;
 }
 
-@keyframes toastFade {
-  from { transform: translateY(-10px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+.toast-card.success span#toast-icon {
+    color: #4caf50;
+    font-weight: bold;
 }
 
-.toast-icon {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 16px;
-  font-weight: bold;
-  color: white;
-  flex-shrink: 0;
-}
-
-.toast-card.success .toast-icon {
-  background-color: #2e7d32;
-}
-
-.toast-card.error .toast-icon {
-  background-color: #d32f2f;
-}
-
-.toast-message {
-  font-size: 14px;
-  font-weight: 600;
-  color: #333;
-}
-
-/* Grid Multi Lahan */
-.lahan-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
-
-.farm-land {
-  background: #5d4037;
-  border-radius: 8px;
-  padding: 16px 10px;
-  text-align: center;
-  color: #fff8e1;
-  min-height: 150px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  border: 2px dashed #8d6e63;
-  margin-top: 0; /* Override margin bawaan */
-}
-
-/* Styling Tombol Qty Modal */
-.modal-qty-controls {
-  margin-bottom: 16px;
-  background: #f4f9f3;
-  padding: 12px;
-  border-radius: 8px;
-  border: 1px solid #d2e3d0;
-}
-
-.btn-qty {
-  background-color: #e0e0e0;
-  color: #333;
-  border: none;
-  padding: 8px 12px;
-  border-radius: 6px;
-  font-weight: bold;
-  cursor: pointer;
-  font-size: 14px;
-  transition: 0.2s;
-}
-
-.btn-qty:hover {
-  background-color: #bdbdbd;
-}
-
-.qty-display-box {
-  background: white;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  padding: 8px 0;
-  width: 50px;
-  text-align: center;
-  font-size: 18px;
-  font-weight: bold;
-  color: #2e7d32;
-}
-
-.btn-qty-maks {
-  background-color: #ffb300;
-  color: white;
-  border: none;
-  padding: 6px 16px;
-  border-radius: 6px;
-  font-weight: bold;
-  cursor: pointer;
-  font-size: 12px;
-  display: block;
-  margin: 0 auto;
-  transition: 0.2s;
-}
-
-.btn-qty-maks:hover {
-  background-color: #ffa000;
+.toast-card.error span#toast-icon {
+    color: #f44336;
+    font-weight: bold;
 }
