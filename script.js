@@ -55,6 +55,42 @@ let listAksesori = [
     { id: 'baju', nama: 'Baju Partai', icon: '👕', slot: 'badan', harga: 1200000, bonusPersen: 19 }
 ];
 
+// ==========================================
+// SISTEM CUACA DINAMIS & EFEKNYA
+// ==========================================
+let cuacaAktif = {
+    nama: 'Cerah',
+    ikon: '☀️',
+    efekPersen: 0
+};
+
+const daftarCuaca = [
+    { nama: 'Cerah', ikon: '☀️', efekPersen: 0 },
+    { nama: 'Panas', ikon: '🔥', efekPersen: -3 },        // Mengurangi hasil panen 3%
+    { nama: 'Mendung', ikon: '☁️', efekPersen: 7 },       // Menambah hasil panen 7%
+    { nama: 'Gerimis', ikon: '🌦️', efekPersen: 30 },      // Menambah hasil panen 30%
+    { nama: 'Hujan', ikon: '🌧️', efekPersen: 120 },       // Menambah hasil panen 120%
+    { nama: 'Angin Kencang', ikon: '🌬️', efekPersen: -50 },// Mengurangi hasil panen 50%
+    { nama: 'Storm / Badai', ikon: '⚡', efekPersen: -70 }, // Mengurangi hasil panen 70%
+    { nama: 'Badai Petir Berat', ikon: '🌪️', efekPersen: -90 }// Mengurangi hasil panen 90%
+];
+
+function ubahCuacaSecaraAcak() {
+    let randomIndex = Math.floor(Math.random() * daftarCuaca.length);
+    cuacaAktif = daftarCuaca[randomIndex];
+    
+    renderInfoCuacaDiUI();
+    showToast(`Prakiraan Cuaca: ${cuacaAktif.ikon} ${cuacaAktif.nama}!`, 'info');
+}
+
+function renderInfoCuacaDiUI() {
+    let panelCuaca = document.getElementById('info-cuaca-display');
+    if (panelCuaca) {
+        let tanda = cuacaAktif.efekPersen > 0 ? '+' : '';
+        panelCuaca.innerText = `${cuacaAktif.ikon} ${cuacaAktif.nama} (${tanda}${cuacaAktif.efekPersen}%)`;
+    }
+}
+
 let uang = 3500; 
 let inventory = []; 
 let jumlahPupuk = 0; 
@@ -80,7 +116,6 @@ let currentTransactionPrice = 0;
 let currentQty = 1; 
 let maxQtyAllowed = 99; 
 
-// Variabel untuk proses pemilihan tanam bibit ke lahan
 let selectedLahanIndex = null;
 let selectedBibitNama = '';
 
@@ -103,9 +138,7 @@ function updateFluktuasiHarga() {
         hargaJualAktif[tanaman.nama] = Math.round(hargaJualBaru); 
     }); 
 
-    // Selalu render ulang pasar secara real-time di latar belakang
-    // sehingga harga langsung berubah saat pemain masuk ke tab pasar
-    renderPasar();
+    renderPasar(); 
 } 
 
 function formatRupiah(angka) {
@@ -195,6 +228,7 @@ function openGameTabeksplisit(tabName) {
 
 function renderPasar() {
     const container = document.getElementById('pasar-container'); 
+    if (!container) return;
     let html = ''; 
     
     libraryTanaman.forEach(tanaman => {
@@ -289,6 +323,7 @@ function pakaiAksesori(id) {
 
 function renderLahan() {
     const container = document.getElementById('lahan-container'); 
+    if (!container) return;
     let html = ''; 
     
     lahan.forEach((l, index) => {
@@ -324,7 +359,6 @@ function renderLahan() {
     container.innerHTML = headerHtml + html; 
 } 
 
-// --- FITUR MODAL KONFIRMASI JUMLAH BIBIT SAAT MENANAM ---
 function bukaModalPilihBibit(indexLahan) {
     let bibitDiInv = inventory.filter(i => i.nama.includes('Bibit'));
     if (bibitDiInv.length === 0) {
@@ -334,19 +368,17 @@ function bukaModalPilihBibit(indexLahan) {
     }
 
     selectedLahanIndex = indexLahan;
-    selectedBibitNama = bibitDiInv[0].nama; // Mengambil bibit pertama yang tersedia
+    selectedBibitNama = bibitDiInv[0].nama;
 
     let itemInv = inventory.find(i => i.nama === selectedBibitNama);
     let stokMaks = itemInv ? itemInv.jumlah : 0;
     
-    // Batasi maksimum penanaman sekali jalan adalah 99 atau sesuai stok di inventory
     maxQtyAllowed = Math.min(99, stokMaks);
     currentQty = 1;
 
     document.getElementById('modal-title').innerText = `Tanam ${selectedBibitNama}`;
     document.getElementById('modal-price').innerText = `Stok di Inventory: ${stokMaks} | Maksimal 99 per lahan`;
     
-    // Sembunyikan informasi total harga karena ini penanaman bibit, ubah teks konfirmasi
     document.getElementById('modal-total-price').parentElement.style.display = 'none';
     document.getElementById('btn-confirm-transaction').innerText = 'Tanam Sekarang';
     document.getElementById('btn-confirm-transaction').setAttribute('onclick', 'konfirmasiTanamBibit()');
@@ -386,7 +418,6 @@ function konfirmasiTanamBibit() {
 
     tutupModalTransaksi();
     
-    // Kembalikan tombol konfirmasi agar normal kembali untuk fungsi beli/jual pasar
     document.getElementById('modal-total-price').parentElement.style.display = 'block';
     document.getElementById('btn-confirm-transaction').setAttribute('onclick', 'konfirmasiTransaksi()');
 
@@ -490,24 +521,22 @@ function gunakanPupukMassal() {
     showToast(`Pupuk Massal digunakan! Semua lahan dipercepat ${itemSpesial.efekWaktu / 1000} Detik!`, 'success');
 } 
 
+// --- PANEN DENGAN PENGARUH AKSESORI DAN CUACA DINAMIS ---
 function panenTanaman(index) {
     let l = lahan[index]; 
     if (l.status !== 'siap_panen') return; 
     
-    // 1. Hitung jumlah dasar + bonus aksesori slot
+    // 1. Hitung jumlah dasar + bonus persentase aksesori slot
     let totalBonusPersenAcc = hitungTotalBonusPersen(); 
     let jumlahDasarDanAcc = l.jumlahBibit + Math.floor(l.jumlahBibit * (totalBonusPersenAcc / 100));
 
-    // 2. Terapkan efek persentase cuaca aktif terhadap hasil akhir
+    // 2. Terapkan persentase efek cuaca aktif
     let penyesuaianCuaca = Math.round(jumlahDasarDanAcc * (cuacaAktif.efekPersen / 100));
     let jumlahPanenTotal = jumlahDasarDanAcc + penyesuaianCuaca;
 
-    // Pastikan hasil panen minimal 1 buah meskipun cuaca sangat buruk (-90%)
-    if (jumlahPanenTotal < 1) jumlahPanenTotal = 1;
+    if (jumlahPanenTotal < 1) jumlahPanenTotal = 1; // Minimal hasil panen adalah 1 buah
 
     tambahKeInventory(l.tanaman, jumlahPanenTotal); 
-    
-    // Notifikasi hasil panen beserta info cuaca
     showToast(`Panen ${jumlahPanenTotal} ${l.tanaman} (${cuacaAktif.ikon} ${cuacaAktif.nama})!`, 'success'); 
     
     l.status = 'kosong'; 
@@ -533,13 +562,13 @@ function bukaModalTransaksi(tipe, namaBarang, harga, stokMaksimal = 0) {
         document.getElementById('modal-title').innerText = `Beli ${namaBarang}`; 
         document.getElementById('btn-confirm-transaction').innerText = 'Konfirmasi Beli'; 
         let maxMampuBeli = Math.floor(uang / harga); 
-        maxQtyAllowed = Math.min(99, maxMampuBeli); // Pembelian tetap dibatasi 99 agar aman
+        maxQtyAllowed = Math.min(99, maxMampuBeli); 
         if (maxQtyAllowed < 1) maxQtyAllowed = 1; 
     } else if (tipe === 'jual') {
         document.getElementById('modal-title').innerText = `Jual ${namaBarang}`; 
         document.getElementById('btn-confirm-transaction').innerText = 'Konfirmasi Jual'; 
         
-        // Penjualan sekarang diubah batas maksimalnya menjadi 999 item atau sesuai stok
+        // Batas maksimal jual sekarang diatur hingga 999 item
         maxQtyAllowed = Math.min(999, stokMaksimal); 
     } 
     
@@ -548,7 +577,7 @@ function bukaModalTransaksi(tipe, namaBarang, harga, stokMaksimal = 0) {
     updateModalDisplay(); 
     
     document.getElementById('transaction-modal').style.display = 'flex'; 
-}
+} 
 
 function tutupModalTransaksi() {
     document.getElementById('transaction-modal').style.display = 'none'; 
@@ -560,7 +589,6 @@ function ubahQty(amount) {
     if (currentQty < 1 && maxQtyAllowed > 0) currentQty = 1; 
     if (maxQtyAllowed === 0) currentQty = 0; 
     
-    // Cek apakah sedang dalam mode modal penanaman bibit atau transaksi biasa
     let btnText = document.getElementById('btn-confirm-transaction').innerText;
     if (btnText === 'Tanam Sekarang') {
         updateModalDisplayCustom();
@@ -640,6 +668,7 @@ function tambahKeInventory(namaItem, jumlah) {
 
 function renderInventory() {
     const container = document.getElementById('inventory-list'); 
+    if (!container) return;
     if (inventory.length === 0) {
         container.innerHTML = '<p style="color: #64748b; font-style: italic;">Inventory masih kosong.</p>'; 
         return; 
@@ -716,6 +745,7 @@ function simpanGame() {
         jumlahPupuk: jumlahPupuk,
         aksesoriDimiliki: aksesoriDimiliki,
         slotAktif: slotAktif,
+        cuacaAktif: cuacaAktif,
         lahan: lahan.map(l => ({
             id: l.id,
             status: l.status,
@@ -740,6 +770,7 @@ function muatGame() {
             jumlahPupuk = data.jumlahPupuk || 0;
             aksesoriDimiliki = data.aksesoriDimiliki || [];
             slotAktif = data.slotAktif || { kepala: null, badan: null, kaki: null, telapak: null };
+            if (data.cuacaAktif) cuacaAktif = data.cuacaAktif;
             lahanTambahanDibeli = data.lahanTambahanDibeli || 0;
             hargaTambahLahan = data.hargaTambahLahan || 5000;
             
@@ -782,9 +813,9 @@ function initGame() {
     muatGame(); 
     updateFluktuasiHarga(); 
     setInterval(updateFluktuasiHarga, 60000); 
-
-    // Ganti cuaca otomatis setiap 3 menit (180000 ms)
-    ubahCuacaSecaraAcak();
+    
+    // Inisialisasi cuaca acak pertama kali, lalu ubah acak setiap 3 menit (180000 ms)
+    renderInfoCuacaDiUI();
     setInterval(ubahCuacaSecaraAcak, 180000);
     
     renderPasar(); 
@@ -804,44 +835,6 @@ function initGame() {
             }
         }
     });
-}
-
-// ==========================================
-// SISTEM CUACA DINAMIS
-// ==========================================
-let cuacaAktif = {
-    nama: 'Cerah',
-    ikon: '☀️',
-    efekPersen: 0 // Normal (0% perubahan)
-};
-
-// Daftar jenis cuaca dan efeknya terhadap hasil panen
-const daftarCuaca = [
-    { nama: 'Cerah', ikon: '☀️', efekPersen: 0 },
-    { nama: 'Panas', ikon: '🔥', efekPersen: -3 },      // Mengurangi hasil panen 3%
-    { nama: 'Mendung', ikon: '☁️', efekPersen: 7 },     // Menambah hasil panen 7%
-    { nama: 'Gerimis', ikon: '🌦️', efekPersen: 30 },    // Menambah hasil panen 30%
-    { nama: 'Hujan', ikon: '🌧️', efekPersen: 120 },     // Menambah hasil panen 120%
-    { nama: 'Angin Kencang', ikon: '🌬️', efekPersen: -50 }, // Mengurangi hasil panen 50%
-    { nama: 'Storm / Badai Petir', ikon: '⚡', efekPersen: -70 }, // Mengurangi hasil panen 70%
-    { nama: 'Badai Besar', ikon: '🌪️', efekPersen: -90 }  // Mengurangi hasil panen 90%
-];
-
-// Fungsi untuk mengacak cuaca secara berkala (misal setiap 3 menit atau dipanggil saat inisialisasi)
-function ubahCuacaSecaraAcak() {
-    let randomIndex = Math.floor(Math.random() * daftarCuaca.length);
-    cuacaAktif = daftarCuaca[randomIndex];
-    
-    showToast(`Perubahan Cuaca: ${cuacaAktif.ikon} ${cuacaAktif.nama}!`, 'info');
-    renderInfoCuacaDiUI();
-}
-
-// Menampilkan info cuaca di panel atas (bisa disematkan di index.html jika ingin terlihat)
-function renderInfoCuacaDiUI() {
-    let panelCuaca = document.getElementById('info-cuaca-display');
-    if (panelCuaca) {
-        panelCuaca.innerText = `Cuaca: ${cuacaAktif.ikon} ${cuacaAktif.nama} (${cuacaAktif.efekPersen >= 0 ? '+' : ''}${cuacaAktif.efekPersen}%)`;
-    }
-}
+} 
 
 initGame();
