@@ -325,7 +325,7 @@ function bukaModalTransaksi(tipe, namaBarang, harga, stokMaksimal = 0) {
     } else if (tipe === 'jual') {
         document.getElementById('modal-title').innerText = `Jual ${namaBarang}`; 
         document.getElementById('btn-confirm-transaction').innerText = 'Konfirmasi Jual'; 
-        maxQtyAllowed = stokMaksimal; 
+        maxQtyAllowed = Math.min(99, stokMaksimal); 
     } 
     
     currentQty = (maxQtyAllowed > 0) ? 1 : 0; 
@@ -459,13 +459,29 @@ function renderInventory() {
 // ==========================================
 // FITUR SIMPAN, MUAT, & NICKNAME (LOCALSTORAGE)
 // ==========================================
-function ubahNickname() {
-    let namaBaru = prompt("Masukkan Nickname / Nama Petani baru:", playerName);
-    if (namaBaru && namaBaru.trim() !== "") {
-        playerName = namaBaru.trim();
-        document.getElementById('player-nickname').innerText = `${playerName} ✏️`;
+function bukaModalNickname() {
+    let inputEl = document.getElementById('input-new-nickname');
+    if (inputEl) inputEl.value = playerName;
+    document.getElementById('nickname-modal').style.display = 'flex';
+}
+
+function tutupModalNickname() {
+    document.getElementById('nickname-modal').style.display = 'none';
+}
+
+function simpanNicknameBaru() {
+    let inputEl = document.getElementById('input-new-nickname');
+    let namaBaru = inputEl ? inputEl.value.trim() : "";
+    
+    if (namaBaru !== "") {
+        playerName = namaBaru;
+        let elNick = document.getElementById('player-nickname');
+        if (elNick) elNick.innerText = `👨‍🌾 ${playerName} ✏️`;
         simpanGame();
-        showToast("Nickname berhasil diubah!", "success");
+        showToast("Nama petani berhasil diperbarui!", "success");
+        tutupModalNickname();
+    } else {
+        showToast("Nama tidak boleh kosong!", "error");
     }
 }
 
@@ -501,17 +517,13 @@ function muatGame() {
             hargaTambahLahan = data.hargaTambahLahan || 5000;
             
             if (data.lahan && data.lahan.length > 0) {
-                lahan = data.lahan.map(l => {
-                    let timer = null;
-                    // Jika saat disimpan statusnya sedang ditanam, aktifkan kembali timernya
-                    return {
-                        id: l.id,
-                        status: l.status,
-                        tanaman: l.tanaman,
-                        waktuSelesai: l.waktuSelesai,
-                        timerInterval: timer
-                    };
-                });
+                lahan = data.lahan.map(l => ({
+                    id: l.id,
+                    status: l.status,
+                    tanaman: l.tanaman,
+                    waktuSelesai: l.waktuSelesai,
+                    timerInterval: null
+                }));
             }
         } catch (e) {
             console.error("Gagal memuat save data", e);
@@ -530,7 +542,7 @@ function resetGame() {
 // INISIALISASI GAME
 // ==========================================
 function initGame() {
-    muatGame(); // Muat data tersimpan dari memori browser
+    muatGame(); 
     updateFluktuasiHarga(); 
     setInterval(updateFluktuasiHarga, 60000); 
     
@@ -539,9 +551,8 @@ function initGame() {
     updateUangDisplay();
     
     let elNick = document.getElementById('player-nickname');
-if(elNick) elNick.innerText = `👨‍🌾 ${playerName} ✏️`;
+    if(elNick) elNick.innerText = `👨‍🌾 ${playerName} ✏️`;
 
-    // Jalankan ulang timer untuk lahan yang sedang berjalan
     lahan.forEach((l, index) => {
         if (l.status === 'ditanam') {
             if (l.waktuSelesai <= new Date().getTime()) {
@@ -553,33 +564,4 @@ if(elNick) elNick.innerText = `👨‍🌾 ${playerName} ✏️`;
     });
 } 
 
-// ==========================================
-// PENGATURAN POPUP NICKNAME & LOCALSTORAGE
-// ==========================================
-function bukaModalNickname() {
-    let inputEl = document.getElementById('input-new-nickname');
-    if (inputEl) inputEl.value = playerName;
-    document.getElementById('nickname-modal').style.display = 'flex';
-}
-
-function tutupModalNickname() {
-    document.getElementById('nickname-modal').style.display = 'none';
-}
-
-function simpanNicknameBaru() {
-    let inputEl = document.getElementById('input-new-nickname');
-    let namaBaru = inputEl ? inputEl.value.trim() : "";
-    
-    if (namaBaru !== "") {
-        playerName = namaBaru;
-        let elNick = document.getElementById('player-nickname');
-        if (elNick) elNick.innerText = `👨‍🌾 ${playerName} ✏️`;
-        simpanGame();
-        showToast("Nama petani berhasil diperbarui!", "success");
-        tutupModalNickname();
-    } else {
-        showToast("Nama tidak boleh kosong!", "error");
-    }
-}
-// Jalankan game saat dimuat
 initGame();
