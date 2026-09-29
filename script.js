@@ -4,7 +4,7 @@ let bibitDipilih = null;
 let statusLahanGame = 'kosong'; 
 let jenisTanamanAktif = null;
 
-// Harga dasar bibit referensi untuk perhitungan jual
+// Harga dasar bibit referensi
 const hargaDasarBibit = {
   'Semangka': 800,
   'Melon': 500
@@ -16,12 +16,15 @@ let hargaJualAktif = {
   'Melon': 0
 };
 
-// Fungsi menghitung fluktuasi harga (20% - 90% dari harga bibit)
+// Fungsi menghitung harga jual = Harga Bibit + (20% - 90% kenaikan dari harga bibit)
 function updateFluktuasiHarga() {
   for (let buah in hargaDasarBibit) {
     let base = hargaDasarBibit[buah];
-    let persentase = (Math.floor(Math.random() * 71) + 20) / 100; // Random antara 0.20 sampai 0.90
-    hargaJualAktif[buah] = Math.round(base * persentase);
+    let persentaseKenaikan = (Math.floor(Math.random() * 71) + 20) / 100; // Random 0.20 sampai 0.90 (20% - 90%)
+    let tambahanHarga = base * persentaseKenaikan;
+    
+    // Harga jual adalah modal bibit ditambah persentase kenaikannya
+    hargaJualAktif[buah] = Math.round(base + tambahanHarga);
   }
 }
 
@@ -88,7 +91,6 @@ function renderInventory() {
         actionButton = `<button class="btn-submit" style="padding: 6px 10px; font-size: 12px;" onclick="pilihBibitUntukDitanam('${item.nama}')">Tanam</button>`;
       }
     } else {
-      // Jika buah hasil panen, tampilkan info harga jual fluktuatif & tombol Jual
       if (item.nama.includes('Semangka')) icon = '🍉';
       if (item.nama.includes('Melon')) icon = '🍈';
 
@@ -166,15 +168,13 @@ function jualHasilPanen(namaBuah) {
   if (!item || item.jumlah <= 0) return;
 
   let hargaSatuan = hargaJualAktif[namaBuah] || 0;
-  let totalPendapatan = hargaSatuan; // Jual 1 per klik
+  let totalPendapatan = hargaSatuan;
 
-  // Kurangi 1 dari inventory
   item.jumlah -= 1;
   if (item.jumlah <= 0) {
     inventory = inventory.filter(i => i.nama !== namaBuah);
   }
 
-  // Tambah uang pemain
   uang += totalPendapatan;
   updateUangDisplay();
 
