@@ -1,45 +1,30 @@
 let uang = 2500;
 let inventory = [];
-let jumlahPupuk = 0; // Menyimpan stok pupuk kompos
-let bibitDipilih = null;
-let statusLahanGame = 'kosong'; 
-let jenisTanamanAktif = null;
-let waktuSelesaiPanen = 0; 
-let timerInterval = null;  
+let jumlahPupuk = 0;
 
-let selectedItemToBuy = {
-  nama: '',
-  hargaSatuan: 0
-};
+// Sistem Multi Lahan
+let lahan = [
+  { id: 1, status: 'kosong', tanaman: null, waktuSelesai: 0, timerInterval: null }
+];
+let lahanTambahanDibeli = 0;
+const limitLahanTambahan = 6; // Maksimal tambah 6 (total 7 lahan)
+let hargaTambahLahan = 5000;
 
-const hargaDasarBibit = {
-  'Semangka': 800,
-  'Melon': 500
-};
-
-// Durasi waktu tumbuh (Semangka 30 Detik, Melon 15 Detik)
-const waktuTumbuhBibit = {
-  'Semangka': 30 * 1000, 
-  'Melon': 15 * 1000     
-};
-
-let hargaJualAktif = {
-  'Semangka': 0,
-  'Melon': 0
-};
+let selectedItemToBuy = { nama: '', hargaSatuan: 0 };
+const hargaDasarBibit = { 'Semangka': 800, 'Melon': 500 };
+const waktuTumbuhBibit = { 'Semangka': 30 * 1000, 'Melon': 15 * 1000 };
+let hargaJualAktif = { 'Semangka': 0, 'Melon': 0 };
 
 function updateFluktuasiHarga() {
   for (let buah in hargaDasarBibit) {
     let base = hargaDasarBibit[buah];
-    let persentaseKenaikan = (Math.floor(Math.random() * 71) + 20) / 100; // 20% - 90%
-    let tambahanHarga = base * persentaseKenaikan;
-    hargaJualAktif[buah] = Math.round(base + tambahanHarga);
+    let persentaseKenaikan = (Math.floor(Math.random() * 71) + 20) / 100;
+    hargaJualAktif[buah] = Math.round(base + (base * persentaseKenaikan));
   }
 }
 
 updateFluktuasiHarga();
-// Ubah dari 3600000 menjadi 60000 (60.000 milidetik = 1 menit)
-setInterval(updateFluktuasiHarga, 60000);
+setInterval(updateFluktuasiHarga, 60000); // Update setiap 1 menit
 
 function formatRupiah(angka) {
   return angka.toLocaleString('id-ID');
@@ -47,13 +32,6 @@ function formatRupiah(angka) {
 
 function updateUangDisplay() {
   document.getElementById('player-koin').innerText = formatRupiah(uang);
-}
-
-function updateTombolPupuk() {
-  let btnPupuk = document.getElementById('btn-pupuk');
-  if (btnPupuk) {
-    btnPupuk.innerText = `Gunakan Pupuk (${jumlahPupuk})`;
-  }
 }
 
 let toastTimeout = null;
@@ -68,30 +46,171 @@ function showToast(message, type = 'success') {
   msg.innerText = message;
 
   overlay.style.display = 'flex';
-
   if (toastTimeout) clearTimeout(toastTimeout);
-
-  // Waktu auto-close dikurangi menjadi 400ms (0.4 detik)
-  toastTimeout = setTimeout(() => {
-    overlay.style.display = 'none';
-  }, 400); 
+  toastTimeout = setTimeout(() => { overlay.style.display = 'none'; }, 400); 
 }
 
 function openGameTab(tabName) {
   document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
   document.querySelectorAll('.nav-tabs .tab-btn').forEach(btn => btn.classList.remove('active'));
-  
   document.getElementById('tab-' + tabName).classList.add('active');
   event.currentTarget.classList.add('active');
 
-  if (tabName === 'inventory') {
-    renderInventory();
+  if (tabName === 'inventory') renderInventory();
+  if (tabName === 'menanam') renderLahan();
+}
+
+function openGameTabeksplisit(tabName) {
+  document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+  document.querySelectorAll('.nav-tabs .tab-btn').forEach(btn => btn.classList.remove('active'));
+  document.getElementById('tab-' + tabName).classList.add('active');
+  document.querySelectorAll('.nav-tabs .tab-btn')[0].classList.add('active');
+}
+
+// ================= FUNGSI LAHAN =================
+function renderLahan() {
+  const container = document.getElementById('lahan-container');
+  let html = '';
+
+  lahan.forEach((l, index) => {
+    html += `
+      <div class="farm-land">
+        <p id="status-lahan-${index}" style="font-size: 13px; font-weight: bold; margin-bottom: 8px;">
+          ${l.status === 'kosong' ? 'Lahan Kosong' : l.status === 'siap_panen' ? `✨ ${l.tanaman}` : `🌱 ${l.tanaman}`}
+        </p>
+        
+        <small id="waktu-lahan-${index}" style="display: ${l.status === 'ditanam' ? 'block' : 'none'}; font-size: 11px; margin-bottom: 8px; color: #fff8e1;"></small>
+
+        ${l.status === 'kosong' ? `<button class="btn-submit" style="padding: 6px; font-size: 11px;" onclick="openGameTabeksplisit('inventory'); renderInventory();">Tanam Bibit</button>` : ''}
+        
+        ${l.status === 'ditanam' ? `<button class="btn-submit" style="padding: 6px; font-size: 11px; background-color: #795548;" onclick="gunakanPupuk(${index})">Pupuk (${jumlahPupuk})</button>` : ''}
+        
+        ${l.status === 'siap_panen' ? `<button class="btn-submit" style="padding: 6px; font-size: 11px; background-color: #f57f17;" onclick="panenTanaman(${index})">Panen</button>` : ''}
+      </div>
+    `;
+  });
+  container.innerHTML = html;
+
+  let btnTambah = document.getElementById('btn-tambah-lahan');
+  if (lahanTambahanDibeli >= limitLahanTambahan) {
+    btnTambah.style.display = 'none';
+  } else {
+    btnTambah.innerText = `➕ Lahan (Rp ${formatRupiah(hargaTambahLahan)})`;
   }
 }
 
+function beliLahan() {
+  if (lahanTambahanDibeli >= limitLahanTambahan) {
+    showToast('Batas maksimal lahan tercapai!', 'error');
+    return;
+  }
+  if (uang < hargaTambahLahan) {
+    showToast(`Uang kurang! Butuh Rp ${formatRupiah(hargaTambahLahan)}`, 'error');
+    return;
+  }
+
+  uang -= hargaTambahLahan;
+  updateUangDisplay();
+
+  lahan.push({
+    id: lahan.length + 1,
+    status: 'kosong', tanaman: null, waktuSelesai: 0, timerInterval: null
+  });
+
+  lahanTambahanDibeli++;
+  showToast('Berhasil menambah lahan!', 'success');
+
+  // Harga naik 250% (dikali 2.5) dari harga saat ini untuk lahan berikutnya
+  hargaTambahLahan = Math.round(hargaTambahLahan * 2.5);
+  renderLahan();
+}
+
+function pilihBibitUntukDitanam(namaBibit) {
+  let emptyIndex = lahan.findIndex(l => l.status === 'kosong');
+  if (emptyIndex === -1) {
+    showToast('Semua lahan sedang terisi!', 'error');
+    return;
+  }
+
+  let item = inventory.find(i => i.nama === namaBibit);
+  if (item) {
+    item.jumlah -= 1;
+    if (item.jumlah <= 0) inventory = inventory.filter(i => i.nama !== namaBibit);
+  }
+
+  let bibitDipilih = namaBibit.replace('Bibit ', '');
+  let targetLahan = lahan[emptyIndex];
+
+  targetLahan.status = 'ditanam';
+  targetLahan.tanaman = bibitDipilih;
+  
+  let durasiMs = waktuTumbuhBibit[bibitDipilih] || 15000;
+  targetLahan.waktuSelesai = new Date().getTime() + durasiMs;
+
+  openGameTabeksplisit('menanam');
+  renderLahan();
+  mulaiTimerLahan(emptyIndex);
+}
+
+function mulaiTimerLahan(index) {
+  let l = lahan[index];
+  if (l.timerInterval) clearInterval(l.timerInterval);
+
+  l.timerInterval = setInterval(() => {
+    let sisaWaktu = l.waktuSelesai - new Date().getTime();
+    let waktuEl = document.getElementById(`waktu-lahan-${index}`);
+    
+    if (sisaWaktu <= 0) {
+      clearInterval(l.timerInterval);
+      l.status = 'siap_panen';
+      renderLahan(); 
+    } else {
+      let jam = Math.floor((sisaWaktu % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      let menit = Math.floor((sisaWaktu % (1000 * 60 * 60)) / (1000 * 60));
+      let detik = Math.floor((sisaWaktu % (1000 * 60)) / 1000);
+      
+      let formatWaktu = `${String(jam).padStart(2, '0')}:${String(menit).padStart(2, '0')}:${String(detik).padStart(2, '0')}`;
+      if(waktuEl) waktuEl.innerText = `⏱️ ${formatWaktu}`;
+    }
+  }, 1000);
+}
+
+function gunakanPupuk(index) {
+  let l = lahan[index];
+  if (l.status !== 'ditanam') return;
+  if (jumlahPupuk <= 0) {
+    showToast('Pupuk Kompos habis!', 'error');
+    return;
+  }
+
+  jumlahPupuk -= 1;
+  l.waktuSelesai -= 7000; // Potong waktu 7 detik
+  if (l.waktuSelesai <= new Date().getTime()) {
+    l.waktuSelesai = new Date().getTime();
+  }
+  
+  renderLahan();
+  showToast('Dipercepat 7 Detik!', 'success');
+}
+
+function panenTanaman(index) {
+  let l = lahan[index];
+  if (l.status !== 'siap_panen') return;
+
+  tambahKeInventory(l.tanaman, 1);
+  showToast(`Panen 1 ${l.tanaman}!`, 'success');
+
+  l.status = 'kosong';
+  l.tanaman = null;
+  l.waktuSelesai = 0;
+  if (l.timerInterval) clearInterval(l.timerInterval);
+  
+  renderLahan();
+}
+
+// ================= FUNGSI PASAR & INVENTORY =================
 function bukaModalBeli(namaBarang, harga) {
   selectedItemToBuy = { nama: namaBarang, hargaSatuan: harga };
-  
   document.getElementById('modal-title').innerText = `Beli ${namaBarang}`;
   document.getElementById('modal-price').innerText = `Harga Satuan: Rp ${formatRupiah(harga)}`;
   document.getElementById('modal-qty').value = 1;
@@ -109,13 +228,8 @@ function hitungTotalModal() {
   let qtyInput = document.getElementById('modal-qty');
   let qty = parseInt(qtyInput.value) || 1;
 
-  if (qty > 99) {
-    qty = 99;
-    qtyInput.value = 99;
-  } else if (qty < 1 && qtyInput.value !== "") {
-    qty = 1;
-    qtyInput.value = 1;
-  }
+  if (qty > 99) { qty = 99; qtyInput.value = 99; } 
+  else if (qty < 1 && qtyInput.value !== "") { qty = 1; qtyInput.value = 1; }
 
   let total = qty * selectedItemToBuy.hargaSatuan;
   document.getElementById('modal-total-price').innerText = `Rp ${formatRupiah(total)}`;
@@ -132,29 +246,25 @@ function konfirmasiBeli() {
     uang -= totalHarga;
     updateUangDisplay();
 
-    // Jika yang dibeli adalah Pupuk Kompos, masukkan ke variabel khusus (bukan inventory)
     if (selectedItemToBuy.nama === 'Pupuk Kompos') {
       jumlahPupuk += qty;
-      updateTombolPupuk();
+      renderLahan(); // Update teks tombol pupuk di lahan yang sedang ditanam
     } else {
       tambahKeInventory(selectedItemToBuy.nama, qty);
     }
     
     tutupModalBeli();
-    showToast(`Berhasil membeli ${qty} ${selectedItemToBuy.nama}!`, 'success');
+    showToast(`Membeli ${qty} ${selectedItemToBuy.nama}!`, 'success');
   } else {
     tutupModalBeli();
-    showToast('Uang kamu tidak cukup untuk pembelian ini!', 'error');
+    showToast('Uang tidak cukup!', 'error');
   }
 }
 
 function tambahKeInventory(namaItem, jumlah) {
   let existing = inventory.find(item => item.nama === namaItem);
-  if (existing) {
-    existing.jumlah += jumlah;
-  } else {
-    inventory.push({ nama: namaItem, jumlah: jumlah });
-  }
+  if (existing) existing.jumlah += jumlah;
+  else inventory.push({ nama: namaItem, jumlah: jumlah });
 }
 
 function renderInventory() {
@@ -171,8 +281,11 @@ function renderInventory() {
 
     if (item.nama.includes('Bibit')) {
       icon = '🌱';
-      if (statusLahanGame === 'kosong') {
+      let hasEmptyLand = lahan.some(l => l.status === 'kosong');
+      if (hasEmptyLand) {
         actionButton = `<button class="btn-submit" style="padding: 6px 10px; font-size: 12px;" onclick="pilihBibitUntukDitanam('${item.nama}')">Tanam</button>`;
+      } else {
+         actionButton = `<small style="color:red; font-size: 10px;">Lahan Penuh</small>`;
       }
     } else {
       if (item.nama.includes('Semangka')) icon = '🍉';
@@ -181,7 +294,7 @@ function renderInventory() {
       let hargaJualSatuan = hargaJualAktif[item.nama] || 0;
       actionButton = `
         <div style="text-align: right;">
-          <small style="display: block; color: #555; font-size: 10px;">Harga Jual: Rp ${formatRupiah(hargaJualSatuan)}</small>
+          <small style="display: block; color: #555; font-size: 10px;">Jual: Rp ${formatRupiah(hargaJualSatuan)}</small>
           <button class="btn-sell" onclick="jualHasilPanen('${item.nama}')">Jual</button>
         </div>
       `;
@@ -200,114 +313,20 @@ function renderInventory() {
   container.innerHTML = html;
 }
 
-function pilihBibitUntukDitanam(namaBibit) {
-  let item = inventory.find(i => i.nama === namaBibit);
-  if (item) {
-    item.jumlah -= 1;
-    if (item.jumlah <= 0) {
-      inventory = inventory.filter(i => i.nama !== namaBibit);
-    }
-  }
-
-  bibitDipilih = namaBibit.replace('Bibit ', '');
-  jenisTanamanAktif = bibitDipilih;
-  statusLahanGame = 'ditanam';
-
-  openGameTabeksplisit('menanam');
-  document.getElementById('btn-tanam').style.display = 'none';
-  
-  // Tampilkan tombol gunakan pupuk
-  document.getElementById('btn-pupuk').style.display = 'inline-block';
-  updateTombolPupuk();
-
-  let durasiMs = waktuTumbuhBibit[bibitDipilih] || 15000;
-  waktuSelesaiPanen = new Date().getTime() + durasiMs;
-
-  if (timerInterval) clearInterval(timerInterval);
-
-  timerInterval = setInterval(() => {
-    let sekarang = new Date().getTime();
-    let sisaWaktu = waktuSelesaiPanen - sekarang;
-
-    if (sisaWaktu <= 0) {
-      clearInterval(timerInterval);
-      statusLahanGame = 'siap_panen';
-      document.getElementById('status-lahan').innerText = `✨ ${bibitDipilih} sudah siap dipanen!`;
-      document.getElementById('btn-panen').style.display = 'inline-block';
-      document.getElementById('btn-pupuk').style.display = 'none'; // Sembunyikan pupuk
-    } else {
-      let jam = Math.floor((sisaWaktu % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      let menit = Math.floor((sisaWaktu % (1000 * 60 * 60)) / (1000 * 60));
-      let detik = Math.floor((sisaWaktu % (1000 * 60)) / 1000);
-
-      let formatWaktu = `${String(jam).padStart(2, '0')}:${String(menit).padStart(2, '0')}:${String(detik).padStart(2, '0')}`;
-      document.getElementById('status-lahan').innerText = `🌱 ${bibitDipilih} sedang tumbuh...\n⏱️ Sisa Waktu: ${formatWaktu}`;
-    }
-  }, 1000);
-}
-
-function gunakanPupuk() {
-  if (statusLahanGame !== 'ditanam') {
-    showToast('Tidak ada tanaman yang sedang tumbuh!', 'error');
-    return;
-  }
-  if (jumlahPupuk <= 0) {
-    showToast('Kamu tidak memiliki Pupuk Kompos!', 'error');
-    return;
-  }
-
-  jumlahPupuk -= 1;
-  updateTombolPupuk();
-
-  // Memotong waktu panen sebanyak 7 detik (7000 milidetik)
-  waktuSelesaiPanen -= 7000;
-  
-  // Jika karena dipupuk waktunya langsung habis
-  if (waktuSelesaiPanen <= new Date().getTime()) {
-    waktuSelesaiPanen = new Date().getTime(); // Set minimal 0 agar interval langsung menyelesaikannya
-  }
-  
-  showToast('Berhasil dipupuk! Waktu dipercepat 7 Detik.', 'success');
-}
-
-function openGameTabeksplisit(tabName) {
-  document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-  document.querySelectorAll('.nav-tabs .tab-btn').forEach(btn => btn.classList.remove('active'));
-  document.getElementById('tab-' + tabName).classList.add('active');
-  document.querySelectorAll('.nav-tabs .tab-btn')[0].classList.add('active');
-}
-
-function panenTanaman() {
-  if (statusLahanGame !== 'siap_panen') return;
-
-  let hasilPanen = jenisTanamanAktif || 'Semangka';
-  tambahKeInventory(hasilPanen, 1);
-
-  showToast(`Panen berhasil! Mendapatkan 1 ${hasilPanen}.`, 'success');
-
-  statusLahanGame = 'kosong';
-  bibitDipilih = null;
-  jenisTanamanAktif = null;
-  document.getElementById('status-lahan').innerText = 'Lahan Kosong';
-  document.getElementById('btn-panen').style.display = 'none';
-  document.getElementById('btn-pupuk').style.display = 'none';
-}
-
 function jualHasilPanen(namaBuah) {
   let item = inventory.find(i => i.nama === namaBuah);
   if (!item || item.jumlah <= 0) return;
 
-  let hargaSatuan = hargaJualAktif[namaBuah] || 0;
-  let totalPendapatan = hargaSatuan;
-
+  let totalPendapatan = hargaJualAktif[namaBuah] || 0;
   item.jumlah -= 1;
-  if (item.jumlah <= 0) {
-    inventory = inventory.filter(i => i.nama !== namaBuah);
-  }
+  if (item.jumlah <= 0) inventory = inventory.filter(i => i.nama !== namaBuah);
 
   uang += totalPendapatan;
   updateUangDisplay();
 
-  showToast(`Berhasil menjual 1 ${namaBuah} seharga Rp ${formatRupiah(totalPendapatan)}!`, 'success');
+  showToast(`Terjual seharga Rp ${formatRupiah(totalPendapatan)}!`, 'success');
   renderInventory();
 }
+
+// Inisialisasi awal render lahan saat pertama dibuka
+renderLahan();
