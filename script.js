@@ -494,12 +494,21 @@ function panenTanaman(index) {
     let l = lahan[index]; 
     if (l.status !== 'siap_panen') return; 
     
-    let totalBonusPersen = hitungTotalBonusPersen(); 
-    let bonusTambahan = Math.floor(l.jumlahBibit * (totalBonusPersen / 100));
-    let jumlahPanenTotal = l.jumlahBibit + bonusTambahan;
+    // 1. Hitung jumlah dasar + bonus aksesori slot
+    let totalBonusPersenAcc = hitungTotalBonusPersen(); 
+    let jumlahDasarDanAcc = l.jumlahBibit + Math.floor(l.jumlahBibit * (totalBonusPersenAcc / 100));
+
+    // 2. Terapkan efek persentase cuaca aktif terhadap hasil akhir
+    let penyesuaianCuaca = Math.round(jumlahDasarDanAcc * (cuacaAktif.efekPersen / 100));
+    let jumlahPanenTotal = jumlahDasarDanAcc + penyesuaianCuaca;
+
+    // Pastikan hasil panen minimal 1 buah meskipun cuaca sangat buruk (-90%)
+    if (jumlahPanenTotal < 1) jumlahPanenTotal = 1;
 
     tambahKeInventory(l.tanaman, jumlahPanenTotal); 
-    showToast(`Panen ${jumlahPanenTotal} ${l.tanaman} (+${bonusTambahan} bonus)!`, 'success'); 
+    
+    // Notifikasi hasil panen beserta info cuaca
+    showToast(`Panen ${jumlahPanenTotal} ${l.tanaman} (${cuacaAktif.ikon} ${cuacaAktif.nama})!`, 'success'); 
     
     l.status = 'kosong'; 
     l.tanaman = null; 
@@ -773,6 +782,10 @@ function initGame() {
     muatGame(); 
     updateFluktuasiHarga(); 
     setInterval(updateFluktuasiHarga, 60000); 
+
+    // Ganti cuaca otomatis setiap 3 menit (180000 ms)
+    ubahCuacaSecaraAcak();
+    setInterval(ubahCuacaSecaraAcak, 180000);
     
     renderPasar(); 
     renderLahan(); 
@@ -791,7 +804,7 @@ function initGame() {
             }
         }
     });
-} 
+}
 
 // ==========================================
 // SISTEM CUACA DINAMIS
