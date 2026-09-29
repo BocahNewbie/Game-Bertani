@@ -1,5 +1,5 @@
 // ==========================================
-// DATA LOKAL TANAMAN & AKSESORI
+// DATA LOKAL TANAMAN & AKSESORI BERDASARKAN SLOT
 // ==========================================
 let libraryTanaman = [
     {
@@ -47,21 +47,30 @@ const itemSpesial = {
     efekWaktu: 9000 
 }; 
 
-// Daftar Aksesori Penambah Hasil Panen
+// Daftar Aksesori dengan Slot Spesifik & Bonus Persentase (%)
 let listAksesori = [
-    { id: 'sendal', nama: 'Sendal Jepit', icon: '🩴', harga: 15000, bonus: 1 },
-    { id: 'caping', nama: 'Caping Petani', icon: '👒', harga: 50000, bonus: 2 },
-    { id: 'baju', nama: 'Baju Partai', icon: '👕', harga: 1200000, bonus: 5 }
+    { id: 'sendal', nama: 'Sendal Jepit', icon: '🩴', slot: 'telapak', harga: 15000, bonusPersen: 3 },
+    { id: 'caping', nama: 'Caping Petani', icon: '👒', slot: 'kepala', harga: 50000, bonusPersen: 8 },
+    { id: 'boxer', nama: 'Celana Boxer', icon: '🩳', slot: 'kaki', harga: 150000, bonusPersen: 12 },
+    { id: 'baju', nama: 'Baju Partai', icon: '👕', slot: 'badan', harga: 1200000, bonusPersen: 19 }
 ];
 
 let uang = 3500; 
 let inventory = []; 
 let jumlahPupuk = 0; 
-let aksesoriDimiliki = []; // Menyimpan ID aksesori yang sudah dibeli
-let aksesoriAktif = null;  // ID aksesori yang sedang dipakai
+let aksesoriDimiliki = []; // ID aksesori yang dibeli
 
+// Slot Aksesori Aktif (Kepala, Badan, Kaki, Telapak)
+let slotAktif = {
+    kepala: null,
+    badan: null,
+    kaki: null,
+    telapak: null
+};
+
+// Struktur Lahan: Mendukung kapasitas hingga 99 bibit per lahan
 let lahan = [
-    { id: 1, status: 'kosong', tanaman: null, waktuSelesai: 0, timerInterval: null } 
+    { id: 1, status: 'kosong', tanaman: null, jumlahBibit: 0, waktuSelesai: 0, timerInterval: null } 
 ]; 
 let lahanTambahanDibeli = 0; 
 const limitLahanTambahan = 6; 
@@ -105,20 +114,37 @@ function updateUangDisplay() {
     document.getElementById('player-koin').innerText = `Rp ${formatRupiah(uang)}`; 
 } 
 
-function updatePanelAksesoriInfo() {
-    let activeDisplay = document.getElementById('active-accessory-display');
-    let bonusDisplay = document.getElementById('active-bonus-display');
-    
-    if (aksesoriAktif) {
-        let item = listAksesori.find(a => a.id === aksesoriAktif);
-        if (item) {
-            activeDisplay.innerText = `${item.icon} ${item.nama}`;
-            bonusDisplay.innerText = `Bonus: +${item.bonus}`;
-            return;
+function hitungTotalBonusPersen() {
+    let totalPersen = 0;
+    for (let slot in slotAktif) {
+        let accId = slotAktif[slot];
+        if (accId) {
+            let acc = listAksesori.find(a => a.id === accId);
+            if (acc) totalPersen += acc.bonusPersen;
         }
     }
-    activeDisplay.innerText = "Belum ada";
-    bonusDisplay.innerText = "Bonus: +0";
+    return totalPersen;
+}
+
+function updatePanelAksesoriInfo() {
+    let kepalaEl = document.getElementById('slot-kepala-display');
+    let badanEl = document.getElementById('slot-badan-display');
+    let kakiEl = document.getElementById('slot-kaki-display');
+    let telapakEl = document.getElementById('slot-telapak-display');
+    let totalBonusEl = document.getElementById('total-bonus-display');
+
+    let getInfoAcc = (id) => {
+        let a = listAksesori.find(item => item.id === id);
+        return a ? `${a.icon} ${a.nama} (+${a.bonusPersen}%)` : 'Kosong';
+    };
+
+    kepalaEl.innerText = slotAktif.kepala ? getInfoAcc(slotAktif.kepala) : 'Kosong';
+    badanEl.innerText = slotAktif.badan ? getInfoAcc(slotAktif.badan) : 'Kosong';
+    kakiEl.innerText = slotAktif.kaki ? getInfoAcc(slotAktif.kaki) : 'Kosong';
+    telapakEl.innerText = slotAktif.telapak ? getInfoAcc(slotAktif.telapak) : 'Kosong';
+
+    let total = hitungTotalBonusPersen();
+    totalBonusEl.innerText = `+${total}%`;
 }
 
 let toastTimeout = null; 
@@ -167,7 +193,6 @@ function renderPasar() {
     const container = document.getElementById('pasar-container'); 
     let html = ''; 
     
-    // Render Bibit Tanaman
     libraryTanaman.forEach(tanaman => {
         let hargaToko = hargaBeliAktif[tanaman.namaBibit] || tanaman.BasehargaBeli; 
         html += ` 
@@ -181,7 +206,6 @@ function renderPasar() {
         `; 
     }); 
     
-    // Render Pupuk Spesial
     html += ` 
         <div class="card-item"> 
             <div> 
@@ -192,11 +216,11 @@ function renderPasar() {
         </div> 
     `; 
 
-    // Render Toko Aksesori
+    // Render Toko Aksesori Berdasarkan Slot
     html += `<h4 style="margin: 15px 0 8px 0; color: #1e293b; font-size: 14px;">🎩 Toko Aksesori Petani</h4>`;
     listAksesori.forEach(acc => {
         let sudahDimiliki = aksesoriDimiliki.includes(acc.id);
-        let sedangDipakai = aksesoriAktif === acc.id;
+        let sedangDipakai = slotAktif[acc.slot] === acc.id;
         
         let actionBtn = '';
         if (sedangDipakai) {
@@ -211,7 +235,7 @@ function renderPasar() {
             <div class="card-item">
                 <div>
                     <strong>${acc.icon} ${acc.nama}</strong><br>
-                    <small style="color: #64748b;">Bonus Hasil: +${acc.bonus} | Harga: Rp ${formatRupiah(acc.harga)}</small>
+                    <small style="color: #64748b;">Slot: [${acc.slot.toUpperCase()}] | Bonus: +${acc.bonusPersen}% | Harga: Rp ${formatRupiah(acc.harga)}</small>
                 </div>
                 ${actionBtn}
             </div>
@@ -238,7 +262,10 @@ function beliAksesori(id, harga) {
     }
     uang -= harga;
     aksesoriDimiliki.push(id);
-    aksesoriAktif = id; // Otomatis pakai setelah dibeli
+    
+    let acc = listAksesori.find(a => a.id === id);
+    if (acc) slotAktif[acc.slot] = id; // Otomatis pasang ke slotnya
+
     updateUangDisplay();
     updatePanelAksesoriInfo();
     simpanGame();
@@ -247,11 +274,14 @@ function beliAksesori(id, harga) {
 }
 
 function pakaiAksesori(id) {
-    aksesoriAktif = id;
-    updatePanelAksesoriInfo();
-    simpanGame();
-    renderPasar();
-    showToast("Aksesori berhasil dipasang!", "success");
+    let acc = listAksesori.find(a => a.id === id);
+    if (acc) {
+        slotAktif[acc.slot] = id;
+        updatePanelAksesoriInfo();
+        simpanGame();
+        renderPasar();
+        showToast(`Aksesori ${acc.nama} dipasang ke slot ${acc.slot}!`, "success");
+    }
 }
 
 function renderLahan() {
@@ -262,14 +292,21 @@ function renderLahan() {
         let dataTanaman = libraryTanaman.find(t => t.nama === l.tanaman); 
         let iconTampil = dataTanaman ? dataTanaman.iconBuah : '🌱'; 
         
+        let statusTeks = 'Lahan Kosong';
+        if (l.status === 'ditanam') {
+            statusTeks = `🌱 ${l.tanaman} (${l.jumlahBibit}/99)`;
+        } else if (l.status === 'siap_panen') {
+            statusTeks = `✨ ${iconTampil}${l.tanaman} (${l.jumlahBibit} Siap Panen)`;
+        }
+
         html += ` 
             <div class="farm-land"> 
                 <p id="status-lahan-${index}" style="font-size: 13px; font-weight: bold; margin-bottom: 8px; color: #1e293b;"> 
-                    ${l.status === 'kosong' ? 'Lahan Kosong' : l.status === 'siap_panen' ? `✨ ${iconTampil}${l.tanaman}` : `🌱 ${l.tanaman}`} 
+                    ${statusTeks} 
                 </p> 
                 <small id="waktu-lahan-${index}" style="display: ${l.status === 'ditanam' ? 'block' : 'none'}; font-size: 11px; margin-bottom: 8px; color: #3b82f6; font-weight: bold;"></small> 
-                ${l.status === 'kosong' ? `<button class="btn-submit" style="padding: 6px; font-size: 11px;" onclick="openGameTabeksplisit('inventory'); renderInventory();">Tanam Bibit</button>` : ''} 
-                ${l.status === 'ditanam' ? `<button class="btn-submit" style="padding: 6px; font-size: 11px; background-color: #475569;" onclick="gunakanPupuk(${index})">Pupuk (${jumlahPupuk})</button>` : ''} 
+                ${l.status === 'kosong' ? `<button class="btn-submit" style="padding: 6px; font-size: 11px;" onclick="bukaModalTanam(${index})">Tanam Bibit</button>` : ''} 
+                ${l.status === 'ditanam' ? `<div style="display:flex; gap:4px;"><button class="btn-submit" style="padding: 6px; font-size: 10px; flex:1;" onclick="bukaModalTambahBibit(${index})">+ Bibit</button><button class="btn-submit" style="padding: 6px; font-size: 10px; flex:1; background-color: #475569;" onclick="gunakanPupuk(${index})">Pupuk</button></div>` : ''} 
                 ${l.status === 'siap_panen' ? `<button class="btn-submit" style="padding: 6px; font-size: 11px; background-color: #d97706;" onclick="panenTanaman(${index})">Panen</button>` : ''} 
             </div> 
         `; 
@@ -277,6 +314,75 @@ function renderLahan() {
     
     container.innerHTML = html; 
 } 
+
+// Fungsi khusus untuk memilih dan menanam bibit hingga maksimal 99 dalam 1 lahan
+function bukaModalTanam(indexLahan) {
+    // Cari bibit apa saja yang ada di inventory
+    let bibitDiInv = inventory.filter(i => i.nama.includes('Bibit'));
+    if (bibitDiInv.length === 0) {
+        showToast('Kamu tidak punya bibit di inventory!', 'error');
+        openGameTabeksplisit('pasar');
+        return;
+    }
+    
+    // Untuk sederhana, ambil bibit pertama yang tersedia atau buat pilihan
+    let bibitDipilih = bibitDiInv[0].nama;
+    tanamBibitKeLahan(indexLahan, bibitDipilih, 1);
+}
+
+function tanamBibitKeLahan(indexLahan, namaBibit, jumlahAwal) {
+    let item = inventory.find(i => i.nama === namaBibit);
+    if (!item || item.jumlah < jumlahAwal) {
+        showToast('Jumlah bibit tidak cukup!', 'error');
+        return;
+    }
+
+    item.jumlah -= jumlahAwal;
+    if (item.jumlah <= 0) inventory = inventory.filter(i => i.nama !== namaBibit);
+
+    let dataBibit = libraryTanaman.find(t => t.namaBibit === namaBibit);
+    let bibitNamaBersih = dataBibit ? dataBibit.nama : namaBibit.replace('Bibit ', '');
+    let durasiMs = dataBibit ? dataBibit.waktuTumbuh : 15000;
+
+    let targetLahan = lahan[indexLahan];
+    targetLahan.status = 'ditanam';
+    targetLahan.tanaman = bibitNamaBersih;
+    targetLahan.jumlahBibit = jumlahAwal;
+    targetLahan.waktuSelesai = new Date().getTime() + durasiMs;
+
+    simpanGame();
+    openGameTabeksplisit('menanam');
+    renderLahan();
+    mulaiTimerLahan(indexLahan);
+    showToast(`Berhasil menanam ${jumlahAwal} ${bibitNamaBersih}!`, 'success');
+}
+
+function bukaModalTambahBibit(indexLahan) {
+    let l = lahan[indexLahan];
+    if (l.status !== 'ditanam') return;
+
+    let sisaKapasitas = 99 - l.jumlahBibit;
+    if (sisaKapasitas <= 0) {
+        showToast('Lahan sudah penuh (maksimal 99 bibit)!', 'error');
+        return;
+    }
+
+    let namaBibitLengkap = `Bibit ${l.tanaman}`;
+    let item = inventory.find(i => i.nama === namaBibitLengkap);
+    if (!item || item.jumlah <= 0) {
+        showToast(`Kamu tidak punya stok ${namaBibitLengkap} di inventory!`, 'error');
+        return;
+    }
+
+    let jumlahTambah = Math.min(sisaKapasitas, item.jumlah, 10); // Tambah sekaligus maksimal 10 atau sisa kapasitas
+    item.jumlah -= jumlahTambah;
+    if (item.jumlah <= 0) inventory = inventory.filter(i => i.nama !== namaBibitLengkap);
+
+    l.jumlahBibit += jumlahTambah;
+    simpanGame();
+    renderLahan();
+    showToast(`Menambahkan ${jumlahTambah} bibit ke lahan ini!`, 'success');
+}
 
 function beliLahan() {
     if (lahanTambahanDibeli >= limitLahanTambahan) {
@@ -295,6 +401,7 @@ function beliLahan() {
         id: lahan.length + 1, 
         status: 'kosong', 
         tanaman: null, 
+        jumlahBibit: 0,
         waktuSelesai: 0, 
         timerInterval: null 
     }); 
@@ -312,29 +419,10 @@ function beliLahan() {
 function pilihBibitUntukDitanam(namaBibit) {
     let emptyIndex = lahan.findIndex(l => l.status === 'kosong'); 
     if (emptyIndex === -1) {
-        showToast('Semua lahan sedang terisi!', 'error'); 
+        showToast('Semua lahan sedang terisi! Gunakan tombol + Bibit pada lahan aktif.', 'error'); 
         return; 
     } 
-    
-    let item = inventory.find(i => i.nama === namaBibit); 
-    if (item) {
-        item.jumlah -= 1; 
-        if (item.jumlah <= 0) inventory = inventory.filter(i => i.nama !== namaBibit); 
-    } 
-    
-    let dataBibit = libraryTanaman.find(t => t.namaBibit === namaBibit); 
-    let bibitDipilih = dataBibit ? dataBibit.nama : namaBibit.replace('Bibit ', ''); 
-    let durasiMs = dataBibit ? dataBibit.waktuTumbuh : 15000; 
-    
-    let targetLahan = lahan[emptyIndex]; 
-    targetLahan.status = 'ditanam'; 
-    targetLahan.tanaman = bibitDipilih; 
-    targetLahan.waktuSelesai = new Date().getTime() + durasiMs; 
-    
-    simpanGame();
-    openGameTabeksplisit('menanam'); 
-    renderLahan(); 
-    mulaiTimerLahan(emptyIndex); 
+    tanamBibitKeLahan(emptyIndex, namaBibit, 1);
 } 
 
 function mulaiTimerLahan(index) {
@@ -381,25 +469,22 @@ function gunakanPupuk(index) {
     showToast(`Dipercepat ${itemSpesial.efekWaktu / 1000} Detik!`, 'success'); 
 } 
 
-// --- BAGIAN UTAMA PENAMBAHAN HASIL PANEN BERDASARKAN AKSESORI ---
+// --- PERHITUNGAN PANEN DENGAN BONUS PERSENTASE AKSESORI ---
 function panenTanaman(index) {
     let l = lahan[index]; 
     if (l.status !== 'siap_panen') return; 
     
-    // Hitung jumlah hasil panen dasar (1) ditambah bonus aksesori yang aktif
-    let jumlahPanen = 1;
-    if (aksesoriAktif) {
-        let acc = listAksesori.find(a => a.id === aksesoriAktif);
-        if (acc) {
-            jumlahPanen += acc.bonus;
-        }
-    }
-    
-    tambahKeInventory(l.tanaman, jumlahPanen); 
-    showToast(`Panen ${jumlahPanen} ${l.tanaman}!`, 'success'); 
+    // Perhitungan: Jumlah bibit awal dikali dengan total bonus persentase aksesori
+    let totalBonusPersen = hitungTotalBonusPersen(); // Contoh: 19 + 8 = 27%
+    let bonusTambahan = Math.floor(l.jumlahBibit * (totalBonusPersen / 100));
+    let jumlahPanenTotal = l.jumlahBibit + bonusTambahan;
+
+    tambahKeInventory(l.tanaman, jumlahPanenTotal); 
+    showToast(`Panen ${jumlahPanenUrl || jumlahPanenTotal} ${l.tanaman} (+${bonusBonusTeks = bonusTambahan} bonus)!`, 'success'); 
     
     l.status = 'kosong'; 
     l.tanaman = null; 
+    l.jumlahBibit = 0;
     l.waktuSelesai = 0; 
     
     if (l.timerInterval) clearInterval(l.timerInterval); 
@@ -412,7 +497,6 @@ function bukaModalTransaksi(tipe, namaBarang, harga, stokMaksimal = 0) {
     currentTransactionItem = namaBarang; 
     currentTransactionPrice = harga; 
     
-    // Sembunyikan kontrol qty jika item spesial (pupuk kompos dibeli satuan atau bisa banyak? Biarkan pakai qty tapi atur maksimalnya)
     document.getElementById('modal-qty-container').style.display = 'flex';
 
     if (tipe === 'beli') {
@@ -524,12 +608,7 @@ function renderInventory() {
         
         if (item.nama.includes('Bibit')) {
             icon = dataTanaman ? dataTanaman.iconBibit : '🌱'; 
-            let hasEmptyLand = lahan.some(l => l.status === 'kosong'); 
-            if (hasEmptyLand) {
-                actionButton = `<button class="btn-submit" style="padding: 6px 10px; font-size: 12px;" onclick="pilihBibitUntukDitanam('${item.nama}')">Tanam</button>`; 
-            } else {
-                actionButton = `<small style="color:#ef4444; font-size: 10px; font-weight: 600;">Lahan Penuh</small>`; 
-            } 
+            actionButton = `<button class="btn-submit" style="padding: 6px 10px; font-size: 12px;" onclick="pilihBibitUntukDitanam('${item.nama}')">Tanam</button>`; 
         } else {
             icon = dataTanaman ? dataTanaman.iconBuah : '📦'; 
             let hargaJualSatuan = hargaJualAktif[item.nama] || 0; 
@@ -591,11 +670,12 @@ function simpanGame() {
         inventory: inventory,
         jumlahPupuk: jumlahPupuk,
         aksesoriDimiliki: aksesoriDimiliki,
-        aksesoriAktif: aksesoriAktif,
+        slotAktif: slotAktif,
         lahan: lahan.map(l => ({
             id: l.id,
             status: l.status,
             tanaman: l.tanaman,
+            jumlahBibit: l.jumlahBibit || 1,
             waktuSelesai: l.waktuSelesai
         })),
         lahanTambahanDibeli: lahanTambahanDibeli,
@@ -615,7 +695,7 @@ function muatGame() {
             inventory = data.inventory || [];
             jumlahPupuk = data.jumlahPupuk || 0;
             aksesoriDimiliki = data.aksesoriDimiliki || [];
-            aksesoriAktif = data.aksesoriAktif || null;
+            slotAktif = data.slotAktif || { kepala: null, badan: null, kaki: null, telapak: null };
             lahanTambahanDibeli = data.lahanTambahanDibeli || 0;
             hargaTambahLahan = data.hargaTambahLahan || 5000;
             
@@ -624,6 +704,7 @@ function muatGame() {
                     id: l.id,
                     status: l.status,
                     tanaman: l.tanaman,
+                    jumlahBibit: l.jumlahBibit || 1,
                     waktuSelesai: l.waktuSelesai,
                     timerInterval: null
                 }));
@@ -634,9 +715,6 @@ function muatGame() {
     }
 }
 
-// ==========================================
-// FITUR MODAL RESET GAME
-// ==========================================
 function resetGame() {
     document.getElementById('reset-modal').style.display = 'flex';
 }
