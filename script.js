@@ -31,31 +31,25 @@ let hargaJualAktif = {}; // Harga jual dinamis berdasar persentase sheet
 
 // Sistem Fluktuasi Harga Pasar (Per 1 Menit)
 function updateFluktuasiHarga() {
-  libraryTanaman.forEach(tanaman => {
-    let baseBeli = tanaman.baseHargaBeli;
-    
-    // 1. Hitung Harga Beli Fluktuatif (Turun 1%-7% atau Naik 7%-10% dari Base)
-    let isTurun = Math.random() < 0.5;
-    let variasiBeli = isTurun ? 
-      (Math.floor(Math.random() * 7) + 1) / 100 :   
-      (Math.floor(Math.random() * 4) + 7) / 100;   
-      
-    let hargaBeliBaru = isTurun ? baseBeli * (1 - variasiBeli) : baseBeli * (1 + variasiBeli);
-    hargaBeliAktif[tanaman.namaBibit] = Math.round(hargaBeliBaru);
+    libraryTanaman.forEach(tanaman => {
+        let baseBeli = Number(tanaman.BasehargaBeli) || 0;
+        let baseJual = Number(tanaman.BasehargaJual) || 0;
 
-    // 2. Hitung Harga Jual Berdasarkan Persentase dari Spreadsheet
-    let rangeParts = tanaman.persenJual.split('-');
-    let minPersen = parseFloat(rangeParts[0]) || 0.20;
-    let maxPersen = parseFloat(rangeParts[1]) || 1.25;
-    
-    let randomPersenJual = minPersen + Math.random() * (maxPersen - minPersen);
-    hargaJualAktif[tanaman.nama] = Math.round(baseBeli * randomPersenJual);
-  });
+        // 1. Harga Beli Pasar: Turun maksimal 6% (-0.06) atau Naik maksimal 10% (+0.10)
+        let variasiBeli = (Math.random() * 0.16) - 0.06; 
+        let hargaBeliBaru = baseBeli * (1 + variasiBeli);
+        hargaBeliAktif[tanaman.namaBibit] = Math.round(hargaBeliBaru);
 
-  // 👇 TAMBAHKAN BARIS INI AGAR PASAR LANGSUNG BERUBAH REAL-TIME SAAT DIBUKA
-  if (document.getElementById('tab-pasar').classList.contains('active')) {
-    renderPasar();
-  }
+        // 2. Harga Jual Pasar: Turun maksimal 35% (-0.35) atau Naik maksimal 68% (+0.68)
+        let variasiJual = (Math.random() * 1.03) - 0.35; 
+        let hargaJualBaru = baseJual * (1 + variasiJual);
+        hargaJualAktif[tanaman.nama] = Math.round(hargaJualBaru);
+    });
+
+    // Agar pasar langsung berubah real-time saat tab pasar sedang dibuka
+    if (document.getElementById('tab-pasar').classList.contains('active')) {
+        renderPasar();
+    }
 }
 
 function formatRupiah(angka) {
@@ -445,5 +439,8 @@ async function initGame() {
     pasarContainer.innerHTML = '<p style="color:red; text-align:center;">Gagal memuat data dari Spreadsheet. Pastikan URL benar & sudah dideploy untuk "Siapa saja".</p>';
   }
 }
+
+// Jalankan setiap 60 detik
+setInterval(updateFluktuasiHarga, 60000);
 
 initGame();
