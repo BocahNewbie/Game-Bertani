@@ -4,31 +4,32 @@ let bibitDipilih = null;
 let statusLahanGame = 'kosong'; 
 let jenisTanamanAktif = null;
 
+// Variabel untuk data pop-up pembelian aktif
+let selectedItemToBuy = {
+  nama: '',
+  hargaSatuan: 0
+};
+
 // Harga dasar bibit referensi
 const hargaDasarBibit = {
   'Semangka': 800,
   'Melon': 500
 };
 
-// Menyimpan harga jual fluktuatif saat ini per jam
 let hargaJualAktif = {
   'Semangka': 0,
   'Melon': 0
 };
 
-// Fungsi menghitung harga jual = Harga Bibit + (20% - 90% kenaikan dari harga bibit)
 function updateFluktuasiHarga() {
   for (let buah in hargaDasarBibit) {
     let base = hargaDasarBibit[buah];
-    let persentaseKenaikan = (Math.floor(Math.random() * 71) + 20) / 100; // Random 0.20 sampai 0.90 (20% - 90%)
+    let persentaseKenaikan = (Math.floor(Math.random() * 71) + 20) / 100; // 20% - 90%
     let tambahanHarga = base * persentaseKenaikan;
-    
-    // Harga jual adalah modal bibit ditambah persentase kenaikannya
     hargaJualAktif[buah] = Math.round(base + tambahanHarga);
   }
 }
 
-// Inisialisasi awal dan perbarui setiap 1 jam (3600000 ms)
 updateFluktuasiHarga();
 setInterval(updateFluktuasiHarga, 3600000);
 
@@ -52,15 +53,56 @@ function openGameTab(tabName) {
   }
 }
 
-function beliBibit(namaBibit, harga) {
-  if (uang >= harga) {
-    uang -= harga;
+// Fungsi Modal Pembelian
+function bukaModalBeli(namaBibit, harga) {
+  selectedItemToBuy = { nama: namaBibit, hargaSatuan: harga };
+  
+  document.getElementById('modal-title').innerText = `Beli ${namaBibit}`;
+  document.getElementById('modal-price').innerText = `Harga Satuan: Rp ${formatRupiah(harga)}`;
+  document.getElementById('modal-qty').value = 1;
+  document.getElementById('modal-qty').max = 99;
+  
+  hitungTotalModal();
+  document.getElementById('buy-modal').style.display = 'flex';
+}
+
+function tutupModalBeli() {
+  document.getElementById('buy-modal').style.display = 'none';
+}
+
+function hitungTotalModal() {
+  let qtyInput = document.getElementById('modal-qty');
+  let qty = parseInt(qtyInput.value) || 1;
+
+  // Batasi jumlah minimal 1 dan maksimal 99
+  if (qty > 99) {
+    qty = 99;
+    qtyInput.value = 99;
+  } else if (qty < 1 && qtyInput.value !== "") {
+    qty = 1;
+    qtyInput.value = 1;
+  }
+
+  let total = qty * selectedItemToBuy.hargaSatuan;
+  document.getElementById('modal-total-price').innerText = `Rp ${formatRupiah(total)}`;
+}
+
+function konfirmasiBeli() {
+  let qty = parseInt(document.getElementById('modal-qty').value) || 1;
+  if (qty > 99) qty = 99;
+  if (qty < 1) qty = 1;
+
+  let totalHarga = qty * selectedItemToBuy.hargaSatuan;
+
+  if (uang >= totalHarga) {
+    uang -= totalHarga;
     updateUangDisplay();
 
-    tambahKeInventory(namaBibit, 1);
-    alert(`Berhasil membeli ${namaBibit}! Item telah dimasukkan ke Inventory.`);
+    tambahKeInventory(selectedItemToBuy.nama, qty);
+    alert(`Berhasil membeli ${qty} ${selectedItemToBuy.nama}!`);
+    tutupModalBeli();
   } else {
-    alert('Uang kamu tidak cukup!');
+    alert('Uang kamu tidak cukup untuk pembelian ini!');
   }
 }
 
@@ -94,7 +136,7 @@ function renderInventory() {
       if (item.nama.includes('Semangka')) icon = '🍉';
       if (item.nama.includes('Melon')) icon = '🍈';
 
-      let hargaJualSatuan = hargaJualAktif[item.nama] || 0;
+      let hargaJualSatuan = hargaJualAktif[item.nama.replace('Buah ', '')] || 0;
       actionButton = `
         <div style="text-align: right;">
           <small style="display: block; color: #555; font-size: 10px;">Harga Jual: Rp ${formatRupiah(hargaJualSatuan)}</small>
