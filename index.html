@@ -3,98 +3,51 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Game Bertani</title>
+  <title>Game Bertani Tanpa Login</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
   <div class="container">
-    <!-- AUTH SECTION (Awal) -->
-    <div id="auth-section">
-      <div class="nav-tabs">
-        <button class="tab-btn active" onclick="openAuthTab('login')">Login</button>
-        <button class="tab-btn" onclick="openAuthTab('daftar')">Daftar</button>
+    <div class="game-header">
+      <div class="player-info">
+        <h3>👨‍🌾 Petani</h3>
       </div>
+      <div class="gold-display">💰 <span id="player-koin">100</span> Koin</div>
+    </div>
 
-      <div id="auth-alert" class="alert"></div>
+    <div class="nav-tabs">
+      <button class="tab-btn active" onclick="openGameTab('menanam')">Menanam</button>
+      <button class="tab-btn" onclick="openGameTab('pasar')">Pasar</button>
+    </div>
 
-      <!-- TAB LOGIN -->
-      <div id="tab-login" class="tab-content active">
-        <form id="form-login" onsubmit="handleLogin(event)">
-          <div class="form-group">
-            <label for="login-nickname">Nickname</label>
-            <input type="text" id="login-nickname" required>
-          </div>
-          <div class="form-group">
-            <label for="login-password">Password</label>
-            <input type="password" id="login-password" required>
-          </div>
-          <button type="submit" class="btn-submit">Masuk</button>
-        </form>
-      </div>
-
-      <!-- TAB DAFTAR -->
-      <div id="tab-daftar" class="tab-content">
-        <form id="form-daftar" onsubmit="handleRegister(event)">
-          <div class="form-group">
-            <label for="reg-nickname">Nickname</label>
-            <input type="text" id="reg-nickname" required>
-          </div>
-          <div class="form-group">
-            <label for="reg-password">Password</label>
-            <input type="password" id="reg-password" required>
-          </div>
-          <div class="form-group">
-            <label for="reg-confirm-password">Konfirmasi Password</label>
-            <input type="password" id="reg-confirm-password" required>
-          </div>
-          <button type="submit" class="btn-submit">Daftar Akun</button>
-        </form>
+    <!-- TAB MENANAM -->
+    <div id="tab-menanam" class="tab-content active">
+      <h4>Lahan Pertanian Saya</h4>
+      <div class="farm-land" id="lahan-1">
+        <p id="status-lahan">Lahan Kosong</p>
+        <button id="btn-tanam" class="btn-submit" style="width: auto; margin-top: 10px; display: none;" onclick="tanamTanaman()">Tanam Bibit</button>
       </div>
     </div>
 
-    <!-- GAME DASHBOARD SECTION (Setelah Login) -->
-    <div id="game-section" style="display: none;">
-      <div class="game-header">
-        <div class="player-info">
-          <h3 id="player-name">Petani</h3>
+    <!-- TAB PASAR -->
+    <div id="tab-pasar" class="tab-content">
+      <h4>Toko Bibit</h4>
+      <br>
+      <div class="card-item">
+        <div>
+          <strong>🍉 Semangka</strong><br>
+          <small>Harga: 40 Koin | Waktu: 24 Jam</small>
         </div>
-        <div class="gold-display">💰 <span id="player-koin">100</span> Koin</div>
+        <button class="btn-buy" onclick="beliBibit('Semangka', 40)">Beli</button>
       </div>
 
-      <div class="nav-tabs">
-        <button class="tab-btn active" onclick="openGameTab('menanam')">Menanam</button>
-        <button class="tab-btn" onclick="openGameTab('pasar')">Pasar</button>
-      </div>
-
-      <!-- TAB MENANAM -->
-      <div id="tab-menanam" class="tab-content active">
-        <h4>Lahan Pertanian Saya</h4>
-        <div class="farm-land" id="lahan-1">
-          <p id="status-lahan">Lahan Kosong</p>
-          <button id="btn-tanam" class="btn-submit" style="width: auto; margin-top: 10px; display: none;" onclick="tanamTanaman()">Tanam Bibit</button>
+      <div class="card-item">
+        <div>
+          <strong>🍈 Melon</strong><br>
+          <small>Harga: 30 Koin | Waktu: 18 Jam</small>
         </div>
-      </div>
-
-      <!-- TAB PASAR -->
-      <div id="tab-pasar" class="tab-content">
-        <h4>Toko Bibit</h4>
-        <br>
-        <div class="card-item">
-          <div>
-            <strong>🍉 Semangka</strong><br>
-            <small>Harga: 40 Koin | Waktu: 24 Jam</small>
-          </div>
-          <button class="btn-buy" onclick="beliBibit('Semangka', 40)">Beli</button>
-        </div>
-
-        <div class="card-item">
-          <div>
-            <strong>🍈 Melon</strong><br>
-            <small>Harga: 30 Koin | Waktu: 18 Jam</small>
-          </div>
-          <button class="btn-buy" onclick="beliBibit('Melon', 30)">Beli</button>
-        </div>
+        <button class="btn-buy" onclick="beliBibit('Melon', 30)">Beli</button>
       </div>
     </div>
   </div>
