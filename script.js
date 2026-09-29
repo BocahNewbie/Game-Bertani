@@ -8,7 +8,7 @@ const itemSpesial = {
   nama: 'Pupuk Kompos',
   icon: '💩',
   hargaBeli: 200,
-  efekWaktu: 7000
+  efekWaktu: 10000
 };
 
 let uang = 2500;
