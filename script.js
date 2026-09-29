@@ -1,17 +1,15 @@
-// GANTI DENGAN URL WEB APP GOOGLE APPS SCRIPT ANDA
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyeeHoT6xVhf-UgLwL0JHd-dIIbrn7XkID6Mix4ELEVUsHxSXLqM14pjbcb88IKVmYi/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyjvp3Jeid05iXhtI-BYFOhfZey-BQr18bdspGmc9KMsfsBXL-2cwnYMTBc1u4YRvbp/exec';
 
-// Library Kosong (Akan ditarik otomatis dari Spreadsheet)
 let libraryTanaman = [];
 
 const itemSpesial = {
   nama: 'Pupuk Kompos',
   icon: '💩',
-  hargaBeli: 200,
+  hargaBeli: 100,
   efekWaktu: 10000
 };
 
-let uang = 2500;
+let uang = 3500;
 let inventory = [];
 let jumlahPupuk = 0;
 
@@ -28,15 +26,36 @@ let currentTransactionPrice = 0;
 let currentQty = 1;
 let maxQtyAllowed = 99;
 
-let hargaJualAktif = {};
+let hargaBeliAktif = {}; // Harga beli dinamis di pasar
+let hargaJualAktif = {}; // Harga jual dinamis berdasar persentase sheet
 
-// Sistem Harga Pasar Berdasarkan Spreadsheet
+// Sistem Fluktuasi Harga Pasar (Per 1 Menit)
 function updateFluktuasiHarga() {
   libraryTanaman.forEach(tanaman => {
-    let base = tanaman.hargaBeli;
-    let persentaseKenaikan = (Math.floor(Math.random() * 71) + 20) / 100;
-    hargaJualAktif[tanaman.nama] = Math.round(base + (base * persentaseKenaikan));
+    let baseBeli = tanaman.baseHargaBeli;
+    
+    // 1. Hitung Harga Beli Fluktuatif (Turun 1%-7% atau Naik 7%-10% dari Base)
+    let isTurun = Math.random() < 0.5;
+    let variasiBeli = isTurun ? 
+      (Math.floor(Math.random() * 7) + 1) / 100 :   // Turun 0.01 - 0.07 (1% - 7%)
+      (Math.floor(Math.random() * 4) + 7) / 100;   // Naik 0.07 - 0.10 (7% - 10%)
+      
+    let hargaBeliBaru = isTurun ? baseBeli * (1 - variasiBeli) : baseBeli * (1 + variasiBeli);
+    hargaBeliAktif[tanaman.namaBibit] = Math.round(hargaBeliBaru);
+
+    // 2. Hitung Harga Jual Berdasarkan Persentase dari Spreadsheet (Contoh: "0.2-1.25")
+    let rangeParts = tanaman.persenJual.split('-');
+    let minPersen = parseFloat(rangeParts[0]) || 0.20;
+    let maxPersen = parseFloat(rangeParts[1]) || 1.25;
+    
+    let randomPersenJual = minPersen + Math.random() * (maxPersen - minPersen);
+    hargaJualAktif[tanaman.nama] = Math.round(baseBeli * randomPersenJual);
   });
+
+  // Render ulang pasar jika sedang dibuka agar harganya langsung berubah realtime
+  if (document.getElementById('tab-pasar').classList.contains('active')) {
+    renderPasar();
+  }
 }
 
 function formatRupiah(angka) {
@@ -81,19 +100,20 @@ function openGameTabeksplisit(tabName) {
   document.querySelectorAll('.nav-tabs .tab-btn')[0].classList.add('active');
 }
 
-// Render Toko Pasar Otomatis dari Spreadsheet
+// Render Toko Pasar Menggunakan Harga Aktif
 function renderPasar() {
   const container = document.getElementById('pasar-container');
   let html = '';
 
   libraryTanaman.forEach(tanaman => {
+    let hargaToko = hargaBeliAktif[tanaman.namaBibit] || tanaman.baseHargaBeli;
     html += `
       <div class="card-item">
         <div>
           <strong>${tanaman.iconBibit} ${tanaman.namaBibit}</strong><br>
-          <small>Harga: Rp ${formatRupiah(tanaman.hargaBeli)} | Waktu: ${tanaman.waktuTumbuh / 1000} Detik</small>
+          <small>Harga: Rp ${formatRupiah(hargaToko)} | Waktu: ${tanaman.waktuTumbuh / 1000} Detik</small>
         </div>
-        <button class="btn-buy" onclick="bukaModalTransaksi('beli', '${tanaman.namaBibit}', ${tanaman.hargaBeli})">Beli</button>
+        <button class="btn-buy" onclick="bukaModalTransaksi('beli', '${tanaman.namaBibit}', ${hargaToko})">Beli</button>
       </div>
     `;
   });
@@ -111,7 +131,6 @@ function renderPasar() {
   container.innerHTML = html;
 }
 
-// Render Lahan
 function renderLahan() {
   const container = document.getElementById('lahan-container');
   let html = '';
@@ -254,7 +273,7 @@ function panenTanaman(index) {
   renderLahan();
 }
 
-// Modal Transaksi Pembelian/Penjualan
+// Modal Transaksi
 function bukaModalTransaksi(tipe, namaBarang, harga, stokMaksimal = 0) {
   currentTransactionType = tipe;
   currentTransactionItem = namaBarang;
@@ -403,7 +422,7 @@ function renderInventory() {
   container.innerHTML = html;
 }
 
-// Inisialisasi Game (Mengambil data dari Spreadsheet API)
+// Inisialisasi Game
 async function initGame() {
   const pasarContainer = document.getElementById('pasar-container');
   pasarContainer.innerHTML = '<p style="text-align:center; padding: 20px;">🔄 Memuat data dari Spreadsheet...</p>';
@@ -413,7 +432,7 @@ async function initGame() {
     libraryTanaman = await response.json();
     
     updateFluktuasiHarga();
-    setInterval(updateFluktuasiHarga, 60000); // Update harga pasar per 1 menit
+    setInterval(updateFluktuasiHarga, 60000); // Update harga pasar (beli & jual) tiap 1 menit
     
     renderPasar();
     renderLahan();
@@ -422,5 +441,4 @@ async function initGame() {
   }
 }
 
-// Jalankan inisialisasi saat game dibuka
 initGame();
