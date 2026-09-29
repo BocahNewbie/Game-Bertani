@@ -47,12 +47,16 @@ const itemSpesial = {
     efekWaktu: 9000 
 }; 
 
-// Daftar Aksesori dengan Slot Spesifik & Bonus Persentase (%)
+// Daftar Aksesori dengan Slot Spesifik, Bonus Persen, & Efek Cuaca Unik
 let listAksesori = [
     { id: 'sendal', nama: 'Sendal Jepit', icon: '🩴', slot: 'telapak', harga: 15000, bonusPersen: 3 },
+    { id: 'boots', nama: 'Sepatu Boots', icon: '🥾', slot: 'telapak', harga: 45000, bonusPersen: 2, tangkalAngin: 35 }, // Menghilangkan 35% efek angin kencang
     { id: 'caping', nama: 'Caping Petani', icon: '👒', slot: 'kepala', harga: 50000, bonusPersen: 8 },
+    { id: 'helmet', nama: 'Helm Full Face', icon: '🪖', slot: 'kepala', harga: 250000, bonusPersen: 0, bonusBadaiPetir: 150 }, // +150% saat badai petir berat
     { id: 'boxer', nama: 'Celana Boxer', icon: '🩳', slot: 'kaki', harga: 150000, bonusPersen: 12 },
-    { id: 'baju', nama: 'Baju Partai', icon: '👕', slot: 'badan', harga: 1200000, bonusPersen: 19 }
+    { id: 'joger', nama: 'Celana Joger', icon: '👖', slot: 'kaki', harga: 300000, bonusPersen: 5, sinergiJas: 100 }, // +100% jika dipadukan dengan jas anti badai
+    { id: 'baju', nama: 'Baju Partai', icon: '👕', slot: 'badan', harga: 1200000, bonusPersen: 19 },
+    { id: 'jas', nama: 'Jas Anti Badai', icon: '🧥', slot: 'badan', harga: 500000, bonusPersen: 4, tangkalBadai: 50 } // Menghilangkan 50% efek badai
 ];
 
 // ==========================================
@@ -521,18 +525,57 @@ function gunakanPupukMassal() {
     showToast(`Pupuk Massal digunakan! Semua lahan dipercepat ${itemSpesial.efekWaktu / 1000} Detik!`, 'success');
 } 
 
-// --- PANEN DENGAN PENGARUH AKSESORI DAN CUACA DINAMIS ---
+// --- PANEN DENGAN PERHITUNGAN EFEK CUACA, PENANGKAL, & SINERGI AKSESORI ---
 function panenTanaman(index) {
     let l = lahan[index]; 
     if (l.status !== 'siap_panen') return; 
     
-    // 1. Hitung jumlah dasar + bonus persentase aksesori slot
+    // 1. Bonus dasar dari aksesori yang dipakai
     let totalBonusPersenAcc = hitungTotalBonusPersen(); 
     let jumlahDasarDanAcc = l.jumlahBibit + Math.floor(l.jumlahBibit * (totalBonusPersenAcc / 100));
 
-    // 2. Terapkan persentase efek cuaca aktif
-    let penyesuaianCuaca = Math.round(jumlahDasarDanAcc * (cuacaAktif.efekPersen / 100));
+    // 2. Terapkan efek persentase cuaca aktif dengan memperhitungkan penangkal
+    let efekCuacaEfektif = cuacaAktif.efekPersen;
+
+    // Cek Jas Anti Badai (Menghilangkan 50% efek buruk Storm / Badai)
+    if (cuacaAktif.nama.includes('Badai') && slotAktif.badan === 'jas') {
+        let jasObj = listAksesori.find(a => a.id === 'jas');
+        if (jasObj && jasObj.tangkalBadai) {
+            efekCuacaEfektif += jasObj.tangkalBadai; // Menambah balik nilai negatifnya sebesar 50%
+            if (efekCuacaEfektif > 0) efekCuacaEfektif = 0;
+        }
+    }
+
+    // Cek Sepatu Boots (Menghilangkan 35% efek buruk Angin Kencang)
+    if (cuacaAktif.nama === 'Angin Kencang' && slotAktif.telapak === 'boots') {
+        let bootsObj = listAksesori.find(a => a.id === 'boots');
+        if (bootsObj && bootsObj.tangkalAngin) {
+            efekCuacaEfektif += bootsObj.tangkalAngin;
+            if (efekCuacaEfektif > 0) efekCuacaEfektif = 0;
+        }
+    }
+
+    // 3. Hitung penyesuaian cuaca setelah ditangkal
+    let penyesuaianCuaca = Math.round(jumlahDasarDanAcc * (efekCuacaEfektif / 100));
     let jumlahPanenTotal = jumlahDasarDanAcc + penyesuaianCuaca;
+
+    // 4. Cek Sinergi Celana Joger + Jas Anti Badai (+100% saat badai)
+    if (cuacaAktif.nama.includes('Badai') && slotAktif.badan === 'jas' && slotAktif.kaki === 'joger') {
+        let jogerObj = listAksesori.find(a => a.id === 'joger');
+        if (jogerObj && jogerObj.sinergiJas) {
+            let bonusSinergi = Math.floor(l.jumlahBibit * (jogerObj.sinergiJas / 100));
+            jumlahPanenTotal += bonusSinergi;
+        }
+    }
+
+    // 5. Cek Helm Full Face (+150% saat Badai Petir Berat)
+    if (cuacaAktif.nama === 'Badai Petir Berat' && slotAktif.kepala === 'helmet') {
+        let helmetObj = listAksesori.find(a => a.id === 'helmet');
+        if (helmetObj && helmetObj.bonusBadaiPetir) {
+            let bonusHelm = Math.floor(l.jumlahBibit * (helmetObj.bonusBadaiPetir / 100));
+            jumlahPanenTotal += bonusHelm;
+        }
+    }
 
     if (jumlahPanenTotal < 1) jumlahPanenTotal = 1; // Minimal hasil panen adalah 1 buah
 
@@ -567,9 +610,7 @@ function bukaModalTransaksi(tipe, namaBarang, harga, stokMaksimal = 0) {
     } else if (tipe === 'jual') {
         document.getElementById('modal-title').innerText = `Jual ${namaBarang}`; 
         document.getElementById('btn-confirm-transaction').innerText = 'Konfirmasi Jual'; 
-        
-        // Batas maksimal jual sekarang diatur hingga 999 item
-        maxQtyAllowed = Math.min(999, stokMaksimal); 
+        maxQtyAllowed = Math.min(999, stokMaksimal); // Batas jual hingga 999 item
     } 
     
     currentQty = (maxQtyAllowed > 0) ? 1 : 0; 
@@ -814,7 +855,6 @@ function initGame() {
     updateFluktuasiHarga(); 
     setInterval(updateFluktuasiHarga, 60000); 
     
-    // Inisialisasi cuaca acak pertama kali, lalu ubah acak setiap 3 menit (180000 ms)
     renderInfoCuacaDiUI();
     setInterval(ubahCuacaSecaraAcak, 180000);
     
