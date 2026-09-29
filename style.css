@@ -135,6 +135,21 @@ body {
   background-color: #1b5e20;
 }
 
+.btn-sell {
+  background-color: #d32f2f;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.btn-sell:hover {
+  background-color: #c62828;
+}
+
 .inventory-item {
   border: 1px solid #d2e3d0;
   background-color: #f4f9f3;
