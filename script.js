@@ -1,6 +1,36 @@
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyjvp3Jeid05iXhtI-BYFOhfZey-BQr18bdspGmc9KMsfsBXL-2cwnYMTBc1u4YRvbp/exec'; 
+// ==========================================
+// DATA LOKAL TANAMAN (SILAHKAN ATUR DI SINI)
+// ==========================================
+let libraryTanaman = [
+    {
+        nama: 'Semangka',
+        namaBibit: 'Bibit Semangka',
+        iconBibit: '🌱',
+        iconBuah: '🍉',
+        BasehargaBeli: 600,
+        BasehargaJual: 750,
+        waktuTumbuh: 30000 // dalam milidetik (30000 = 30 detik)
+    },
+    {
+        nama: 'Melon',
+        namaBibit: 'Bibit Melon',
+        iconBibit: '🌱',
+        iconBuah: '🍈',
+        BasehargaBeli: 400,
+        BasehargaJual: 600,
+        waktuTumbuh: 15000
+    },
+    {
+        nama: 'Jagung',
+        namaBibit: 'Bibit Jagung',
+        iconBibit: '🌱',
+        iconBuah: '🌽',
+        BasehargaBeli: 1000,
+        BasehargaJual: 1600,
+        waktuTumbuh: 50000
+    }
+];
 
-let libraryTanaman = []; 
 const itemSpesial = { 
     nama: 'Pupuk Kompos', 
     icon: '💩', 
@@ -24,8 +54,8 @@ let currentTransactionPrice = 0;
 let currentQty = 1; 
 let maxQtyAllowed = 99; 
 
-let hargaBeliAktif = {}; // Harga beli dinamis di pasar 
-let hargaJualAktif = {}; // Harga jual dinamis berdasar sheet
+let hargaBeliAktif = {}; 
+let hargaJualAktif = {}; 
 
 // Sistem Fluktuasi Harga Pasar (Per 1 Menit)
 function updateFluktuasiHarga() {
@@ -44,7 +74,6 @@ function updateFluktuasiHarga() {
         hargaJualAktif[tanaman.nama] = Math.round(hargaJualBaru); 
     }); 
 
-    // Agar pasar langsung berubah real-time saat tab pasar sedang dibuka
     if (document.getElementById('tab-pasar').classList.contains('active')) {
         renderPasar(); 
     } 
@@ -94,7 +123,6 @@ function openGameTabeksplisit(tabName) {
     
     document.getElementById('tab-' + tabName).classList.add('active'); 
     
-    // Sesuaikan tombol navigasi aktif di header jika ada
     const navButtons = document.querySelectorAll('.nav-tabs .tab-btn');
     if (tabName === 'menanam' && navButtons[0]) navButtons[0].classList.add('active');
     if (tabName === 'inventory' && navButtons[1]) navButtons[1].classList.add('active');
@@ -130,14 +158,14 @@ function renderPasar() {
     
     container.innerHTML = html; 
 
-    // Atur visibilitas dan teks tombol tambah lahan di tab pasar
+    // Tombol Beli Lahan di dalam Tab Pasar
     let btnTambah = document.getElementById('btn-tambah-lahan'); 
     if (btnTambah) {
         if (lahanTambahanDibeli >= limitLahanTambahan) {
             btnTambah.style.display = 'none'; 
         } else {
             btnTambah.style.display = 'block'; 
-            btnTambah.innerText = `➕ Lahan (Rp ${formatRupiah(hargaTambahLahan)})`; 
+            btnTambah.innerText = `➕ Beli Lahan Baru (Rp ${formatRupiah(hargaTambahLahan)})`; 
         } 
     } 
 } 
@@ -189,10 +217,8 @@ function beliLahan() {
     
     lahanTambahanDibeli++; 
     showToast('Berhasil menambah lahan!', 'success'); 
-    
     hargaTambahLahan = Math.round(hargaTambahLahan * 2.5); 
     
-    // Refresh tampilan pasar & otomatis pindah ke tab menanam
     renderPasar(); 
     openGameTabeksplisit('menanam'); 
     renderLahan(); 
@@ -283,7 +309,6 @@ function panenTanaman(index) {
     renderLahan(); 
 } 
 
-// Modal Transaksi 
 function bukaModalTransaksi(tipe, namaBarang, harga, stokMaksimal = 0) {
     currentTransactionType = tipe; 
     currentTransactionItem = namaBarang; 
@@ -428,27 +453,14 @@ function renderInventory() {
     container.innerHTML = html; 
 } 
 
-// Inisialisasi Game 
-async function initGame() {
-    const pasarContainer = document.getElementById('pasar-container'); 
-    pasarContainer.innerHTML = '<p style="text-align:center; padding: 20px;">🔄 Memuat data dari Spreadsheet...</p>'; 
-    
-    try {
-        const response = await fetch(SCRIPT_URL); 
-        libraryTanaman = await response.json(); 
-        
-        if (libraryTanaman && libraryTanaman.length > 0) {
-            updateFluktuasiHarga(); 
-            setInterval(updateFluktuasiHarga, 60000); // Update harga pasar per 1 menit 
-            renderPasar(); 
-            renderLahan(); 
-        } else {
-            pasarContainer.innerHTML = '<p style="color:red; text-align:center;">Spreadsheet kosong atau format kolom tidak sesuai!</p>'; 
-        } 
-    } catch (error) {
-        pasarContainer.innerHTML = '<p style="color:red; text-align:center;">Gagal memuat data dari Spreadsheet. Pastikan URL benar & sudah dideploy untuk "Siapa saja".</p>'; 
-    } 
+// Inisialisasi Game (Tanpa Fetch Spreadsheet)
+function initGame() {
+    updateFluktuasiHarga(); 
+    setInterval(updateFluktuasiHarga, 60000); // Update harga pasar per 1 menit 
+    renderPasar(); 
+    renderLahan(); 
+    updateUangDisplay();
 } 
 
-// Jalankan inisialisasi awal
+// Jalankan game saat dimuat
 initGame();
