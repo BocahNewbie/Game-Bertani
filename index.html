@@ -44,7 +44,7 @@
           <strong>🌱 Bibit Semangka</strong><br>
           <small>Harga: Rp 800 | Waktu: 30 Detik</small>
         </div>
-        <button class="btn-buy" onclick="bukaModalBeli('Bibit Semangka', 800)">Beli</button>
+        <button class="btn-buy" onclick="bukaModalTransaksi('beli', 'Bibit Semangka', 800)">Beli</button>
       </div>
 
       <div class="card-item">
@@ -52,7 +52,7 @@
           <strong>🌱 Bibit Melon</strong><br>
           <small>Harga: Rp 500 | Waktu: 15 Detik</small>
         </div>
-        <button class="btn-buy" onclick="bukaModalBeli('Bibit Melon', 500)">Beli</button>
+        <button class="btn-buy" onclick="bukaModalTransaksi('beli', 'Bibit Melon', 500)">Beli</button>
       </div>
 
       <div class="card-item">
@@ -60,7 +60,7 @@
           <strong>💩 Pupuk Kompos</strong><br>
           <small>Harga: Rp 200 | Efek: Cepat 7 Detik</small>
         </div>
-        <button class="btn-buy" style="background-color: #795548;" onclick="bukaModalBeli('Pupuk Kompos', 200)">Beli</button>
+        <button class="btn-buy" style="background-color: #795548;" onclick="bukaModalTransaksi('beli', 'Pupuk Kompos', 200)">Beli</button>
       </div>
     </div>
 
@@ -75,15 +75,28 @@
     </div>
   </div>
 
-  <!-- MODAL PEMBELIAN MODERN -->
-  <div id="buy-modal" class="modal-overlay">
+  <!-- MODAL TRANSAKSI (BELI/JUAL) -->
+  <div id="transaction-modal" class="modal-overlay">
     <div class="modal-card">
-      <h3 id="modal-title">Beli Bibit</h3>
-      <p id="modal-price" style="font-size: 13px; color: #666; margin: 4px 0 16px 0;"></p>
+      <h3 id="modal-title">Transaksi</h3>
+      <p id="modal-price" style="font-size: 13px; color: #666; margin: 4px 0 16px 0; text-align: center;"></p>
       
-      <div class="modal-input-group">
-        <label for="modal-qty">Jumlah (1 - 99 pcs):</label>
-        <input type="number" id="modal-qty" min="1" max="99" value="1" oninput="hitungTotalModal()">
+      <div class="modal-qty-controls">
+        <label style="display: block; font-size: 13px; font-weight: 600; margin-bottom: 8px; text-align: center;">Atur Jumlah:</label>
+        
+        <div style="display: flex; justify-content: center; align-items: center; gap: 6px; margin-bottom: 12px;">
+          <button class="btn-qty" onclick="ubahQty(-5)">-5</button>
+          <button class="btn-qty" onclick="ubahQty(-1)">-1</button>
+          
+          <div class="qty-display-box">
+            <span id="modal-qty-display">1</span>
+          </div>
+          
+          <button class="btn-qty" onclick="ubahQty(1)">+1</button>
+          <button class="btn-qty" onclick="ubahQty(5)">+5</button>
+        </div>
+        
+        <button class="btn-qty-maks" onclick="setQtyMaks()">Pilih Maksimal</button>
       </div>
 
       <div class="modal-total-preview">
@@ -91,8 +104,8 @@
       </div>
 
       <div class="modal-buttons">
-        <button class="btn-cancel" onclick="tutupModalBeli()">Batal</button>
-        <button class="btn-confirm" onclick="konfirmasiBeli()">Konfirmasi Beli</button>
+        <button class="btn-cancel" onclick="tutupModalTransaksi()">Batal</button>
+        <button class="btn-confirm" id="btn-confirm-transaction" onclick="konfirmasiTransaksi()">Konfirmasi</button>
       </div>
     </div>
   </div>
