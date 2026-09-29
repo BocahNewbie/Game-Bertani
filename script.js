@@ -1,5 +1,5 @@
 // GANTI DENGAN URL WEB APP GOOGLE APPS SCRIPT ANDA
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx.../exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxhBm3BpyG9Cr1_uGPRixZL_y8FosR5n9W7QaAQ6G_1_e8etHMF-7h0EL5T4obvCVGq/exec';
 
 // UI Tab Navigation
 function openAuthTab(tabName) {
