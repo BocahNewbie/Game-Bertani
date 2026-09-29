@@ -84,7 +84,7 @@ function formatRupiah(angka) {
 } 
 
 function updateUangDisplay() {
-    document.getElementById('player-koin').innerText = formatRupiah(uang); 
+    document.getElementById('player-koin').innerText = `Rp ${formatRupiah(uang)}`;
 } 
 
 let toastTimeout = null; 
