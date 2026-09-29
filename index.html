@@ -5,19 +5,79 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Game Bertani Sederhana</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* Tambahan styling modern untuk layout baru */
+        .player-panel {
+            background: linear-gradient(135deg, #2e7d32, #43a047);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+        .player-info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .player-info-row h3 {
+            margin: 0;
+            font-size: 18px;
+        }
+        .save-load-btns {
+            display: flex;
+            gap: 8px;
+        }
+        .btn-action-small {
+            background: rgba(255, 255, 255, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+        .btn-action-small:hover {
+            background: rgba(255, 255, 255, 0.4);
+        }
+    </style>
 </head>
 <body>
 
     <div class="game-container">
-        <!-- Header / Status Bar Modern -->
-        <header class="game-header" style="background: linear-gradient(135deg, #2e7d32, #43a047); color: white; padding: 15px 20px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center;">
-            <h2 style="margin: 0; font-size: 20px; display: flex; align-items: center; gap: 8px;">🌾 Game Bertani</h2>
-            <div class="status-bar" style="background: rgba(255, 255, 255, 0.2); padding: 8px 14px; border-radius: 20px; font-size: 14px; backdrop-filter: blur(5px);">
-                <span>💵 Saldo: <strong id="player-koin" style="color: #ffeb3b;">Rp 2.500</strong></span>
-            </div>
+        <!-- 1. Header Game -->
+        <header class="game-header" style="text-align: center; margin-bottom: 12px;">
+            <h2 style="margin: 0; font-size: 22px; color: #2e7d32; display: flex; align-items: center; justify-content: center; gap: 8px;">🌾 Game Bertani</h2>
         </header>
 
-        <!-- Navigasi Tab -->
+        <!-- 2. Panel Nickname, Saldo, & Tombol Simpan -->
+        <div class="player-panel">
+            <div class="player-info-row">
+                <div>
+                    <span style="font-size: 12px; opacity: 0.9; display: block;">PENGELOLA LAHAN</span>
+                    <h3 id="player-nickname" style="cursor: pointer;" onclick="ubahNickname()" title="Klik untuk ubah nickname">👨‍🌾 Petani Pintar ✏️</h3>
+                </div>
+                <div style="text-align: right;">
+                    <span style="font-size: 12px; opacity: 0.9; display: block;">SALDO KAS</span>
+                    <strong id="player-koin" style="font-size: 18px; color: #ffeb3b;">Rp 3.500</strong>
+                </div>
+            </div>
+            
+            <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.2); margin: 10px 0;">
+            
+            <div class="player-info-row" style="margin-bottom: 0;">
+                <span style="font-size: 11px; opacity: 0.8;">💾 Data otomatis tersimpan di perangkat</span>
+                <div class="save-load-btns">
+                    <button class="btn-action-small" onclick="simpanGame()">Simpan Progres</button>
+                    <button class="btn-action-small" onclick="resetGame()" style="background: rgba(211, 47, 47, 0.5);">Reset</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Navigasi Tab Game di Bawahnya -->
         <div class="nav-tabs">
             <button class="tab-btn active" onclick="openGameTab('menanam')">🌽 Menanam</button>
             <button class="tab-btn" onclick="openGameTab('inventory')">🎒 Inventory</button>
@@ -27,32 +87,25 @@
         <!-- Konten Tab: Menanam -->
         <div id="tab-menanam" class="tab-content active">
             <h3>Lahan Pertanian</h3>
-            <div id="lahan-container" class="farm-grid">
-                <!-- Lahan akan dirender lewat script.js -->
-            </div>
+            <div id="lahan-container" class="farm-grid"></div>
         </div>
 
         <!-- Konten Tab: Inventory -->
         <div id="tab-inventory" class="tab-content">
             <h3>Inventory Saya</h3>
-            <div id="inventory-list" class="inventory-container">
-                <!-- Inventory akan dirender lewat script.js -->
-            </div>
+            <div id="inventory-list" class="inventory-container"></div>
         </div>
 
         <!-- Konten Tab: Pasar -->
         <div id="tab-pasar" class="tab-content">
             <h3>Pasar Bibit & Pupuk</h3>
-            <div id="pasar-container" class="market-container">
-                <!-- Pasar akan dirender lewat script.js -->
-            </div>
+            <div id="pasar-container" class="market-container"></div>
 
-            <!-- Tombol Beli Lahan Baru -->
             <button id="btn-tambah-lahan" class="btn-submit" style="margin-top: 20px; background-color: #2e7d32; width: 100%; display: none;" onclick="beliLahan()">➕ Beli Lahan Baru</button>
         </div>
     </div>
 
-    <!-- Modal Transaksi (Beli / Jual) -->
+    <!-- Modal Transaksi -->
     <div id="transaction-modal" class="modal-overlay" style="display: none;">
         <div class="modal-card">
             <h3 id="modal-title">Transaksi</h3>
