@@ -50,13 +50,13 @@ const itemSpesial = {
 // Daftar Aksesori dengan Slot Spesifik, Bonus Persen, & Efek Cuaca Unik
 let listAksesori = [
     { id: 'sendal', nama: 'Sendal Jepit', icon: '🩴', slot: 'telapak', harga: 15000, bonusPersen: 3 },
-    { id: 'boots', nama: 'Sepatu Boots', icon: '🥾', slot: 'telapak', harga: 45000, bonusPersen: 2, tangkalAngin: 35 }, // Menghilangkan 35% efek angin kencang
+    { id: 'boots', nama: 'Sepatu Boots', icon: '🥾', slot: 'telapak', harga: 15000, bonusPersen: 2, tangkalAngin: 35 }, // Menghilangkan 35% efek angin kencang
     { id: 'caping', nama: 'Caping Petani', icon: '👒', slot: 'kepala', harga: 50000, bonusPersen: 8 },
-    { id: 'helmet', nama: 'Helm Full Face', icon: '🪖', slot: 'kepala', harga: 250000, bonusPersen: 0, bonusBadaiPetir: 150 }, // +150% saat badai petir berat
-    { id: 'boxer', nama: 'Celana Boxer', icon: '🩳', slot: 'kaki', harga: 150000, bonusPersen: 12 },
-    { id: 'joger', nama: 'Celana Joger', icon: '👖', slot: 'kaki', harga: 300000, bonusPersen: 5, sinergiJas: 100 }, // +100% jika dipadukan dengan jas anti badai
+    { id: 'helmet', nama: 'Helm Full Face', icon: '🪖', slot: 'kepala', harga: 50000, bonusPersen: 0, bonusBadaiPetir: 150 }, // +150% saat badai petir berat
+    { id: 'boxer', nama: 'Celana Boxer', icon: '🩳', slot: 'kaki', harga: 50000, bonusPersen: 12 },
+    { id: 'joger', nama: 'Celana Joger', icon: '👖', slot: 'kaki', harga: 2000, bonusPersen: 5, sinergiJas: 100 }, // +100% jika dipadukan dengan jas anti badai
     { id: 'baju', nama: 'Baju Partai', icon: '👕', slot: 'badan', harga: 1200000, bonusPersen: 19 },
-    { id: 'jas', nama: 'Jas Anti Badai', icon: '🧥', slot: 'badan', harga: 500000, bonusPersen: 4, tangkalBadai: 50 } // Menghilangkan 50% efek badai
+    { id: 'jas', nama: 'Jas Anti Badai', icon: '🧥', slot: 'badan', harga: 5000, bonusPersen: 4, tangkalBadai: 50 } // Menghilangkan 50% efek badai
 ];
 
 // ==========================================
