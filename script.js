@@ -793,4 +793,42 @@ function initGame() {
     });
 } 
 
+// ==========================================
+// SISTEM CUACA DINAMIS
+// ==========================================
+let cuacaAktif = {
+    nama: 'Cerah',
+    ikon: '☀️',
+    efekPersen: 0 // Normal (0% perubahan)
+};
+
+// Daftar jenis cuaca dan efeknya terhadap hasil panen
+const daftarCuaca = [
+    { nama: 'Cerah', ikon: '☀️', efekPersen: 0 },
+    { nama: 'Panas', ikon: '🔥', efekPersen: -3 },      // Mengurangi hasil panen 3%
+    { nama: 'Mendung', ikon: '☁️', efekPersen: 7 },     // Menambah hasil panen 7%
+    { nama: 'Gerimis', ikon: '🌦️', efekPersen: 30 },    // Menambah hasil panen 30%
+    { nama: 'Hujan', ikon: '🌧️', efekPersen: 120 },     // Menambah hasil panen 120%
+    { nama: 'Angin Kencang', ikon: '🌬️', efekPersen: -50 }, // Mengurangi hasil panen 50%
+    { nama: 'Storm / Badai Petir', ikon: '⚡', efekPersen: -70 }, // Mengurangi hasil panen 70%
+    { nama: 'Badai Besar', ikon: '🌪️', efekPersen: -90 }  // Mengurangi hasil panen 90%
+];
+
+// Fungsi untuk mengacak cuaca secara berkala (misal setiap 3 menit atau dipanggil saat inisialisasi)
+function ubahCuacaSecaraAcak() {
+    let randomIndex = Math.floor(Math.random() * daftarCuaca.length);
+    cuacaAktif = daftarCuaca[randomIndex];
+    
+    showToast(`Perubahan Cuaca: ${cuacaAktif.ikon} ${cuacaAktif.nama}!`, 'info');
+    renderInfoCuacaDiUI();
+}
+
+// Menampilkan info cuaca di panel atas (bisa disematkan di index.html jika ingin terlihat)
+function renderInfoCuacaDiUI() {
+    let panelCuaca = document.getElementById('info-cuaca-display');
+    if (panelCuaca) {
+        panelCuaca.innerText = `Cuaca: ${cuacaAktif.ikon} ${cuacaAktif.nama} (${cuacaAktif.efekPersen >= 0 ? '+' : ''}${cuacaAktif.efekPersen}%)`;
+    }
+}
+
 initGame();
