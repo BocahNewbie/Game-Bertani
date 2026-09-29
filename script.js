@@ -1,6 +1,9 @@
 // ==========================================
 // DATA LOKAL TANAMAN (SILAHKAN ATUR DI SINI)
 // ==========================================
+// ==========================================
+// DATA LOKAL TANAMAN (SILAHKAN ATUR DI SINI)
+// ==========================================
 let libraryTanaman = [
     {
         nama: 'Semangka',
@@ -28,6 +31,15 @@ let libraryTanaman = [
         BasehargaBeli: 1000,
         BasehargaJual: 1600,
         waktuTumbuh: 45000
+    },
+    {
+        nama: 'Apel',
+        namaBibit: 'Bibit Apel',
+        iconBibit: '🌱',
+        iconBuah: '🍎',
+        BasehargaBeli: 1300,
+        BasehargaJual: 2150,
+        waktuTumbuh: 90000 // 90 detik
     }
 ];
 
