@@ -28,18 +28,20 @@
       <div class="farm-land" id="lahan-1">
         <p id="status-lahan">Lahan Kosong</p>
         <button id="btn-tanam" class="btn-submit" style="width: auto; margin-top: 10px; display: none;" onclick="tanamTanaman()">Tanam Bibit</button>
+        <!-- Tombol Pupuk Baru -->
+        <button id="btn-pupuk" class="btn-submit" style="width: auto; margin-top: 10px; display: none; background-color: #795548;" onclick="gunakanPupuk()">Gunakan Pupuk (0)</button>
         <button id="btn-panen" class="btn-submit" style="width: auto; margin-top: 10px; display: none; background-color: #f57f17;" onclick="panenTanaman()">Panen Hasil</button>
       </div>
     </div>
 
     <!-- TAB PASAR -->
     <div id="tab-pasar" class="tab-content">
-      <h4>Toko Bibit</h4>
+      <h4>Toko Pertanian</h4>
       <br>
       <div class="card-item">
         <div>
           <strong>🌱 Bibit Semangka</strong><br>
-          <small>Harga Beli: Rp 800 | Waktu: 30 Detik</small>
+          <small>Harga: Rp 800 | Waktu: 30 Detik</small>
         </div>
         <button class="btn-buy" onclick="bukaModalBeli('Bibit Semangka', 800)">Beli</button>
       </div>
@@ -47,9 +49,18 @@
       <div class="card-item">
         <div>
           <strong>🌱 Bibit Melon</strong><br>
-          <small>Harga Beli: Rp 500 | Waktu: 15 Detik</small>
+          <small>Harga: Rp 500 | Waktu: 15 Detik</small>
         </div>
         <button class="btn-buy" onclick="bukaModalBeli('Bibit Melon', 500)">Beli</button>
+      </div>
+
+      <!-- Item Pupuk Kompos -->
+      <div class="card-item">
+        <div>
+          <strong>💩 Pupuk Kompos</strong><br>
+          <small>Harga: Rp 200 | Efek: Cepat 7 Detik</small>
+        </div>
+        <button class="btn-buy" style="background-color: #795548;" onclick="bukaModalBeli('Pupuk Kompos', 200)">Beli</button>
       </div>
     </div>
 
