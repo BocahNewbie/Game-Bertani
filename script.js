@@ -49,9 +49,9 @@ const itemSpesial = {
 
 // Daftar Aksesori Penambah Hasil Panen
 let listAksesori = [
-    { id: 'sendal', nama: 'Sendal Jepit', icon: '🩴', harga: 1500, bonus: 1 },
-    { id: 'caping', nama: 'Caping Petani', icon: '👒', harga: 5000, bonus: 2 },
-    { id: 'baju', nama: 'Baju Partai', icon: '👕', harga: 12000, bonus: 5 }
+    { id: 'sendal', nama: 'Sendal Jepit', icon: '🩴', harga: 15000, bonus: 1 },
+    { id: 'caping', nama: 'Caping Petani', icon: '👒', harga: 50000, bonus: 2 },
+    { id: 'baju', nama: 'Baju Partai', icon: '👕', harga: 1200000, bonus: 5 }
 ];
 
 let uang = 3500; 
