@@ -4,16 +4,20 @@ let bibitDipilih = null;
 let statusLahanGame = 'kosong'; 
 let jenisTanamanAktif = null;
 
-// Variabel untuk data pop-up pembelian aktif
 let selectedItemToBuy = {
   nama: '',
   hargaSatuan: 0
 };
 
-// Harga dasar bibit referensi
 const hargaDasarBibit = {
   'Semangka': 800,
   'Melon': 500
+};
+
+// Durasi waktu tumbuh dalam milidetik (30 detik untuk Semangka, 15 detik untuk Melon)
+const waktuTumbuhBibit = {
+  'Semangka': 30000, 
+  'Melon': 15000     
 };
 
 let hargaJualAktif = {
@@ -41,6 +45,26 @@ function updateUangDisplay() {
   document.getElementById('player-koin').innerText = formatRupiah(uang);
 }
 
+let toastTimeout = null;
+function showToast(message, type = 'success') {
+  const overlay = document.getElementById('toast-overlay');
+  const card = document.getElementById('toast-card');
+  const icon = document.getElementById('toast-icon');
+  const msg = document.getElementById('toast-message');
+
+  card.className = `toast-card ${type}`;
+  icon.innerHTML = type === 'success' ? '✓' : '✕';
+  msg.innerText = message;
+
+  overlay.style.display = 'flex';
+
+  if (toastTimeout) clearTimeout(toastTimeout);
+
+  toastTimeout = setTimeout(() => {
+    overlay.style.display = 'none';
+  }, 2000);
+}
+
 function openGameTab(tabName) {
   document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
   document.querySelectorAll('.nav-tabs .tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -53,7 +77,6 @@ function openGameTab(tabName) {
   }
 }
 
-// Fungsi Modal Pembelian
 function bukaModalBeli(namaBibit, harga) {
   selectedItemToBuy = { nama: namaBibit, hargaSatuan: harga };
   
@@ -74,7 +97,6 @@ function hitungTotalModal() {
   let qtyInput = document.getElementById('modal-qty');
   let qty = parseInt(qtyInput.value) || 1;
 
-  // Batasi jumlah minimal 1 dan maksimal 99
   if (qty > 99) {
     qty = 99;
     qtyInput.value = 99;
@@ -99,10 +121,11 @@ function konfirmasiBeli() {
     updateUangDisplay();
 
     tambahKeInventory(selectedItemToBuy.nama, qty);
-    alert(`Berhasil membeli ${qty} ${selectedItemToBuy.nama}!`);
     tutupModalBeli();
+    showToast(`Berhasil membeli ${qty} ${selectedItemToBuy.nama}!`, 'success');
   } else {
-    alert('Uang kamu tidak cukup untuk pembelian ini!');
+    tutupModalBeli();
+    showToast('Uang kamu tidak cukup untuk pembelian ini!', 'error');
   }
 }
 
@@ -136,7 +159,7 @@ function renderInventory() {
       if (item.nama.includes('Semangka')) icon = '🍉';
       if (item.nama.includes('Melon')) icon = '🍈';
 
-      let hargaJualSatuan = hargaJualAktif[item.nama.replace('Buah ', '')] || 0;
+      let hargaJualSatuan = hargaJualAktif[item.nama] || 0;
       actionButton = `
         <div style="text-align: right;">
           <small style="display: block; color: #555; font-size: 10px;">Harga Jual: Rp ${formatRupiah(hargaJualSatuan)}</small>
@@ -173,14 +196,18 @@ function pilihBibitUntukDitanam(namaBibit) {
 
   openGameTabeksplisit('menanam');
   
-  document.getElementById('status-lahan').innerText = `🌱 ${bibitDipilih} sedang tumbuh... (Klik untuk simulasi panen)`;
+  let durasiTampil = bibitDipilih === 'Semangka' ? '30 detik' : '15 detik';
+  document.getElementById('status-lahan').innerText = `🌱 ${bibitDipilih} sedang tumbuh... (Estimasi: ${durasiTampil})`;
   document.getElementById('btn-tanam').style.display = 'none';
+
+  // Ambil durasi berdasarkan jenis tanaman (dalam milidetik)
+  let durasiMs = waktuTumbuhBibit[bibitDipilih] || 15000;
 
   setTimeout(() => {
     statusLahanGame = 'siap_panen';
     document.getElementById('status-lahan').innerText = `✨ ${bibitDipilih} sudah siap dipanen!`;
     document.getElementById('btn-panen').style.display = 'inline-block';
-  }, 3000); 
+  }, durasiMs); 
 }
 
 function openGameTabeksplisit(tabName) {
@@ -196,7 +223,7 @@ function panenTanaman() {
   let hasilPanen = jenisTanamanAktif || 'Semangka';
   tambahKeInventory(hasilPanen, 1);
 
-  alert(`Panen berhasil! Mendapatkan 1 ${hasilPanen} yang masuk ke Inventory.`);
+  showToast(`Panen berhasil! Mendapatkan 1 ${hasilPanen}.`, 'success');
 
   statusLahanGame = 'kosong';
   bibitDipilih = null;
@@ -220,6 +247,6 @@ function jualHasilPanen(namaBuah) {
   uang += totalPendapatan;
   updateUangDisplay();
 
-  alert(`Berhasil menjual 1 ${namaBuah} seharga Rp ${formatRupiah(totalPendapatan)}!`);
+  showToast(`Berhasil menjual 1 ${namaBuah} seharga Rp ${formatRupiah(totalPendapatan)}!`, 'success');
   renderInventory();
 }
