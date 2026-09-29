@@ -124,5 +124,19 @@
     </div>
 
     <script src="script.js"></script>
+    <!-- Modal Konfirmasi Reset Game -->
+    <div id="reset-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-card" style="text-align: center; border-top: 4px solid #d32f2f;">
+            <div style="font-size: 36px; margin-bottom: 5px;">⚠️</div>
+            <h3 style="color: #d32f2f; margin-bottom: 8px;">Reset Semua Progres?</h3>
+            <p style="margin: 0 0 15px 0; font-size: 13px; color: #555; line-height: 1.4;">
+                Tindakan ini akan menghapus seluruh data tanaman, saldo, inventory, dan lahan yang sudah kamu miliki secara permanen!
+            </p>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn-submit" onclick="eksekusiResetGame()" style="flex: 1; background-color: #d32f2f;">Ya, Reset</button>
+                <button class="btn-submit" onclick="tutupModalReset()" style="flex: 1; background-color: #757575;">Batal</button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
