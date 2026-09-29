@@ -37,13 +37,13 @@ function updateFluktuasiHarga() {
     // 1. Hitung Harga Beli Fluktuatif (Turun 1%-7% atau Naik 7%-10% dari Base)
     let isTurun = Math.random() < 0.5;
     let variasiBeli = isTurun ? 
-      (Math.floor(Math.random() * 7) + 1) / 100 :   // Turun 0.01 - 0.07 (1% - 7%)
-      (Math.floor(Math.random() * 4) + 7) / 100;   // Naik 0.07 - 0.10 (7% - 10%)
+      (Math.floor(Math.random() * 7) + 1) / 100 :   
+      (Math.floor(Math.random() * 4) + 7) / 100;   
       
     let hargaBeliBaru = isTurun ? baseBeli * (1 - variasiBeli) : baseBeli * (1 + variasiBeli);
     hargaBeliAktif[tanaman.namaBibit] = Math.round(hargaBeliBaru);
 
-    // 2. Hitung Harga Jual Berdasarkan Persentase dari Spreadsheet (Contoh: "0.2-1.25")
+    // 2. Hitung Harga Jual Berdasarkan Persentase dari Spreadsheet
     let rangeParts = tanaman.persenJual.split('-');
     let minPersen = parseFloat(rangeParts[0]) || 0.20;
     let maxPersen = parseFloat(rangeParts[1]) || 1.25;
@@ -52,7 +52,7 @@ function updateFluktuasiHarga() {
     hargaJualAktif[tanaman.nama] = Math.round(baseBeli * randomPersenJual);
   });
 
-  // Render ulang pasar jika sedang dibuka agar harganya langsung berubah realtime
+  // 👇 TAMBAHKAN BARIS INI AGAR PASAR LANGSUNG BERUBAH REAL-TIME SAAT DIBUKA
   if (document.getElementById('tab-pasar').classList.contains('active')) {
     renderPasar();
   }
