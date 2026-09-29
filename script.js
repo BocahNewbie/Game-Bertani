@@ -38,7 +38,8 @@ function updateFluktuasiHarga() {
 }
 
 updateFluktuasiHarga();
-setInterval(updateFluktuasiHarga, 3600000);
+// Ubah dari 3600000 menjadi 60000 (60.000 milidetik = 1 menit)
+setInterval(updateFluktuasiHarga, 60000);
 
 function formatRupiah(angka) {
   return angka.toLocaleString('id-ID');
