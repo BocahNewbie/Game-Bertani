@@ -24,13 +24,14 @@
 
     <!-- TAB LAHAN -->
     <div id="tab-menanam" class="tab-content active">
-      <h4>Lahan Pertanian Saya</h4>
-      <div class="farm-land" id="lahan-1">
-        <p id="status-lahan">Lahan Kosong</p>
-        <button id="btn-tanam" class="btn-submit" style="width: auto; margin-top: 10px; display: none;" onclick="tanamTanaman()">Tanam Bibit</button>
-        <!-- Tombol Pupuk Baru -->
-        <button id="btn-pupuk" class="btn-submit" style="width: auto; margin-top: 10px; display: none; background-color: #795548;" onclick="gunakanPupuk()">Gunakan Pupuk (0)</button>
-        <button id="btn-panen" class="btn-submit" style="width: auto; margin-top: 10px; display: none; background-color: #f57f17;" onclick="panenTanaman()">Panen Hasil</button>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <h4 style="margin:0;">Lahan Pertanian Saya</h4>
+        <button id="btn-tambah-lahan" class="btn-submit" style="width: auto; padding: 6px 12px; font-size: 12px; margin: 0; background-color: #1976d2;" onclick="beliLahan()">➕ Lahan</button>
+      </div>
+      
+      <!-- Container Grid Multi Lahan -->
+      <div id="lahan-container" class="lahan-grid">
+        <!-- Render otomatis via JavaScript -->
       </div>
     </div>
 
@@ -54,7 +55,6 @@
         <button class="btn-buy" onclick="bukaModalBeli('Bibit Melon', 500)">Beli</button>
       </div>
 
-      <!-- Item Pupuk Kompos -->
       <div class="card-item">
         <div>
           <strong>💩 Pupuk Kompos</strong><br>
@@ -67,13 +67,13 @@
     <!-- TAB INVENTORY -->
     <div id="tab-inventory" class="tab-content">
       <h4>Inventory Saya</h4>
-      <!-- Ubah teks keterangan di bawah ini -->
       <p style="font-size: 11px; color: #666; margin-top: 4px;">Harga pasar berubah setiap 1 menit.</p>
       <br>
       <div id="inventory-list">
         <p style="color: #777; font-style: italic;">Inventory masih kosong.</p>
       </div>
     </div>
+  </div>
 
   <!-- MODAL PEMBELIAN MODERN -->
   <div id="buy-modal" class="modal-overlay">
@@ -97,7 +97,7 @@
     </div>
   </div>
 
-  <!-- MODERN NOTIFICATION POPUP (AUTO-CLOSE 2 DETIK) -->
+  <!-- MODERN NOTIFICATION POPUP -->
   <div id="toast-overlay" class="toast-overlay">
     <div id="toast-card" class="toast-card">
       <div id="toast-icon" class="toast-icon"></div>
