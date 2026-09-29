@@ -1,8 +1,20 @@
+// GANTI DENGAN URL WEB APP GOOGLE APPS SCRIPT ANDA
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyeeHoT6xVhf-UgLwL0JHd-dIIbrn7XkID6Mix4ELEVUsHxSXLqM14pjbcb88IKVmYi/exec';
+
+// Library Kosong (Akan ditarik otomatis dari Spreadsheet)
+let libraryTanaman = [];
+
+const itemSpesial = {
+  nama: 'Pupuk Kompos',
+  icon: '💩',
+  hargaBeli: 200,
+  efekWaktu: 7000
+};
+
 let uang = 2500;
 let inventory = [];
 let jumlahPupuk = 0;
 
-// Sistem Multi Lahan
 let lahan = [
   { id: 1, status: 'kosong', tanaman: null, waktuSelesai: 0, timerInterval: null }
 ];
@@ -10,27 +22,22 @@ let lahanTambahanDibeli = 0;
 const limitLahanTambahan = 6; 
 let hargaTambahLahan = 5000;
 
-// Variabel Kontrol Modal Transaksi
-let currentTransactionType = 'beli'; // 'beli' atau 'jual'
+let currentTransactionType = 'beli'; 
 let currentTransactionItem = '';
 let currentTransactionPrice = 0;
 let currentQty = 1;
 let maxQtyAllowed = 99;
 
-const hargaDasarBibit = { 'Semangka': 800, 'Melon': 500 };
-const waktuTumbuhBibit = { 'Semangka': 30 * 1000, 'Melon': 15 * 1000 };
-let hargaJualAktif = { 'Semangka': 0, 'Melon': 0 };
+let hargaJualAktif = {};
 
+// Sistem Harga Pasar Berdasarkan Spreadsheet
 function updateFluktuasiHarga() {
-  for (let buah in hargaDasarBibit) {
-    let base = hargaDasarBibit[buah];
+  libraryTanaman.forEach(tanaman => {
+    let base = tanaman.hargaBeli;
     let persentaseKenaikan = (Math.floor(Math.random() * 71) + 20) / 100;
-    hargaJualAktif[buah] = Math.round(base + (base * persentaseKenaikan));
-  }
+    hargaJualAktif[tanaman.nama] = Math.round(base + (base * persentaseKenaikan));
+  });
 }
-
-updateFluktuasiHarga();
-setInterval(updateFluktuasiHarga, 60000); 
 
 function formatRupiah(angka) {
   return angka.toLocaleString('id-ID');
@@ -64,6 +71,7 @@ function openGameTab(tabName) {
 
   if (tabName === 'inventory') renderInventory();
   if (tabName === 'menanam') renderLahan();
+  if (tabName === 'pasar') renderPasar();
 }
 
 function openGameTabeksplisit(tabName) {
@@ -73,16 +81,49 @@ function openGameTabeksplisit(tabName) {
   document.querySelectorAll('.nav-tabs .tab-btn')[0].classList.add('active');
 }
 
-// ================= FUNGSI LAHAN =================
+// Render Toko Pasar Otomatis dari Spreadsheet
+function renderPasar() {
+  const container = document.getElementById('pasar-container');
+  let html = '';
+
+  libraryTanaman.forEach(tanaman => {
+    html += `
+      <div class="card-item">
+        <div>
+          <strong>${tanaman.iconBibit} ${tanaman.namaBibit}</strong><br>
+          <small>Harga: Rp ${formatRupiah(tanaman.hargaBeli)} | Waktu: ${tanaman.waktuTumbuh / 1000} Detik</small>
+        </div>
+        <button class="btn-buy" onclick="bukaModalTransaksi('beli', '${tanaman.namaBibit}', ${tanaman.hargaBeli})">Beli</button>
+      </div>
+    `;
+  });
+
+  html += `
+    <div class="card-item">
+      <div>
+        <strong>${itemSpesial.icon} ${itemSpesial.nama}</strong><br>
+        <small>Harga: Rp ${formatRupiah(itemSpesial.hargaBeli)} | Efek: Cepat ${itemSpesial.efekWaktu / 1000} Detik</small>
+      </div>
+      <button class="btn-buy" style="background-color: #795548;" onclick="bukaModalTransaksi('beli', '${itemSpesial.nama}', ${itemSpesial.hargaBeli})">Beli</button>
+    </div>
+  `;
+
+  container.innerHTML = html;
+}
+
+// Render Lahan
 function renderLahan() {
   const container = document.getElementById('lahan-container');
   let html = '';
 
   lahan.forEach((l, index) => {
+    let dataTanaman = libraryTanaman.find(t => t.nama === l.tanaman);
+    let iconTampil = dataTanaman ? dataTanaman.iconBuah : '🌱';
+
     html += `
       <div class="farm-land">
         <p id="status-lahan-${index}" style="font-size: 13px; font-weight: bold; margin-bottom: 8px;">
-          ${l.status === 'kosong' ? 'Lahan Kosong' : l.status === 'siap_panen' ? `✨ ${l.tanaman}` : `🌱 ${l.tanaman}`}
+          ${l.status === 'kosong' ? 'Lahan Kosong' : l.status === 'siap_panen' ? `✨ ${iconTampil}${l.tanaman}` : `🌱 ${l.tanaman}`}
         </p>
         
         <small id="waktu-lahan-${index}" style="display: ${l.status === 'ditanam' ? 'block' : 'none'}; font-size: 11px; margin-bottom: 8px; color: #fff8e1;"></small>
@@ -143,13 +184,13 @@ function pilihBibitUntukDitanam(namaBibit) {
     if (item.jumlah <= 0) inventory = inventory.filter(i => i.nama !== namaBibit);
   }
 
-  let bibitDipilih = namaBibit.replace('Bibit ', '');
-  let targetLahan = lahan[emptyIndex];
+  let dataBibit = libraryTanaman.find(t => t.namaBibit === namaBibit);
+  let bibitDipilih = dataBibit ? dataBibit.nama : namaBibit.replace('Bibit ', '');
+  let durasiMs = dataBibit ? dataBibit.waktuTumbuh : 15000;
 
+  let targetLahan = lahan[emptyIndex];
   targetLahan.status = 'ditanam';
   targetLahan.tanaman = bibitDipilih;
-  
-  let durasiMs = waktuTumbuhBibit[bibitDipilih] || 15000;
   targetLahan.waktuSelesai = new Date().getTime() + durasiMs;
 
   openGameTabeksplisit('menanam');
@@ -189,13 +230,13 @@ function gunakanPupuk(index) {
   }
 
   jumlahPupuk -= 1;
-  l.waktuSelesai -= 7000;
+  l.waktuSelesai -= itemSpesial.efekWaktu;
   if (l.waktuSelesai <= new Date().getTime()) {
     l.waktuSelesai = new Date().getTime();
   }
   
   renderLahan();
-  showToast('Dipercepat 7 Detik!', 'success');
+  showToast(`Dipercepat ${itemSpesial.efekWaktu / 1000} Detik!`, 'success');
 }
 
 function panenTanaman(index) {
@@ -213,7 +254,7 @@ function panenTanaman(index) {
   renderLahan();
 }
 
-// ================= MODAL TRANSAKSI (BELI/JUAL) =================
+// Modal Transaksi Pembelian/Penjualan
 function bukaModalTransaksi(tipe, namaBarang, harga, stokMaksimal = 0) {
   currentTransactionType = tipe;
   currentTransactionItem = namaBarang;
@@ -223,14 +264,13 @@ function bukaModalTransaksi(tipe, namaBarang, harga, stokMaksimal = 0) {
     document.getElementById('modal-title').innerText = `Beli ${namaBarang}`;
     document.getElementById('btn-confirm-transaction').innerText = 'Konfirmasi Beli';
     
-    // Kalkulasi maksimal yang bisa dibeli berdasarkan uang
     let maxMampuBeli = Math.floor(uang / harga);
-    maxQtyAllowed = Math.min(99, maxMampuBeli); // Limit beli maksimal 99 sekaligus
-    if (maxQtyAllowed < 1) maxQtyAllowed = 1; // Supaya tetap bisa melihat harga meski uang tak cukup
+    maxQtyAllowed = Math.min(99, maxMampuBeli); 
+    if (maxQtyAllowed < 1) maxQtyAllowed = 1; 
   } else if (tipe === 'jual') {
     document.getElementById('modal-title').innerText = `Jual ${namaBarang}`;
     document.getElementById('btn-confirm-transaction').innerText = 'Konfirmasi Jual';
-    maxQtyAllowed = stokMaksimal; // Sesuai total item yang dimiliki di inventory
+    maxQtyAllowed = stokMaksimal; 
   }
 
   currentQty = (maxQtyAllowed > 0) ? 1 : 0;
@@ -279,7 +319,7 @@ function konfirmasiTransaksi() {
       uang -= totalHarga;
       updateUangDisplay();
 
-      if (currentTransactionItem === 'Pupuk Kompos') {
+      if (currentTransactionItem === itemSpesial.nama) {
         jumlahPupuk += currentQty;
         renderLahan(); 
       } else {
@@ -310,7 +350,6 @@ function konfirmasiTransaksi() {
   }
 }
 
-// ================= INVENTORY & DATA =================
 function tambahKeInventory(namaItem, jumlah) {
   let existing = inventory.find(item => item.nama === namaItem);
   if (existing) existing.jumlah += jumlah;
@@ -328,21 +367,21 @@ function renderInventory() {
   inventory.forEach((item) => {
     let icon = '📦';
     let actionButton = '';
+    let dataTanaman = libraryTanaman.find(t => t.namaBibit === item.nama || t.nama === item.nama);
 
     if (item.nama.includes('Bibit')) {
-      icon = '🌱';
+      icon = dataTanaman ? dataTanaman.iconBibit : '🌱';
       let hasEmptyLand = lahan.some(l => l.status === 'kosong');
+      
       if (hasEmptyLand) {
         actionButton = `<button class="btn-submit" style="padding: 6px 10px; font-size: 12px;" onclick="pilihBibitUntukDitanam('${item.nama}')">Tanam</button>`;
       } else {
         actionButton = `<small style="color:red; font-size: 10px;">Lahan Penuh</small>`;
       }
     } else {
-      if (item.nama.includes('Semangka')) icon = '🍉';
-      if (item.nama.includes('Melon')) icon = '🍈';
-
+      icon = dataTanaman ? dataTanaman.iconBuah : '📦';
       let hargaJualSatuan = hargaJualAktif[item.nama] || 0;
-      // Memanggil modal bukaModalTransaksi tipe 'jual'
+      
       actionButton = `
         <div style="text-align: right;">
           <small style="display: block; color: #555; font-size: 10px;">Jual: Rp ${formatRupiah(hargaJualSatuan)}</small>
@@ -364,4 +403,24 @@ function renderInventory() {
   container.innerHTML = html;
 }
 
-renderLahan();
+// Inisialisasi Game (Mengambil data dari Spreadsheet API)
+async function initGame() {
+  const pasarContainer = document.getElementById('pasar-container');
+  pasarContainer.innerHTML = '<p style="text-align:center; padding: 20px;">🔄 Memuat data dari Spreadsheet...</p>';
+  
+  try {
+    const response = await fetch(SCRIPT_URL);
+    libraryTanaman = await response.json();
+    
+    updateFluktuasiHarga();
+    setInterval(updateFluktuasiHarga, 60000); // Update harga pasar per 1 menit
+    
+    renderPasar();
+    renderLahan();
+  } catch (error) {
+    pasarContainer.innerHTML = '<p style="color:red; text-align:center;">Gagal memuat data dari Spreadsheet. Pastikan URL benar & sudah dideploy untuk "Siapa saja".</p>';
+  }
+}
+
+// Jalankan inisialisasi saat game dibuka
+initGame();
