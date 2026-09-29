@@ -5,11 +5,11 @@ let libraryTanaman = [];
 const itemSpesial = {
   nama: 'Pupuk Kompos',
   icon: '💩',
-  hargaBeli: 100,
-  efekWaktu: 10000
+  hargaBeli: 200,
+  efekWaktu: 7000
 };
 
-let uang = 3500;
+let uang = 2500;
 let inventory = [];
 let jumlahPupuk = 0;
 
