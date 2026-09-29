@@ -531,11 +531,24 @@ function muatGame() {
     }
 }
 
+// ==========================================
+// FITUR MODAL RESET GAME
+// ==========================================
 function resetGame() {
-    if (confirm("Yakin ingin mereset semua progres permainan dari awal?")) {
-        localStorage.removeItem('saveGameBertani');
+    // Membuka modal konfirmasi kustom yang menarik
+    document.getElementById('reset-modal').style.display = 'flex';
+}
+
+function tutupModalReset() {
+    document.getElementById('reset-modal').style.display = 'none';
+}
+
+function eksekusiResetGame() {
+    localStorage.removeItem('saveGameBertani');
+    showToast("Progres berhasil direset!", "error");
+    setTimeout(() => {
         location.reload();
-    }
+    }, 500);
 }
 
 // ==========================================
