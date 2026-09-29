@@ -1,126 +1,87 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Game Bertani</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Bertani Sederhana</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <div class="container">
-    <div class="game-header">
-      <div class="player-info">
-        <h3>👨‍🌾 Petani</h3>
-      </div>
-      <div class="gold-display">💰 Rp <span id="player-koin">2.500</span></div>
-    </div>
+    <div class="game-container">
+        <!-- Header / Status Bar -->
+        <header class="game-header">
+            <h2>🌾 Game Bertani</h2>
+            <div class="status-bar">
+                <span>💰 Uang: <strong id="player-koin">2.500</strong></span>
+            </div>
+        </header>
 
-    <div class="nav-tabs">
-      <button class="tab-btn active" onclick="openGameTab('menanam')">Lahan</button>
-      <button class="tab-btn" onclick="openGameTab('pasar')">Pasar</button>
-      <button class="tab-btn" onclick="openGameTab('inventory')">Inventory</button>
-    </div>
-
-    <!-- TAB LAHAN -->
-    <div id="tab-menanam" class="tab-content active">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-        <h4 style="margin:0;">Lahan Pertanian Saya</h4>
-      </div>
-      
-      <!-- Container Grid Multi Lahan -->
-      <div id="lahan-container" class="lahan-grid">
-        <!-- Render otomatis via JavaScript -->
-      </div>
-    </div>
-
-    <!-- TAB PASAR -->
-    <div id="tab-pasar" class="tab-content">
-      <h4>Toko Pertanian</h4>
-      <br>
-      <div class="card-item">
-        <div>
-          <strong>🌱 Bibit Semangka</strong><br>
-          <small>Harga: Rp 800 | Waktu: 30 Detik</small>
+        <!-- Navigasi Tab -->
+        <div class="nav-tabs">
+            <button class="tab-btn active" onclick="openGameTab('menanam')">🌽 Menanam</button>
+            <button class="tab-btn" onclick="openGameTab('inventory')">🎒 Inventory</button>
+            <button class="tab-btn" onclick="openGameTab('pasar')">🛒 Pasar</button>
         </div>
-        <button class="btn-buy" onclick="bukaModalTransaksi('beli', 'Bibit Semangka', 800)">Beli</button>
-      </div>
 
-      <div class="card-item">
-        <div>
-          <strong>🌱 Bibit Melon</strong><br>
-          <small>Harga: Rp 500 | Waktu: 15 Detik</small>
+        <!-- Konten Tab: Menanam -->
+        <div id="tab-menanam" class="tab-content active">
+            <h3>Lahan Pertanian</h3>
+            <div id="lahan-container" class="farm-grid">
+                <!-- Lahan akan dirender lewat script.js -->
+            </div>
         </div>
-        <button class="btn-buy" onclick="bukaModalTransaksi('beli', 'Bibit Melon', 500)">Beli</button>
-      </div>
 
-      <div class="card-item">
-        <div>
-          <strong>💩 Pupuk Kompos</strong><br>
-          <small>Harga: Rp 200 | Efek: Cepat 7 Detik</small>
+        <!-- Konten Tab: Inventory -->
+        <div id="tab-inventory" class="tab-content">
+            <h3>Inventory Saya</h3>
+            <div id="inventory-list" class="inventory-container">
+                <!-- Inventory akan dirender lewat script.js -->
+            </div>
         </div>
-        <button class="btn-buy" style="background-color: #795548;" onclick="bukaModalTransaksi('beli', 'Pupuk Kompos', 200)">Beli</button>
-      </div>
-    </div>
 
-      <button id="btn-tambah-lahan" class="btn-submit" style="width: auto; padding: 6px 12px; font-size: 12px; margin: 0; background-color: #1976d2;" onclick="beliLahan()">➕ Lahan</button>
-    </div>
-  </div>
-  
-    <!-- TAB INVENTORY -->
-    <div id="tab-inventory" class="tab-content">
-      <h4>Inventory Saya</h4>
-      <p style="font-size: 11px; color: #666; margin-top: 4px;">Harga pasar berubah setiap 1 menit.</p>
-      <br>
-      <div id="inventory-list">
-        <p style="color: #777; font-style: italic;">Inventory masih kosong.</p>
-      </div>
-    </div>
-  </div>
+        <!-- Konten Tab: Pasar (Tombol Beli Lahan dipindah ke sini) -->
+        <div id="tab-pasar" class="tab-content">
+            <h3>Pasar Bibit & Pupuk</h3>
+            <div id="pasar-container" class="market-container">
+                <!-- Pasar akan dirender lewat script.js -->
+            </div>
 
-  <!-- MODAL TRANSAKSI (BELI/JUAL) -->
-  <div id="transaction-modal" class="modal-overlay">
-    <div class="modal-card">
-      <h3 id="modal-title">Transaksi</h3>
-      <p id="modal-price" style="font-size: 13px; color: #666; margin: 4px 0 16px 0; text-align: center;"></p>
-      
-      <div class="modal-qty-controls">
-        <label style="display: block; font-size: 13px; font-weight: 600; margin-bottom: 8px; text-align: center;">Atur Jumlah:</label>
-        
-        <div style="display: flex; justify-content: center; align-items: center; gap: 6px; margin-bottom: 12px;">
-          <button class="btn-qty" onclick="ubahQty(-5)">-5</button>
-          <button class="btn-qty" onclick="ubahQty(-1)">-1</button>
-          
-          <div class="qty-display-box">
-            <span id="modal-qty-display">1</span>
-          </div>
-          
-          <button class="btn-qty" onclick="ubahQty(1)">+1</button>
-          <button class="btn-qty" onclick="ubahQty(5)">+5</button>
+            <!-- Tombol Beli Lahan Baru -->
+            <button id="btn-tambah-lahan" class="btn-submit" style="margin-top: 20px; background-color: #2e7d32; width: 100%; display: none;" onclick="beliLahan()">➕ Beli Lahan Baru</button>
         </div>
-        
-        <button class="btn-qty-maks" onclick="setQtyMaks()">Pilih Maksimal</button>
-      </div>
-
-      <div class="modal-total-preview">
-        Total: <strong id="modal-total-price">Rp 0</strong>
-      </div>
-
-      <div class="modal-buttons">
-        <button class="btn-cancel" onclick="tutupModalTransaksi()">Batal</button>
-        <button class="btn-confirm" id="btn-confirm-transaction" onclick="konfirmasiTransaksi()">Konfirmasi</button>
-      </div>
     </div>
-  </div>
 
-  <!-- MODERN NOTIFICATION POPUP -->
-  <div id="toast-overlay" class="toast-overlay">
-    <div id="toast-card" class="toast-card">
-      <div id="toast-icon" class="toast-icon"></div>
-      <div id="toast-message" class="toast-message">Pesan notifikasi</div>
+    <!-- Modal Transaksi (Beli / Jual) -->
+    <div id="transaction-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-card">
+            <h3 id="modal-title">Transaksi</h3>
+            <p id="modal-price" style="margin: 10px 0; color: #555;"></p>
+            
+            <div class="modal-qty-control" style="display: flex; align-items: center; justify-content: center; gap: 10px; margin: 15px 0;">
+                <button onclick="ubahQty(-1)" class="btn-qty">-</button>
+                <span id="modal-qty-display" style="font-size: 18px; font-weight: bold; min-width: 30px; text-align: center;">1</span>
+                <button onclick="ubahQty(1)" class="btn-qty">+</button>
+                <button onclick="setQtyMaks()" class="btn-qty" style="padding: 5px 10px; font-size: 12px;">Maks</button>
+            </div>
+
+            <p style="margin-bottom: 15px;">Total: <strong id="modal-total-price" style="color: #2e7d32;">Rp 0</strong></p>
+
+            <div style="display: flex; gap: 10px;">
+                <button id="btn-confirm-transaction" class="btn-submit" onclick="konfirmasiTransaksi()" style="flex: 1; background-color: #2e7d32;">Konfirmasi</button>
+                <button class="btn-submit" onclick="tutupModalTransaksi()" style="flex: 1; background-color: #d32f2f;">Batal</button>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <script src="script.js"></script>
+    <!-- Toast Notification -->
+    <div id="toast-overlay" class="toast-overlay" style="display: none;">
+        <div id="toast-card" class="toast-card">
+            <span id="toast-icon">✓</span>
+            <span id="toast-message">Pesan Berhasil</span>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
 </body>
 </html>
