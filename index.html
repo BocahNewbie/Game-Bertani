@@ -14,7 +14,7 @@
             <h2 style="margin: 0; font-size: 22px; color: #1e293b; display: flex; align-items: center; justify-content: center; gap: 8px;">🌾 Game Bertani</h2>
         </header>
 
-        <!-- Panel Nickname, Saldo, & Informasi Cuaca -->
+        <!-- Panel Ringkasan Status Atas -->
         <div class="player-panel">
             <div class="player-info-row">
                 <div>
@@ -28,24 +28,11 @@
             </div>
 
             <!-- Panel Informasi Cuaca Aktif -->
-            <div style="background: rgba(255, 255, 255, 0.12); padding: 8px 10px; border-radius: 8px; font-size: 12px; margin-top: 8px; display: flex; justify-content: space-between; align-items: center;">
-                <span>🌤️ Cuaca Saat Ini: <strong id="info-cuaca-display" style="color: #38bdf8;">Memuat cuaca...</strong></span>
-            </div>
-
-            <!-- Slot Aksesori Aktif Berdasarkan Kategori -->
-            <div style="background: rgba(255, 255, 255, 0.08); padding: 8px; border-radius: 8px; font-size: 11px; margin-top: 6px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 5px;">
-                <div>👒 Kepala: <strong id="slot-kepala-display">Kosong</strong></div>
-                <div>👕 Badan: <strong id="slot-badan-display">Kosong</strong></div>
-                <div>👖 Kaki: <strong id="slot-kaki-display">Kosong</strong></div>
-                <div>🩴 Telapak: <strong id="slot-telapak-display">Kosong</strong></div>
-            </div>
-            <div style="font-size: 11px; margin-top: 5px; text-align: right; color: #38bdf8; font-weight: bold;">
-                Total Bonus Aksesori: <span id="total-bonus-display">0%</span>
+            <div style="background: rgba(255, 255, 255, 0.12); padding: 7px 10px; border-radius: 8px; font-size: 12px; margin-top: 8px; display: flex; justify-content: space-between; align-items: center;">
+                <span>🌤️ Cuaca: <strong id="info-cuaca-display" style="color: #38bdf8;">Memuat cuaca...</strong></span>
             </div>
             
-            <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.15); margin: 10px 0;">
-            
-            <div class="player-info-row" style="margin-bottom: 0;">
+            <div class="player-info-row" style="margin-top: 10px; margin-bottom: 0;">
                 <span style="font-size: 11px; opacity: 0.75;">💾 Data tersimpan otomatis</span>
                 <div class="save-load-btns">
                     <button class="btn-action-small" onclick="simpanGame()">Simpan</button>
@@ -54,39 +41,71 @@
             </div>
         </div>
 
-        <!-- Navigasi Tab Game (Ditambah Tab Aksesori) -->
-        <div class="nav-tabs" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 3px;">
-            <button class="tab-btn active" onclick="openGameTab('menanam')" style="font-size: 11px; padding: 8px 2px;">🌽 Lahan</button>
-            <button class="tab-btn" onclick="openGameTab('inventory')" style="font-size: 11px; padding: 8px 2px;">🎒 Tas</button>
-            <button class="tab-btn" onclick="openGameTab('aksesori')" style="font-size: 11px; padding: 8px 2px;">🎩 Koleksi</button>
-            <button class="tab-btn" onclick="openGameTab('pasar')" style="font-size: 11px; padding: 8px 2px;">🛒 Pasar</button>
+        <!-- Navigasi Tab Besar Utama -->
+        <div class="nav-tabs" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px;">
+            <button class="tab-btn active" onclick="openGameTab('pertanian')" style="font-size: 10px; padding: 7px 1px;">🌾 Tani</button>
+            <button class="tab-btn" onclick="openGameTab('inventory')" style="font-size: 10px; padding: 7px 1px;">🎒 Tas</button>
+            <button class="tab-btn" onclick="openGameTab('profil')" style="font-size: 10px; padding: 7px 1px;">👤 Profil</button>
+            <button class="tab-btn" onclick="openGameTab('pasar')" style="font-size: 10px; padding: 7px 1px;">🛒 Pasar</button>
+            <button class="tab-btn" onclick="openGameTab('toko_aksesori')" style="font-size: 10px; padding: 7px 1px;">🎩 Toko</button>
         </div>
 
-        <!-- Konten Tab: Menanam -->
-        <div id="tab-menanam" class="tab-content active">
-            <h3 style="color: #1e293b; font-size: 16px;">Lahan Pertanian</h3>
+        <!-- KONTEN 1: TAB PERTANIAN (Lahan & Pupuk) -->
+        <div id="tab-pertanian" class="tab-content active">
+            <h3 style="color: #1e293b; font-size: 16px; margin-bottom: 8px;">Lahan Pertanian & Pupuk</h3>
             <div id="lahan-container" class="farm-grid"></div>
         </div>
 
-        <!-- Konten Tab: Inventory -->
+        <!-- KONTEN 2: TAB INVENTORY / TAS (Dipisah: Bibit, Panen, Ternak) -->
         <div id="tab-inventory" class="tab-content">
-            <h3 style="color: #1e293b; font-size: 16px;">Inventory Saya</h3>
-            <div id="inventory-list" class="inventory-container"></div>
+            <h3 style="color: #1e293b; font-size: 16px; margin-bottom: 8px;">Tas Inventory</h3>
+            
+            <!-- Sub-tab navigasi dalam tas -->
+            <div style="display: flex; gap: 5px; margin-bottom: 12px;">
+                <button class="sub-tab-btn active" id="subtab-bibit-btn" onclick="switchSubInventory('bibit')" style="flex: 1; padding: 6px; font-size: 11px; font-weight: bold; border-radius: 6px; border: none; cursor: pointer; background: #1e293b; color: white;">🌱 Bibit</button>
+                <button class="sub-tab-btn" id="subtab-panen-btn" onclick="switchSubInventory('panen')" style="flex: 1; padding: 6px; font-size: 11px; font-weight: bold; border-radius: 6px; border: none; cursor: pointer; background: #e2e8f0; color: #334155;">🍉 Hasil Panen</button>
+                <button class="sub-tab-btn" id="subtab-ternak-btn" onclick="switchSubInventory('ternak')" style="flex: 1; padding: 6px; font-size: 11px; font-weight: bold; border-radius: 6px; border: none; cursor: pointer; background: #e2e8f0; color: #334155;">🥚 Hasil Ternak</button>
+            </div>
+
+            <div id="subtab-content-container" class="inventory-container"></div>
         </div>
 
-        <!-- Konten Tab: Koleksi & Informasi Aksesori -->
-        <div id="tab-aksesori" class="tab-content">
-            <h3 style="color: #1e293b; font-size: 16px;">Koleksi & Detail Aksesori</h3>
-            <p style="font-size: 12px; color: #64748b; margin-top: -5px; margin-bottom: 12px;">Kelola perlengkapanmu dan lihat efek lengkapnya di sini.</p>
-            <div id="aksesori-list-container" class="inventory-container"></div>
+        <!-- KONTEN 3: TAB PROFIL (Slot Perlengkapan: Kepala, Badan, Kaki, Telapak) -->
+        <div id="tab-profil" class="tab-content">
+            <h3 style="color: #1e293b; font-size: 16px; margin-bottom: 5px;">Profil & Perlengkapan Petani</h3>
+            <p style="font-size: 11px; color: #64748b; margin-top: 0; margin-bottom: 12px;">Atur slot aksesori aktif dan lihat koleksi milikmu.</p>
+            
+            <!-- Panel Slot Aksesori Aktif -->
+            <div style="background: #f8fafc; border: 1px solid #cbd5e1; padding: 12px; border-radius: 10px; margin-bottom: 15px;">
+                <h4 style="margin: 0 0 8px 0; font-size: 13px; color: #1e293b;">Slot Aksesori Aktif:</h4>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; font-size: 12px;">
+                    <div style="background: #ffffff; padding: 8px; border-radius: 6px; border: 1px solid #e2e8f0;">👒 Kepala:<br><strong id="slot-kepala-display" style="color: #0f172a;">Kosong</strong></div>
+                    <div style="background: #ffffff; padding: 8px; border-radius: 6px; border: 1px solid #e2e8f0;">👕 Badan:<br><strong id="slot-badan-display" style="color: #0f172a;">Kosong</strong></div>
+                    <div style="background: #ffffff; padding: 8px; border-radius: 6px; border: 1px solid #e2e8f0;">👖 Kaki:<br><strong id="slot-kaki-display" style="color: #0f172a;">Kosong</strong></div>
+                    <div style="background: #ffffff; padding: 8px; border-radius: 6px; border: 1px solid #e2e8f0;">🩴 Telapak:<br><strong id="slot-telapak-display" style="color: #0f172a;">Kosong</strong></div>
+                </div>
+                <div style="font-size: 12px; margin-top: 10px; text-align: right; color: #0284c7; font-weight: bold;">
+                    Total Bonus Panen: <span id="total-bonus-display">0%</span>
+                </div>
+            </div>
+
+            <h4 style="margin: 0 0 8px 0; font-size: 13px; color: #1e293b;">Koleksi Aksesori Dimiliki:</h4>
+            <div id="profil-aksesori-container" class="inventory-container"></div>
         </div>
 
-        <!-- Konten Tab: Pasar -->
+        <!-- KONTEN 4: TAB PASAR (Pupuk & Bibit) -->
         <div id="tab-pasar" class="tab-content">
-            <h3 style="color: #1e293b; font-size: 16px;">Pasar Bibit, Pupuk & Aksesori</h3>
+            <h3 style="color: #1e293b; font-size: 16px; margin-bottom: 8px;">Pasar Bibit & Pupuk</h3>
             <div id="pasar-container" class="market-container"></div>
 
             <button id="btn-tambah-lahan" class="btn-submit" style="margin-top: 20px; background-color: #1e293b; width: 100%; display: none;" onclick="beliLahan()">➕ Beli Lahan Baru</button>
+        </div>
+
+        <!-- KONTEN 5: TAB TOKO AKSESORI -->
+        <div id="tab-toko_aksesori" class="tab-content">
+            <h3 style="color: #1e293b; font-size: 16px; margin-bottom: 8px;">Toko Aksesori Petani</h3>
+            <p style="font-size: 11px; color: #64748b; margin-top: 0; margin-bottom: 12px;">Beli perlengkapan khusus untuk memperkuat hasil panen dan menghadapi cuaca ekstrem.</p>
+            <div id="toko-aksesori-container" class="market-container"></div>
         </div>
     </div>
 
