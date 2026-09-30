@@ -7,44 +7,43 @@ let libraryTanaman = [
         namaBibit: 'Bibit Semangka',
         iconBibit: '🌱',
         iconBuah: '🍉',
-        BasehargaBeli: 60,
-        BasehargaJual: 70,
-        waktuTumbuh: 86400000 
+        BasehargaBeli: 600,
+        BasehargaJual: 750,
+        waktuTumbuh: 30000 
     },
     {
         nama: 'Melon',
         namaBibit: 'Bibit Melon',
         iconBibit: '🌱',
         iconBuah: '🍈',
-        BasehargaBeli: 40,
-        BasehargaJual: 55,
-        waktuTumbuh: 129600000
+        BasehargaBeli: 400,
+        BasehargaJual: 600,
+        waktuTumbuh: 15000
     },
     {
         nama: 'Jagung',
         namaBibit: 'Bibit Jagung',
         iconBibit: '🌱',
         iconBuah: '🌽',
-        BasehargaBeli: 100,
-        BasehargaJual: 120,
-        waktuTumbuh: 172800000
+        BasehargaBeli: 1000,
+        BasehargaJual: 1600,
+        waktuTumbuh: 45000
     },
     {
         nama: 'Apel',
         namaBibit: 'Bibit Apel',
         iconBibit: '🌱',
         iconBuah: '🍎',
-        BasehargaBeli: 170,
-        BasehargaJual: 210,
-        waktuTumbuh: 295200000
+        BasehargaBeli: 1300,
+        BasehargaJual: 2150,
+        waktuTumbuh: 90000
     }
 ];
 
-// Daftar Varian Pupuk Baru
 let listPupuk = [
-    { id: 'pupuk_organik', nama: 'Pupuk Organik', icon: '🍃', hargaBeli: 250, efekWaktu: 18000000 },
-    { id: 'biofertilizer', nama: 'Biofertilizer', icon: '🧪', hargaBeli: 300, efekWaktu: 25200000 },
-    { id: 'pupuk_urea', nama: 'Pupuk Urea', icon: '💎', hargaBeli: 520, efekWaktu: 54000000 }
+    { id: 'pupuk_organik', nama: 'Pupuk Organik', icon: '🍃', hargaBeli: 150, efekWaktu: 15000 },
+    { id: 'biofertilizer', nama: 'Biofertilizer', icon: '🧪', hargaBeli: 250, efekWaktu: 25000 },
+    { id: 'pupuk_urea', nama: 'Pupuk Urea', icon: '💎', hargaBeli: 450, efekWaktu: 50000 }
 ];
 
 let stokPupuk = {
@@ -53,20 +52,19 @@ let stokPupuk = {
     pupuk_urea: 0
 };
 
-// Daftar Aksesori Lengkap dengan Keterangan Efeknya
 let listAksesori = [
-    { id: 'sendal', nama: 'Sendal Jepit', icon: '🩴', slot: 'telapak', harga: 25000, bonusPersen: 3, deskripsi: 'Menambah +3% hasil panen dasar.' },
-    { id: 'boots', nama: 'Sepatu Boots', icon: '🥾', slot: 'telapak', harga: 450000, bonusPersen: 2, tangkalAngin: 35, deskripsi: 'Menambah +2% bonus dasar & menghilangkan 35% efek pengurangan hasil dari cuaca Angin Kencang.' },
+    { id: 'sendal', nama: 'Sendal Jepit', icon: '🩴', slot: 'telapak', harga: 15000, bonusPersen: 3, deskripsi: 'Menambah +3% hasil panen dasar.' },
+    { id: 'boots', nama: 'Sepatu Boots', icon: '🥾', slot: 'telapak', harga: 45000, bonusPersen: 2, tangkalAngin: 35, deskripsi: 'Menambah +2% bonus dasar & menghilangkan 35% efek pengurangan hasil dari cuaca Angin Kencang.' },
     { id: 'caping', nama: 'Caping Petani', icon: '👒', slot: 'kepala', harga: 50000, bonusPersen: 8, deskripsi: 'Menambah +8% hasil panen dasar.' },
-    { id: 'helmet', nama: 'Helm Full Face', icon: '🪖', slot: 'kepala', harga: 3500000, bonusPersen: 0, bonusBadaiPetir: 150, deskripsi: 'Memberikan tambahan bonus besar +150% hasil panen khusus saat terjadi cuaca Badai Petir Berat.' },
+    { id: 'helmet', nama: 'Helm Full Face', icon: '🪖', slot: 'kepala', harga: 250000, bonusPersen: 0, bonusBadaiPetir: 150, deskripsi: 'Memberikan tambahan bonus besar +150% hasil panen khusus saat terjadi cuaca Badai Petir Berat.' },
     { id: 'boxer', nama: 'Celana Boxer', icon: '🩳', slot: 'kaki', harga: 150000, bonusPersen: 12, deskripsi: 'Menambah +12% hasil panen dasar.' },
     { id: 'joger', nama: 'Celana Joger', icon: '👖', slot: 'kaki', harga: 300000, bonusPersen: 5, sinergiJas: 100, deskripsi: 'Menambah +5% bonus dasar. Memberikan tambahan +100% hasil panen jika dipadukan dengan Jas Anti Badai.' },
     { id: 'baju', nama: 'Baju Partai', icon: '👕', slot: 'badan', harga: 1200000, bonusPersen: 19, deskripsi: 'Menambah +19% hasil panen dasar.' },
-    { id: 'jas', nama: 'Jas Anti Badai', icon: '🧥', slot: 'badan', harga: 5000000, bonusPersen: 4, tangkalBadai: 50, deskripsi: 'Menambah +4% bonus dasar & menghilangkan 50% efek pengurangan dari cuaca Storm / Badai.' }
+    { id: 'jas', nama: 'Jas Anti Badai', icon: '🧥', slot: 'badan', harga: 500000, bonusPersen: 4, tangkalBadai: 50, deskripsi: 'Menambah +4% bonus dasar & menghilangkan 50% efek pengurangan dari cuaca Storm / Badai.' }
 ];
 
 // ==========================================
-// SISTEM CUACA DINAMIS & EFEKNYA
+// PENGATURAN JADWAL CUACA HARIAN OLEH DEVELOPER
 // ==========================================
 let cuacaAktif = {
     nama: 'Cerah',
@@ -74,30 +72,59 @@ let cuacaAktif = {
     efekPersen: 0
 };
 
-const daftarCuaca = [
+const daftarMasterCuaca = [
     { nama: 'Cerah', ikon: '☀️', efekPersen: 0 },
     { nama: 'Panas', ikon: '🔥', efekPersen: -3 },
-    { nama: 'Mendung', ikon: '☁️', efekPersen: 7 },
+    { nama: 'Mendung', ikon: '☁️️', efekPersen: 7 },
     { nama: 'Gerimis', ikon: '🌦️', efekPersen: 30 },
     { nama: 'Hujan', ikon: '🌧️', efekPersen: 120 },
-    { nama: 'Angin Kencang', ikon: '🌬️', efekPersen: -50 },
+    { nama: 'Angin Kencang', ikon: '🌬️️', efekPersen: -50 },
     { nama: 'Storm / Badai', ikon: '⚡', efekPersen: -70 },
     { nama: 'Badai Petir Berat', ikon: '🌪️', efekPersen: -90 }
 ];
 
-function ubahCuacaSecaraAcak() {
-    let randomIndex = Math.floor(Math.random() * daftarCuaca.length);
-    cuacaAktif = daftarCuaca[randomIndex];
-    
+// 🛠️ ATUR DI SINI: Masukkan nama-nama cuaca yang ingin diaktifkan untuk hari ini!
+let jadwalCuacaHariIni = ['Cerah', 'Gerimis', 'Hujan', 'Storm / Badai']; 
+
+let indeksCuacaAktif = 0;
+let timerCuacaInterval = null;
+
+function hitungDanTerapkanJadwalCuaca() {
+    if (!jadwalCuacaHariIni || jadwalCuacaHariIni.length === 0) {
+        jadwalCuacaHariIni = ['Cerah'];
+    }
+
+    // Ambil cuaca berdasarkan urutan jadwal hari ini
+    let namaCuacaTarget = jadwalCuacaHariIni[indeksCuacaAktif % jadwalCuacaHariIni.length];
+    let found = daftarMasterCuaca.find(c => c.nama === namaCuacaTarget);
+    if (found) {
+        cuacaAktif = found;
+    } else {
+        cuacaAktif = daftarMasterCuaca[0];
+    }
+
+    indeksCuacaAktif++;
     renderInfoCuacaDiUI();
-    showToast(`Prakiraan Cuaca: ${cuacaAktif.ikon} ${cuacaAktif.nama}!`, 'info');
+    renderPasar();
+    renderTokoAksesori();
+
+    let statusTutup = cuacaAktif.nama.includes('Badai') ? " (⚠️ Pasar & Toko Tutup!)" : "";
+    showToast(`Pergantian Cuaca: ${cuacaAktif.ikon} ${cuacaAktif.nama}${statusTutup}`, 'info');
+
+    // ⏱️ OTOMATIS: Membagi durasi 24 jam secara merata (skala total 12 menit per siklus penuh hari ini)
+    let totalDurasiSiklusMs = 720000; // 12 Menit total untuk 1 hari penuh game
+    let durasiPerCuacaMs = totalDurasiSiklusMs / jadwalCuacaHariIni.length;
+
+    if (timerCuacaInterval) clearTimeout(timerCuacaInterval);
+    timerCuacaInterval = setTimeout(hitungDanTerapkanJadwalCuaca, durasiPerCuacaMs);
 }
 
 function renderInfoCuacaDiUI() {
     let panelCuaca = document.getElementById('info-cuaca-display');
     if (panelCuaca) {
         let tanda = cuacaAktif.efekPersen > 0 ? '+' : '';
-        panelCuaca.innerText = `${cuacaAktif.ikon} ${cuacaAktif.nama} (${tanda}${cuacaAktif.efekPersen}%)`;
+        let statusTutupTxt = cuacaAktif.nama.includes('Badai') ? ' 🛑 [Tutup]' : '';
+        panelCuaca.innerText = `${cuacaAktif.ikon} ${cuacaAktif.nama} (${tanda}${cuacaAktif.efekPersen}%)${statusTutupTxt}`;
     }
 }
 
@@ -117,7 +144,7 @@ let lahan = [
 ]; 
 let lahanTambahanDibeli = 0; 
 const limitLahanTambahan = 7; 
-let hargaTambahLahan = 1500000; 
+let hargaTambahLahan = 5000; 
 
 let currentTransactionType = 'beli'; 
 let currentTransactionItem = ''; 
@@ -131,7 +158,7 @@ let currentSubInventory = 'bibit';
 
 let hargaBeliAktif = {}; 
 let hargaJualAktif = {}; 
-let playerName = "Petani Baru Desa";
+let playerName = "Petani Pintar";
 
 function updateFluktuasiHarga() {
     libraryTanaman.forEach(tanaman => {
@@ -289,11 +316,26 @@ function renderTabProfil() {
     container.innerHTML = html;
 }
 
+// --- RENDER PASAR (TUTUP KETIKA BADAI) ---
 function renderPasar() {
     const container = document.getElementById('pasar-container'); 
     if (!container) return;
-    let html = ''; 
     
+    let sedangBadai = cuacaAktif.nama.includes('Badai');
+    if (sedangBadai) {
+        container.innerHTML = `
+            <div style="text-align: center; padding: 30px; background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; color: #991b1b;">
+                <div style="font-size: 32px; margin-bottom: 8px;">⛈️</div>
+                <strong>Pasar Ditutup Sementara!</strong><br>
+                <small style="color: #7f1d1d;">Cuaca terlalu berbahaya (${cuacaAktif.nama}). Pedagang menyelamatkan diri. Silakan kembali saat cuaca membaik.</small>
+            </div>
+        `;
+        let btnTambah = document.getElementById('btn-tambah-lahan');
+        if (btnTambah) btnTambah.style.display = 'none';
+        return;
+    }
+
+    let html = ''; 
     html += `<h4 style="margin: 0 0 8px 0; color: #1e293b; font-size: 14px;">🌱 Toko Bibit Tanaman</h4>`;
     libraryTanaman.forEach(tanaman => {
         let hargaToko = hargaBeliAktif[tanaman.namaBibit] || tanaman.BasehargaBeli; 
@@ -335,11 +377,24 @@ function renderPasar() {
     } 
 } 
 
+// --- RENDER TOKO AKSESORI (TUTUP KETIKA BADAI) ---
 function renderTokoAksesori() {
     const container = document.getElementById('toko-aksesori-container');
     if (!container) return;
-    let html = '';
 
+    let sedangBadai = cuacaAktif.nama.includes('Badai');
+    if (sedangBadai) {
+        container.innerHTML = `
+            <div style="text-align: center; padding: 30px; background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; color: #991b1b;">
+                <div style="font-size: 32px; margin-bottom: 8px;">🌪️</div>
+                <strong>Toko Aksesori Tutup Sementara!</strong><br>
+                <small style="color: #7f1d1d;">Pintu toko dikunci rapat akibat cuaca buruk (${cuacaAktif.nama}). Toko buka kembali setelah badai reda.</small>
+            </div>
+        `;
+        return;
+    }
+
+    let html = '';
     listAksesori.forEach(acc => {
         let sudahDimiliki = aksesoriDimiliki.includes(acc.id);
         let actionBtn = '';
@@ -365,6 +420,10 @@ function renderTokoAksesori() {
 }
 
 function beliAksesori(id, harga) {
+    if (cuacaAktif.nama.includes('Badai')) {
+        showToast("Toko sedang tutup karena badai!", "error");
+        return;
+    }
     if (uang < harga) {
         showToast("Uang tidak cukup untuk membeli aksesori ini!", "error");
         return;
@@ -516,6 +575,10 @@ function konfirmasiTanamBibit() {
 }
 
 function beliLahan() {
+    if (cuacaAktif.nama.includes('Badai')) {
+        showToast("Tidak bisa memperluas lahan saat badai melanda!", "error");
+        return;
+    }
     if (lahanTambahanDibeli >= limitLahanTambahan) {
         showToast('Batas maksimal lahan tercapai!', 'error'); 
         return; 
@@ -677,6 +740,11 @@ function panenTanaman(index) {
 } 
 
 function bukaModalTransaksi(tipe, namaBarang, harga, stokMaksimal = 0) {
+    if (cuacaAktif.nama.includes('Badai')) {
+        showToast("Pasar sedang tutup karena cuaca badai!", "error");
+        return;
+    }
+
     currentTransactionType = tipe; 
     currentTransactionItem = namaBarang; 
     currentTransactionPrice = harga; 
@@ -903,6 +971,7 @@ function simpanGame() {
         aksesoriDimiliki: aksesoriDimiliki,
         slotAktif: slotAktif,
         cuacaAktif: cuacaAktif,
+        indeksCuacaAktif: indeksCuacaAktif,
         lahan: lahan.map(l => ({
             id: l.id,
             status: l.status,
@@ -924,28 +993,12 @@ function muatGame() {
             playerName = data.playerName || "Petani Pintar";
             uang = data.uang !== undefined ? data.uang : 3500;
             inventory = data.inventory || [];
-            if (data.stokPupuk) {
-                stokPupuk = data.stokPupuk;
-            } else if (data.jumlahPupuk !== undefined) {
-                stokPupuk.pupuk_organik = data.jumlahPupuk;
-            }
-            // Kompatibilitas migrasi nama properti pupuk lama
-            if (stokPupuk.pupuk_ayam !== undefined) {
-                stokPupuk.pupuk_organik = (stokPupuk.pupuk_organik || 0) + stokPupuk.pupuk_ayam;
-                delete stokPupuk.pupuk_ayam;
-            }
-            if (stokPupuk.pupuk_domba !== undefined) {
-                stokPupuk.biofertilizer = (stokPupuk.biofertilizer || 0) + stokPupuk.pupuk_domba;
-                delete stokPupuk.pupuk_domba;
-            }
-            if (stokPupuk.pupuk_sapi !== undefined) {
-                stokPupuk.pupuk_urea = (stokPupuk.pupuk_urea || 0) + stokPupuk.pupuk_sapi;
-                delete stokPupuk.pupuk_sapi;
-            }
-
+            if (data.stokPupuk) stokPupuk = data.stokPupuk;
             aksesoriDimiliki = data.aksesoriDimiliki || [];
             slotAktif = data.slotAktif || { kepala: null, badan: null, kaki: null, telapak: null };
             if (data.cuacaAktif) cuacaAktif = data.cuacaAktif;
+            if (data.indeksCuacaAktif !== undefined) indeksCuacaAktif = data.indeksCuacaAktif;
+            
             lahanTambahanDibeli = data.lahanTambahanDibeli || 0;
             hargaTambahLahan = data.hargaTambahLahan || 5000;
             
@@ -989,8 +1042,8 @@ function initGame() {
     updateFluktuasiHarga(); 
     setInterval(updateFluktuasiHarga, 60000); 
     
-    renderInfoCuacaDiUI();
-    setInterval(ubahCuacaSecaraAcak, 180000);
+    // Jalankan sistem jadwal cuaca harian buatan developer
+    hitungDanTerapkanJadwalCuaca();
     
     renderPasar(); 
     renderLahan(); 
@@ -998,7 +1051,7 @@ function initGame() {
     updatePanelAksesoriInfo();
     
     let elNick = document.getElementById('player-nickname');
-    if(elNick) elNick.innerText = `👨‍🌾 ${playerName} ✏️`;
+    if(elNick) elNick.innerText = `👨‍🌾 ${playerName} ✏️️`;
 
     lahan.forEach((l, index) => {
         if (l.status === 'ditanam') {
