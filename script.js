@@ -7,8 +7,8 @@ let libraryTanaman = [
         namaBibit: 'Bibit Semangka',
         iconBibit: '🌱',
         iconBuah: '🍉',
-        BasehargaBeli: 600,
-        BasehargaJual: 750,
+        BasehargaBeli: 60,
+        BasehargaJual: 68,
         waktuTumbuh: 30000 
     },
     {
@@ -16,8 +16,8 @@ let libraryTanaman = [
         namaBibit: 'Bibit Melon',
         iconBibit: '🌱',
         iconBuah: '🍈',
-        BasehargaBeli: 400,
-        BasehargaJual: 600,
+        BasehargaBeli: 40,
+        BasehargaJual: 52,
         waktuTumbuh: 15000
     },
     {
@@ -25,8 +25,8 @@ let libraryTanaman = [
         namaBibit: 'Bibit Jagung',
         iconBibit: '🌱',
         iconBuah: '🌽',
-        BasehargaBeli: 1000,
-        BasehargaJual: 1600,
+        BasehargaBeli: 90,
+        BasehargaJual: 111,
         waktuTumbuh: 45000
     },
     {
@@ -34,16 +34,16 @@ let libraryTanaman = [
         namaBibit: 'Bibit Apel',
         iconBibit: '🌱',
         iconBuah: '🍎',
-        BasehargaBeli: 1300,
-        BasehargaJual: 2150,
+        BasehargaBeli: 130,
+        BasehargaJual: 180,
         waktuTumbuh: 90000
     }
 ];
 
 let listPupuk = [
-    { id: 'pupuk_organik', nama: 'Pupuk Organik', icon: '🍃', hargaBeli: 150, efekWaktu: 15000 },
-    { id: 'biofertilizer', nama: 'Biofertilizer', icon: '🧪', hargaBeli: 250, efekWaktu: 25000 },
-    { id: 'pupuk_urea', nama: 'Pupuk Urea', icon: '💎', hargaBeli: 450, efekWaktu: 50000 }
+    { id: 'pupuk_organik', nama: 'Pupuk Organik', icon: '🍃', hargaBeli: 185, efekWaktu: 15000 },
+    { id: 'biofertilizer', nama: 'Biofertilizer', icon: '🧪', hargaBeli: 350, efekWaktu: 25000 },
+    { id: 'pupuk_urea', nama: 'Pupuk Urea', icon: '💎', hargaBeli: 580, efekWaktu: 50000 }
 ];
 
 let stokPupuk = {
@@ -73,18 +73,18 @@ let cuacaAktif = {
 };
 
 const daftarMasterCuaca = [
-    { nama: 'Cerah', ikon: '☀️', efekPersen: 0 },
+    { nama: 'Cerah', ikon: '☀️️', efekPersen: 0 },
     { nama: 'Panas', ikon: '🔥', efekPersen: -3 },
-    { nama: 'Mendung', ikon: '☁️️', efekPersen: 7 },
+    { nama: 'Mendung', ikon: '☁️', efekPersen: 7 },
     { nama: 'Gerimis', ikon: '🌦️', efekPersen: 30 },
     { nama: 'Hujan', ikon: '🌧️', efekPersen: 120 },
-    { nama: 'Angin Kencang', ikon: '🌬️️', efekPersen: -50 },
+    { nama: 'Angin Kencang', ikon: '🌬️', efekPersen: -50 },
     { nama: 'Storm / Badai', ikon: '⚡', efekPersen: -70 },
     { nama: 'Badai Petir Berat', ikon: '🌪️', efekPersen: -90 }
 ];
 
-// 🛠️ ATUR DI SINI: Masukkan nama-nama cuaca yang ingin diaktifkan untuk hari ini!
-let jadwalCuacaHariIni = ['Cerah', 'Gerimis', 'Hujan', 'Storm / Badai']; 
+// 🛠️ ATUR DI SINI: Masukkan nama-nama cuaca untuk hari ini
+let jadwalCuacaHariIni = ['Cerah', 'Gerimis', 'Hujan', 'Storm / Badai', 'Cerah', 'Gerimis']; 
 
 let indeksCuacaAktif = 0;
 let timerCuacaInterval = null;
@@ -94,7 +94,6 @@ function hitungDanTerapkanJadwalCuaca() {
         jadwalCuacaHariIni = ['Cerah'];
     }
 
-    // Ambil cuaca berdasarkan urutan jadwal hari ini
     let namaCuacaTarget = jadwalCuacaHariIni[indeksCuacaAktif % jadwalCuacaHariIni.length];
     let found = daftarMasterCuaca.find(c => c.nama === namaCuacaTarget);
     if (found) {
@@ -111,7 +110,6 @@ function hitungDanTerapkanJadwalCuaca() {
     let statusTutup = cuacaAktif.nama.includes('Badai') ? " (⚠️ Pasar & Toko Tutup!)" : "";
     showToast(`Pergantian Cuaca: ${cuacaAktif.ikon} ${cuacaAktif.nama}${statusTutup}`, 'info');
 
-    // ⏱️ OTOMATIS: Membagi durasi 24 jam secara merata (skala total 12 menit per siklus penuh hari ini)
     let totalDurasiSiklusMs = 720000; // 12 Menit total untuk 1 hari penuh game
     let durasiPerCuacaMs = totalDurasiSiklusMs / jadwalCuacaHariIni.length;
 
@@ -316,7 +314,6 @@ function renderTabProfil() {
     container.innerHTML = html;
 }
 
-// --- RENDER PASAR (TUTUP KETIKA BADAI) ---
 function renderPasar() {
     const container = document.getElementById('pasar-container'); 
     if (!container) return;
@@ -377,7 +374,6 @@ function renderPasar() {
     } 
 } 
 
-// --- RENDER TOKO AKSESORI (TUTUP KETIKA BADAI) ---
 function renderTokoAksesori() {
     const container = document.getElementById('toko-aksesori-container');
     if (!container) return;
@@ -619,6 +615,25 @@ function pilihBibitUntukDitanam(namaBibit) {
     bukaModalPilihBibit(emptyIndex);
 } 
 
+// --- FORMAT WAKTU DINAMIS (JAM/MENIT ATAU HARI) ---
+function formatWaktuDinamis(sisaMs) {
+    let totalDetik = Math.floor(sisaMs / 1000);
+    let totalJam = Math.floor(totalDetik / 3600);
+
+    // Jika waktu tersisa mencapai 24 jam (86400 detik) atau lebih
+    if (totalJam >= 24) {
+        let hari = Math.floor(totalJam / 24);
+        let sisaJam = totalJam % 24;
+        return `${hari} Hari ${sisaJam} Jam`;
+    } else {
+        // Jika di bawah 24 jam, tampilkan format Jam:Menit:Detik
+        let jam = Math.floor(totalDetik / 3600);
+        let menit = Math.floor((totalDetik % 3600) / 60);
+        let detik = totalDetik % 60;
+        return `${String(jam).padStart(2, '0')}:${String(menit).padStart(2, '0')}:${String(detik).padStart(2, '0')}`;
+    }
+}
+
 function mulaiTimerLahan(index) {
     let l = lahan[index]; 
     if (l.timerInterval) clearInterval(l.timerInterval); 
@@ -632,11 +647,7 @@ function mulaiTimerLahan(index) {
             l.status = 'siap_panen'; 
             renderLahan(); 
         } else {
-            let jam = Math.floor((sisaWaktu % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)); 
-            let menit = Math.floor((sisaWaktu % (1000 * 60 * 60)) / (1000 * 60)); 
-            let detik = Math.floor((sisaWaktu % (1000 * 60)) / 1000); 
-            let formatWaktu = `${String(jam).padStart(2, '0')}:${String(menit).padStart(2, '0')}:${String(detik).padStart(2, '0')}`; 
-            
+            let formatWaktu = formatWaktuDinamis(sisaWaktu);
             if(waktuEl) waktuEl.innerText = `⏱️ ${formatWaktu}`; 
         } 
     }, 1000); 
@@ -1042,7 +1053,6 @@ function initGame() {
     updateFluktuasiHarga(); 
     setInterval(updateFluktuasiHarga, 60000); 
     
-    // Jalankan sistem jadwal cuaca harian buatan developer
     hitungDanTerapkanJadwalCuaca();
     
     renderPasar(); 
@@ -1051,7 +1061,7 @@ function initGame() {
     updatePanelAksesoriInfo();
     
     let elNick = document.getElementById('player-nickname');
-    if(elNick) elNick.innerText = `👨‍🌾 ${playerName} ✏️️`;
+    if(elNick) elNick.innerText = `👨‍🌾 ${playerName} ✏️`;
 
     lahan.forEach((l, index) => {
         if (l.status === 'ditanam') {
