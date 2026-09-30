@@ -7,62 +7,62 @@ let libraryTanaman = [
         namaBibit: 'Bibit Semangka',
         iconBibit: '🌱',
         iconBuah: '🍉',
-        BasehargaBeli: 600,
-        BasehargaJual: 750,
-        waktuTumbuh: 30000 
+        BasehargaBeli: 60,
+        BasehargaJual: 70,
+        waktuTumbuh: 86400000 
     },
     {
         nama: 'Melon',
         namaBibit: 'Bibit Melon',
         iconBibit: '🌱',
         iconBuah: '🍈',
-        BasehargaBeli: 400,
-        BasehargaJual: 600,
-        waktuTumbuh: 15000
+        BasehargaBeli: 40,
+        BasehargaJual: 55,
+        waktuTumbuh: 129600000
     },
     {
         nama: 'Jagung',
         namaBibit: 'Bibit Jagung',
         iconBibit: '🌱',
         iconBuah: '🌽',
-        BasehargaBeli: 1000,
-        BasehargaJual: 1600,
-        waktuTumbuh: 45000
+        BasehargaBeli: 100,
+        BasehargaJual: 120,
+        waktuTumbuh: 172800000
     },
     {
         nama: 'Apel',
         namaBibit: 'Bibit Apel',
         iconBibit: '🌱',
         iconBuah: '🍎',
-        BasehargaBeli: 1300,
-        BasehargaJual: 2150,
-        waktuTumbuh: 90000
+        BasehargaBeli: 170,
+        BasehargaJual: 210,
+        waktuTumbuh: 295200000
     }
 ];
 
-// Daftar Variasi Pupuk Organik
+// Daftar Varian Pupuk Baru
 let listPupuk = [
-    { id: 'pupuk_ayam', nama: 'Ee Ayam', icon: '🐔', hargaBeli: 150, efekWaktu: 15000 },
-    { id: 'pupuk_domba', nama: 'Ee Domba', icon: '🐑', hargaBeli: 250, efekWaktu: 25000 },
-    { id: 'pupuk_sapi', nama: 'Ee Sapi', icon: '🐮', hargaBeli: 450, efekWaktu: 50000 }
+    { id: 'pupuk_organik', nama: 'Pupuk Organik', icon: '🍃', hargaBeli: 250, efekWaktu: 18000000 },
+    { id: 'biofertilizer', nama: 'Biofertilizer', icon: '🧪', hargaBeli: 300, efekWaktu: 25200000 },
+    { id: 'pupuk_urea', nama: 'Pupuk Urea', icon: '💎', hargaBeli: 520, efekWaktu: 54000000 }
 ];
 
 let stokPupuk = {
-    pupuk_ayam: 0,
-    pupuk_domba: 0,
-    pupuk_sapi: 0
+    pupuk_organik: 0,
+    biofertilizer: 0,
+    pupuk_urea: 0
 };
 
 // Daftar Aksesori Lengkap dengan Keterangan Efeknya
 let listAksesori = [
-    { id: 'sendal', nama: 'Sendal Jepit', icon: '🩴', slot: 'telapak', harga: 15000, bonusPersen: 3, deskripsi: 'Menambah +3% hasil panen dasar.' },
-    { id: 'boots', nama: 'Sepatu Boots', icon: '🥾', slot: 'telapak', harga: 45000, bonusPersen: 2, tangkalAngin: 35, deskripsi: 'Menambah +2% bonus dasar & menghilangkan 35% efek pengurangan hasil dari cuaca Angin Kencang.' },
+    { id: 'sendal', nama: 'Sendal Jepit', icon: '🩴', slot: 'telapak', harga: 25000, bonusPersen: 3, deskripsi: 'Menambah +3% hasil panen dasar.' },
+    { id: 'boots', nama: 'Sepatu Boots', icon: '🥾', slot: 'telapak', harga: 450000, bonusPersen: 2, tangkalAngin: 35, deskripsi: 'Menambah +2% bonus dasar & menghilangkan 35% efek pengurangan hasil dari cuaca Angin Kencang.' },
     { id: 'caping', nama: 'Caping Petani', icon: '👒', slot: 'kepala', harga: 50000, bonusPersen: 8, deskripsi: 'Menambah +8% hasil panen dasar.' },
-    { id: 'helmet', nama: 'Helm Full Face', icon: '🪖', slot: 'kepala', harga: 250000, bonusPersen: 0, bonusBadaiPetir: 150, deskripsi: 'Memberikan tambahan bonus besar +150% hasil panen khusus saat terjadi cuaca Badai Petir Berat.' },
+    { id: 'helmet', nama: 'Helm Full Face', icon: '🪖', slot: 'kepala', harga: 3500000, bonusPersen: 0, bonusBadaiPetir: 150, deskripsi: 'Memberikan tambahan bonus besar +150% hasil panen khusus saat terjadi cuaca Badai Petir Berat.' },
     { id: 'boxer', nama: 'Celana Boxer', icon: '🩳', slot: 'kaki', harga: 150000, bonusPersen: 12, deskripsi: 'Menambah +12% hasil panen dasar.' },
     { id: 'joger', nama: 'Celana Joger', icon: '👖', slot: 'kaki', harga: 300000, bonusPersen: 5, sinergiJas: 100, deskripsi: 'Menambah +5% bonus dasar. Memberikan tambahan +100% hasil panen jika dipadukan dengan Jas Anti Badai.' },
     { id: 'baju', nama: 'Baju Partai', icon: '👕', slot: 'badan', harga: 1200000, bonusPersen: 19, deskripsi: 'Menambah +19% hasil panen dasar.' },
-    { id: 'jas', nama: 'Jas Anti Badai', icon: '🧥', slot: 'badan', harga: 500000, bonusPersen: 4, tangkalBadai: 50, deskripsi: 'Menambah +4% bonus dasar & menghilangkan 50% efek pengurangan dari cuaca Storm / Badai.' }
+    { id: 'jas', nama: 'Jas Anti Badai', icon: '🧥', slot: 'badan', harga: 5000000, bonusPersen: 4, tangkalBadai: 50, deskripsi: 'Menambah +4% bonus dasar & menghilangkan 50% efek pengurangan dari cuaca Storm / Badai.' }
 ];
 
 // ==========================================
@@ -117,7 +117,7 @@ let lahan = [
 ]; 
 let lahanTambahanDibeli = 0; 
 const limitLahanTambahan = 7; 
-let hargaTambahLahan = 5000; 
+let hargaTambahLahan = 1500000; 
 
 let currentTransactionType = 'beli'; 
 let currentTransactionItem = ''; 
@@ -131,7 +131,7 @@ let currentSubInventory = 'bibit';
 
 let hargaBeliAktif = {}; 
 let hargaJualAktif = {}; 
-let playerName = "Petani Pintar";
+let playerName = "Petani Baru Desa";
 
 function updateFluktuasiHarga() {
     libraryTanaman.forEach(tanaman => {
@@ -217,7 +217,6 @@ function openGameTab(tabName) {
     
     document.getElementById('tab-' + tabName).classList.add('active');
     
-    // Cari tombol tab yang sesuai
     const navButtons = document.querySelectorAll('.nav-tabs .tab-btn');
     if (tabName === 'pertanian' && navButtons[0]) navButtons[0].classList.add('active');
     if (tabName === 'inventory' && navButtons[1]) navButtons[1].classList.add('active');
@@ -309,7 +308,7 @@ function renderPasar() {
         `; 
     }); 
     
-    html += `<h4 style="margin: 15px 0 8px 0; color: #1e293b; font-size: 14px;">💩 Toko Pupuk Organik</h4>`;
+    html += `<h4 style="margin: 15px 0 8px 0; color: #1e293b; font-size: 14px;">🧪 Toko Pupuk</h4>`;
     listPupuk.forEach(p => {
         let stok = stokPupuk[p.id] || 0;
         html += `
@@ -435,11 +434,11 @@ function renderLahan() {
 
     let headerHtml = `
         <div style="grid-column: span 2; background: #e2e8f0; padding: 10px; border-radius: 8px; display: flex; flex-direction: column; gap: 8px; margin-bottom: 5px;">
-            <div style="font-size: 12px; font-weight: bold; color: #1e293b;">🧪 Panel Pupuk Organik Massal:</div>
+            <div style="font-size: 12px; font-weight: bold; color: #1e293b;">🧪 Panel Pupuk Massal:</div>
             <div style="display: flex; gap: 5px; justify-content: space-between;">
-                <button class="btn-submit" style="background-color: #d97706; padding: 5px 8px; font-size: 10px; flex: 1;" onclick="gunakanPupuk('pupuk_ayam')">🐔 Ayam (${stokPupuk.pupuk_ayam})</button>
-                <button class="btn-submit" style="background-color: #2563eb; padding: 5px 8px; font-size: 10px; flex: 1;" onclick="gunakanPupuk('pupuk_domba')">🐑 Domba (${stokPupuk.pupuk_domba})</button>
-                <button class="btn-submit" style="background-color: #0f172a; padding: 5px 8px; font-size: 10px; flex: 1;" onclick="gunakanPupuk('pupuk_sapi')">🐮 Sapi (${stokPupuk.pupuk_sapi})</button>
+                <button class="btn-submit" style="background-color: #16a34a; padding: 5px 6px; font-size: 10px; flex: 1;" onclick="gunakanPupuk('pupuk_organik')">🍃 Organik (${stokPupuk.pupuk_organik})</button>
+                <button class="btn-submit" style="background-color: #2563eb; padding: 5px 6px; font-size: 10px; flex: 1;" onclick="gunakanPupuk('biofertilizer')">🧪 Biofert (${stokPupuk.biofertilizer})</button>
+                <button class="btn-submit" style="background-color: #0f172a; padding: 5px 6px; font-size: 10px; flex: 1;" onclick="gunakanPupuk('pupuk_urea')">💎 Urea (${stokPupuk.pupuk_urea})</button>
             </div>
         </div>
     `;
@@ -807,20 +806,16 @@ function tambahKeInventory(namaItem, jumlah) {
     else inventory.push({ nama: namaItem, jumlah: jumlah }); 
 } 
 
-// --- RENDER INVENTORY BERDASARKAN SUB-TAB (Bibit, Panen, Ternak) ---
 function renderInventory() {
     const container = document.getElementById('subtab-content-container'); 
     if (!container) return;
 
-    // Filter isi inventory berdasarkan kategori sub-tab yang aktif
     let filteredItems = inventory.filter(item => {
         if (currentSubInventory === 'bibit') {
             return item.nama.includes('Bibit');
         } else if (currentSubInventory === 'panen') {
-            // Hasil panen adalah item yang tidak mengandung kata 'Bibit'
             return !item.nama.includes('Bibit');
         } else if (currentSubInventory === 'ternak') {
-            // Tempat penampungan hasil hewan ternak (bisa dikembangkan nanti, misal Telur, Susu)
             return item.kategori === 'ternak';
         }
         return false;
@@ -929,10 +924,25 @@ function muatGame() {
             playerName = data.playerName || "Petani Pintar";
             uang = data.uang !== undefined ? data.uang : 3500;
             inventory = data.inventory || [];
-            if (data.stokPupuk) stokPupuk = data.stokPupuk;
-            if (data.jumlahPupuk !== undefined && data.stokPupuk === undefined) {
-                stokPupuk.pupuk_ayam = data.jumlahPupuk;
+            if (data.stokPupuk) {
+                stokPupuk = data.stokPupuk;
+            } else if (data.jumlahPupuk !== undefined) {
+                stokPupuk.pupuk_organik = data.jumlahPupuk;
             }
+            // Kompatibilitas migrasi nama properti pupuk lama
+            if (stokPupuk.pupuk_ayam !== undefined) {
+                stokPupuk.pupuk_organik = (stokPupuk.pupuk_organik || 0) + stokPupuk.pupuk_ayam;
+                delete stokPupuk.pupuk_ayam;
+            }
+            if (stokPupuk.pupuk_domba !== undefined) {
+                stokPupuk.biofertilizer = (stokPupuk.biofertilizer || 0) + stokPupuk.pupuk_domba;
+                delete stokPupuk.pupuk_domba;
+            }
+            if (stokPupuk.pupuk_sapi !== undefined) {
+                stokPupuk.pupuk_urea = (stokPupuk.pupuk_urea || 0) + stokPupuk.pupuk_sapi;
+                delete stokPupuk.pupuk_sapi;
+            }
+
             aksesoriDimiliki = data.aksesoriDimiliki || [];
             slotAktif = data.slotAktif || { kepala: null, badan: null, kaki: null, telapak: null };
             if (data.cuacaAktif) cuacaAktif = data.cuacaAktif;
