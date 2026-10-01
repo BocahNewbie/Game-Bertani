@@ -1,4 +1,4 @@
-// MARKET.JS - Logika Pasar, Harga Fluktuatif, & Modal Kuantitas Interaktif
+// MARKET.JS - Logika Pasar, Harga Fluktuatif, Ekspansi Kandang & Lahan
 
 let hargaPasarAktif = {
   bibit: {},
@@ -48,7 +48,6 @@ function tampilkanToast(pesan, tipe = 'sukses') {
   setTimeout(() => { toast.remove(); }, 3000);
 }
 
-// Beli Hewan satuan (Langsung pakai modal konfirmasi jika mau, atau tetap tombol langsung)
 function beliHewan(jenis, harga) {
   const k = gameState.kandang[jenis];
   if (k.isi.length >= k.kapasitas) {
@@ -65,7 +64,6 @@ function beliHewan(jenis, harga) {
   }
 }
 
-// Beli Aksesoris (Maksimal 1 buah)
 function beliAksesoris(nama, harga) {
   const sudahPunyaInventory = gameState.inventory.aksesoris.includes(nama);
   const sedangDipakai = Object.values(gameState.aksesorisAktif).includes(nama);
@@ -85,18 +83,7 @@ function beliAksesoris(nama, harga) {
   }
 }
 
-function beliLahan() {
-  const hargaLahan = 500;
-  if (gameState.player.koin >= hargaLahan) {
-    gameState.player.koin -= hargaLahan;
-    gameState.lahan.push({ id: gameState.lahan.length + 1, tanaman: null, umur: 0, siapPanen: false });
-    renderAll();
-    tampilkanToast('Berhasil membuka lahan tani baru!');
-  } else {
-    tampilkanToast('Koin tidak cukup!', 'error');
-  }
-}
-
+// --- LOGIKA UPGRADE KANDANG ---
 function hitungHargaUpgradeKandang(levelSaatIni) {
   let harga = 50000;
   for (let i = 1; i < levelSaatIni; i++) {
@@ -121,5 +108,33 @@ function upgradeKandang(jenis) {
     tampilkanToast(`Berhasil mengupgrade Kandang ${jenis} ke Level ${k.level}!`);
   } else {
     tampilkanToast(`Koin tidak cukup! Biaya Rp ${hargaUpgrade.toLocaleString('id-ID')}`, 'error');
+  }
+}
+
+// --- LOGIKA UPGRADE LAHAN ---
+function hitungHargaUpgradeLahan(jumlahLahanSaatIni) {
+  let harga = 150000;
+  // Kenaikan 790% sama dengan dikali 7.9 per level
+  for (let i = 1; i < jumlahLahanSaatIni; i++) {
+    harga = Math.round(harga * 7.9);
+  }
+  return harga;
+}
+
+function beliLahan() {
+  const jumlahLahan = gameState.lahan.length;
+  if (jumlahLahan >= 10) {
+    tampilkanToast('Lahan sudah mencapai batas maksimal (10 Lahan)!', 'error');
+    return;
+  }
+  const hargaLahan = hitungHargaUpgradeLahan(jumlahLahan);
+  if (gameState.player.koin >= hargaLahan) {
+    gameState.player.koin -= hargaLahan;
+    // Tambah 1 lahan kosong ke dalam array
+    gameState.lahan.push({ id: jumlahLahan + 1, tanaman: null, jumlah: 0, umur: 0, siapPanen: false });
+    renderAll();
+    tampilkanToast(`Berhasil membuka Lahan ke-${jumlahLahan + 1}!`);
+  } else {
+    tampilkanToast(`Koin tidak cukup! Biaya upgrade Rp ${hargaLahan.toLocaleString('id-ID')}`, 'error');
   }
 }
