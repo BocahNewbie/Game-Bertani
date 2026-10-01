@@ -78,6 +78,20 @@ function switchSubTab(parentTab, subName) {
   event.currentTarget.classList.add('active');
 }
 
+// SIMPAN OTOMATIS (AUTO-SAVE) KE LOCALSTORAGE
+function autoSaveGame() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(gameState));
+  // Notifikasi auto-save dibuat senyap di background (tanpa popup toast mengganggu), 
+  // tapi jika ingin melihat log bisa cek console.
+  console.log('💾 Auto-saved!');
+}
+
+// Tambahkan event agar otomatis tersimpan saat menutup tab/browser
+window.addEventListener('beforeunload', () => {
+  autoSaveGame();
+});
+
+// SIMPAN MANUAL (Tombol Simpan Tetap Berfungsi)
 function simpanGame() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(gameState));
   if (typeof tampilkanToast === 'function') tampilkanToast('Game berhasil disimpan!');
@@ -605,5 +619,72 @@ function simpanNickname() {
     gameState.player.nickname = val.trim();
     renderAll();
     tutupModalNickname();
+  }
+}
+
+function aksiLahan(index) {
+  const lahan = gameState.lahan[index];
+  
+  if (!lahan.tanaman) {
+    const bibitTersedia = Object.keys(gameState.inventory.bibit).find(b => gameState.inventory.bibit[b] > 0);
+    if (bibitTersedia) {
+      const stok = gameState.inventory.bibit[bibitTersedia];
+      
+      let strQty = prompt(`Tanam ${bibitTersedia} (Stok di tas: ${stok})\nMasukkan jumlah yang ingin ditanam (Maksimal 99 per lahan):`, "1");
+      if (strQty === null) return; 
+      
+      let qty = parseInt(strQty);
+      if (isNaN(qty) || qty <= 0) {
+        if (typeof tampilkanToast === 'function') tampilkanToast('Jumlah tanam tidak valid!', 'error');
+        return;
+      }
+      
+      if (qty > 99) qty = 99;
+      if (qty > stok) qty = stok; 
+      
+      gameState.inventory.bibit[bibitTersedia] -= qty;
+      lahan.tanaman = bibitTersedia;
+      lahan.jumlah = qty;
+      lahan.siapPanen = true; 
+      
+      autoSaveGame(); // <-- Auto Save Aktif
+      renderAll();
+      if (typeof tampilkanToast === 'function') tampilkanToast(`Berhasil menanam ${qty}x ${bibitTersedia}!`);
+      
+    } else { 
+      if (typeof tampilkanToast === 'function') tampilkanToast('Tidak ada bibit di inventory! Beli di Pasar.', 'error'); 
+    }
+    
+  } else if (lahan.siapPanen) {
+    const namaHasil = lahan.tanaman.replace('Bibit ', '');
+    const jumlahPanen = lahan.jumlah || 1;
+    
+    gameState.inventory.hasil[namaHasil] = (gameState.inventory.hasil[namaHasil] || 0) + jumlahPanen;
+    
+    lahan.tanaman = null;
+    lahan.jumlah = 0;
+    lahan.siapPanen = false;
+    
+    autoSaveGame(); // <-- Auto Save Aktif
+    renderAll();
+    if (typeof tampilkanToast === 'function') tampilkanToast(`Berhasil memanen ${jumlahPanen}x ${namaHasil}!`);
+  }
+}
+
+function panenTernak(jenis, index) {
+  const infoHewan = DIREKTORI_HEWAN[jenis];
+  const jumlahDapat = infoHewan.jumlahHasil || 1;
+
+  if ((gameState.inventory.pakan['Rumput Kering'] || 0) > 0) {
+    gameState.inventory.pakan['Rumput Kering']--;
+    gameState.inventory.hasil[infoHewan.hasilTernak] = (gameState.inventory.hasil[infoHewan.hasilTernak] || 0) + jumlahDapat;
+    
+    autoSaveGame(); // <-- Auto Save Aktif
+    renderAll();
+    if (typeof tampilkanToast === 'function') {
+      tampilkanToast(`Berhasil memerah dan mendapatkan ${jumlahDapat}x ${infoHewan.hasilTernak}!`);
+    }
+  } else { 
+    if (typeof tampilkanToast === 'function') tampilkanToast('Pakan Rumput Kering habis! Beli di Pasar.', 'error'); 
   }
 }
