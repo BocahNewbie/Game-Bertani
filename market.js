@@ -93,7 +93,7 @@ function beliAksesoris(nama, harga) {
 
 // --- LOGIKA UPGRADE KANDANG ---
 function hitungHargaUpgradeKandang(levelSaatIni) {
-  let harga = 250000;
+  let harga = 550000;
   for (let i = 1; i < levelSaatIni; i++) {
     harga = Math.round(harga * 3.5);
   }
@@ -121,7 +121,7 @@ function upgradeKandang(jenis) {
 
 // --- LOGIKA UPGRADE LAHAN ---
 function hitungHargaUpgradeLahan(jumlahLahanSaatIni) {
-  let harga = 375000;
+  let harga = 875000;
   for (let i = 1; i < jumlahLahanSaatIni; i++) {
     harga = Math.round(harga * 7.9);
   }
