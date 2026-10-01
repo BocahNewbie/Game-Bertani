@@ -1,6 +1,6 @@
 // DIRECTORY DATABASE GAME
 
-// Direktori Tumbuhan
+// 1. Direktori Tumbuhan
 const DIREKTORI_TUMBUHAN = {
   'Bibit Padi': {
     nama: 'Bibit Padi',
@@ -18,7 +18,7 @@ const DIREKTORI_TUMBUHAN = {
   }
 };
 
-// Direktori Hewan Ternak (Pakan disatukan menjadi Rumput Kering)
+// 2. Direktori Hewan Ternak (Jumlah hasil ternak sapi diubah menjadi 6)
 const DIREKTORI_HEWAN = {
   ayam: {
     jenis: 'ayam',
@@ -26,6 +26,7 @@ const DIREKTORI_HEWAN = {
     hargaBeliBase: 200,
     hargaJualHewanBase: 100,
     hasilTernak: 'Telur Ayam',
+    jumlahHasil: 1, // Default 1
     hargaJualHasilBase: 40,
     pakan: 'Rumput Kering'
   },
@@ -35,6 +36,7 @@ const DIREKTORI_HEWAN = {
     hargaBeliBase: 1000,
     hargaJualHewanBase: 500,
     hasilTernak: 'Susu Sapi',
+    jumlahHasil: 6, // Diubah menjadi 6 susu per panen
     hargaJualHasilBase: 250,
     pakan: 'Rumput Kering'
   },
@@ -44,12 +46,13 @@ const DIREKTORI_HEWAN = {
     hargaBeliBase: 750,
     hargaJualHewanBase: 350,
     hasilTernak: 'Wol Domba',
+    jumlahHasil: 1, // Default 1
     hargaJualHasilBase: 180,
     pakan: 'Rumput Kering'
   }
 };
 
-// Direktori Aksesoris Lengkap dengan Efeknya
+// 3. Direktori Aksesoris
 const DIREKTORI_AKSESORIS = {
   'Topi Caping': { 
     tipe: 'topi', 
