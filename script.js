@@ -237,10 +237,15 @@ function renderPeternakan() {
 
 function panenTernak(jenis, index) {
   const infoHewan = DIREKTORI_HEWAN[jenis];
+  const jumlahDapat = infoHewan.jumlahHasil || 1; // Membaca jumlah hasil dari direktori
+
   if ((gameState.inventory.pakan['Rumput Kering'] || 0) > 0) {
     gameState.inventory.pakan['Rumput Kering']--;
-    gameState.inventory.hasil[infoHewan.hasilTernak] = (gameState.inventory.hasil[infoHewan.hasilTernak] || 0) + 1;
+    gameState.inventory.hasil[infoHewan.hasilTernak] = (gameState.inventory.hasil[infoHewan.hasilTernak] || 0) + jumlahDapat;
     renderAll();
+    if (typeof tampilkanToast === 'function') {
+      tampilkanToast(`Berhasil memerah dan mendapatkan ${jumlahDapat}x ${infoHewan.hasilTernak}!`);
+    }
   } else { 
     if (typeof tampilkanToast === 'function') tampilkanToast('Pakan Rumput Kering habis! Beli di Pasar.', 'error'); 
   }
