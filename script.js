@@ -1,4 +1,4 @@
-// SCRIPT.JS - Logika Utama Game, Waktu Realtime, Pupuk, & Modal Modern
+// SCRIPT.JS - Logika Utama Game, Waktu Realtime, Pupuk Massal di Atas Lahan & Modal Modern
 
 const STORAGE_KEY = 'PETERNAKAN';
 
@@ -150,7 +150,7 @@ function formatSisaWaktu(detikSisa) {
   return `⏳ Sisa: ${hasilStr.join(' ')}`;
 }
 
-// 1. RENDER PERTANIAN
+// 1. RENDER PERTANIAN (Panel Pupuk Massal di Atas Lahan)
 function renderPertanian() {
   const container = document.getElementById('lahan-container');
   container.innerHTML = '';
@@ -159,11 +159,28 @@ function renderPertanian() {
   const stokKompos = gameState.inventory.pupuk['Pupuk Kompos'] || 0;
   const stokUrea = gameState.inventory.pupuk['Pupuk Urea'] || 0;
 
+  // Render Panel Kontrol Pupuk Massal di Atas Lahan
+  const panelAtasLahan = document.getElementById('pupuk-container');
+  if (panelAtasLahan) {
+    panelAtasLahan.innerHTML = `
+      <div class="card" style="grid-column: 1 / -1; background: #f0fdf4; border: 1px solid #bbf7d0;">
+        <h4 style="color: #166534; margin-bottom: 6px;">🧪 Panel Pupuk Massal (Berpengaruh ke Semua Lahan)</h4>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <button class="btn-primary" style="flex: 1; font-size: 11px; padding: 6px;" onclick="gunakanPupukMassal('Pupuk Kompos')">
+            Gunakan Kompos (Stok: ${stokKompos})
+          </button>
+          <button class="btn-primary" style="flex: 1; font-size: 11px; padding: 6px; background: #0284c7;" onclick="gunakanPupukMassal('Pupuk Urea')">
+            Gunakan Urea (Stok: ${stokUrea})
+          </button>
+        </div>
+      </div>
+    `;
+  }
+
   gameState.lahan.forEach((l, index) => {
     let statusTeks = 'Tanah Kosong';
     let tombolLabel = '🌱 Tanam';
     let tombolDisabled = false;
-    let tombolPupukHTML = '';
 
     if (l.tanaman) {
       const waktuLewatDetik = Math.floor((sekarang - l.waktuTanam) / 1000);
@@ -178,14 +195,6 @@ function renderPertanian() {
         statusTeks = `${l.tanaman} (${l.jumlah}x)<br>${formatSisaWaktu(sisaDetik)}`;
         tombolLabel = '⏳ Tumbuh...';
         tombolDisabled = true;
-
-        // Tombol opsi pemupukan saat tanaman sedang tumbuh
-        tombolPupukHTML = `
-          <div style="display:flex; gap:4px; margin-top:6px;">
-            <button class="btn-secondary" style="font-size:10px; padding:4px; flex:1;" onclick="gunakanPupuk(${index}, 'Pupuk Kompos')" ${stokKompos <= 0 ? 'opacity:0.5;' : ''}>🧪 Kompos (${stokKompos})</button>
-            <button class="btn-secondary" style="font-size:10px; padding:4px; flex:1;" onclick="gunakanPupuk(${index}, 'Pupuk Urea')" ${stokUrea <= 0 ? 'opacity:0.5;' : ''}>🧪 Urea (${stokUrea})</button>
-          </div>
-        `;
       }
     }
 
@@ -197,61 +206,53 @@ function renderPertanian() {
       <button class="btn-primary" onclick="aksiLahan(${index})" ${tombolDisabled ? 'disabled style="background:#94a3b8; cursor:not-allowed;"' : ''}>
         ${tombolLabel}
       </button>
-      ${tombolPupukHTML}
     `;
     container.appendChild(card);
   });
-
-  document.getElementById('pupuk-container').innerHTML = `
-    <div class="card">
-      <h4>🧪 Racik Pupuk Organik Lama</h4>
-      <p>Stok: ${gameState.inventory.pupuk['Pupuk Organik'] || 0}</p>
-      <button class="btn-primary" onclick="racikPupuk()">Racik</button>
-    </div>
-  `;
 }
 
-// Fitur Penggunaan Pupuk Kompos & Urea
-function gunakanPupuk(lahanIndex, namaPupuk) {
-  const lahan = gameState.lahan[lahanIndex];
-  
-  if (!lahan.tanaman || lahan.siapPanen) {
-    if (typeof tampilkanToast === 'function') tampilkanToast('Tidak ada tanaman yang sedang tumbuh di lahan ini!', 'error');
-    return;
-  }
-
+// Fitur Penggunaan Pupuk Massal untuk Semua Lahan Aktif
+function gunakanPupukMassal(namaPupuk) {
   const stokPupuk = gameState.inventory.pupuk[namaPupuk] || 0;
   if (stokPupuk <= 0) {
     if (typeof tampilkanToast === 'function') tampilkanToast(`Stok ${namaPupuk} habis! Beli di Pasar.`, 'error');
     return;
   }
 
+  // Cek apakah ada lahan yang sedang ditanami
+  const lahanAktif = gameState.lahan.filter(l => l.tanaman && !l.siapPanen);
+  if (lahanAktif.length === 0) {
+    if (typeof tampilkanToast === 'function') tampilkanToast('Tidak ada tanaman yang sedang tumbuh di lahan manapun!', 'error');
+    return;
+  }
+
   const infoPupuk = DIREKTORI_PUPUK[namaPupuk];
   if (!infoPupuk) return;
 
-  // Kurangi stok pupuk
+  // Kurangi 1 buah stok pupuk
   gameState.inventory.pupuk[namaPupuk]--;
   if (gameState.inventory.pupuk[namaPupuk] <= 0) {
     delete gameState.inventory.pupuk[namaPupuk];
   }
 
-  // Hitung random percepatan jam ke detik
+  // Hitung random percepatan jam ke detik (berlaku serentak)
   const randomJam = Math.random() * (infoPupuk.efekMaxJam - infoPupuk.efekMinJam) + infoPupuk.efekMinJam;
   const penguranganDetik = Math.round(randomJam * 3600);
-
-  // Majukan waktu tanam
-  lahan.waktuTanam -= (penguranganDetik * 1000);
-
   const sekarang = Date.now();
-  const waktuLewatDetik = Math.floor((sekarang - lahan.waktuTanam) / 1000);
-  if (waktuLewatDetik >= lahan.durasiDetik) {
-    lahan.siapPanen = true;
-  }
+
+  // Terapkan efek ke SEMUA lahan yang sedang menanam
+  lahanAktif.forEach(l => {
+    l.waktuTanam -= (penguranganDetik * 1000);
+    const waktuLewatDetik = Math.floor((sekarang - l.waktuTanam) / 1000);
+    if (waktuLewatDetik >= l.durasiDetik) {
+      l.siapPanen = true;
+    }
+  });
 
   autoSaveGame();
   renderAll();
   if (typeof tampilkanToast === 'function') {
-    tampilkanToast(`Berhasil menggunakan ${namaPupuk}! Waktu tumbuh dipercepat ${randomJam.toFixed(1)} jam.`);
+    tampilkanToast(`Berhasil menggunakan ${namaPupuk}! Semua waktu tumbuh dipercepat ${randomJam.toFixed(1)} jam.`);
   }
 }
 
@@ -506,7 +507,7 @@ function renderAksesoris() {
   });
 }
 
-// 4. RENDER PASAR (Termasuk Menu Pupuk Kompos & Urea)
+// 4. RENDER PASAR
 function renderPasar() {
   const pasarBibit = document.getElementById('pasar-bibit-container');
   pasarBibit.innerHTML = '';
@@ -522,7 +523,6 @@ function renderPasar() {
     `;
   });
 
-  // Render Pasar Pupuk Kompos & Urea
   Object.keys(DIREKTORI_PUPUK).forEach(namaPupuk => {
     const p = DIREKTORI_PUPUK[namaPupuk];
     pasarBibit.innerHTML += `
