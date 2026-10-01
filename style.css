@@ -201,3 +201,56 @@ button {
   justify-content: center;
   margin-top: 10px;
 }
+/* Navigasi Utama Dibuat Besar dan Menonjol */
+.nav-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.tab-btn {
+  flex: 1;
+  background: #e2e8f0;
+  color: #334155;
+  padding: 14px 10px; /* Ukuran diperbesar */
+  font-size: 15px;    /* Teks lebih besar */
+  font-weight: bold;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  transition: 0.2s;
+}
+
+.tab-btn.active {
+  background: #16a34a;
+  color: white;
+  border-color: #14532d;
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.2);
+}
+
+/* Sub-nav secara default disembunyikan, hanya muncul jika tab induknya aktif */
+.sub-nav {
+  display: none; 
+  gap: 6px;
+  margin-bottom: 12px;
+  padding-bottom: 4px;
+  overflow-x: auto;
+}
+
+/* Sub-nav aktif akan tampil fleksibel */
+.sub-nav.active-sub {
+  display: flex;
+}
+
+.sub-tab-btn {
+  background: #f1f5f9;
+  color: #64748b;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.sub-tab-btn.active {
+  background: #0ea5e9;
+  color: white;
+}
