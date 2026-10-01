@@ -1,4 +1,4 @@
-// MARKET.JS - Logika Pasar, Harga Fluktuatif, Ekspansi Kandang & Lahan
+// MARKET.JS - Logika Pasar, Harga Fluktuatif Seragam (-10% s.d +35%), & Toast Modern
 
 let hargaPasarAktif = {
   bibit: {},
@@ -16,23 +16,31 @@ function initMarketFluctuation() {
 }
 
 function hitungHargaPasarBaru() {
-  const getFaktorAcak = () => (Math.random() * 0.4) + 0.8;
+  // Menghasilkan faktor fluktuasi seragam: Turun max 10% (0.90) hingga Naik max 35% (1.35)
+  // Rumus: Min 0.90 sampai Max 1.35
+  const faktorFluktuasi = 0.90 + Math.random() * (1.35 - 0.90);
+
+  // 1. Terapkan pada Tumbuhan (Bibit & Hasil)
   Object.keys(DIREKTORI_TUMBUHAN).forEach(key => {
     const item = DIREKTORI_TUMBUHAN[key];
     hargaPasarAktif.bibit[key] = {
-      beli: Math.round(item.hargaBeliBase * getFaktorAcak()),
-      jual: Math.round(item.hargaJualBase * getFaktorAcak())
+      beli: Math.round(item.hargaBeliBase * faktorFluktuasi),
+      jual: Math.round(item.hargaJualBase * faktorFluktuasi)
     };
   });
+
+  // 2. Terapkan pada Hewan Ternak (Beli Hewan, Jual Hewan, Hasil Ternak)
   Object.keys(DIREKTORI_HEWAN).forEach(key => {
     const item = DIREKTORI_HEWAN[key];
     hargaPasarAktif.hewan[key] = {
-      beli: Math.round(item.hargaBeliBase * getFaktorAcak()),
-      jualHewan: Math.round(item.hargaJualHewanBase * getFaktorAcak()),
-      jualHasil: Math.round(item.hargaJualHasilBase * getFaktorAcak())
+      beli: Math.round(item.hargaBeliBase * faktorFluktuasi),
+      jualHewan: Math.round(item.hargaJualHewanBase * faktorFluktuasi),
+      jualHasil: Math.round(item.hargaJualHasilBase * faktorFluktuasi)
     };
   });
-  hargaPasarAktif.pakan = Math.round(15 * getFaktorAcak());
+
+  // 3. Terapkan juga pada Pakan Rumput Kering
+  hargaPasarAktif.pakan = Math.round(15 * faktorFluktuasi);
 }
 
 // Sistem Toast Modern
@@ -114,7 +122,6 @@ function upgradeKandang(jenis) {
 // --- LOGIKA UPGRADE LAHAN ---
 function hitungHargaUpgradeLahan(jumlahLahanSaatIni) {
   let harga = 150000;
-  // Kenaikan 790% sama dengan dikali 7.9 per level
   for (let i = 1; i < jumlahLahanSaatIni; i++) {
     harga = Math.round(harga * 7.9);
   }
@@ -130,7 +137,6 @@ function beliLahan() {
   const hargaLahan = hitungHargaUpgradeLahan(jumlahLahan);
   if (gameState.player.koin >= hargaLahan) {
     gameState.player.koin -= hargaLahan;
-    // Tambah 1 lahan kosong ke dalam array
     gameState.lahan.push({ id: jumlahLahan + 1, tanaman: null, jumlah: 0, umur: 0, siapPanen: false });
     renderAll();
     tampilkanToast(`Berhasil membuka Lahan ke-${jumlahLahan + 1}!`);
