@@ -6,14 +6,14 @@ const DIREKTORI_TUMBUHAN = {
     nama: 'Bibit Padi',
     hargaBeliBase: 35,
     hargaJualBase: 40,
-    waktuTumbuh: 10,
+    waktuTumbuh: 100,
     keterangan: 'Tanaman pokok penghasil padi.'
   },
   'Bibit Jagung': {
     nama: 'Bibit Jagung',
     hargaBeliBase: 90,
     hargaJualBase: 140,
-    waktuTumbuh: 20,
+    waktuTumbuh: 200,
     keterangan: 'Jagung manis bernilai jual tinggi.'
   }
 };
