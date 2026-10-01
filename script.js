@@ -258,7 +258,7 @@ function panenTernak(jenis, index) {
     gameState.inventory.hasil[infoHewan.hasilTernak] = (gameState.inventory.hasil[infoHewan.hasilTernak] || 0) + jumlahDapat;
     renderAll();
     if (typeof tampilkanToast === 'function') {
-      tampilkanToast(`Berhasil memerah dan mendapatkan ${jumlahDapat}x ${infoHewan.hasilTernak}!`);
+      tampilkanToast(`Berhasil mendapatkan ${jumlahDapat}x ${infoHewan.hasilTernak}!`);
     }
   } else { 
     if (typeof tampilkanToast === 'function') tampilkanToast('Pakan Rumput Kering habis! Beli di Pasar.', 'error'); 
