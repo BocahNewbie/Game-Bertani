@@ -16,7 +16,7 @@ let libraryTanaman = [
     namaBibit: 'Bibit Cabai',
     iconBibit: '🌱',
     iconBuah: '🌶️',
-    BasehargaBeli: 75,
+    BasehargaBeli: 65,
     BasehargaJual: 95,
     waktuTumbuh: 36000000 // 10 Jam (dalam milidetik)
     },
