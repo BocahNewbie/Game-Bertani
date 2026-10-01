@@ -32,10 +32,12 @@ let gameState = {
 
 document.addEventListener('DOMContentLoaded', () => {
   muatGame();
+  if (typeof initMarketFluctuation === 'function') {
+    initMarketFluctuation();
+  }
   renderAll();
 });
 
-// FUNGSI RESET GAME
 function eksekusiResetGame() {
   localStorage.removeItem(STORAGE_KEY);
   location.reload();
@@ -49,7 +51,6 @@ function tutupModalReset() {
   document.getElementById('modal-reset').style.display = 'none';
 }
 
-// NAVIGASI TAB UTAMA & OTOMATIS BUKA SUB-TAB PERTAMA
 function switchTab(tabName) {
   document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
   document.querySelectorAll('.nav-tabs .tab-btn').forEach(el => el.classList.remove('active'));
@@ -64,9 +65,7 @@ function switchTab(tabName) {
   if (targetSubNav) {
     targetSubNav.classList.add('active-sub');
     const firstSubBtn = targetSubNav.querySelector('.sub-tab-btn');
-    if (firstSubBtn) {
-      firstSubBtn.click();
-    }
+    if (firstSubBtn) { firstSubBtn.click(); }
   }
 }
 
@@ -79,7 +78,6 @@ function switchSubTab(parentTab, subName) {
   event.currentTarget.classList.add('active');
 }
 
-// SIMPAN & MUAT GAME
 function simpanGame() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(gameState));
   alert('Game berhasil disimpan!');
@@ -92,7 +90,6 @@ function muatGame() {
   }
 }
 
-// RENDER UTAMA
 function renderAll() {
   document.getElementById('player-nickname').innerText = `👨‍🌾 ${gameState.player.nickname} ✏️`;
   document.getElementById('player-koin').innerText = `Rp ${gameState.player.koin.toLocaleString('id-ID')}`;
@@ -140,9 +137,7 @@ function aksiLahan(index) {
       lahan.tanaman = bibitTersedia;
       lahan.siapPanen = true; 
       renderAll();
-    } else {
-      alert('Tidak ada bibit di inventory! Beli di Pasar.');
-    }
+    } else { alert('Tidak ada bibit di inventory! Beli di Pasar.'); }
   } else if (lahan.siapPanen) {
     const namaHasil = lahan.tanaman.replace('Bibit ', '');
     gameState.inventory.hasil[namaHasil] = (gameState.inventory.hasil[namaHasil] || 0) + 1;
@@ -162,15 +157,16 @@ function renderPeternakan() {
   ['ayam', 'sapi', 'domba'].forEach(j => {
     const dataKandang = gameState.kandang[j];
     const infoHewan = DIREKTORI_HEWAN[j];
+    const stokPakan = gameState.inventory.pakan['Rumput Kering'] || 0;
     
     document.getElementById(`info-kandang-${j}`).innerText = 
-      `Kapasitas: ${dataKandang.isi.length} / ${dataKandang.kapasitas} Ekor | Pakan (${infoHewan.pakan}): ${gameState.inventory.pakan[infoHewan.pakan] || 0}`;
+      `Kapasitas: ${dataKandang.isi.length} / ${dataKandang.kapasitas} Ekor (Max 5) | Pakan (Rumput Kering): ${stokPakan}`;
 
     const container = document.getElementById(`kandang-${j}-container`);
     container.innerHTML = '';
 
     if (dataKandang.isi.length === 0) {
-      container.innerHTML = `<p style="font-size:12px; color:#64748b;">Kandang masih kosong. Beli hewan di Pasar!</p>`;
+      container.innerHTML = `<p style="font-size:12px; color:#64748b;">Kandang kosong. Beli hewan di Pasar!</p>`;
       return;
     }
 
@@ -180,7 +176,7 @@ function renderPeternakan() {
       card.innerHTML = `
         <h4>${infoHewan.nama} #${index + 1}</h4>
         <p>Hasilkan: ${infoHewan.hasilTernak}</p>
-        <button class="btn-primary" onclick="panenTernak('${j}', ${index})">🧺 Ambil Hasil</button>
+        <button class="btn-primary" onclick="panenTernak('${j}', ${index})">🧺 Beri Pakan & Ambil</button>
       `;
       container.appendChild(card);
     });
@@ -189,18 +185,14 @@ function renderPeternakan() {
 
 function panenTernak(jenis, index) {
   const infoHewan = DIREKTORI_HEWAN[jenis];
-  const pakanDibutuhkan = infoHewan.pakan;
-
-  if ((gameState.inventory.pakan[pakanDibutuhkan] || 0) > 0) {
-    gameState.inventory.pakan[pakanDibutuhkan]--;
+  if ((gameState.inventory.pakan['Rumput Kering'] || 0) > 0) {
+    gameState.inventory.pakan['Rumput Kering']--;
     gameState.inventory.hasil[infoHewan.hasilTernak] = (gameState.inventory.hasil[infoHewan.hasilTernak] || 0) + 1;
     renderAll();
-  } else {
-    alert(`Pakan ${pakanDibutuhkan} habis! Beli pakan di Pasar.`);
-  }
+  } else { alert('Pakan Rumput Kering habis! Beli di Pasar.'); }
 }
 
-// 3. RENDER AKSESORIS
+// 3. RENDER AKSESORIS (Menampilkan deskripsi efek aksesoris)
 function renderAksesoris() {
   document.getElementById('slot-topi').innerText = gameState.aksesorisAktif.topi || 'Kosong';
   document.getElementById('slot-baju').innerText = gameState.aksesorisAktif.baju || 'Kosong';
@@ -218,52 +210,63 @@ function renderAksesoris() {
   }
 
   gameState.inventory.aksesoris.forEach((item) => {
+    const infoDetail = DIREKTORI_AKSESORIS[item];
     const card = document.createElement('div');
     card.className = 'card';
-    card.innerHTML = `<h4>${item}</h4><button class="btn-primary" onclick="pakaiAksesoris('${item}')">Pakai</button>`;
+    card.innerHTML = `
+      <h4>${item}</h4>
+      <p style="font-size:10px; color:#0284c7; margin-bottom:6px;">${infoDetail ? infoDetail.efek : ''}</p>
+      <button class="btn-primary" onclick="pakaiAksesoris('${item}')">Pakai</button>
+    `;
     container.appendChild(card);
   });
 }
 
-// 4. RENDER PASAR
+// 4. RENDER PASAR (Menampilkan harga fluktuatif & deskripsi efek aksesoris)
 function renderPasar() {
   const pasarBibit = document.getElementById('pasar-bibit-container');
   pasarBibit.innerHTML = '';
-  Object.values(DIREKTORI_TUMBUHAN).forEach(t => {
+  Object.keys(DIREKTORI_TUMBUHAN).forEach(key => {
+    const t = DIREKTORI_TUMBUHAN[key];
+    const hPasar = hargaPasarAktif.bibit[key] || { beli: t.hargaBeliBase, jual: t.hargaJualBase };
     pasarBibit.innerHTML += `
       <div class="card">
         <h4>🌱 ${t.nama}</h4>
-        <p>Beli: Rp ${t.hargaBeli} | Jual: Rp ${t.hargaJual}<br>Waktu: ${t.waktuTumbuh}s</p>
-        <button class="btn-primary" onclick="beliBibit('${t.nama}', ${t.hargaBeli})">Beli</button>
+        <p>Beli: Rp ${hPasar.beli} | Jual: Rp ${hPasar.jual}<br>Waktu: ${t.waktuTumbuh}s</p>
+        <button class="btn-primary" onclick="beliBibit('${t.nama}', ${hPasar.beli})">Beli</button>
       </div>
     `;
   });
 
   const pasarHewan = document.getElementById('pasar-hewan-container');
   pasarHewan.innerHTML = '';
-  Object.values(DIREKTORI_HEWAN).forEach(h => {
+  Object.keys(DIREKTORI_HEWAN).forEach(key => {
+    const h = DIREKTORI_HEWAN[key];
+    const hPasar = hargaPasarAktif.hewan[key] || { beli: h.hargaBeliBase, jualHewan: h.hargaJualHewanBase };
+    const hPakan = hargaPasarAktif.pakan || 15;
     pasarHewan.innerHTML += `
       <div class="card">
         <h4>🐾 ${h.nama}</h4>
-        <p>Beli Hewan: Rp ${h.hargaBeli}<br>Pakan (${h.pakan}): Rp ${h.hargaPakan}</p>
-        <button class="btn-primary" onclick="beliHewan('${h.jenis}', ${h.hargaBeli})">Beli Hewan</button>
-        <button class="btn-secondary" style="margin-top:4px;" onclick="beliPakan('${h.pakan}', ${h.hargaPakan})">Beli Pakan</button>
+        <p>Beli Hewan: Rp ${hPasar.beli}<br>Pakan (Rumput Kering): Rp ${hPakan}</p>
+        <button class="btn-primary" onclick="beliHewan('${h.jenis}', ${hPasar.beli})">Beli Hewan</button>
+        <button class="btn-secondary" style="margin-top:4px;" onclick="beliPakan(${hPakan})">Beli Pakan</button>
       </div>
     `;
   });
 
-  document.getElementById('pasar-aksesoris-container').innerHTML = `
-    <div class="card">
-      <h4>🎩 Topi Caping</h4>
-      <p>Harga: Rp 150</p>
-      <button class="btn-primary" onclick="beliAksesoris('Topi Caping', 150)">Beli</button>
-    </div>
-    <div class="card">
-      <h4>👟 Sepatu Bot</h4>
-      <p>Harga: Rp 200</p>
-      <button class="btn-primary" onclick="beliAksesoris('Sepatu Bot', 200)">Beli</button>
-    </div>
-  `;
+  const pasarAksesoris = document.getElementById('pasar-aksesoris-container');
+  pasarAksesoris.innerHTML = '';
+  Object.keys(DIREKTORI_AKSESORIS).forEach(nama => {
+    const item = DIREKTORI_AKSESORIS[nama];
+    pasarAksesoris.innerHTML += `
+      <div class="card">
+        <h4>${nama}</h4>
+        <p>Harga: Rp ${item.harga}</p>
+        <p style="font-size:10px; color:#0284c7; margin-bottom:6px;">${item.efek}</p>
+        <button class="btn-primary" onclick="beliAksesoris('${nama}', ${item.harga})">Beli</button>
+      </div>
+    `;
+  });
 
   document.getElementById('pasar-ekspansi-container').innerHTML = `
     <div class="card">
@@ -272,9 +275,19 @@ function renderPasar() {
       <button class="btn-primary" onclick="beliLahan()">Tambah</button>
     </div>
     <div class="card">
-      <h4>🏗️ Perbesar Kandang Ayam</h4>
+      <h4>🏗️ Upgrade Kandang Ayam (Max 5)</h4>
       <p>Harga: Rp 300</p>
-      <button class="btn-primary" onclick="perbesarKandang('ayam', 300)">Perbesar</button>
+      <button class="btn-primary" onclick="perbesarKandang('ayam')">Upgrade Ayam</button>
+    </div>
+    <div class="card">
+      <h4>🏗️ Upgrade Kandang Sapi (Max 5)</h4>
+      <p>Harga: Rp 300</p>
+      <button class="btn-primary" onclick="perbesarKandang('sapi')">Upgrade Sapi</button>
+    </div>
+    <div class="card">
+      <h4>🏗️ Upgrade Kandang Domba (Max 5)</h4>
+      <p>Harga: Rp 300</p>
+      <button class="btn-primary" onclick="perbesarKandang('domba')">Upgrade Domba</button>
     </div>
   `;
 }
@@ -285,8 +298,15 @@ function renderInventory() {
   containerHasil.innerHTML = '';
   
   let daftarHargaJual = {};
-  Object.values(DIREKTORI_TUMBUHAN).forEach(t => daftarHargaJual[t.nama.replace('Bibit ', '')] = t.hargaJual);
-  Object.values(DIREKTORI_HEWAN).forEach(h => daftarHargaJual[h.hasilTernak] = h.hargaJualHasil);
+  Object.keys(DIREKTORI_TUMBUHAN).forEach(key => {
+    const t = DIREKTORI_TUMBUHAN[key];
+    const namaBersih = t.nama.replace('Bibit ', '');
+    daftarHargaJual[namaBersih] = hargaPasarAktif.bibit[key] ? hargaPasarAktif.bibit[key].jual : t.hargaJualBase;
+  });
+  Object.keys(DIREKTORI_HEWAN).forEach(key => {
+    const h = DIREKTORI_HEWAN[key];
+    daftarHargaJual[h.hasilTernak] = hargaPasarAktif.hewan[key] ? hargaPasarAktif.hewan[key].jualHasil : h.hargaJualHasilBase;
+  });
 
   const totalHasil = Object.values(gameState.inventory.hasil).reduce((a, b) => a + b, 0);
   if (totalHasil === 0) {
@@ -300,7 +320,7 @@ function renderInventory() {
         card.innerHTML = `
           <h4>${nama}</h4>
           <p>Jumlah: ${jumlah}</p>
-          <button class="btn-primary" onclick="jualHasil('${nama}', ${hargaJual})">Jual</button>
+          <button class="btn-primary" onclick="jualHasil('${nama}', ${hargaJual})">Jual (Rp ${hargaJual})</button>
         `;
         containerHasil.appendChild(card);
       }
