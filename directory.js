@@ -18,7 +18,7 @@ const DIREKTORI_TUMBUHAN = {
   }
 };
 
-// 2. Direktori Hewan Ternak (Jumlah hasil ternak sapi diubah menjadi 6)
+// 2. Direktori Hewan Ternak
 const DIREKTORI_HEWAN = {
   ayam: {
     jenis: 'ayam',
@@ -26,7 +26,7 @@ const DIREKTORI_HEWAN = {
     hargaBeliBase: 950,
     hargaJualHewanBase: 350,
     hasilTernak: 'Telur Ayam',
-    jumlahHasil: 2, // Default 2
+    jumlahHasil: 2,
     hargaJualHasilBase: 21,
     pakan: 'Rumput Kering'
   },
@@ -36,7 +36,7 @@ const DIREKTORI_HEWAN = {
     hargaBeliBase: 6700,
     hargaJualHewanBase: 3500,
     hasilTernak: 'Susu Sapi',
-    jumlahHasil: 6, // Diubah menjadi 6 susu per panen
+    jumlahHasil: 6,
     hargaJualHasilBase: 130,
     pakan: 'Rumput Kering'
   },
@@ -46,26 +46,44 @@ const DIREKTORI_HEWAN = {
     hargaBeliBase: 3750,
     hargaJualHewanBase: 1350,
     hasilTernak: 'Wol Domba',
-    jumlahHasil: 1, // Default 1
+    jumlahHasil: 1,
     hargaJualHasilBase: 150,
     pakan: 'Rumput Kering'
   }
 };
 
-// 3. Direktori Aksesoris
+// 3. Direktori Pupuk (Kompos & Urea)
+const DIREKTORI_PUPUK = {
+  'Pupuk Kompos': {
+    nama: 'Pupuk Kompos',
+    harga: 4500,
+    efekMinJam: 2,
+    efekMaxJam: 8,
+    keterangan: 'Mempercepat waktu tumbuh tanaman 2 - 8 jam (random).'
+  },
+  'Pupuk Urea': {
+    nama: 'Pupuk Urea',
+    harga: 17500,
+    efekMinJam: 12,
+    efekMaxJam: 24,
+    keterangan: 'Mempercepat waktu tumbuh tanaman 12 - 24 jam (random).'
+  }
+};
+
+// 4. Direktori Aksesoris
 const DIREKTORI_AKSESORIS = {
   'Topi Caping': { 
     tipe: 'topi', 
     bonusType: 'jual', 
-    nilai: 10, 
-    harga: 150,
+    nilai: 15, 
+    harga: 150000,
     efek: 'Meningkatkan harga jual hasil panen & ternak sebesar +10%.' 
   },
   'Sepatu Bot': { 
     tipe: 'sepatu', 
     bonusType: 'tumbuh', 
-    nilai: 15, 
-    harga: 200,
-    efek: 'Mempercepat proses tumbuh tanaman sebesar +15%.' 
+    nilai: 10, 
+    harga: 200000,
+    efek: 'Meningkatkan hasil panen sebesar +10%.' 
   }
 };
