@@ -6,6 +6,8 @@ const DIREKTORI_AKSESORIS = {
   'Sepatu Bot': { tipe: 'sepatu', bonusType: 'tumbuh', nilai: 15 } // +15% kecepatan tumbuh
 };
 
+// ACCESSORIES.JS - Logika Efek Aksesoris
+
 function pakaiAksesoris(namaItem) {
   const info = DIREKTORI_AKSESORIS[namaItem];
   if (!info) return;
@@ -27,5 +29,5 @@ function hitungBonusAksesoris(tipeBonus) {
       }
     }
   });
-  return totalBonus; // Mengembalikan angka persentase (misal: 10 untuk 10%)
+  return totalBonus;
 }
