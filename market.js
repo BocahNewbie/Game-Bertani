@@ -1,4 +1,4 @@
-// MARKET.JS - Logika Pasar, Harga Fluktuatif, Ekspansi, & Toast Modern
+// MARKET.JS - Logika Pasar, Harga Fluktuatif, & Modal Kuantitas Interaktif
 
 let hargaPasarAktif = {
   bibit: {},
@@ -48,32 +48,7 @@ function tampilkanToast(pesan, tipe = 'sukses') {
   setTimeout(() => { toast.remove(); }, 3000);
 }
 
-// Beli Item/Bibit (Maksimal 99)
-function beliItemMassal(kategori, nama, hargaSatuan) {
-  let jumlahStr = prompt(`Beli ${nama} (Harga @Rp ${hargaSatuan}):\nMasukkan jumlah (Maksimal 99):`, "1");
-  if (jumlahStr === null) return;
-  
-  let jumlah = parseInt(jumlahStr);
-  if (isNaN(jumlah) || jumlah <= 0) {
-    tampilkanToast('Masukkan jumlah yang valid!', 'error');
-    return;
-  }
-  if (jumlah > 99) {
-    tampilkanToast('Batas pembelian maksimal adalah 99 item sekaligus!', 'error');
-    jumlah = 99;
-  }
-
-  let totalHarga = hargaSatuan * jumlah;
-  if (gameState.player.koin >= totalHarga) {
-    gameState.player.koin -= totalHarga;
-    gameState.inventory[kategori][nama] = (gameState.inventory[kategori][nama] || 0) + jumlah;
-    renderAll();
-    tampilkanToast(`Berhasil membeli ${jumlah}x ${nama} seharga Rp ${totalHarga.toLocaleString('id-ID')}!`);
-  } else {
-    tampilkanToast('Koin Anda tidak cukup untuk transaksi ini!', 'error');
-  }
-}
-
+// Beli Hewan satuan (Langsung pakai modal konfirmasi jika mau, atau tetap tombol langsung)
 function beliHewan(jenis, harga) {
   const k = gameState.kandang[jenis];
   if (k.isi.length >= k.kapasitas) {
@@ -85,32 +60,6 @@ function beliHewan(jenis, harga) {
     k.isi.push({ id: Date.now(), siapPanen: true });
     renderAll();
     tampilkanToast(`Berhasil membeli 1 ekor ${jenis} seharga Rp ${harga.toLocaleString('id-ID')}!`);
-  } else {
-    tampilkanToast('Koin tidak cukup!', 'error');
-  }
-}
-
-// Beli Pakan Massal (Maksimal 99)
-function beliPakanMassal(hargaSatuan) {
-  let jumlahStr = prompt(`Beli Pakan Rumput Kering (Harga @Rp ${hargaSatuan}):\nMasukkan jumlah (Maksimal 99):`, "1");
-  if (jumlahStr === null) return;
-
-  let jumlah = parseInt(jumlahStr);
-  if (isNaN(jumlah) || jumlah <= 0) {
-    tampilkanToast('Masukkan jumlah yang valid!', 'error');
-    return;
-  }
-  if (jumlah > 99) {
-    tampilkanToast('Batas pembelian maksimal adalah 99 item sekaligus!', 'error');
-    jumlah = 99;
-  }
-
-  let totalHarga = hargaSatuan * jumlah;
-  if (gameState.player.koin >= totalHarga) {
-    gameState.player.koin -= totalHarga;
-    gameState.inventory.pakan['Rumput Kering'] = (gameState.inventory.pakan['Rumput Kering'] || 0) + jumlah;
-    renderAll();
-    tampilkanToast(`Berhasil membeli ${jumlah}x Rumput Kering!`);
   } else {
     tampilkanToast('Koin tidak cukup!', 'error');
   }
@@ -148,9 +97,7 @@ function beliLahan() {
   }
 }
 
-// Fungsi Upgrade Kandang Berdasarkan Level (Max Lv 10, Kapasitas Max 15)
 function hitungHargaUpgradeKandang(levelSaatIni) {
-  // Level 1 ke Level 2 mulai dari 50.000, naik 350% (dikalikan 3.5 dari harga sebelumnya)
   let harga = 50000;
   for (let i = 1; i < levelSaatIni; i++) {
     harga = Math.round(harga * 3.5);
@@ -160,25 +107,19 @@ function hitungHargaUpgradeKandang(levelSaatIni) {
 
 function upgradeKandang(jenis) {
   const k = gameState.kandang[jenis];
-  
   if (k.level >= 10) {
     tampilkanToast(`Kandang ${jenis} sudah mencapai Level Maksimal (Level 10)!`, 'error');
     return;
   }
-
   const hargaUpgrade = hitungHargaUpgradeKandang(k.level);
-
   if (gameState.player.koin >= hargaUpgrade) {
     gameState.player.koin -= hargaUpgrade;
     k.level += 1;
-    
-    // Pemetaan kapasitas tiap level dari Lv 1 (2 ekor) hingga Lv 10 (15 ekor)
     const kapasitasTabel = { 1: 2, 2: 4, 3: 6, 4: 8, 5: 10, 6: 11, 7: 12, 8: 13, 9: 14, 10: 15 };
     k.kapasitas = kapasitasTabel[k.level] || 15;
-
     renderAll();
-    tampilkanToast(`Berhasil mengupgrade Kandang ${jenis} ke Level ${k.level} (Kapasitas: ${k.kapasitas} Ekor)!`);
+    tampilkanToast(`Berhasil mengupgrade Kandang ${jenis} ke Level ${k.level}!`);
   } else {
-    tampilkanToast(`Koin tidak cukup! Biaya upgrade Rp ${hargaUpgrade.toLocaleString('id-ID')}`, 'error');
+    tampilkanToast(`Koin tidak cukup! Biaya Rp ${hargaUpgrade.toLocaleString('id-ID')}`, 'error');
   }
 }
