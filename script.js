@@ -64,27 +64,6 @@ let listAksesori = [
 ];
 
 // ==========================================
-// DATA MASTER PETERNAKAN BARU
-// ==========================================
-let libraryTernak = [
-    { nama: 'Ayam', idBibit: 'Ayam', icon: '🐓', BasehargaBeli: 175000, BasehargaJual: 95000, limit: 5 },
-    { nama: 'Domba', idBibit: 'Domba', icon: '🐑', BasehargaBeli: 1975000, BasehargaJual: 1350000, limit: 5 },
-    { nama: 'Sapi', idBibit: 'Sapi', icon: '🐄', BasehargaBeli: 10000000, BasehargaJual: 7500000, limit: 5 }
-];
-
-let hargaPakanBase = 75000;
-let hargaPakanAktif = 75000;
-
-// Penampung harga aktif fluktuatif (jika belum ada object-nya, deklarasikan di sini)
-if (typeof hargaBeliAktif === 'undefined') var hargaBeliAktif = {};
-if (typeof hargaJualAktif === 'undefined') var hargaJualAktif = {};
-
-
-// State Baru untuk Peternakan (Pastikan di-load & di-save nanti)
-let stokPakan = 0;
-let listTernakDimiliki = []; // Array of object: { id: timestamp, jenis: 'Sapi'/'Ayam'/'Domba', waktuMakanTerakhir: timestamp }
-
-// ==========================================
 // PENGATURAN JADWAL CUACA HARIAN OLEH DEVELOPER
 // ==========================================
 let cuacaAktif = {
@@ -192,28 +171,9 @@ function updateFluktuasiHarga() {
         let hargaJualBaru = baseJual * (1 + variasiJual);
         hargaJualAktif[tanaman.nama] = Math.round(hargaJualBaru); 
     }); 
-    
-    // Tambahan Fluktuasi Harga Ternak
-    libraryTernak.forEach(hewan => {
-        let baseBeli = Number(hewan.BasehargaBeli) || 0;
-        let baseJual = Number(hewan.BasehargaJual) || 0;
-        
-        let variasiBeli = (Math.random() * 0.16) - 0.06; // Variasi -6% sampai +10%
-        let hargaBeliBaru = baseBeli * (1 + variasiBeli);
-        hargaBeliAktif[hewan.idBibit] = Math.round(hargaBeliBaru);
 
-        let variasiJual = (Math.random() * 1.03) - 0.35; // Variasi -35% sampai +68%
-        let hargaJualBaru = baseJual * (1 + variasiJual);
-        hargaJualAktif[hewan.nama] = Math.round(hargaJualBaru);
-    });
-
-    // Tambahan Fluktuasi Harga Pakan
-    let variasiPakan = (Math.random() * 0.10) - 0.05; // Variasi -5% sampai +5%
-    hargaPakanAktif = Math.round(hargaPakanBase * (1 + variasiPakan));
-
-    renderPasar();
-    renderPeternakan(); // Fungsi render baru untuk tab peternakan
-}} 
+    renderPasar(); 
+} 
 
 function formatRupiah(angka) {
     return angka.toLocaleString('id-ID'); 
@@ -311,13 +271,8 @@ function switchSubInventory(sub) {
     document.getElementById('subtab-ternak-btn').style.background = sub === 'ternak' ? '#1e293b' : '#e2e8f0';
     document.getElementById('subtab-ternak-btn').style.color = sub === 'ternak' ? 'white' : '#334155';
 
-    if (sub === 'ternak') {
-        renderPeternakan();
-    } else {
-        renderInventory();
-    }
+    renderInventory();
 }
-
 
 function renderTabProfil() {
     updatePanelAksesoriInfo();
@@ -405,32 +360,6 @@ function renderPasar() {
             </div>
         `;
     });
-    // Tambahkan baris ini di bagian paling bawah fungsi renderPasar() sebelum penutup container.innerHTML
-html += `<h4 style="margin: 15px 0 8px 0; color: #1e293b; font-size: 14px;">🐄 Toko Peternakan & Pakan</h4>`;
-html += `
-    <div class="card-item">
-        <div>
-            <strong>🌾 Pakan Hewan</strong><br>
-            <small style="color: #64748b;">Harga: Rp ${formatRupiah(hargaPakanAktif)} (Miliki: ${stokPakan})</small>
-        </div>
-        <button class="btn-buy" style="background-color: #b45309;" onclick="bukaModalTransaksi('beli_pakan', 'pakan', ${hargaPakanAktif})">Beli</button>
-    </div>
-`;
-
-libraryTernak.forEach(hewan => {
-    let hargaToko = hargaBeliAktif[hewan.idBibit] || hewan.BasehargaBeli;
-    let jumlahMilik = listTernakDimiliki.filter(h => h.jenis === hewan.nama).length;
-    html += `
-        <div class="card-item">
-            <div>
-                <strong>${hewan.icon} ${hewan.nama}</strong><br>
-                <small style="color: #64748b;">Harga: Rp ${formatRupiah(hargaToko)} | Batas: ${jumlahMilik}/${hewan.limit}</small>
-            </div>
-            <button class="btn-buy" onclick="bukaModalTransaksi('beli_ternak', '${hewan.nama}', ${hargaToko})">Beli</button>
-        </div>
-    `;
-});
-
     
     container.innerHTML = html; 
 
@@ -688,21 +617,26 @@ function pilihBibitUntukDitanam(namaBibit) {
 
 // --- FORMAT WAKTU DINAMIS (JAM/MENIT ATAU HARI) ---
 function formatWaktuDinamis(sisaMs) {
-    let totalDetik = Math.floor(sisaMs / 1000);
-    let totalJam = Math.floor(totalDetik / 3600);
+  let totalDetik = Math.floor(sisaMs / 1000);
+  let totalMenit = Math.floor(totalDetik / 60);
+  let totalJam = Math.floor(totalDetik / 3600);
 
-    // Jika waktu tersisa mencapai 24 jam (86400 detik) atau lebih
-    if (totalJam >= 24) {
-        let hari = Math.floor(totalJam / 24);
-        let sisaJam = totalJam % 24;
-        return `${hari} Hari ${sisaJam} Jam`;
-    } else {
-        // Jika di bawah 24 jam, tampilkan format Jam:Menit:Detik
-        let jam = Math.floor(totalDetik / 3600);
-        let menit = Math.floor((totalDetik % 3600) / 60);
-        let detik = totalDetik % 60;
-        return `${String(jam).padStart(2, '0')}:${String(menit).padStart(2, '0')}:${String(detik).padStart(2, '0')}`;
-    }
+  // 1. Di atas 24 jam: tampilkan format "X Hari Y Jam"
+  if (totalJam >= 24) {
+    let hari = Math.floor(totalJam / 24);
+    let sisaJam = totalJam % 24;
+    return `${hari} Hari ${sisaJam} Jam`;
+  } 
+  // 2. Antara 1 jam hingga 23 jam (di bawah 24 jam): tampilkan format "X Jam"
+  else if (totalJam >= 1) {
+    return `${totalJam} Jam`;
+  } 
+  // 3. Di bawah 1 jam: tampilkan format "Menit:Detik" (contoh: 05:42)
+  else {
+    let sisaMenit = totalMenit % 60;
+    let sisaDetik = totalDetik % 60;
+    return `${String(sisaMenit).padStart(2, '0')}:${String(sisaDetik).padStart(2, '0')}`;
+  }
 }
 
 function mulaiTimerLahan(index) {
@@ -949,47 +883,6 @@ function konfirmasiTransaksi() {
         renderInventory(); 
     } 
 } 
-// Masukkan ke dalam if-else block fungsi konfirmasiTransaksi() kamu:
-else if (currentTransactionType === 'beli_pakan') {
-    if (uang >= totalHarga) {
-        uang -= totalHarga;
-        stokPakan += currentQty;
-        updateUangDisplay();
-        tutupModalTransaksi();
-        simpanGame();
-        renderPasar();
-        showToast(`Membeli ${currentQty} Pakan Hewan!`, 'success');
-    } else {
-        showToast('Uang tidak cukup!', 'error');
-    }
-    
-} else if (currentTransactionType === 'beli_ternak') {
-    let dataMaster = libraryTernak.find(h => h.nama === currentTransactionItem);
-    let jumlahMilik = listTernakDimiliki.filter(h => h.jenis === currentTransactionItem).length;
-    
-    if (jumlahMilik + currentQty > dataMaster.limit) {
-        showToast(`Gagal! Batas maksimal memelihara ${dataMaster.nama} adalah ${dataMaster.limit} ekor.`, 'error');
-        return;
-    }
-
-    if (uang >= totalHarga) {
-        uang -= totalHarga;
-        for(let i=0; i<currentQty; i++) {
-            listTernakDimiliki.push({
-                id: new Date().getTime() + i,
-                jenis: currentTransactionItem,
-                waktuMakanTerakhir: 0 // Belum pernah diberi makan
-            });
-        }
-        updateUangDisplay();
-        tutupModalTransaksi();
-        simpanGame();
-        renderPasar();
-        showToast(`Berhasil membeli ${currentQty} ekor ${currentTransactionItem}!`, 'success');
-    } else {
-        showToast('Uang tidak cukup!', 'error');
-    }
-}
 
 function tambahKeInventory(namaItem, jumlah) {
     let existing = inventory.find(item => item.nama === namaItem); 
@@ -1055,94 +948,6 @@ function renderInventory() {
     
     container.innerHTML = html; 
 } 
-
-function renderPeternakan() {
-    const container = document.getElementById('subtab-content-container'); 
-    // Menggunakan container subtab yang sama dengan inventory/ternak sesuai di script asli Anda
-    if (currentSubInventory !== 'ternak' || !container) return;
-
-    if (listTernakDimiliki.length === 0) {
-        container.innerHTML = `<p style="color: #64748b; font-style: italic; text-align: center; padding: 20px; font-size: 12px;">Kamu belum memiliki hewan ternak. Beli di Tab Pasar!</p>`;
-        return;
-    }
-
-    let html = `<div style="padding: 10px; background: #f8fafc; margin-bottom: 10px; border-radius: 6px; font-size: 12px;"><strong>Persediaan Pakan:</strong> 🌾 ${stokPakan} Kantong</div>`;
-    
-    let waktuSekarang = new Date().getTime();
-    let satuHariMs = 24 * 60 * 60 * 1000; // Rentang 24 jam penuh
-
-    listTernakDimiliki.forEach((hewan) => {
-        let master = libraryTernak.find(h => h.nama === hewan.jenis);
-        let hargaJualSatuan = hargaJualAktif[hewan.jenis] || master.BasehargaJual;
-        
-        let sisaWaktuGantiMakan = (hewan.waktuMakanTerakhir + satuHariMs) - waktuSekarang;
-        let bisaDiberiMakan = sisaWaktuGantiMakan <= 0;
-
-        let statusMakanText = "";
-        let tombolMakan = "";
-
-        if (hewan.waktuMakanTerakhir === 0) {
-            statusMakanText = `<span style="color: #dc2626; font-weight:bold;">Lapar (Belum pernah diberi makan)</span>`;
-            tombolMakan = `<button class="btn-submit" style="background-color: #16a34a; padding: 4px 8px; font-size: 11px;" onclick="beriMakanTernak(${hewan.id})">🌾 Kasih Makan</button>`;
-        } else if (bisaDiberiMakan) {
-            statusMakanText = `<span style="color: #dc2626; font-weight:bold;">Lapar (Waktunya makan!)</span>`;
-            tombolMakan = `<button class="btn-submit" style="background-color: #16a34a; padding: 4px 8px; font-size: 11px;" onclick="beriMakanTernak(${hewan.id})">🌾 Kasih Makan</button>`;
-        } else {
-            let totalDetik = Math.floor(sisaWaktuGantiMakan / 1000);
-            let jam = Math.floor(totalDetik / 3600);
-            let menit = Math.floor((totalDetik % 3600) / 60);
-            let detik = totalDetik % 60;
-            statusMakanText = `<span style="color: #2563eb;">Kenyang (Makan lagi dalam ${jam}j ${menit}m ${detik}s)</span>`;
-            tombolMakan = `<button class="btn-submit" style="background-color: #94a3b8; padding: 4px 8px; font-size: 11px;" disabled>Kenyang</button>`;
-        }
-
-        html += `
-            <div class="inventory-item" style="margin-bottom: 8px;">
-                <div>
-                    <span>${master.icon} <strong>${hewan.jenis}</strong></span><br>
-                    <small style="color: #64748b;">Status: ${statusMakanText}</small>
-                </div>
-                <div style="display:flex; gap:5px; align-items:center;">
-                    ${tombolMakan}
-                    <button class="btn-sell" style="padding: 4px 8px; font-size: 11px;" onclick="jualTernak(${hewan.id}, ${hargaJualSatuan})">Jual (Rp ${formatRupiah(hargaJualSatuan)})</button>
-                </div>
-            </div>
-        `;
-    });
-
-    container.innerHTML = html;
-}
-
-function beriMakanTernak(idHewan) {
-    if (stokPakan <= 0) {
-        showToast("Pakan habis! Silakan beli pakan di Pasar terlebih dahulu.", "error");
-        return;
-    }
-
-    let hewan = listTernakDimiliki.find(h => h.id === idHewan);
-    if (!hewan) return;
-
-    stokPakan -= 1;
-    hewan.waktuMakanTerakhir = new Date().getTime();
-    
-    simpanGame();
-    renderPeternakan();
-    showToast(`Berhasil memberi makan ${hewan.jenis}!`, "success");
-}
-
-function jualTernak(idHewan, hargaJual) {
-    let index = listTernakDimiliki.findIndex(h => h.id === idHewan);
-    if (index === -1) return;
-
-    let hewanTerjual = listTernakDimiliki[index];
-    uang += hargaJual;
-    listTernakDimiliki.splice(index, 1); // Hapus dari daftar peternakan
-
-    updateUangDisplay();
-    simpanGame();
-    renderPeternakan();
-    showToast(`${hewanTerjual.jenis} berhasil dijual seharga Rp ${formatRupiah(hargaJual)}!`, "success");
-}
 
 // ==========================================
 // FITUR SIMPAN, MUAT, & NICKNAME (LOCALSTORAGE)
@@ -1212,10 +1017,7 @@ function muatGame() {
             
             lahanTambahanDibeli = data.lahanTambahanDibeli || 0;
             hargaTambahLahan = data.hargaTambahLahan || 5000;
-            stokPakan = data.stokPakan !== undefined ? data.stokPakan : 0;
-            listTernakDimiliki = data.listTernakDimiliki || [];
-
-        
+            
             if (data.lahan && data.lahan.length > 0) {
                 lahan = data.lahan.map(l => ({
                     id: l.id,
@@ -1262,13 +1064,6 @@ function initGame() {
     renderLahan(); 
     updateUangDisplay();
     updatePanelAksesoriInfo();
-    // Tambahkan di baris terbawah fungsi initGame() Anda sebelum tutup kurung kurawal:
-setInterval(() => {
-    if (currentSubInventory === 'ternak') {
-        renderPeternakan();
-    }
-}, 1000); // Re-render tiap 1 detik untuk update countdown 24 jam ternak
-
     
     let elNick = document.getElementById('player-nickname');
     if(elNick) elNick.innerText = `👨‍🌾 ${playerName} ✏️`;
