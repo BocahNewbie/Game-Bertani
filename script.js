@@ -1,4 +1,4 @@
-// SCRIPT.JS - Perbaikan Pasar Sub-Tab Pupuk & Panel Dinamis di Atas Lahan
+// SCRIPT.JS - Perbaikan Tombol Jual Peternakan, Pasar Pupuk & Panel Di Atas Lahan
 
 const STORAGE_KEY = 'PETERNAKAN';
 
@@ -57,11 +57,13 @@ function eksekusiResetGame() {
 }
 
 function bukaModalReset() {
-  document.getElementById('modal-reset').style.display = 'flex';
+  const el = document.getElementById('modal-reset');
+  if (el) el.style.display = 'flex';
 }
 
 function tutupModalReset() {
-  document.getElementById('modal-reset').style.display = 'none';
+  const el = document.getElementById('modal-reset');
+  if (el) el.style.display = 'none';
 }
 
 function switchTab(tabName) {
@@ -69,27 +71,37 @@ function switchTab(tabName) {
   document.querySelectorAll('.nav-tabs .tab-btn').forEach(el => el.classList.remove('active'));
   document.querySelectorAll('.sub-nav').forEach(el => el.classList.remove('active-sub'));
 
-  document.getElementById(`tab-${tabName}`).classList.add('active');
-  event.currentTarget.classList.add('active');
+  const targetTab = document.getElementById(`tab-${tabName}`);
+  if (targetTab) targetTab.classList.add('active');
+  
+  if (event && event.currentTarget) {
+    event.currentTarget.classList.add('active');
+  }
 
   const currentTabSection = document.getElementById(`tab-${tabName}`);
-  const targetSubNav = currentTabSection.querySelector('.sub-nav');
-  
-  if (targetSubNav) {
-    targetSubNav.classList.add('active-sub');
-    const firstSubBtn = targetSubNav.querySelector('.sub-tab-btn');
-    if (firstSubBtn) { firstSubBtn.click(); }
+  if (currentTabSection) {
+    const targetSubNav = currentTabSection.querySelector('.sub-nav');
+    if (targetSubNav) {
+      targetSubNav.classList.add('active-sub');
+      const firstSubBtn = targetSubNav.querySelector('.sub-tab-btn');
+      if (firstSubBtn) { firstSubBtn.click(); }
+    }
   }
 }
 
 function switchSubTab(parentTab, subName) {
   const parent = document.getElementById(`tab-${parentTab}`);
+  if (!parent) return;
+  
   parent.querySelectorAll('.sub-content').forEach(el => el.classList.remove('active'));
   parent.querySelectorAll('.sub-nav .sub-tab-btn').forEach(el => el.classList.remove('active'));
   
   const targetSub = document.getElementById(`subtab-${subName}`);
   if (targetSub) targetSub.classList.add('active');
-  event.currentTarget.classList.add('active');
+  
+  if (event && event.currentTarget) {
+    event.currentTarget.classList.add('active');
+  }
 }
 
 function simpanGame() {
@@ -108,6 +120,7 @@ function muatGame() {
         if (gameState.kandang[j]) {
           if (!gameState.kandang[j].level) gameState.kandang[j].level = 1;
           if (!gameState.kandang[j].kapasitas) gameState.kandang[j].kapasitas = 2;
+          if (!gameState.kandang[j].isi) gameState.kandang[j].isi = [];
         }
       });
       if (gameState.lahan) {
@@ -164,7 +177,6 @@ function renderPertanian() {
   const stokKompos = gameState.inventory.pupuk['Pupuk Kompos'] || 0;
   const stokUrea = gameState.inventory.pupuk['Pupuk Urea'] || 0;
 
-  // Panel Pupuk di Atas Lahan (Hanya muncul jika stok salah satu pupuk > 0)
   const panelAtasLahan = document.getElementById('pupuk-container');
   if (panelAtasLahan) {
     let tombolPupukHTML = '';
@@ -185,7 +197,7 @@ function renderPertanian() {
     }
 
     if (tombolPupukHTML === '') {
-      panelAtasLahan.innerHTML = ''; // Kosongkan jika belum beli pupuk
+      panelAtasLahan.innerHTML = '';
     } else {
       panelAtasLahan.innerHTML = `
         <div class="card" style="grid-column: 1 / -1; background: #f0fdf4; border: 1px solid #bbf7d0; margin-bottom: 12px;">
@@ -351,10 +363,12 @@ function racikPupuk() {
   if (typeof tampilkanToast === 'function') tampilkanToast('Berhasil meracik Pupuk Organik!');
 }
 
-// 2. RENDER PETERNAKAN
+// 2. RENDER PETERNAKAN (Diperbaiki Tombol Jual Hewan)
 function renderPeternakan() {
   ['ayam', 'sapi', 'domba'].forEach(j => {
     const dataKandang = gameState.kandang[j];
+    if (!dataKandang) return;
+    
     const infoHewan = DIREKTORI_HEWAN[j];
     const stokPakan = gameState.inventory.pakan['Rumput Kering'] || 0;
     
@@ -374,7 +388,7 @@ function renderPeternakan() {
 
     dataKandang.isi.forEach((h, index) => {
       const namaHewanTampil = h.namaCustom || `${infoHewan.nama} #${index + 1}`;
-      const hJual = hargaPasarAktif.hewan[j] ? hargaPasarAktif.hewan[j].jualHewan : infoHewan.hargaJualHewanBase;
+      const hJual = hargaPasarAktif && hargaPasarAktif.hewan && hargaPasarAktif.hewan[j] ? hargaPasarAktif.hewan[j].jualHewan : infoHewan.hargaJualHewanBase;
 
       const card = document.createElement('div');
       card.className = 'card';
@@ -541,7 +555,7 @@ function renderAksesoris() {
   });
 }
 
-// 4. RENDER PASAR (Sub-Tab Pasar Pupuk Terhubung)
+// 4. RENDER PASAR
 function renderPasar() {
   const pasarBibit = document.getElementById('pasar-bibit-container');
   if (pasarBibit) {
@@ -559,7 +573,6 @@ function renderPasar() {
     });
   }
 
-  // Render Pasar Pupuk (Kompos & Urea) ke sub-kategori pasar pupuk
   const pasarPupuk = document.getElementById('pasar-pupuk-container');
   if (pasarPupuk) {
     pasarPupuk.innerHTML = '';
