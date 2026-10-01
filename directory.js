@@ -4,15 +4,15 @@
 const DIREKTORI_TUMBUHAN = {
   'Bibit Padi': {
     nama: 'Bibit Padi',
-    hargaBeliBase: 50,
-    hargaJualBase: 100,
+    hargaBeliBase: 35,
+    hargaJualBase: 40,
     waktuTumbuh: 10,
     keterangan: 'Tanaman pokok penghasil padi.'
   },
   'Bibit Jagung': {
     nama: 'Bibit Jagung',
     hargaBeliBase: 90,
-    hargaJualBase: 180,
+    hargaJualBase: 140,
     waktuTumbuh: 20,
     keterangan: 'Jagung manis bernilai jual tinggi.'
   }
@@ -23,31 +23,31 @@ const DIREKTORI_HEWAN = {
   ayam: {
     jenis: 'ayam',
     nama: 'Ayam',
-    hargaBeliBase: 200,
-    hargaJualHewanBase: 100,
+    hargaBeliBase: 950,
+    hargaJualHewanBase: 350,
     hasilTernak: 'Telur Ayam',
-    jumlahHasil: 1, // Default 1
-    hargaJualHasilBase: 40,
+    jumlahHasil: 2, // Default 2
+    hargaJualHasilBase: 21,
     pakan: 'Rumput Kering'
   },
   sapi: {
     jenis: 'sapi',
     nama: 'Sapi',
-    hargaBeliBase: 1000,
-    hargaJualHewanBase: 500,
+    hargaBeliBase: 6700,
+    hargaJualHewanBase: 3500,
     hasilTernak: 'Susu Sapi',
     jumlahHasil: 6, // Diubah menjadi 6 susu per panen
-    hargaJualHasilBase: 2500000,
+    hargaJualHasilBase: 130,
     pakan: 'Rumput Kering'
   },
   domba: {
     jenis: 'domba',
     nama: 'Domba',
-    hargaBeliBase: 750,
-    hargaJualHewanBase: 350,
+    hargaBeliBase: 3750,
+    hargaJualHewanBase: 1350,
     hasilTernak: 'Wol Domba',
     jumlahHasil: 1, // Default 1
-    hargaJualHasilBase: 180,
+    hargaJualHasilBase: 150,
     pakan: 'Rumput Kering'
   }
 };
