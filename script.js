@@ -1,112 +1,26 @@
-// ==========================================
-// DATA LOKAL TANAMAN & AKSESORI BERDASARKAN SLOT
-// ==========================================
 let libraryTanaman = [
-    {
-        nama: 'Semangka',
-        namaBibit: 'Bibit Semangka',
-        iconBibit: '🌱',
-        iconBuah: '🍉',
-        BasehargaBeli: 60,
-        BasehargaJual: 68,
-        waktuTumbuh:  28800000
-    },
-    {
-        nama: 'Cabai',
-        namaBibit: 'Bibit Cabai',
-        iconBibit: '🌱',
-        iconBuah: '🌶️',
-        BasehargaBeli: 65,
-        BasehargaJual: 105,
-        waktuTumbuh: 36000000
-    },
-    {
-        nama: 'Brokoli',
-        namaBibit: 'Bibit Brokoli',
-        iconBibit: '🌱',
-        iconBuah: '🥦',
-        BasehargaBeli: 75,
-        BasehargaJual: 100,
-        waktuTumbuh: 43242000
-    },
-    {
-        nama: 'Bawang Merah',
-        namaBibit: 'Bibit Bawang Merah',
-        iconBibit: '🌱',
-        iconBuah: '🧅',
-        BasehargaBeli: 27,
-        BasehargaJual: 70,
-        waktuTumbuh: 31600000
-    },
-    {
-        nama: 'Melon',
-        namaBibit: 'Bibit Melon',
-        iconBibit: '🌱',
-        iconBuah: '🍈',
-        BasehargaBeli: 40,
-        BasehargaJual: 52,
-        waktuTumbuh: 18000000
-    },
-    {
-        nama: 'Jagung',
-        namaBibit: 'Bibit Jagung',
-        iconBibit: '🌱',
-        iconBuah: '🌽',
-        BasehargaBeli: 90,
-        BasehargaJual: 111,
-        waktuTumbuh: 54000000
-    },
-    {
-        nama: 'Apel',
-        namaBibit: 'Bibit Apel',
-        iconBibit: '🌱',
-        iconBuah: '🍎',
-        BasehargaBeli: 130,
-        BasehargaJual: 180,
-        waktuTumbuh: 86400000
-    }
+    { nama: 'Semangka', namaBibit: 'Bibit Semangka', iconBibit: '🌱', iconBuah: '🍉', BasehargaBeli: 60, BasehargaJual: 68, waktuTumbuh: 28800000 },
+    { nama: 'Cabai', namaBibit: 'Bibit Cabai', iconBibit: '🌱', iconBuah: '🌶️', BasehargaBeli: 65, BasehargaJual: 105, waktuTumbuh: 36000000 },
+    { nama: 'Brokoli', namaBibit: 'Bibit Brokoli', iconBibit: '🌱', iconBuah: '🥦', BasehargaBeli: 75, BasehargaJual: 100, waktuTumbuh: 43242000 },
+    { nama: 'Bawang Merah', namaBibit: 'Bibit Bawang Merah', iconBibit: '🌱', iconBuah: '🧅', BasehargaBeli: 27, BasehargaJual: 70, waktuTumbuh: 31600000 },
+    { nama: 'Melon', namaBibit: 'Bibit Melon', iconBibit: '🌱', iconBuah: '🍈', BasehargaBeli: 40, BasehargaJual: 52, waktuTumbuh: 18000000 },
+    { nama: 'Jagung', namaBibit: 'Bibit Jagung', iconBibit: '🌱', iconBuah: '🌽', BasehargaBeli: 90, BasehargaJual: 111, waktuTumbuh: 54000000 },
+    { nama: 'Apel', namaBibit: 'Bibit Apel', iconBibit: '🌱', iconBuah: '🍎', BasehargaBeli: 130, BasehargaJual: 180, waktuTumbuh: 86400000 }
 ];
-// ==========================================
-// DATA LOKAL TERNAK & KANDANG
-// ==========================================
+
 let libraryTernak = [
-    {
-        id: 'ayam',
-        nama: 'Ayam Bertelur',
-        icon: '🐔',
-        iconHasil: '🥚',
-        namaHasil: 'Telur Ayam',
-        hargaBeli: 250,
-        hargaHasilJual: 45,
-        waktuProduksi: 21600000 // 6 Jam (dalam milidetik)
-    },
-    {
-        id: 'sapi',
-        nama: 'Sapi Perah',
-        icon: '🐄',
-        iconHasil: '🥛',
-        namaHasil: 'Susu Sapi',
-        hargaBeli: 1200,
-        hargaHasilJual: 180,
-        waktuProduksi: 43200000 // 12 Jam (dalam milidetik)
-    }
+    { id: 'ayam', nama: 'Ayam Bertelur', icon: '🐔', iconHasil: '🥚', namaHasil: 'Telur Ayam', hargaBeli: 250, hargaHasilJual: 45, waktuProduksi: 21600000 },
+    { id: 'sapi', nama: 'Sapi Perah', icon: '🐄', iconHasil: '🥛', namaHasil: 'Susu Sapi', hargaBeli: 1200, hargaHasilJual: 180, waktuProduksi: 43200000 }
 ];
 
-// Menyimpan ternak yang sudah dibeli pemain
 let daftarTernakPemain = [];
-
 let listPupuk = [
     { id: 'pupuk_organik', nama: 'Pupuk Organik', icon: '🍃', hargaBeli: 185, efekWaktu: 18000000 },
     { id: 'biofertilizer', nama: 'Biofertilizer', icon: '🧪', hargaBeli: 350, efekWaktu: 25200000 },
     { id: 'pupuk_urea', nama: 'Pupuk Urea', icon: '💎', hargaBeli: 580, efekWaktu: 36000000 }
 ];
 
-let stokPupuk = {
-    pupuk_organik: 0,
-    biofertilizer: 0,
-    pupuk_urea: 0
-};
-
+let stokPupuk = { pupuk_organik: 0, biofertilizer: 0, pupuk_urea: 0 };
 let listAksesori = [
     { id: 'sendal', nama: 'Sendal Jepit', icon: '🩴', slot: 'telapak', harga: 15000, bonusPersen: 3, deskripsi: 'Menambah +3% hasil panen dasar.' },
     { id: 'boots', nama: 'Sepatu Boots', icon: '🥾', slot: 'telapak', harga: 45000, bonusPersen: 2, tangkalAngin: 35, deskripsi: 'Menambah +2% bonus dasar & menghilangkan 35% efek pengurangan hasil dari cuaca Angin Kencang.' },
@@ -118,172 +32,11 @@ let listAksesori = [
     { id: 'jas', nama: 'Jas Anti Badai', icon: '🧥', slot: 'badan', harga: 500000, bonusPersen: 4, tangkalBadai: 50, deskripsi: 'Menambah +4% bonus dasar & menghilangkan 50% efek pengurangan dari cuaca Storm / Badai.' }
 ];
 
-// Fungsi Membeli Ternak
-function beliTernak(idTernak) {
-    let ternak = libraryTernak.find(t => t.id === idTernak);
-    if (!ternak) return;
-
-    if (uang < ternak.hargaBeli) {
-        showToast('Uang tidak cukup untuk membeli ternak ini!', 'error');
-        return;
-    }
-
-    uang -= ternak.hargaBeli;
-    updateUangDisplay();
-
-    // Tambahkan ternak baru ke kandang
-    daftarTernakPemain.push({
-        instanceId: Date.now(),
-        id: ternak.id,
-        nama: ternak.nama,
-        icon: ternak.icon,
-        waktuSiapPanen: Date.now() + ternak.waktuProduksi,
-        status: 'menghasilkan'
-    });
-
-    showToast(`Berhasil membeli ${ternak.nama}!`, 'success');
-    renderInventory();
-}
-
-// Render tampilan ternak saat subtab 'ternak' aktif
-function renderTernakInventory() {
-    const container = document.getElementById('inventory-container');
-    if (!container) return;
-
-    if (daftarTernakPemain.length === 0) {
-        container.innerHTML = `
-            <div style="text-align: center; color: #64748b; padding: 20px;">
-                Belum ada hewan ternak di kandang. Beli ternak di Toko / Pasar!
-            </div>`;
-        return;
-    }
-
-    let html = '';
-    const sekarang = Date.now();
-
-    daftarTernakPemain.forEach((item, index) => {
-        let ternakInfo = libraryTernak.find(t => t.id === item.id);
-        let sisaWaktu = Math.max(0, Math.ceil((item.waktuSiapPanen - sekarang) / 1000));
-        let siapPanen = sisaWaktu === 0;
-
-        html += `
-            <div class="card-item" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                <div>
-                    <strong>${item.icon} ${item.nama}</strong><br>
-                    <small style="color: #64748b;">
-                        Status: ${siapPanen ? '✅ Siap Panen ' + ternakInfo.iconHasil : '⏳ Menghasilkan (' + sisaWaktu + 'd)'}
-                    </small>
-                </div>
-                ${siapPanen 
-                    ? `<button class="btn-buy" style="background-color: #10b981;" onclick="panenHasilTernak(${index})">Panen ${ternakInfo.iconHasil}</button>`
-                    : `<button class="btn-buy" style="background-color: #94a3b8;" disabled>Tunggu</button>`
-                }
-            </div>
-        `;
-    });
-
-    container.innerHTML = html;
-}
-
-// Fungsi Panen Hasil Ternak
-function panenHasilTernak(index) {
-    let item = daftarTernakPemain[index];
-    if (!item) return;
-
-    let ternakInfo = libraryTernak.find(t => t.id === item.id);
-    
-    // Tambahkan hasil panen ke inventory panen dasar
-    let itemDiInv = inventory.find(i => i.nama === ternakInfo.namaHasil);
-    if (itemDiInv) {
-        itemDiInv.jumlah += 1;
-    } else {
-        inventory.push({ nama: ternakInfo.namaHasil, jumlah: 1, type: 'panen' });
-    }
-
-    // Reset waktu produksi berikutnya
-    item.waktuSiapPanen = Date.now() + ternakInfo.waktuProduksi;
-
-    showToast(`Berhasil memanen ${ternakInfo.namaHasil}!`, 'success');
-    renderInventory();
-}
-
-// ==========================================
-// PENGATURAN JADWAL CUACA HARIAN OLEH DEVELOPER
-// ==========================================
-let cuacaAktif = {
-    nama: 'Cerah',
-    ikon: '☀️',
-    efekPersen: 0
-};
-
-const daftarMasterCuaca = [
-    { nama: 'Cerah', ikon: '☀️️', efekPersen: 0 },
-    { nama: 'Panas', ikon: '🔥', efekPersen: -3 },
-    { nama: 'Mendung', ikon: '☁️', efekPersen: 7 },
-    { nama: 'Gerimis', ikon: '🌦️', efekPersen: 30 },
-    { nama: 'Hujan', ikon: '🌧️', efekPersen: 120 },
-    { nama: 'Angin Kencang', ikon: '🌬️', efekPersen: -50 },
-    { nama: 'Storm / Badai', ikon: '⚡', efekPersen: -70 },
-    { nama: 'Badai Petir Berat', ikon: '🌪️', efekPersen: -90 }
-];
-
-// 🛠️ ATUR DI SINI: Masukkan nama-nama cuaca untuk hari ini
-let jadwalCuacaHariIni = ['Cerah', 'Panas', 'Hujan', 'Gerimis', 'Angin Kencang']; 
-
-let indeksCuacaAktif = 0;
-let timerCuacaInterval = null;
-
-function hitungDanTerapkanJadwalCuaca() {
-    if (!jadwalCuacaHariIni || jadwalCuacaHariIni.length === 0) {
-        jadwalCuacaHariIni = ['Cerah'];
-    }
-
-    let namaCuacaTarget = jadwalCuacaHariIni[indeksCuacaAktif % jadwalCuacaHariIni.length];
-    let found = daftarMasterCuaca.find(c => c.nama === namaCuacaTarget);
-    if (found) {
-        cuacaAktif = found;
-    } else {
-        cuacaAktif = daftarMasterCuaca[0];
-    }
-
-    indeksCuacaAktif++;
-    renderInfoCuacaDiUI();
-    renderPasar();
-    renderTokoAksesori();
-
-    let statusTutup = cuacaAktif.nama.includes('Badai') ? " (⚠️ Pasar & Toko Tutup!)" : "";
-    showToast(`Pergantian Cuaca: ${cuacaAktif.ikon} ${cuacaAktif.nama}${statusTutup}`, 'info');
-
-    let totalDurasiSiklusMs = 720000; // 12 Menit total untuk 1 hari penuh game
-    let durasiPerCuacaMs = totalDurasiSiklusMs / jadwalCuacaHariIni.length;
-
-    if (timerCuacaInterval) clearTimeout(timerCuacaInterval);
-    timerCuacaInterval = setTimeout(hitungDanTerapkanJadwalCuaca, durasiPerCuacaMs);
-}
-
-function renderInfoCuacaDiUI() {
-    let panelCuaca = document.getElementById('info-cuaca-display');
-    if (panelCuaca) {
-        let tanda = cuacaAktif.efekPersen > 0 ? '+' : '';
-        let statusTutupTxt = cuacaAktif.nama.includes('Badai') ? ' 🛑 [Tutup]' : '';
-        panelCuaca.innerText = `${cuacaAktif.ikon} ${cuacaAktif.nama} (${tanda}${cuacaAktif.efekPersen}%)${statusTutupTxt}`;
-    }
-}
-
-let uang = 1500; 
+let uang = 3500; 
 let inventory = []; 
 let aksesoriDimiliki = []; 
-
-let slotAktif = {
-    kepala: null,
-    badan: null,
-    kaki: null,
-    telapak: null
-};
-
-let lahan = [
-    { id: 1, status: 'kosong', tanaman: null, jumlahBibit: 0, waktuSelesai: 0, timerInterval: null } 
-]; 
+let slotAktif = { kepala: null, badan: null, kaki: null, telapak: null };
+let lahan = [{ id: 1, status: 'kosong', tanaman: null, jumlahBibit: 0, waktuSelesai: 0, timerInterval: null }]; 
 let lahanTambahanDibeli = 0; 
 const limitLahanTambahan = 7; 
 let hargaTambahLahan = 5000; 
@@ -297,101 +50,74 @@ let maxQtyAllowed = 99;
 let selectedLahanIndex = null;
 let selectedBibitNama = '';
 let currentSubInventory = 'bibit';
-
 let hargaBeliAktif = {}; 
 let hargaJualAktif = {}; 
-let playerName = "Petani Desa Baru";
+let playerName = "Petani Pintar";
+
+let cuacaAktif = { nama: 'Cerah', ikon: '☀️', efekPersen: 0 };
+const daftarMasterCuaca = [
+    { nama: 'Cerah', ikon: '☀️', efekPersen: 0 },
+    { nama: 'Panas', ikon: '🔥', efekPersen: -3 },
+    { nama: 'Mendung', ikon: '☁️', efekPersen: 7 },
+    { nama: 'Gerimis', ikon: '🌦️', efekPersen: 30 },
+    { nama: 'Hujan', ikon: '🌧️', efekPersen: 120 },
+    { nama: 'Angin Kencang', ikon: '🌬️', efekPersen: -50 },
+    { nama: 'Storm / Badai', ikon: '⚡', efekPersen: -70 },
+    { nama: 'Badai Petir Berat', ikon: '🌪️', efekPersen: -90 }
+];
+let jadwalCuacaHariIni = ['Cerah', 'Panas', 'Hujan', 'Gerimis', 'Angin Kencang']; 
+let indeksCuacaAktif = 0;
+let timerCuacaInterval = null;
+let ternakInterval = null;
+
+function hitungDanTerapkanJadwalCuaca() {
+    if (!jadwalCuacaHariIni || jadwalCuacaHariIni.length === 0) jadwalCuacaHariIni = ['Cerah'];
+    let namaCuacaTarget = jadwalCuacaHariIni[indeksCuacaAktif % jadwalCuacaHariIni.length];
+    let found = daftarMasterCuaca.find(c => c.nama === namaCuacaTarget);
+    cuacaAktif = found ? found : daftarMasterCuaca[0];
+    indeksCuacaAktif++;
+    renderInfoCuacaDiUI();
+    renderPasar();
+    renderTokoAksesori();
+
+    let totalDurasiSiklusMs = 720000; 
+    let durasiPerCuacaMs = totalDurasiSiklusMs / jadwalCuacaHariIni.length;
+    if (timerCuacaInterval) clearTimeout(timerCuacaInterval);
+    timerCuacaInterval = setTimeout(hitungDanTerapkanJadwalCuaca, durasiPerCuacaMs);
+}
+
+function renderInfoCuacaDiUI() {
+    let panelCuaca = document.getElementById('info-cuaca-display');
+    if (panelCuaca) {
+        let tanda = cuacaAktif.efekPersen > 0 ? '+' : '';
+        let statusTutupTxt = cuacaAktif.nama.includes('Badai') ? ' 🛑 [Tutup]' : '';
+        panelCuaca.innerText = `Cuaca: ${cuacaAktif.ikon} ${cuacaAktif.nama} (${tanda}${cuacaAktif.efekPersen}%)${statusTutupTxt}`;
+    }
+}
 
 function updateFluktuasiHarga() {
     libraryTanaman.forEach(tanaman => {
-        let baseBeli = Number(tanaman.BasehargaBeli) || 0; 
-        let baseJual = Number(tanaman.BasehargaJual) || 0; 
-
-        let variasiBeli = (Math.random() * 0.16) - 0.06; 
-        let hargaBeliBaru = baseBeli * (1 + variasiBeli);
-        hargaBeliAktif[tanaman.namaBibit] = Math.round(hargaBeliBaru); 
-
-        let variasiJual = (Math.random() * 1.03) - 0.35; 
-        let hargaJualBaru = baseJual * (1 + variasiJual);
-        hargaJualAktif[tanaman.nama] = Math.round(hargaJualBaru); 
+        let baseBeli = tanaman.BasehargaBeli; 
+        let baseJual = tanaman.BasehargaJual; 
+        hargaBeliAktif[tanaman.namaBibit] = Math.round(baseBeli * (1 + (Math.random() * 0.16 - 0.06))); 
+        hargaJualAktif[tanaman.nama] = Math.round(baseJual * (1 + (Math.random() * 1.03 - 0.35))); 
     }); 
-
+    libraryTernak.forEach(t => {
+        hargaJualAktif[t.namaHasil] = t.hargaHasilJual;
+    });
     renderPasar(); 
 } 
 
-function formatRupiah(angka) {
-    return angka.toLocaleString('id-ID'); 
-} 
-
-function updateUangDisplay() {
-    document.getElementById('player-koin').innerText = `Rp ${formatRupiah(uang)}`; 
-} 
-
-function hitungTotalBonusPersen() {
-    let totalPersen = 0;
-    for (let slot in slotAktif) {
-        let accId = slotAktif[slot];
-        if (accId) {
-            let acc = listAksesori.find(a => a.id === accId);
-            if (acc) totalPersen += acc.bonusPersen;
-        }
-    }
-    return totalPersen;
-}
-
-function updatePanelAksesoriInfo() {
-    let kepalaEl = document.getElementById('slot-kepala-display');
-    let badanEl = document.getElementById('slot-badan-display');
-    let kakiEl = document.getElementById('slot-kaki-display');
-    let telapakEl = document.getElementById('slot-telapak-display');
-    let totalBonusEl = document.getElementById('total-bonus-display');
-
-    if (!kepalaEl) return;
-
-    let getInfoAcc = (id) => {
-        let a = listAksesori.find(item => item.id === id);
-        return a ? `${a.icon} ${a.nama} (+${a.bonusPersen}%)` : 'Kosong';
-    };
-
-    kepalaEl.innerText = slotAktif.kepala ? getInfoAcc(slotAktif.kepala) : 'Kosong';
-    badanEl.innerText = slotAktif.badan ? getInfoAcc(slotAktif.badan) : 'Kosong';
-    kakiEl.innerText = slotAktif.kaki ? getInfoAcc(slotAktif.kaki) : 'Kosong';
-    telapakEl.innerText = slotAktif.telapak ? getInfoAcc(slotAktif.telapak) : 'Kosong';
-
-    let total = hitungTotalBonusPersen();
-    totalBonusEl.innerText = `+${total}%`;
-}
-
-let toastTimeout = null; 
-function showToast(message, type = 'success') {
-    const overlay = document.getElementById('toast-overlay'); 
-    const card = document.getElementById('toast-card'); 
-    const icon = document.getElementById('toast-icon'); 
-    const msg = document.getElementById('toast-message'); 
-    
-    card.className = `toast-card ${type}`; 
-    icon.innerHTML = type === 'success' ? '✓' : '✕'; 
-    msg.innerText = message; 
-    overlay.style.display = 'flex'; 
-    
-    if (toastTimeout) clearTimeout(toastTimeout); 
-    toastTimeout = setTimeout(() => { 
-        overlay.style.display = 'none'; 
-    }, 400); 
-} 
+function formatRupiah(angka) { return angka.toLocaleString('id-ID'); } 
+function updateUangDisplay() { document.getElementById('player-koin').innerText = `Rp ${formatRupiah(uang)}`; } 
 
 function openGameTab(tabName) {
     document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active')); 
     document.querySelectorAll('.nav-tabs .tab-btn').forEach(btn => btn.classList.remove('active')); 
-    
     document.getElementById('tab-' + tabName).classList.add('active');
     
-    const navButtons = document.querySelectorAll('.nav-tabs .tab-btn');
-    if (tabName === 'pertanian' && navButtons[0]) navButtons[0].classList.add('active');
-    if (tabName === 'inventory' && navButtons[1]) navButtons[1].classList.add('active');
-    if (tabName === 'profil' && navButtons[2]) navButtons[2].classList.add('active');
-    if (tabName === 'pasar' && navButtons[3]) navButtons[3].classList.add('active');
-    if (tabName === 'toko_aksesori' && navButtons[4]) navButtons[4].classList.add('active');
+    const event = window.event;
+    if(event && event.target) event.target.classList.add('active');
     
     if (tabName === 'pertanian') renderLahan();
     if (tabName === 'inventory') renderInventory(); 
@@ -400,713 +126,116 @@ function openGameTab(tabName) {
     if (tabName === 'toko_aksesori') renderTokoAksesori(); 
 } 
 
-function openGameTabeksplisit(tabName) {
-    openGameTab(tabName);
-} 
-
 function switchSubInventory(sub) {
     currentSubInventory = sub;
-    document.getElementById('subtab-bibit-btn').style.background = sub === 'bibit' ? '#1e293b' : '#e2e8f0';
-    document.getElementById('subtab-bibit-btn').style.color = sub === 'bibit' ? 'white' : '#334155';
-
-    document.getElementById('subtab-panen-btn').style.background = sub === 'panen' ? '#1e293b' : '#e2e8f0';
-    document.getElementById('subtab-panen-btn').style.color = sub === 'panen' ? 'white' : '#334155';
-
-    document.getElementById('subtab-ternak-btn').style.background = sub === 'ternak' ? '#1e293b' : '#e2e8f0';
-    document.getElementById('subtab-ternak-btn').style.color = sub === 'ternak' ? 'white' : '#334155';
-
+    ['bibit', 'panen', 'ternak'].forEach(type => {
+        let btn = document.getElementById(`subtab-${type}-btn`);
+        if(btn) {
+            btn.style.background = sub === type ? '#1e293b' : '#e2e8f0';
+            btn.style.color = sub === type ? 'white' : '#334155';
+        }
+    });
     renderInventory();
 }
-function tanamDariInventory(namaBibit) {
-    // Cari lahan kosong pertama
-    let lahanKosongIndex = lahan.findIndex(l => l.status === 'kosong');
 
-    if (lahanKosongIndex === -1) {
-        showToast('Semua lahan sedang terisi! Panen dulu atau buka lahan baru.', 'error');
+function beliTernak(idTernak) {
+    let ternak = libraryTernak.find(t => t.id === idTernak);
+    if (!ternak) return;
+    if (uang < ternak.hargaBeli) {
+        showToast('Uang tidak cukup untuk membeli hewan ternak ini!', 'error');
         return;
     }
-
-    // Set variabel lahan & bibit yang dipilih
-    selectedLahanIndex = lahanKosongIndex;
-    selectedBibitNama = namaBibit;
-
-    let itemInv = inventory.find(i => i.nama === selectedBibitNama);
-    let stokMaks = itemInv ? itemInv.jumlah : 0;
-
-    maxQtyAllowed = Math.min(99, stokMaks);
-    currentQty = 1;
-
-    document.getElementById('modal-title').innerText = `Tanam ${selectedBibitNama} di Lahan #${lahanKosongIndex + 1}`;
-    document.getElementById('modal-price').innerText = `Stok di Inventory: ${stokMaks} | Maksimal ${maxQtyAllowed} per lahan`;
-    
-    document.getElementById('modal-total-price').parentElement.style.display = 'none';
-    document.getElementById('btn-confirm-transaction').innerText = 'Tanam Sekarang';
-    document.getElementById('btn-confirm-transaction').setAttribute('onclick', 'konfirmasiTanamBibit()');
-
-    updateModalDisplayCustom();
-    document.getElementById('transaction-modal').style.display = 'flex';
-    // Catatan: Jangan panggil fungsi pemindah tab (misal: openGameTab) di sini agar tetap berada di tab Inventory.
-}
-
-function renderTabProfil() {
-    updatePanelAksesoriInfo();
-    const container = document.getElementById('profil-aksesori-container');
-    if (!container) return;
-
-    if (aksesoriDimiliki.length === 0) {
-        container.innerHTML = '<p style="color: #64748b; font-style: italic; text-align: center; padding: 15px; font-size: 12px;">Kamu belum memiliki aksesori. Beli perlengkapan di Tab Toko Aksesori!</p>';
-        return;
-    }
-
-    let html = '';
-    aksesoriDimiliki.forEach(id => {
-        let acc = listAksesori.find(a => a.id === id);
-        if (!acc) return;
-
-        let sedangDipakai = slotAktif[acc.slot] === acc.id;
-        let actionBtn = '';
-
-        if (sedangDipakai) {
-            actionBtn = `<button class="btn-submit" style="background-color: #10b981; padding: 5px 10px; font-size: 11px;" disabled>Dipakai</button>`;
-        } else {
-            actionBtn = `<button class="btn-submit" style="background-color: #3b82f6; padding: 5px 10px; font-size: 11px;" onclick="pakaiAksesori('${acc.id}')">Kenakan</button>`;
-        }
-
-        html += `
-            <div class="inventory-item" style="flex-direction: column; align-items: flex-start; gap: 6px; padding: 12px;">
-                <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
-                    <span style="font-size: 14px;">${acc.icon} <strong style="color: #1e293b;">${acc.nama}</strong> <span style="font-size: 10px; background: #e2e8f0; padding: 2px 5px; border-radius: 4px; color: #475569; margin-left: 5px;">[${acc.slot.toUpperCase()}]</span></span>
-                    ${actionBtn}
-                </div>
-                <div style="font-size: 11px; color: #475569; background: #f1f5f9; padding: 6px 8px; border-radius: 6px; width: 100%; box-sizing: border-box;">
-                    <strong>Efek:</strong> ${acc.deskripsi}
-                </div>
-            </div>
-        `;
-    });
-
-    container.innerHTML = html;
-}
-
-function renderPasar() {
-    const container = document.getElementById('pasar-container'); 
-    if (!container) return;
-    
-    let sedangBadai = cuacaAktif.nama.includes('Badai');
-    if (sedangBadai) {
-        container.innerHTML = `
-            <div style="text-align: center; padding: 30px; background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; color: #991b1b;">
-                <div style="font-size: 32px; margin-bottom: 8px;">⛈️</div>
-                <strong>Pasar Ditutup Sementara!</strong><br>
-                <small style="color: #7f1d1d;">Cuaca terlalu berbahaya (${cuacaAktif.nama}). Pedagang menyelamatkan diri. Silakan kembali saat cuaca membaik.</small>
-            </div>
-        `;
-        let btnTambah = document.getElementById('btn-tambah-lahan');
-        if (btnTambah) btnTambah.style.display = 'none';
-        return;
-    }
-
-    let html = ''; 
-    html += `<h4 style="margin: 0 0 8px 0; color: #1e293b; font-size: 14px;">🌱 Toko Bibit Tanaman</h4>`;
-    libraryTanaman.forEach(tanaman => {
-        let hargaToko = hargaBeliAktif[tanaman.namaBibit] || tanaman.BasehargaBeli; 
-        html += ` 
-            <div class="card-item"> 
-                <div> 
-                    <strong>${tanaman.iconBibit} ${tanaman.namaBibit}</strong><br> 
-                    <small style="color: #64748b;">Harga: Rp ${formatRupiah(hargaToko)} | Waktu: ${tanaman.waktuTumbuh / 1000} Detik</small> 
-                </div> 
-                <button class="btn-buy" onclick="bukaModalTransaksi('beli', '${tanaman.namaBibit}', ${hargaToko})">Beli</button> 
-            </div> 
-        `; 
-    }); 
-    
-    html += `<h4 style="margin: 15px 0 8px 0; color: #1e293b; font-size: 14px;">🧪 Toko Pupuk</h4>`;
-    listPupuk.forEach(p => {
-        let stok = stokPupuk[p.id] || 0;
-        html += `
-            <div class="card-item">
-                <div>
-                    <strong>${p.icon} ${p.nama}</strong><br>
-                    <small style="color: #64748b;">Harga: Rp ${formatRupiah(p.hargaBeli)} | Cepat ${p.efekWaktu / 1000} Detik (Stok: ${stok})</small>
-                </div>
-                <button class="btn-buy" style="background-color: #475569;" onclick="bukaModalTransaksi('beli_pupuk', '${p.id}', ${p.hargaBeli})">Beli</button>
-            </div>
-        `;
-    });
-    
-    container.innerHTML = html; 
-
-    let btnTambah = document.getElementById('btn-tambah-lahan'); 
-    if (btnTambah) {
-        if (lahanTambahanDibeli >= limitLahanTambahan) {
-            btnTambah.style.display = 'none'; 
-        } else {
-            btnTambah.style.display = 'block'; 
-            btnTambah.innerText = `➕ Beli Lahan Baru (Rp ${formatRupiah(hargaTambahLahan)})`; 
-        } 
-    } 
-} 
-
-function renderTokoAksesori() {
-    const container = document.getElementById('toko-aksesori-container');
-    if (!container) return;
-
-    let sedangBadai = cuacaAktif.nama.includes('Badai');
-    if (sedangBadai) {
-        container.innerHTML = `
-            <div style="text-align: center; padding: 30px; background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; color: #991b1b;">
-                <div style="font-size: 32px; margin-bottom: 8px;">🌪️</div>
-                <strong>Toko Aksesori Tutup Sementara!</strong><br>
-                <small style="color: #7f1d1d;">Pintu toko dikunci rapat akibat cuaca buruk (${cuacaAktif.nama}). Toko buka kembali setelah badai reda.</small>
-            </div>
-        `;
-        return;
-    }
-
-    let html = '';
-    listAksesori.forEach(acc => {
-        let sudahDimiliki = aksesoriDimiliki.includes(acc.id);
-        let actionBtn = '';
-        
-        if (sudahDimiliki) {
-            actionBtn = `<button class="btn-submit" style="background-color: #64748b; padding: 6px 12px; cursor: default;" disabled>Sudah Punya</button>`;
-        } else {
-            actionBtn = `<button class="btn-buy" onclick="beliAksesori('${acc.id}', ${acc.harga})">Beli</button>`;
-        }
-
-        html += `
-            <div class="card-item" style="flex-direction: column; align-items: flex-start; gap: 6px;">
-                <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
-                    <strong>${acc.icon} ${acc.nama}</strong>
-                    ${actionBtn}
-                </div>
-                <small style="color: #64748b; line-height: 1.3;">Slot: [${acc.slot.toUpperCase()}] | Harga: Rp ${formatRupiah(acc.harga)}<br><strong>Efek:</strong> ${acc.deskripsi}</small>
-            </div>
-        `;
-    });
-
-    container.innerHTML = html;
-}
-
-function beliAksesori(id, harga) {
-    if (cuacaAktif.nama.includes('Badai')) {
-        showToast("Toko sedang tutup karena badai!", "error");
-        return;
-    }
-    if (uang < harga) {
-        showToast("Uang tidak cukup untuk membeli aksesori ini!", "error");
-        return;
-    }
-    uang -= harga;
-    aksesoriDimiliki.push(id);
-    
-    let acc = listAksesori.find(a => a.id === id);
-    if (acc) {
-        if (acc.id === 'joger' && slotAktif.badan !== 'jas') {
-            showToast("Berhasil dibeli! (Celana Joger belum bisa dipakai karena Jas Anti Badai tidak aktif di badan)", "success");
-        } else {
-            slotAktif[acc.slot] = id;
-            showToast("Berhasil membeli dan mengenakan aksesori!", "success");
-        }
-    }
-
+    uang -= ternak.hargaBeli;
     updateUangDisplay();
-    updatePanelAksesoriInfo();
-    simpanGame();
-    renderTokoAksesori();
-}
 
-function pakaiAksesori(id) {
-    let acc = listAksesori.find(a => a.id === id);
-    if (!acc) return;
-
-    if (acc.id === 'joger' && slotAktif.badan !== 'jas') {
-        showToast("Celana Joger tidak bisa dipakai! Kamu harus mengenakan Jas Anti Badai terlebih dahulu di slot Badan.", "error");
-        return;
-    }
-
-    slotAktif[acc.slot] = id;
-    updatePanelAksesoriInfo();
-    simpanGame();
-    renderTabProfil();
-    showToast(`Aksesori ${acc.nama} dipasang ke slot ${acc.slot}!`, "success");
-}
-
-function renderLahan() {
-    const container = document.getElementById('lahan-container'); 
-    if (!container) return;
-    let html = ''; 
-    
-    lahan.forEach((l, index) => {
-        let dataTanaman = libraryTanaman.find(t => t.nama === l.tanaman); 
-        let iconTampil = dataTanaman ? dataTanaman.iconBuah : '🌱'; 
-        
-        let statusTeks = 'Lahan Kosong';
-        if (l.status === 'ditanam') {
-            statusTeks = `🌱 ${l.tanaman} (${l.jumlahBibit} Bibit)`;
-        } else if (l.status === 'siap_panen') {
-            statusTeks = `✨ ${iconTampil}${l.tanaman} (${l.jumlahBibit} Siap Panen)`;
-        }
-
-        html += ` 
-            <div class="farm-land"> 
-                <p id="status-lahan-${index}" style="font-size: 13px; font-weight: bold; margin-bottom: 8px; color: #1e293b;"> 
-                    ${statusTeks} 
-                </p> 
-                <small id="waktu-lahan-${index}" style="display: ${l.status === 'ditanam' ? 'block' : 'none'}; font-size: 11px; margin-bottom: 8px; color: #3b82f6; font-weight: bold;"></small> 
-                ${l.status === 'kosong' ? `<button class="btn-submit" style="padding: 6px; font-size: 11px;" onclick="bukaModalPilihBibit(${index})">Tanam Bibit</button>` : ''} 
-                ${l.status === 'siap_panen' ? `<button class="btn-submit" style="padding: 6px; font-size: 11px; background-color: #d97706;" onclick="panenTanaman(${index})">Panen</button>` : ''} 
-            </div> 
-        `; 
-    }); 
-
-    let headerHtml = `
-        <div style="grid-column: span 2; background: #e2e8f0; padding: 10px; border-radius: 8px; display: flex; flex-direction: column; gap: 8px; margin-bottom: 5px;">
-            <div style="font-size: 12px; font-weight: bold; color: #1e293b;">🧪 Panel Pupuk Massal:</div>
-            <div style="display: flex; gap: 5px; justify-content: space-between;">
-                <button class="btn-submit" style="background-color: #16a34a; padding: 5px 6px; font-size: 10px; flex: 1;" onclick="gunakanPupuk('pupuk_organik')">🍃 Organik (${stokPupuk.pupuk_organik})</button>
-                <button class="btn-submit" style="background-color: #2563eb; padding: 5px 6px; font-size: 10px; flex: 1;" onclick="gunakanPupuk('biofertilizer')">🧪 Biofert (${stokPupuk.biofertilizer})</button>
-                <button class="btn-submit" style="background-color: #0f172a; padding: 5px 6px; font-size: 10px; flex: 1;" onclick="gunakanPupuk('pupuk_urea')">💎 Urea (${stokPupuk.pupuk_urea})</button>
-            </div>
-        </div>
-    `;
-    
-    container.innerHTML = headerHtml + html; 
-} 
-
-function bukaModalPilihBibit(indexLahan) {
-    let bibitDiInv = inventory.filter(i => i.nama.includes('Bibit') && i.jumlah > 0);
-
-    if (bibitDiInv.length === 0) {
-        showToast('Kamu tidak punya bibit di inventory! Beli dulu di Pasar.', 'error');
-        return;
-    }
-
-    selectedLahanIndex = indexLahan;
-
-    // Buat opsi elemen dropdown HTML dari daftar bibit yang dimiliki
-    let optionsHtml = bibitDiInv.map(b => `<option value="${b.nama}">${b.nama} (Stok: ${b.jumlah})</option>`).join('');
-
-    document.getElementById('modal-title').innerText = `Pilih Bibit untuk Lahan #${indexLahan + 1}`;
-    
-    // Tampilkan dropdown selector bibit
-    document.getElementById('modal-price').innerHTML = `
-        <label for="select-bibit-lahan" style="display:block; margin-bottom:5px; font-weight:bold;">Pilih Bibit:</label>
-        <select id="select-bibit-lahan" onchange="gantiPilihanBibit(this.value)" style="width: 100%; padding: 6px; border-radius: 6px; border: 1px solid #ccc;">
-            ${optionsHtml}
-        </select>
-        <small id="info-stok-bibit" style="display:block; margin-top:6px; color:#64748b;"></small>
-    `;
-
-    // Set pilihan default ke bibit pertama di dropdown
-    gantiPilihanBibit(bibitDiInv[0].nama);
-
-    document.getElementById('modal-total-price').parentElement.style.display = 'none';
-    document.getElementById('btn-confirm-transaction').innerText = 'Tanam Sekarang';
-    document.getElementById('btn-confirm-transaction').setAttribute('onclick', 'konfirmasiTanamBibit()');
-
-    document.getElementById('transaction-modal').style.display = 'flex';
-}
-
-// Fungsi helper saat pilihan dropdown diubah
-function gantiPilihanBibit(namaBibit) {
-    selectedBibitNama = namaBibit;
-    let itemInv = inventory.find(i => i.nama === selectedBibitNama);
-    let stokMaks = itemInv ? itemInv.jumlah : 0;
-    
-    maxQtyAllowed = Math.min(99, stokMaks);
-    currentQty = 1;
-
-    let infoElem = document.getElementById('info-stok-bibit');
-    if (infoElem) {
-        infoElem.innerText = `Stok di Inventory: ${stokMaks} | Maksimal ${maxQtyAllowed} per lahan`;
-    }
-
-    updateModalDisplayCustom();
-}
-
-function updateModalDisplayCustom() {
-    document.getElementById('modal-qty-display').innerText = currentQty;
-}
-
-function konfirmasiTanamBibit() {
-    if (currentQty <= 0) {
-        showToast('Jumlah tidak valid!', 'error');
-        return;
-    }
-
-    let item = inventory.find(i => i.nama === selectedBibitNama);
-    if (!item || item.jumlah < currentQty) {
-        showToast('Stok bibit tidak cukup!', 'error');
-        return;
-    }
-
-    item.jumlah -= currentQty;
-    if (item.jumlah <= 0) inventory = inventory.filter(i => i.nama !== selectedBibitNama);
-
-    let dataBibit = libraryTanaman.find(t => t.namaBibit === selectedBibitNama);
-    let bibitNamaBersih = dataBibit ? dataBibit.nama : selectedBibitNama.replace('Bibit ', '');
-    let durasiMs = dataBibit ? dataBibit.waktuTumbuh : 15000;
-
-    let targetLahan = lahan[selectedLahanIndex];
-    targetLahan.status = 'ditanam';
-    targetLahan.tanaman = bibitNamaBersih;
-    targetLahan.jumlahBibit = currentQty;
-    targetLahan.waktuSelesai = new Date().getTime() + durasiMs;
-
-    tutupModalTransaksi();
-    
-    document.getElementById('modal-total-price').parentElement.style.display = 'block';
-    document.getElementById('btn-confirm-transaction').setAttribute('onclick', 'konfirmasiTransaksi()');
-
-    simpanGame();
-    openGameTabeksplisit('pertanian');
-    renderLahan();
-    mulaiTimerLahan(selectedLahanIndex);
-    showToast(`Berhasil menanam ${currentQty} ${bibitNamaBersih}!`, 'success');
-}
-
-function beliLahan() {
-    if (cuacaAktif.nama.includes('Badai')) {
-        showToast("Tidak bisa memperluas lahan saat badai melanda!", "error");
-        return;
-    }
-    if (lahanTambahanDibeli >= limitLahanTambahan) {
-        showToast('Batas maksimal lahan tercapai!', 'error'); 
-        return; 
-    } 
-    if (uang < hargaTambahLahan) {
-        showToast(`Uang kurang! Butuh Rp ${formatRupiah(hargaTambahLahan)}`, 'error'); 
-        return; 
-    } 
-    
-    uang -= hargaTambahLahan; 
-    updateUangDisplay(); 
-    
-    lahan.push({
-        id: lahan.length + 1, 
-        status: 'kosong', 
-        tanaman: null, 
-        jumlahBibit: 0,
-        waktuSelesai: 0, 
-        timerInterval: null 
-    }); 
-    
-    lahanTambahanDibeli++; 
-    showToast('Berhasil menambah lahan!', 'success'); 
-    hargaTambahLahan = Math.round(hargaTambahLahan * 2.5); 
-    
-    simpanGame();
-    renderPasar(); 
-    openGameTabeksplisit('pertanian'); 
-    renderLahan(); 
-} 
-
-function pilihBibitUntukDitanam(namaBibit) {
-    let emptyIndex = lahan.findIndex(l => l.status === 'kosong'); 
-    if (emptyIndex === -1) {
-        showToast('Semua lahan sedang terisi!', 'error'); 
-        return; 
-    } 
-    bukaModalPilihBibit(emptyIndex);
-} 
-
-// --- FORMAT WAKTU DINAMIS (JAM/MENIT ATAU HARI) ---
-function formatWaktuDinamis(sisaMs) {
-    let totalDetik = Math.floor(sisaMs / 1000);
-    let totalJam = Math.floor(totalDetik / 3600);
-
-    // Jika waktu tersisa mencapai 24 jam (86400 detik) atau lebih
-    if (totalJam >= 24) {
-        let hari = Math.floor(totalJam / 24);
-        let sisaJam = totalJam % 24;
-        return `${hari} Hari ${sisaJam} Jam`;
-    } else {
-        // Jika di bawah 24 jam, tampilkan format Jam:Menit:Detik
-        let jam = Math.floor(totalDetik / 3600);
-        let menit = Math.floor((totalDetik % 3600) / 60);
-        let detik = totalDetik % 60;
-        return `${String(jam).padStart(2, '0')}:${String(menit).padStart(2, '0')}:${String(detik).padStart(2, '0')}`;
-    }
-}
-
-function mulaiTimerLahan(index) {
-    let l = lahan[index]; 
-    if (l.timerInterval) clearInterval(l.timerInterval); 
-    
-    l.timerInterval = setInterval(() => {
-        let sisaWaktu = l.waktuSelesai - new Date().getTime(); 
-        let waktuEl = document.getElementById(`waktu-lahan-${index}`); 
-        
-        if (sisaWaktu <= 0) {
-            clearInterval(l.timerInterval); 
-            l.status = 'siap_panen'; 
-            renderLahan(); 
-        } else {
-            let formatWaktu = formatWaktuDinamis(sisaWaktu);
-            if(waktuEl) waktuEl.innerText = `⏱️ ${formatWaktu}`; 
-        } 
-    }, 1000); 
-} 
-
-function gunakanPupuk(idPupuk) {
-    let pupukObj = listPupuk.find(p => p.id === idPupuk);
-    if (!pupukObj) return;
-
-    if (stokPupuk[idPupuk] <= 0) {
-        showToast(`${pupukObj.nama} habis! Silakan beli di Pasar.`, 'error');
-        return;
-    }
-
-    let adaLahanDitanam = lahan.some(l => l.status === 'ditanam');
-    if (!adaLahanDitanam) {
-        showToast('Tidak ada lahan yang sedang ditanami saat ini!', 'error');
-        return;
-    }
-
-    stokPupuk[idPupuk] -= 1;
-    let waktuSekarang = new Date().getTime();
-
-    lahan.forEach(l => {
-        if (l.status === 'ditanam') {
-            l.waktuSelesai -= pupukObj.efekWaktu;
-            if (l.waktuSelesai <= waktuSekarang) {
-                l.waktuSelesai = waktuSekarang;
-            }
-        }
+    daftarTernakPemain.push({
+        instanceId: Date.now() + Math.random(),
+        id: ternak.id,
+        nama: ternak.nama,
+        icon: ternak.icon,
+        waktuSiapPanen: Date.now() + ternak.waktuProduksi,
+        status: 'menghasilkan'
     });
 
+    showToast(`Berhasil membeli ${ternak.nama}! Cek tab Kandang Ternak.`, 'success');
     simpanGame();
-    renderLahan();
-    showToast(`${pupukObj.nama} digunakan! Semua lahan dipercepat ${pupukObj.efekWaktu / 1000} Detik!`, 'success');
-} 
+    renderPasar();
+}
 
-function panenTanaman(index) {
-    let l = lahan[index]; 
-    if (l.status !== 'siap_panen') return; 
-    
-    if (slotAktif.kaki === 'joger' && slotAktif.badan !== 'jas') {
-        slotAktif.kaki = null;
-        updatePanelAksesoriInfo();
-        showToast("Celana Joger dilepas otomatis karena Jas Anti Badai tidak aktif!", "error");
-    }
+function renderTernakInventory() {
+    const container = document.getElementById('inventory-container');
+    const subContainer = document.getElementById('subtab-content-container');
+    if (subContainer) subContainer.innerHTML = '';
+    if (!container) return;
 
-    let totalBonusPersenAcc = hitungTotalBonusPersen(); 
-    let jumlahDasarDanAcc = l.jumlahBibit + Math.floor(l.jumlahBibit * (totalBonusPersenAcc / 100));
-
-    let efekCuacaEfektif = cuacaAktif.efekPersen;
-
-    if (cuacaAktif.nama.includes('Badai') && slotAktif.badan === 'jas') {
-        let jasObj = listAksesori.find(a => a.id === 'jas');
-        if (jasObj && jasObj.tangkalBadai) {
-            efekCuacaEfektif += jasObj.tangkalBadai;
-            if (efekCuacaEfektif > 0) efekCuacaEfektif = 0;
-        }
-    }
-
-    if (cuacaAktif.nama === 'Angin Kencang' && slotAktif.telapak === 'boots') {
-        let bootsObj = listAksesori.find(a => a.id === 'boots');
-        if (bootsObj && bootsObj.tangkalAngin) {
-            efekCuacaEfektif += bootsObj.tangkalAngin;
-            if (efekCuacaEfektif > 0) efekCuacaEfektif = 0;
-        }
-    }
-
-    let penyesuaianCuaca = Math.round(jumlahDasarDanAcc * (efekCuacaEfektif / 100));
-    let jumlahPanenTotal = jumlahDasarDanAcc + penyesuaianCuaca;
-
-    if (cuacaAktif.nama.includes('Badai') && slotAktif.badan === 'jas' && slotAktif.kaki === 'joger') {
-        let jogerObj = listAksesori.find(a => a.id === 'joger');
-        if (jogerObj && jogerObj.sinergiJas) {
-            let bonusSinergi = Math.floor(l.jumlahBibit * (jogerObj.sinergiJas / 100));
-            jumlahPanenTotal += bonusSinergi;
-        }
-    }
-
-    if (cuacaAktif.nama === 'Badai Petir Berat' && slotAktif.kepala === 'helmet') {
-        let helmetObj = listAksesori.find(a => a.id === 'helmet');
-        if (helmetObj && helmetObj.bonusBadaiPetir) {
-            let bonusHelm = Math.floor(l.jumlahBibit * (helmetObj.bonusBadaiPetir / 100));
-            jumlahPanenTotal += bonusHelm;
-        }
-    }
-
-    if (jumlahPanenTotal < 1) jumlahPanenTotal = 1; 
-
-    tambahKeInventory(l.tanaman, jumlahPanenTotal); 
-    showToast(`Panen ${jumlahPanenTotal} ${l.tanaman} (${cuacaAktif.ikon} ${cuacaAktif.nama})!`, 'success'); 
-    
-    l.status = 'kosong'; 
-    l.tanaman = null; 
-    l.jumlahBibit = 0;
-    l.waktuSelesai = 0; 
-    
-    if (l.timerInterval) clearInterval(l.timerInterval); 
-    simpanGame();
-    renderLahan(); 
-} 
-
-function bukaModalTransaksi(tipe, namaBarang, harga, stokMaksimal = 0) {
-    if (cuacaAktif.nama.includes('Badai')) {
-        showToast("Pasar sedang tutup karena cuaca badai!", "error");
+    if (daftarTernakPemain.length === 0) {
+        container.innerHTML = `
+            <div style="text-align: center; color: #64748b; padding: 20px; font-size:12px;">
+                Belum ada hewan ternak di kandang. Beli hewan ternak di Tab Pasar!
+            </div>`;
         return;
     }
 
-    currentTransactionType = tipe; 
-    currentTransactionItem = namaBarang; 
-    currentTransactionPrice = harga; 
-    
-    document.getElementById('modal-qty-container').style.display = 'flex';
-    document.getElementById('modal-total-price').parentElement.style.display = 'block';
-    document.getElementById('btn-confirm-transaction').setAttribute('onclick', 'konfirmasiTransaksi()');
+    let html = '';
+    const sekarang = Date.now();
 
-    if (tipe === 'beli') {
-        document.getElementById('modal-title').innerText = `Beli ${namaBarang}`; 
-        document.getElementById('btn-confirm-transaction').innerText = 'Konfirmasi Beli'; 
-        let maxMampuBeli = Math.floor(uang / harga); 
-        maxQtyAllowed = Math.min(99, maxMampuBeli); 
-        if (maxQtyAllowed < 1) maxQtyAllowed = 1; 
-    } else if (tipe === 'beli_pupuk') {
-        let pObj = listPupuk.find(p => p.id === namaBarang);
-        let namaP = pObj ? pObj.nama : namaBarang;
-        currentTransactionItem = pObj ? pObj.id : namaBarang;
-        document.getElementById('modal-title').innerText = `Beli ${namaP}`;
-        document.getElementById('btn-confirm-transaction').innerText = 'Konfirmasi Beli';
-        let maxMampuBeli = Math.floor(uang / harga);
-        maxQtyAllowed = Math.min(99, maxMampuBeli);
-        if (maxQtyAllowed < 1) maxQtyAllowed = 1;
-    } else if (tipe === 'jual') {
-        document.getElementById('modal-title').innerText = `Jual ${namaBarang}`; 
-        document.getElementById('btn-confirm-transaction').innerText = 'Konfirmasi Jual'; 
-        maxQtyAllowed = Math.min(999, stokMaksimal); 
-    } 
-    
-    currentQty = (maxQtyAllowed > 0) ? 1 : 0; 
-    document.getElementById('modal-price').innerText = `Harga Satuan: Rp ${formatRupiah(harga)}`; 
-    updateModalDisplay(); 
-    
-    document.getElementById('transaction-modal').style.display = 'flex'; 
-} 
+    daftarTernakPemain.forEach((item, index) => {
+        let ternakInfo = libraryTernak.find(t => t.id === item.id);
+        let sisaWaktu = Math.max(0, Math.ceil((item.waktuSiapPanen - sekarang) / 1000));
+        let siapPanen = sisaWaktu === 0;
 
-function tutupModalTransaksi() {
-    document.getElementById('transaction-modal').style.display = 'none'; 
-} 
+        html += `
+            <div class="card-item" style="margin-bottom: 8px;">
+                <div>
+                    <strong>${item.icon} ${item.nama}</strong><br>
+                    <small style="color: #64748b;">
+                        Status: ${siapPanen ? '✅ Siap Ambil ' + ternakInfo.iconHasil : '⏳ Produksi (' + sisaWaktu + 's)'}
+                    </small>
+                </div>
+                ${siapPanen 
+                    ? `<button class="btn-submit" style="background-color: #10b981;" onclick="panenHasilTernak(${index})">Ambil ${ternakInfo.iconHasil}</button>`
+                    : `<button class="btn-submit" style="background-color: #94a3b8; cursor:not-allowed;" disabled>Tunggu</button>`
+                }
+            </div>
+        `;
+    });
+    container.innerHTML = html;
+}
 
-function ubahQty(amount) {
-    currentQty += amount; 
-    if (currentQty > maxQtyAllowed) currentQty = maxQtyAllowed; 
-    if (currentQty < 1 && maxQtyAllowed > 0) currentQty = 1; 
-    if (maxQtyAllowed === 0) currentQty = 0; 
+function panenHasilTernak(index) {
+    let item = daftarTernakPemain[index];
+    if (!item) return;
+    let ternakInfo = libraryTernak.find(t => t.id === item.id);
     
-    let btnText = document.getElementById('btn-confirm-transaction').innerText;
-    if (btnText === 'Tanam Sekarang') {
-        updateModalDisplayCustom();
-    } else {
-        updateModalDisplay(); 
-    }
-} 
+    tambahKeInventory(ternakInfo.namaHasil, 1);
+    item.waktuSiapPanen = Date.now() + ternakInfo.waktuProduksi;
 
-function setQtyMaks() {
-    currentQty = maxQtyAllowed; 
-    if (currentQty === 0 && currentTransactionType === 'beli') currentQty = 1; 
-    
-    let btnText = document.getElementById('btn-confirm-transaction').innerText;
-    if (btnText === 'Tanam Sekarang') {
-        updateModalDisplayCustom();
-    } else {
-        updateModalDisplay(); 
-    }
-} 
-
-function updateModalDisplay() {
-    document.getElementById('modal-qty-display').innerText = currentQty; 
-    let total = currentQty * currentTransactionPrice; 
-    document.getElementById('modal-total-price').innerText = `Rp ${formatRupiah(total)}`; 
-} 
-
-function konfirmasiTransaksi() {
-    if (currentQty <= 0) {
-        showToast('Jumlah tidak valid!', 'error'); 
-        return; 
-    } 
-    
-    let totalHarga = currentQty * currentTransactionPrice; 
-    
-    if (currentTransactionType === 'beli') {
-        if (uang >= totalHarga) {
-            uang -= totalHarga; 
-            updateUangDisplay(); 
-            tambahKeInventory(currentTransactionItem, currentQty); 
-            tutupModalTransaksi(); 
-            simpanGame();
-            showToast(`Membeli ${currentQty} ${currentTransactionItem}!`, 'success'); 
-        } else {
-            showToast('Uang tidak cukup!', 'error'); 
-        } 
-    } else if (currentTransactionType === 'beli_pupuk') {
-        if (uang >= totalHarga) {
-            uang -= totalHarga;
-            updateUangDisplay();
-            stokPupuk[currentTransactionItem] += currentQty;
-            tutupModalTransaksi();
-            simpanGame();
-            renderPasar();
-            renderLahan();
-            showToast(`Membeli ${currentQty} pupuk!`, 'success');
-        } else {
-            showToast('Uang tidak cukup!', 'error');
-        }
-    } else if (currentTransactionType === 'jual') {
-        let item = inventory.find(i => i.nama === currentTransactionItem); 
-        if (!item || item.jumlah < currentQty) {
-            showToast('Item tidak cukup untuk dijual!', 'error'); 
-            return; 
-        } 
-        
-        item.jumlah -= currentQty; 
-        if (item.jumlah <= 0) inventory = inventory.filter(i => i.nama !== currentTransactionItem); 
-        
-        uang += totalHarga; 
-        updateUangDisplay(); 
-        tutupModalTransaksi(); 
-        simpanGame();
-        showToast(`Terjual ${currentQty} item seharga Rp ${formatRupiah(totalHarga)}!`, 'success'); 
-        renderInventory(); 
-    } 
-} 
-
-function tambahKeInventory(namaItem, jumlah) {
-    let existing = inventory.find(item => item.nama === namaItem); 
-    if (existing) existing.jumlah += jumlah; 
-    else inventory.push({ nama: namaItem, jumlah: jumlah }); 
-} 
+    showToast(`Berhasil memanen ${ternakInfo.namaHasil}!`, 'success');
+    simpanGame();
+    renderTernakInventory();
+}
 
 function renderInventory() {
     const container = document.getElementById('subtab-content-container'); 
-    if (!container) return;
+    const containerTernak = document.getElementById('inventory-container');
+    if (!container || !containerTernak) return;
+    
+    container.innerHTML = '';
+    containerTernak.innerHTML = '';
 
-    // Di dalam renderInventory() atau switchSubInventory()
-if (currentSubInventory === 'ternak') {
-    renderTernakInventory();
-}
+    if (currentSubInventory === 'ternak') {
+        renderTernakInventory();
+        return;
+    }
+
     let filteredItems = inventory.filter(item => {
-        if (currentSubInventory === 'bibit') {
-            return item.nama.includes('Bibit');
-        } else if (currentSubInventory === 'panen') {
-            return !item.nama.includes('Bibit');
-        } else if (currentSubInventory === 'ternak') {
-            return item.kategori === 'ternak';
-        }
+        if (currentSubInventory === 'bibit') return item.nama.includes('Bibit');
+        if (currentSubInventory === 'panen') return !item.nama.includes('Bibit');
         return false;
     });
 
     if (filteredItems.length === 0) {
-        let pesanKosong = 'Belum ada item di kategori ini.';
-        if (currentSubInventory === 'bibit') pesanKosong = 'Belum ada bibit. Beli di Tab Pasar!';
-        if (currentSubInventory === 'panen') pesanKosong = 'Belum ada hasil panen. Silakan bertani dulu!';
-        if (currentSubInventory === 'ternak') pesanKosong = 'Belum ada hasil hewan ternak.';
-        
+        let pesanKosong = currentSubInventory === 'bibit' ? 'Belum ada bibit. Beli di Tab Pasar!' : 'Belum ada hasil panen/ternak.';
         container.innerHTML = `<p style="color: #64748b; font-style: italic; text-align: center; padding: 20px; font-size: 12px;">${pesanKosong}</p>`; 
         return; 
     } 
@@ -1116,16 +245,17 @@ if (currentSubInventory === 'ternak') {
         let icon = '📦'; 
         let actionButton = ''; 
         let dataTanaman = libraryTanaman.find(t => t.namaBibit === item.nama || t.nama === item.nama); 
+        let dataTernakHasil = libraryTernak.find(t => t.namaHasil === item.nama);
         
         if (item.nama.includes('Bibit')) {
             icon = dataTanaman ? dataTanaman.iconBibit : '🌱'; 
-            actionButton = `<button class="btn-submit" style="padding: 5px 8px; font-size: 11px;" onclick="pilihBibitUntukDitanam('${item.nama}')">Tanam</button>`; 
+            actionButton = `<button class="btn-submit" style="padding: 5px 8px; font-size: 11px;" onclick="openGameTab('pertanian')">Tanam</button>`; 
         } else {
-            icon = dataTanaman ? dataTanaman.iconBuah : '📦'; 
+            icon = dataTanaman ? dataTanaman.iconBuah : (dataTernakHasil ? dataTernakHasil.iconHasil : '📦'); 
             let hargaJualSatuan = hargaJualAktif[item.nama] || 0; 
             actionButton = ` 
                 <div style="text-align: right;"> 
-                    <small style="display: block; color: #64748b; font-size: 9px;">Jual: Rp ${formatRupiah(hargaJualSatuan)}</small> 
+                    <small style="display: block; color: #64748b; font-size: 9px;">Harga: Rp ${formatRupiah(hargaJualSatuan)}</small> 
                     <button class="btn-sell" style="padding: 4px 8px; font-size: 11px; margin-top: 2px;" onclick="bukaModalTransaksi('jual', '${item.nama}', ${hargaJualSatuan}, ${item.jumlah})">Jual</button> 
                 </div> 
             `; 
@@ -1141,138 +271,304 @@ if (currentSubInventory === 'ternak') {
             </div> 
         `; 
     }); 
-    
     container.innerHTML = html; 
 } 
 
-// ==========================================
-// FITUR SIMPAN, MUAT, & NICKNAME (LOCALSTORAGE)
-// ==========================================
-function bukaModalNickname() {
-    let inputEl = document.getElementById('input-new-nickname');
-    if (inputEl) inputEl.value = playerName;
-    document.getElementById('nickname-modal').style.display = 'flex';
-}
-
-function tutupModalNickname() {
-    document.getElementById('nickname-modal').style.display = 'none';
-}
-
-function simpanNicknameBaru() {
-    let inputEl = document.getElementById('input-new-nickname');
-    let namaBaru = inputEl ? inputEl.value.trim() : "";
+function renderPasar() {
+    const container = document.getElementById('pasar-container'); 
+    if (!container) return;
     
-    if (namaBaru !== "") {
-        playerName = namaBaru;
-        let elNick = document.getElementById('player-nickname');
-        if (elNick) elNick.innerText = `👨‍🌾 ${playerName} ✏️`;
-        simpanGame();
-        showToast("Nama petani berhasil diperbarui!", "success");
-        tutupModalNickname();
-    } else {
-        showToast("Nama tidak boleh kosong!", "error");
+    if (cuacaAktif.nama.includes('Badai')) {
+        container.innerHTML = `<div style="text-align: center; padding: 20px; color: #991b1b;">⛈️ Pasar Ditutup Sementara karena Badai!</div>`;
+        return;
     }
+
+    let html = ''; 
+    html += `<h4 style="margin: 10px 0 5px 0; font-size: 13px; color:#1e293b;">🌱 Toko Bibit Tanaman</h4>`;
+    libraryTanaman.forEach(tanaman => {
+        let hargaToko = hargaBeliAktif[tanaman.namaBibit] || tanaman.BasehargaBeli; 
+        html += ` 
+            <div class="card-item"> 
+                <div><strong>${tanaman.iconBibit} ${tanaman.namaBibit}</strong><br><small>Rp ${formatRupiah(hargaToko)}</small></div> 
+                <button class="btn-buy" onclick="bukaModalTransaksi('beli', '${tanaman.namaBibit}', ${hargaToko})">Beli</button> 
+            </div> `; 
+    }); 
+
+    html += `<h4 style="margin: 15px 0 5px 0; font-size: 13px; color:#1e293b;">🐔 Pasar Hewan Ternak</h4>`;
+    libraryTernak.forEach(ternak => {
+        html += `
+            <div class="card-item">
+                <div><strong>${ternak.icon} ${ternak.nama}</strong><br><small>Harga: Rp ${formatRupiah(ternak.hargaBeli)} | Produk: ${ternak.iconHasil}</small></div>
+                <button class="btn-buy" style="background-color: #2563eb;" onclick="beliTernak('${ternak.id}')">Beli</button>
+            </div>`;
+    });
+    
+    html += `<h4 style="margin: 15px 0 5px 0; font-size: 13px; color:#1e293b;">🧪 Toko Pupuk</h4>`;
+    listPupuk.forEach(p => {
+        html += `
+            <div class="card-item">
+                <div><strong>${p.icon} ${p.nama}</strong><br><small>Rp ${formatRupiah(p.hargaBeli)}</small></div>
+                <button class="btn-buy" style="background-color: #475569;" onclick="bukaModalTransaksi('beli_pupuk', '${p.id}', ${p.hargaBeli})">Beli</button>
+            </div>`;
+    });
+    container.innerHTML = html; 
+}
+
+function renderLahan() {
+    const container = document.getElementById('lahan-container'); 
+    if (!container) return;
+    let html = ''; 
+    
+    lahan.forEach((l, index) => {
+        let dataTanaman = libraryTanaman.find(t => t.nama === l.tanaman); 
+        let iconTampil = dataTanaman ? dataTanaman.iconBuah : '🌱'; 
+        let statusTeks = l.status === 'kosong' ? 'Lahan Kosong' : (l.status === 'ditanam' ? `🌱 ${l.tanaman}` : `✨ ${iconTampil} Siap Panen`);
+
+        html += ` 
+            <div class="farm-land"> 
+                <p style="font-size: 12px; font-weight: bold; margin:0;">${statusTeks}</p> 
+                <small id="waktu-lahan-${index}" style="font-size: 11px; color: #3b82f6;"></small> 
+                ${l.status === 'kosong' ? `<button class="btn-submit" style="padding:4px;" onclick="bukaModalPilihBibit(${index})">Tanam</button>` : ''} 
+                ${l.status === 'siap_panen' ? `<button class="btn-submit" style="padding:4px; background-color:#d97706;" onclick="panenTanaman(${index})">Panen</button>` : ''} 
+            </div> `; 
+    }); 
+
+    let headerHtml = `
+        <div style="grid-column: span 2; background: #e2e8f0; padding: 8px; border-radius: 8px; display:flex; gap:4px; margin-bottom:5px;">
+            <button class="btn-submit" style="font-size:10px; flex:1; background:#16a34a;" onclick="gunakanPupuk('pupuk_organik')">🍃 Organik (${stokPupuk.pupuk_organik})</button>
+            <button class="btn-submit" style="font-size:10px; flex:1; background:#2563eb;" onclick="gunakanPupuk('biofertilizer')">🧪 Bio (${stokPupuk.biofertilizer})</button>
+            <button class="btn-submit" style="font-size:10px; flex:1; background:#0f172a;" onclick="gunakanPupuk('pupuk_urea')">💎 Urea (${stokPupuk.pupuk_urea})</button>
+        </div>`;
+    container.innerHTML = headerHtml + html; 
+} 
+
+function bukaModalPilihBibit(indexLahan) {
+    let bibitDiInv = inventory.filter(i => i.nama.includes('Bibit') && i.jumlah > 0);
+    if (bibitDiInv.length === 0) {
+        showToast('Anda tidak memiliki bibit tanaman! Beli di Pasar.', 'error');
+        return;
+    }
+    selectedLahanIndex = indexLahan;
+    let optionsHtml = bibitDiInv.map(b => `<option value="${b.nama}">${b.nama} (Stok: ${b.jumlah})</option>`).join('');
+
+    document.getElementById('modal-title').innerText = `Tanam Lahan #${indexLahan + 1}`;
+    document.getElementById('modal-price').innerHTML = `
+        <select id="select-bibit-lahan" onchange="gantiPilihanBibit(this.value)" style="width:100%; padding:6px; border-radius:6px;">
+            ${optionsHtml}
+        </select>`;
+    gantiPilihanBibit(bibitDiInv[0].nama);
+    document.getElementById('btn-confirm-transaction').innerText = 'Tanam';
+    document.getElementById('btn-confirm-transaction').setAttribute('onclick', 'konfirmasiTanamBibit()');
+    document.getElementById('transaction-modal').style.display = 'flex';
+}
+
+function gantiPilihanBibit(namaBibit) {
+    selectedBibitNama = namaBibit;
+    let itemInv = inventory.find(i => i.nama === selectedBibitNama);
+    maxQtyAllowed = itemInv ? Math.min(99, itemInv.jumlah) : 1;
+    currentQty = 1;
+    document.getElementById('modal-qty-display').innerText = currentQty;
+    document.getElementById('modal-total-price').innerText = '-';
+}
+
+function konfirmasiTanamBibit() {
+    let item = inventory.find(i => i.nama === selectedBibitNama);
+    if (!item || item.jumlah < currentQty) return;
+
+    item.jumlah -= currentQty;
+    if (item.jumlah <= 0) inventory = inventory.filter(i => i.nama !== selectedBibitNama);
+
+    let dataBibit = libraryTanaman.find(t => t.namaBibit === selectedBibitNama);
+    let targetLahan = lahan[selectedLahanIndex];
+    targetLahan.status = 'ditanam';
+    targetLahan.tanaman = dataBibit.nama;
+    targetLahan.jumlahBibit = currentQty;
+    targetLahan.waktuSelesai = Date.now() + dataBibit.waktuTumbuh;
+
+    tutupModalTransaksi();
+    simpanGame();
+    renderLahan();
+    mulaiTimerLahan(selectedLahanIndex);
+    showToast(`Berhasil menanam ${targetLahan.tanaman}!`, 'success');
+}
+
+function mulaiTimerLahan(index) {
+    let l = lahan[index]; 
+    if (l.timerInterval) clearInterval(l.timerInterval); 
+    l.timerInterval = setInterval(() => {
+        let sisa = l.waktuSelesai - Date.now(); 
+        let el = document.getElementById(`waktu-lahan-${index}`); 
+        if (sisa <= 0) {
+            clearInterval(l.timerInterval); 
+            l.status = 'siap_panen'; 
+            renderLahan(); 
+        } else if (el) {
+            el.innerText = `⏳ ${Math.ceil(sisa/1000)}s`;
+        } 
+    }, 1000); 
+}
+
+function panenTanaman(index) {
+    let l = lahan[index];
+    let totalPanen = l.jumlahBibit + Math.floor(l.jumlahBibit * (hitungTotalBonusPersen() / 100));
+    tambahKeInventory(l.tanaman, totalPanen);
+    showToast(`Panen ${totalPanen} ${l.tanaman}!`, 'success');
+    l.status = 'kosong'; l.tanaman = null;
+    simpanGame();
+    renderLahan();
+}
+
+function gunakanPupuk(idPupuk) {
+    if (stokPupuk[idPupuk] <= 0) { showToast('Pupuk habis!', 'error'); return; }
+    stokPupuk[idPupuk]--;
+    lahan.forEach(l => { if (l.status === 'ditanam') l.waktuSelesai -= listPupuk.find(p=>p.id===idPupuk).efekWaktu; });
+    simpanGame(); renderLahan(); showToast('Semua tanaman dipercepat!', 'success');
+}
+
+function beliLahan() {
+    if(uang < hargaTambahLahan) { showToast('Koin tidak cukup!', 'error'); return; }
+    uang -= hargaTambahLahan;
+    lahan.push({ id: lahan.length + 1, status: 'kosong', tanaman: null, jumlahBibit: 0, waktuSelesai: 0, timerInterval: null });
+    hargaTambahLahan = Math.round(hargaTambahLahan * 2.5);
+    simpanGame(); updateUangDisplay(); renderPasar(); renderLahan();
+}
+
+function bukaModalTransaksi(tipe, namaBarang, harga, stok = 0) {
+    currentTransactionType = tipe; currentTransactionItem = namaBarang; currentTransactionPrice = harga;
+    maxQtyAllowed = tipe === 'jual' ? stok : Math.min(99, Math.floor(uang / harga));
+    currentQty = maxQtyAllowed > 0 ? 1 : 0;
+    
+    document.getElementById('modal-title').innerText = tipe === 'jual' ? `Jual ${namaBarang}` : `Beli ${namaBarang}`;
+    document.getElementById('modal-price').innerText = `Harga: Rp ${formatRupiah(harga)}`;
+    document.getElementById('btn-confirm-transaction').innerText = 'Konfirmasi';
+    document.getElementById('btn-confirm-transaction').setAttribute('onclick', 'konfirmasiTransaksi()');
+    updateModalDisplay();
+    document.getElementById('transaction-modal').style.display = 'flex';
+}
+
+function ubahQty(amt) {
+    currentQty = Math.max(1, Math.min(maxQtyAllowed, currentQty + amt));
+    updateModalDisplay();
+}
+function setQtyMaks() { currentQty = maxQtyAllowed; updateModalDisplay(); }
+function updateModalDisplay() {
+    document.getElementById('modal-qty-display').innerText = currentQty;
+    document.getElementById('modal-total-price').innerText = `Rp ${formatRupiah(currentQty * currentTransactionPrice)}`;
+}
+function tutupModalTransaksi() { document.getElementById('transaction-modal').style.display = 'none'; }
+
+function konfirmasiTransaksi() {
+    let total = currentQty * currentTransactionPrice;
+    if (currentTransactionType === 'beli') {
+        if(uang < total) return; uang -= total; tambahKeInventory(currentTransactionItem, currentQty);
+    } else if (currentTransactionType === 'beli_pupuk') {
+        if(uang < total) return; uang -= total; stokPupuk[currentTransactionItem] += currentQty;
+    } else if (currentTransactionType === 'jual') {
+        let item = inventory.find(i => i.nama === currentTransactionItem);
+        if(!item || item.jumlah < currentQty) return;
+        item.jumlah -= currentQty; uang += total;
+        if(item.jumlah <= 0) inventory = inventory.filter(i => i.nama !== currentTransactionItem);
+    }
+    tutupModalTransaksi(); simpanGame(); updateUangDisplay(); renderInventory(); renderPasar();
+}
+
+function tambahKeInventory(nama, qty) {
+    let item = inventory.find(i => i.nama === nama);
+    if(item) item.jumlah += qty; else inventory.push({ nama: nama, jumlah: qty });
+}
+
+function hitungTotalBonusPersen() {
+    let t = 0; for(let s in slotAktif) { let a = listAksesori.find(x=>x.id===slotAktif[s]); if(a) t += a.bonusPersen; } return t;
+}
+function renderTabProfil() {
+    let getAccInfo = (id) => { let a = listAksesori.find(x=>x.id===id); return a ? `${a.icon} ${a.nama} (+${a.bonusPersen}%)` : 'Kosong'; };
+    document.getElementById('slot-kepala-display').innerText = getAccInfo(slotAktif.kepala);
+    document.getElementById('slot-badan-display').innerText = getAccInfo(slotAktif.badan);
+    document.getElementById('slot-kaki-display').innerText = getAccInfo(slotAktif.kaki);
+    document.getElementById('slot-telapak-display').innerText = getAccInfo(slotAktif.telapak);
+    document.getElementById('total-bonus-display').innerText = `+${hitungTotalBonusPersen()}%`;
+    
+    let container = document.getElementById('profil-aksesori-container');
+    if(!container) return;
+    if(aksesoriDimiliki.length === 0) { container.innerHTML = '<p style="font-size:11px; text-align:center;">Belum memiliki aksesori.</p>'; return; }
+    
+    let html = '';
+    aksesoriDimiliki.forEach(id => {
+        let acc = listAksesori.find(a => a.id === id);
+        let pakai = slotAktif[acc.slot] === id;
+        html += `
+            <div class="inventory-item">
+                <span>${acc.icon} <strong>${acc.nama}</strong></span>
+                <button class="btn-submit" style="background:${pakai?'#10b981':'#3b82f6'}" ${pakai?'disabled':''} onclick="pakaiAksesori('${acc.id}')">${pakai?'Dipakai':'Pakai'}</button>
+            </div>`;
+    });
+    container.innerHTML = html;
+}
+
+function pakaiAksesori(id) {
+    let acc = listAksesori.find(a=>a.id===id);
+    slotAktif[acc.slot] = id; simpanGame(); renderTabProfil(); showToast('Aksesori dipasang!');
+}
+
+function renderTokoAksesori() {
+    let container = document.getElementById('toko-aksesori-container'); if(!container) return;
+    let html = '';
+    listAksesori.forEach(a => {
+        let punya = aksesoriDimiliki.includes(a.id);
+        html += `
+            <div class="card-item">
+                <div><strong>${a.icon} ${a.nama}</strong><br><small>Rp ${formatRupiah(a.harga)}</small></div>
+                <button class="btn-buy" ${punya?'disabled style="background:#64748b;"':''} onclick="beliAksesori('${a.id}',${a.harga})">${punya?'Miliki':'Beli'}</button>
+            </div>`;
+    });
+    container.innerHTML = html;
+}
+
+function beliAksesori(id, harga) {
+    if(uang < harga) { showToast('Koin tidak cukup!', 'error'); return; }
+    uang -= harga; aksesoriDimiliki.push(id); slotAktif[listAksesori.find(x=>x.id===id).slot] = id;
+    simpanGame(); updateUangDisplay(); renderTokoAksesori(); showToast('Aksesori dibeli & dipakai!');
+}
+
+let toastTimeout = null;
+function showToast(msg, type='success') {
+    let o = document.getElementById('toast-overlay'); let c = document.getElementById('toast-card');
+    c.className = `toast-card ${type}`; document.getElementById('toast-message').innerText = msg;
+    o.style.display = 'flex'; if(toastTimeout) clearTimeout(toastTimeout);
+    toastTimeout = setTimeout(() => o.style.display='none', 2000);
 }
 
 function simpanGame() {
-    let dataGame = {
-        playerName: playerName,
-        uang: uang,
-        inventory: inventory,
-        stokPupuk: stokPupuk,
-        aksesoriDimiliki: aksesoriDimiliki,
-        slotAktif: slotAktif,
-        cuacaAktif: cuacaAktif,
-        indeksCuacaAktif: indeksCuacaAktif,
-        lahan: lahan.map(l => ({
-            id: l.id,
-            status: l.status,
-            tanaman: l.tanaman,
-            jumlahBibit: l.jumlahBibit || 1,
-            waktuSelesai: l.waktuSelesai
-        })),
-        lahanTambahanDibeli: lahanTambahanDibeli,
-        hargaTambahLahan: hargaTambahLahan
-    };
-    localStorage.setItem('saveGameBertani', JSON.stringify(dataGame));
+    let save = { playerName, uang, inventory, stokPupuk, aksesoriDimiliki, slotAktif, daftarTernakPemain };
+    localStorage.setItem('saveGameBertaniNew', JSON.stringify(save));
 }
 
 function muatGame() {
-    let savedData = localStorage.getItem('saveGameBertani');
-    if (savedData) {
-        try {
-            let data = JSON.parse(savedData);
-            playerName = data.playerName || "Petani Pintar";
-            uang = data.uang !== undefined ? data.uang : 3500;
-            inventory = data.inventory || [];
-            if (data.stokPupuk) stokPupuk = data.stokPupuk;
-            aksesoriDimiliki = data.aksesoriDimiliki || [];
-            slotAktif = data.slotAktif || { kepala: null, badan: null, kaki: null, telapak: null };
-            if (data.cuacaAktif) cuacaAktif = data.cuacaAktif;
-            if (data.indeksCuacaAktif !== undefined) indeksCuacaAktif = data.indeksCuacaAktif;
-            
-            lahanTambahanDibeli = data.lahanTambahanDibeli || 0;
-            hargaTambahLahan = data.hargaTambahLahan || 5000;
-            
-            if (data.lahan && data.lahan.length > 0) {
-                lahan = data.lahan.map(l => ({
-                    id: l.id,
-                    status: l.status,
-                    tanaman: l.tanaman,
-                    jumlahBibit: l.jumlahBibit || 1,
-                    waktuSelesai: l.waktuSelesai,
-                    timerInterval: null
-                }));
-            }
-        } catch (e) {
-            console.error("Gagal memuat save data", e);
-        }
+    let saved = localStorage.getItem('saveGameBertaniNew');
+    if(saved) {
+        let d = JSON.parse(saved);
+        playerName = d.playerName || "Petani Pintar";
+        uang = d.uang !== undefined ? d.uang : 3500;
+        inventory = d.inventory || [];
+        stokPupuk = d.stokPupuk || { pupuk_organik: 0, biofertilizer: 0, pupuk_urea: 0 };
+        aksesoriDimiliki = d.aksesoriDimiliki || [];
+        slotAktif = d.slotAktif || { kepala: null, badan: null, kaki: null, telapak: null };
+        daftarTernakPemain = d.daftarTernakPemain || [];
     }
 }
 
-function resetGame() {
-    document.getElementById('reset-modal').style.display = 'flex';
-}
+function resetGame() { document.getElementById('reset-modal').style.display = 'flex'; }
+function tutupModalReset() { document.getElementById('reset-modal').style.display = 'none'; }
+function eksekusiResetGame() { localStorage.removeItem('saveGameBertaniNew'); location.reload(); }
 
-function tutupModalReset() {
-    document.getElementById('reset-modal').style.display = 'none';
-}
-
-function eksekusiResetGame() {
-    localStorage.removeItem('saveGameBertani');
-    showToast("Progres berhasil direset!", "error");
-    setTimeout(() => {
-        location.reload();
-    }, 500);
-}
-
-// ==========================================
-// INISIALISASI GAME
-// ==========================================
 function initGame() {
-    muatGame(); 
-    updateFluktuasiHarga(); 
-    setInterval(updateFluktuasiHarga, 60000); 
+    muatGame(); updateFluktuasiHarga(); hitungDanTerapkanJadwalCuaca(); updateUangDisplay(); renderLahan();
     
-    hitungDanTerapkanJadwalCuaca();
-    
-    renderPasar(); 
-    renderLahan(); 
-    updateUangDisplay();
-    updatePanelAksesoriInfo();
-    
-    let elNick = document.getElementById('player-nickname');
-    if(elNick) elNick.innerText = `👨‍🌾 ${playerName} ✏️`;
-
-    lahan.forEach((l, index) => {
-        if (l.status === 'ditanam') {
-            if (l.waktuSelesai <= new Date().getTime()) {
-                l.status = 'siap_panen';
-            } else {
-                mulaiTimerLahan(index);
-            }
+    if(ternakInterval) clearInterval(ternakInterval);
+    ternakInterval = setInterval(() => {
+        if(currentSubInventory === 'ternak' && document.getElementById('tab-inventory').classList.contains('active')) {
+            renderTernakInventory();
         }
-    });
-} 
-
+    }, 1000);
+}
 initGame();
