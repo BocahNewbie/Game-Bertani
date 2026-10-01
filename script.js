@@ -348,6 +348,86 @@ function renderInventory() {
     containerBibit.innerHTML = `<p style="font-size:12px; color:#64748b;">Stok bibit dan pakan kosong.</p>`;
   }
 }
+// VARIABEL KONTROL MODAL JUAL
+let itemJualAktif = {
+  nama: '',
+  hargaSatuanDasar: 0,
+  stokMaks: 0
+};
+
+function bukaModalJual(namaItem, hargaDasar) {
+  const stok = gameState.inventory.hasil[namaItem] || 0;
+  if (stok <= 0) {
+    tampilkanToast('Stok barang kosong di inventory!', 'error');
+    return;
+  }
+
+  itemJualAktif = {
+    nama: namaItem,
+    hargaSatuanDasar: hargaDasar,
+    stokMaks: stok
+  };
+
+  const bonusPersen = typeof hitungBonusAksesoris === 'function' ? hitungBonusAksesoris('jual') : 0;
+  const hargaAkhirSatuan = Math.round(hargaDasar * (1 + bonusPersen / 100));
+
+  document.getElementById('modal-jual-title').innerText = `Jual ${namaItem}`;
+  document.getElementById('modal-jual-info').innerText = `Stok Tersedia: ${stok} | Harga @Rp ${hargaAkhirSatuan}`;
+  document.getElementById('input-jumlah-jual').value = 1;
+  document.getElementById('input-jumlah-jual').max = stok;
+  document.getElementById('modal-jual').style.display = 'flex';
+}
+
+function tutupModalJual() {
+  document.getElementById('modal-jual').style.display = 'none';
+}
+
+function ubahJumlahJual(delta) {
+  const input = document.getElementById('input-jumlah-jual');
+  let val = parseInt(input.value) || 1;
+  val += delta;
+  
+  if (val < 1) val = 1;
+  if (val > itemJualAktif.stokMaks) val = itemJualAktif.stokMaks;
+  
+  input.value = val;
+}
+
+function setJumlahJualMaks() {
+  document.getElementById('input-jumlah-jual').value = itemJualAktif.stokMaks;
+}
+
+function validasiInputJual() {
+  const input = document.getElementById('input-jumlah-jual');
+  let val = parseInt(input.value) || 1;
+  if (val < 1) input.value = 1;
+  if (val > itemJualAktif.stokMaks) input.value = itemJualAktif.stokMaks;
+}
+
+function eksekusiJualItem() {
+  const jumlahJual = parseInt(document.getElementById('input-jumlah-jual').value) || 0;
+  if (jumlahJual <= 0 || jumlahJual > gameState.inventory.hasil[itemJualAktif.nama]) {
+    tampilkanToast('Jumlah jual tidak valid!', 'error');
+    return;
+  }
+
+  // Kurangi inventory
+  gameState.inventory.hasil[itemJualAktif.nama] -= jumlahJual;
+  if (gameState.inventory.hasil[itemJualAktif.nama] <= 0) {
+    delete gameState.inventory.hasil[itemJualAktif.nama];
+  }
+
+  // Hitung total koin dengan bonus aksesoris
+  const bonusPersen = typeof hitungBonusAksesoris === 'function' ? hitungBonusAksesoris('jual') : 0;
+  const hargaAkhirSatuan = Math.round(itemJualAktif.hargaSatuanDasar * (1 + bonusPersen / 100));
+  const totalPendapatan = hargaAkhirSatuan * jumlahJual;
+
+  gameState.player.koin += totalPendapatan;
+  
+  tutupModalJual();
+  renderAll();
+  tampilkanToast(`Berhasil menjual ${jumlahJual}x ${itemJualAktif.nama} seharga Rp ${totalPendapatan.toLocaleString('id-ID')}!`);
+}
 
 // MODAL NICKNAME
 function bukaModalNickname() {
