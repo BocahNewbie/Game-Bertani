@@ -247,11 +247,15 @@
     </div>
   </div>
 
-  <!-- SCRIPTS -->
-  <script src="directory.js"></script>
-  <script src="accessories.js"></script>
-  <script src="weather.js"></script>
-  <script src="market.js"></script>
-  <script src="script.js"></script>
+  <!-- SCRIPTS - Urutan Pemuatan Modular -->
+    <script src="database.js"></script>
+    <script src="harga.js"></script>
+    <script src="cuaca.js"></script>
+    <script src="pertanian.js"></script>
+    <script src="peternakan.js"></script>
+    <script src="aksesoris.js"></script>
+    <script src="market.js"></script>
+    <script src="inventory.js"></script>
+    <script src="script.js"></script> <!-- Pengontrol Utama / State Global -->
 </body>
 </html>
