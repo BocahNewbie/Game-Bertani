@@ -17,9 +17,9 @@ let gameState = {
     { id: 2, tanaman: null, umur: 0, siapPanen: false }
   ],
   kandang: {
-    ayam: { kapasitas: 3, isi: [] },
-    sapi: { kapasitas: 1, isi: [] },
-    domba: { kapasitas: 1, isi: [] }
+    ayam: { level: 1, kapasitas: 2, isi: [] },
+    sapi: { level: 1, kapasitas: 2, isi: [] },
+    domba: { level: 1, kapasitas: 2, isi: [] }
   },
   inventory: {
     bibit: {},
@@ -86,7 +86,17 @@ function simpanGame() {
 function muatGame() {
   const savedData = localStorage.getItem(STORAGE_KEY);
   if (savedData) {
-    try { gameState = JSON.parse(savedData); } catch (e) { console.error(e); }
+    try { 
+      const parsed = JSON.parse(savedData);
+      gameState = parsed;
+      // Memastikan struktur level kandang aman jika dimuat dari save data lama
+      ['ayam', 'sapi', 'domba'].forEach(j => {
+        if (gameState.kandang[j]) {
+          if (!gameState.kandang[j].level) gameState.kandang[j].level = 1;
+          if (!gameState.kandang[j].kapasitas) gameState.kandang[j].kapasitas = 2;
+        }
+      });
+    } catch (e) { console.error(e); }
   }
 }
 
@@ -161,7 +171,7 @@ function renderPeternakan() {
     const stokPakan = gameState.inventory.pakan['Rumput Kering'] || 0;
     
     document.getElementById(`info-kandang-${j}`).innerText = 
-      `Kapasitas: ${dataKandang.isi.length} / ${dataKandang.kapasitas} Ekor (Max 5) | Pakan (Rumput Kering): ${stokPakan}`;
+      `Level Kandang: Lv.${dataKandang.level} | Kapasitas: ${dataKandang.isi.length} / ${dataKandang.kapasitas} Ekor | Pakan: ${stokPakan}`;
 
     const container = document.getElementById(`kandang-${j}-container`);
     container.innerHTML = '';
@@ -277,28 +287,33 @@ function renderPasar() {
     `;
   });
 
-  document.getElementById('pasar-ekspansi-container').innerHTML = `
+  // Render menu ekspansi kandang dengan harga dinamis berdasarkan level
+  const expContainer = document.getElementById('pasar-ekspansi-container');
+  expContainer.innerHTML = `
     <div class="card">
-      <h4>➕ Lahan Baru</h4>
+      <h4>➕ Lahan Tani Baru</h4>
       <p>Harga: Rp 500</p>
       <button class="btn-primary" onclick="beliLahan()">Tambah</button>
     </div>
-    <div class="card">
-      <h4>🏗️ Upgrade Kandang Ayam (Max 5)</h4>
-      <p>Harga: Rp 300</p>
-      <button class="btn-primary" onclick="perbesarKandang('ayam')">Upgrade Ayam</button>
-    </div>
-    <div class="card">
-      <h4>🏗️ Upgrade Kandang Sapi (Max 5)</h4>
-      <p>Harga: Rp 300</p>
-      <button class="btn-primary" onclick="perbesarKandang('sapi')">Upgrade Sapi</button>
-    </div>
-    <div class="card">
-      <h4>🏗️ Upgrade Kandang Domba (Max 5)</h4>
-      <p>Harga: Rp 300</p>
-      <button class="btn-primary" onclick="perbesarKandang('domba')">Upgrade Domba</button>
-    </div>
   `;
+
+  ['ayam', 'sapi', 'domba'].forEach(jenis => {
+    const kandang = gameState.kandang[jenis];
+    const nextLevel = kandang.level + 1;
+    const isMax = kandang.level >= 10;
+    const hargaUpgrade = isMax ? 0 : hitungHargaUpgradeKandang(kandang.level);
+    const namaHewanCapital = jenis.charAt(0).toUpperCase() + jenis.slice(1);
+
+    expContainer.innerHTML += `
+      <div class="card">
+        <h4>🏗️ Kandang ${namaHewanCapital}</h4>
+        <p>Level: ${kandang.level} / 10<br>Kapasitas: ${kandang.kapasitas} Ekor<br>${isMax ? '<b>Maksimal Level</b>' : `Biaya Upgrade: Rp ${hargaUpgrade.toLocaleString('id-ID')}`}</p>
+        <button class="btn-primary" onclick="upgradeKandang('${jenis}')" ${isMax ? 'disabled style="background:#94a3b8; cursor:not-allowed;"' : ''}>
+          ${isMax ? 'Max Level' : `Upgrade Lv.${nextLevel}`}
+        </button>
+      </div>
+    `;
+  });
 }
 
 // 5. RENDER INVENTORY
