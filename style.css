@@ -67,24 +67,27 @@ button {
 .btn-danger:hover { background: #dc2626; }
 .btn-secondary { background: #94a3b8; color: white; }
 
-/* Navigation Tabs */
+/* Navigation Tabs - Dibuat kembali bisa digulir horizontal dengan mulus */
 .nav-tabs {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   margin-bottom: 15px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
 }
 
 .tab-btn {
-  flex: 1;
   background: #e2e8f0;
   color: #334155;
-  padding: 14px 10px;
-  font-size: 15px;
+  padding: 12px 16px;
+  font-size: 14px;
   font-weight: bold;
   border-radius: 8px;
   border: 2px solid transparent;
   transition: 0.2s;
-  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .tab-btn.active {
@@ -114,6 +117,7 @@ button {
   border-radius: 6px;
   font-size: 13px;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .sub-tab-btn.active {
@@ -262,7 +266,7 @@ button {
   flex-direction: column;
   gap: 6px;
   max-width: 280px;
-  max-height: 140px; /* Batasan tinggi agar pas maksimal 3 baris */
+  max-height: 140px;
   overflow: hidden;
   pointer-events: none;
 }
