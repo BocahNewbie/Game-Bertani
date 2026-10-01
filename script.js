@@ -273,6 +273,36 @@ function switchSubInventory(sub) {
 
     renderInventory();
 }
+function tanamDariInventory(namaBibit) {
+    // Cari lahan kosong pertama
+    let lahanKosongIndex = lahan.findIndex(l => l.status === 'kosong');
+
+    if (lahanKosongIndex === -1) {
+        showToast('Semua lahan sedang terisi! Panen dulu atau buka lahan baru.', 'error');
+        return;
+    }
+
+    // Set variabel lahan & bibit yang dipilih
+    selectedLahanIndex = lahanKosongIndex;
+    selectedBibitNama = namaBibit;
+
+    let itemInv = inventory.find(i => i.nama === selectedBibitNama);
+    let stokMaks = itemInv ? itemInv.jumlah : 0;
+
+    maxQtyAllowed = Math.min(99, stokMaks);
+    currentQty = 1;
+
+    document.getElementById('modal-title').innerText = `Tanam ${selectedBibitNama} di Lahan #${lahanKosongIndex + 1}`;
+    document.getElementById('modal-price').innerText = `Stok di Inventory: ${stokMaks} | Maksimal ${maxQtyAllowed} per lahan`;
+    
+    document.getElementById('modal-total-price').parentElement.style.display = 'none';
+    document.getElementById('btn-confirm-transaction').innerText = 'Tanam Sekarang';
+    document.getElementById('btn-confirm-transaction').setAttribute('onclick', 'konfirmasiTanamBibit()');
+
+    updateModalDisplayCustom();
+    document.getElementById('transaction-modal').style.display = 'flex';
+    // Catatan: Jangan panggil fungsi pemindah tab (misal: openGameTab) di sini agar tetap berada di tab Inventory.
+}
 
 function renderTabProfil() {
     updatePanelAksesoriInfo();
@@ -502,31 +532,54 @@ function renderLahan() {
 } 
 
 function bukaModalPilihBibit(indexLahan) {
-    let bibitDiInv = inventory.filter(i => i.nama.includes('Bibit'));
+    let bibitDiInv = inventory.filter(i => i.nama.includes('Bibit') && i.jumlah > 0);
+
     if (bibitDiInv.length === 0) {
         showToast('Kamu tidak punya bibit di inventory! Beli dulu di Pasar.', 'error');
-        openGameTabeksplisit('pasar');
         return;
     }
 
     selectedLahanIndex = indexLahan;
-    selectedBibitNama = bibitDiInv[0].nama;
 
+    // Buat opsi elemen dropdown HTML dari daftar bibit yang dimiliki
+    let optionsHtml = bibitDiInv.map(b => `<option value="${b.nama}">${b.nama} (Stok: ${b.jumlah})</option>`).join('');
+
+    document.getElementById('modal-title').innerText = `Pilih Bibit untuk Lahan #${indexLahan + 1}`;
+    
+    // Tampilkan dropdown selector bibit
+    document.getElementById('modal-price').innerHTML = `
+        <label for="select-bibit-lahan" style="display:block; margin-bottom:5px; font-weight:bold;">Pilih Bibit:</label>
+        <select id="select-bibit-lahan" onchange="gantiPilihanBibit(this.value)" style="width: 100%; padding: 6px; border-radius: 6px; border: 1px solid #ccc;">
+            ${optionsHtml}
+        </select>
+        <small id="info-stok-bibit" style="display:block; margin-top:6px; color:#64748b;"></small>
+    `;
+
+    // Set pilihan default ke bibit pertama di dropdown
+    gantiPilihanBibit(bibitDiInv[0].nama);
+
+    document.getElementById('modal-total-price').parentElement.style.display = 'none';
+    document.getElementById('btn-confirm-transaction').innerText = 'Tanam Sekarang';
+    document.getElementById('btn-confirm-transaction').setAttribute('onclick', 'konfirmasiTanamBibit()');
+
+    document.getElementById('transaction-modal').style.display = 'flex';
+}
+
+// Fungsi helper saat pilihan dropdown diubah
+function gantiPilihanBibit(namaBibit) {
+    selectedBibitNama = namaBibit;
     let itemInv = inventory.find(i => i.nama === selectedBibitNama);
     let stokMaks = itemInv ? itemInv.jumlah : 0;
     
     maxQtyAllowed = Math.min(99, stokMaks);
     currentQty = 1;
 
-    document.getElementById('modal-title').innerText = `Tanam ${selectedBibitNama}`;
-    document.getElementById('modal-price').innerText = `Stok di Inventory: ${stokMaks} | Maksimal 99 per lahan`;
-    
-    document.getElementById('modal-total-price').parentElement.style.display = 'none';
-    document.getElementById('btn-confirm-transaction').innerText = 'Tanam Sekarang';
-    document.getElementById('btn-confirm-transaction').setAttribute('onclick', 'konfirmasiTanamBibit()');
+    let infoElem = document.getElementById('info-stok-bibit');
+    if (infoElem) {
+        infoElem.innerText = `Stok di Inventory: ${stokMaks} | Maksimal ${maxQtyAllowed} per lahan`;
+    }
 
     updateModalDisplayCustom();
-    document.getElementById('transaction-modal').style.display = 'flex';
 }
 
 function updateModalDisplayCustom() {
