@@ -40,6 +40,25 @@ let libraryTanaman = [
     }
 ];
 
+// ==========================================
+// DATA LOKAL PETERNAKAN & PAKAN
+// ==========================================
+let libraryTernak = [
+  { nama: 'Ayam', hargaBeli: 175800, hargaJual: 95670, icon: '🐔' },
+  { nama: 'Sapi', hargaBeli: 9875740, hargaJual: 6987000, icon: '🐮' },
+  { nama: 'Domba', hargaBeli: 1890050, hargaJual: 1435000, icon: '🐑' }
+];
+
+let itemPakanTernak = {
+  id: 'pakan_ternak',
+  nama: 'Pakan Ternak',
+  hargaBeli: 37850,
+  icon: '🌾'
+};
+
+let kandangTernak = []; // Menyimpan hewan ternak yang dipelihara
+let stokPakanTernak = 0; // Stok pakan ternak pemain
+
 let listPupuk = [
     { id: 'pupuk_organik', nama: 'Pupuk Organik', icon: '🍃', hargaBeli: 185, efekWaktu: 18000000 },
     { id: 'biofertilizer', nama: 'Biofertilizer', icon: '🧪', hargaBeli: 350, efekWaktu: 25200000 },
@@ -195,6 +214,113 @@ function hitungTotalBonusPersen() {
     return totalPersen;
 }
 
+// ==========================================
+// FITUR PETERNAKAN & PAKAN
+// ==========================================
+function renderPeternakan() {
+  const container = document.getElementById('peternakan-container');
+  if (!container) return;
+
+  let sedangBadai = cuacaAktif.nama.includes('Badai');
+  if (sedangBadai) {
+    container.innerHTML = `
+      <div style="text-align: center; padding: 30px; background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; color: #991b1b;">
+        <div style="font-size: 32px; margin-bottom: 8px;">🌪️</div>
+        <strong>Pasar Peternakan Tutup Sementara!</strong><br>
+        <small style="color: #7f1d1d;">Toko peternakan tutup akibat cuaca buruk (${cuacaAktif.nama}).</small>
+      </div>
+    `;
+    return;
+  }
+
+  let html = `<h4 style="margin: 0 0 8px 0; color: #1e293b; font-size: 14px;">🐄 Jual Beli Hewan Ternak</h4>`;
+  
+  libraryTernak.forEach(hewan => {
+    html += `
+      <div class="card-item" style="margin-bottom: 10px;">
+        <div>
+          <strong>${hewan.icon} ${hewan.nama}</strong><br>
+          <small style="color: #64748b;">Beli: Rp ${formatRupiah(hewan.hargaBeli)} | Jual: Rp ${formatRupiah(hewan.hargaJual)}</small>
+        </div>
+        <div style="display: flex; gap: 5px;">
+          <button class="btn-buy" onclick="bukaModalTransaksi('beli_ternak', '${hewan.nama}', ${hewan.hargaBeli})">Beli</button>
+          <button class="btn-buy" style="background-color: #ef4444;" onclick="bukaModalTransaksi('jual_ternak', '${hewan.nama}', ${hewan.hargaJual})">Jual</button>
+        </div>
+      </div>
+    `;
+  });
+
+  html += `<h4 style="margin: 15px 0 8px 0; color: #1e293b; font-size: 14px;">🌾 Toko Pakan Ternak</h4>`;
+  html += `
+    <div class="card-item">
+      <div>
+        <strong>${itemPakanTernak.icon} ${itemPakanTernak.nama}</strong><br>
+        <small style="color: #64748b;">Harga: Rp ${formatRupiah(itemPakanTernak.hargaBeli)} / pcs (Stokmu: ${stokPakanTernak})</small>
+      </div>
+      <button class="btn-buy" style="background-color: #475569;" onclick="bukaModalTransaksi('beli_pakan', '${itemPakanTernak.id}', ${itemPakanTernak.hargaBeli})">Beli Pakan</button>
+    </div>
+  `;
+
+  container.innerHTML = html;
+}
+
+function renderTabTernak() {
+  const container = document.getElementById('kandang-container');
+  if (!container) return;
+
+  let infoPakan = document.getElementById('info-stok-pakan');
+  if (infoPakan) {
+    infoPakan.innerText = `Stok Pakan Ternak: ${stokPakanTernak} pcs`;
+  }
+
+  if (kandangTernak.length === 0) {
+    container.innerHTML = `
+      <div style="text-align: center; padding: 20px; color: #64748b; font-size: 13px;">
+        Kandang masih kosong. Beli hewan ternak di Tab Pasar/Peternakan!
+      </div>
+    `;
+    return;
+  }
+
+  let html = '';
+  kandangTernak.forEach((item, index) => {
+    let hewan = libraryTernak.find(h => h.nama === item.nama);
+    let statusKenyang = item.kenyang ? 'Kenyang 🟢' : 'Lapar 🔴';
+    
+    html += `
+      <div class="card-item" style="margin-bottom: 8px;">
+        <div>
+          <strong>${hewan ? hewan.icon : '🐾'} ${item.nama}</strong><br>
+          <small style="color: #64748b;">Status: ${statusKenyang}</small>
+        </div>
+        <div>
+          ${!item.kenyang 
+            ? `<button class="btn-submit" style="background-color: #10b981; padding: 5px 10px; font-size: 11px;" onclick="beriPakanTernak(${index})">Beri Pakan</button>`
+            : `<button class="btn-submit" style="background-color: #94a3b8; padding: 5px 10px; font-size: 11px;" disabled>Sudah Kenyang</button>`
+          }
+        </div>
+      </div>
+    `;
+  });
+
+  container.innerHTML = html;
+}
+
+function beriPakanTernak(index) {
+  if (stokPakanTernak <= 0) {
+    showToast("Pakan ternak habis! Beli di Tab Pasar Peternakan.", "error");
+    return;
+  }
+
+  if (kandangTernak[index]) {
+    stokPakanTernak--;
+    kandangTernak[index].kenyang = true;
+    showToast(`Berhasil memberi pakan ${kandangTernak[index].nama}!`, "success");
+    renderTabTernak();
+    if (typeof simpanGame === 'function') simpanGame();
+  }
+}
+
 function updatePanelAksesoriInfo() {
     let kepalaEl = document.getElementById('slot-kepala-display');
     let badanEl = document.getElementById('slot-badan-display');
@@ -222,7 +348,7 @@ let toastTimeout = null;
 function showToast(message, type = 'success') {
     const overlay = document.getElementById('toast-overlay'); 
     const card = document.getElementById('toast-card'); 
-    const icon = document.getElementById('toast-icon'); 
+    const icon = document.getElementById('toast-icon');F
     const msg = document.getElementById('toast-message'); 
     
     card.className = `toast-card ${type}`; 
@@ -230,7 +356,7 @@ function showToast(message, type = 'success') {
     msg.innerText = message; 
     overlay.style.display = 'flex'; 
     
-    if (toastTimeout) clearTimeout(toastTimeout); 
+    if (toastTimeout) clearTimeout(toastTimeout); F
     toastTimeout = setTimeout(() => { 
         overlay.style.display = 'none'; 
     }, 400); 
@@ -253,7 +379,9 @@ function openGameTab(tabName) {
     if (tabName === 'inventory') renderInventory(); 
     if (tabName === 'profil') renderTabProfil(); 
     if (tabName === 'pasar') renderPasar(); 
-    if (tabName === 'toko_aksesori') renderTokoAksesori(); 
+    if (tabName === 'toko_aksesori') renderTokoAksesori();
+    if (tabName === 'ternak') renderTabTernak();
+    if (tabName === 'peternakan') renderPeternakan();
 } 
 
 function openGameTabeksplisit(tabName) {
@@ -866,6 +994,39 @@ function konfirmasiTransaksi() {
             showToast('Item tidak cukup untuk dijual!', 'error'); 
             return; 
         } 
+
+        // Di dalam fungsi konfirmasiTransaksi(), tambahkan penanganan tipe ini:
+if (currentTransactionType === 'beli_ternak') {
+  let totalBiaya = currentTransactionPrice * currentQty;
+  if (uang < totalBiaya) {
+    showToast("Uang tidak cukup!", "error");
+    return;
+  }
+  uang -= totalBiaya;
+  for (let i = 0; i < currentQty; i++) {
+    kandangTernak.push({ nama: currentTransactionItem, kenyang: false });
+  }
+  showToast(`Berhasil membeli ${currentQty} ${currentTransactionItem}!`, "success");
+} else if (currentTransactionType === 'jual_ternak') {
+  // Cari hewan yang cocok di kandang untuk dijual
+  let indexHewan = kandangTernak.findIndex(h => h.nama === currentTransactionItem);
+  if (indexHewan === -1) {
+    showToast(`Kamu tidak memiliki ${currentTransactionItem} di kandang!`, "error");
+    return;
+  }
+  uang += currentTransactionPrice;
+  kandangTernak.splice(indexHewan, 1);
+  showToast(`Berhasil menjual 1 ${currentTransactionItem}!`, "success");
+} else if (currentTransactionType === 'beli_pakan') {
+  let totalBiaya = currentTransactionPrice * currentQty;
+  if (uang < totalBiaya) {
+    showToast("Uang tidak cukup!", "error");
+    return;
+  }
+  uang -= totalBiaya;
+  stokPakanTernak += currentQty;
+  showToast(`Berhasil membeli ${currentQty} Pakan Ternak!`, "success");
+}
         
         item.jumlah -= currentQty; 
         if (item.jumlah <= 0) inventory = inventory.filter(i => i.nama !== currentTransactionItem); 
