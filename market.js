@@ -1,4 +1,4 @@
-// MARKET.JS - Logika Pasar, Batasan Beli, & Sistem Toast Modern
+// MARKET.JS - Logika Pasar, Harga Fluktuatif, Pembelian, & Toast Modern
 
 let hargaPasarAktif = {
   bibit: {},
@@ -35,7 +35,7 @@ function hitungHargaPasarBaru() {
   hargaPasarAktif.pakan = Math.round(15 * getFaktorAcak());
 }
 
-// Sistem Notifikasi Toast Modern Menggantikan Alert Bawaan Browser
+// Sistem Toast Modern
 function tampilkanToast(pesan, tipe = 'sukses') {
   const container = document.getElementById('toast-container');
   if (!container) return;
@@ -48,7 +48,7 @@ function tampilkanToast(pesan, tipe = 'sukses') {
   setTimeout(() => { toast.remove(); }, 3000);
 }
 
-// Fungsi Beli dengan Batasan Maksimal 99 Item
+// Beli Item/Bibit (Maksimal 99)
 function beliItemMassal(kategori, nama, hargaSatuan) {
   let jumlahStr = prompt(`Beli ${nama} (Harga @Rp ${hargaSatuan}):\nMasukkan jumlah (Maksimal 99):`, "1");
   if (jumlahStr === null) return;
@@ -90,6 +90,7 @@ function beliHewan(jenis, harga) {
   }
 }
 
+// Beli Pakan Massal (Maksimal 99)
 function beliPakanMassal(hargaSatuan) {
   let jumlahStr = prompt(`Beli Pakan Rumput Kering (Harga @Rp ${hargaSatuan}):\nMasukkan jumlah (Maksimal 99):`, "1");
   if (jumlahStr === null) return;
@@ -115,7 +116,16 @@ function beliPakanMassal(hargaSatuan) {
   }
 }
 
+// Beli Aksesoris (Maksimal 1 buah, jika sudah punya tombol ter-blok)
 function beliAksesoris(nama, harga) {
+  const sudahPunyaInventory = gameState.inventory.aksesoris.includes(nama);
+  const sedangDipakai = Object.values(gameState.aksesorisAktif).includes(nama);
+  
+  if (sudahPunyaInventory || sedangDipakai) {
+    tampilkanToast(`Anda sudah memiliki ${nama}!`, 'error');
+    return;
+  }
+
   if (gameState.player.koin >= harga) {
     gameState.player.koin -= harga;
     gameState.inventory.aksesoris.push(nama);
