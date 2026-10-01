@@ -538,12 +538,25 @@ function showToast(msg, type='success') {
     toastTimeout = setTimeout(() => o.style.display='none', 2000);
 }
 
-function saveGame() {
+function simpanGame() {
     let dataGame = {
+        playerName: playerName,
         uang: uang,
         inventory: inventory,
-        lahan: lahan,
-        // Tambahkan variabel lain yang ingin disimpan di sini
+        stokPupuk: stokPupuk,
+        aksesoriDimiliki: aksesoriDimiliki,
+        slotAktif: slotAktif,
+        cuacaAktif: cuacaAktif,
+        indeksCuacaAktif: indeksCuacaAktif,
+        lahan: lahan.map(l => ({
+            id: l.id,
+            status: l.status,
+            tanaman: l.tanaman,
+            jumlahBibit: l.jumlahBibit || 1,
+            waktuSelesai: l.waktuSelesai
+        })),
+        lahanTambahanDibeli: lahanTambahanDibeli,
+        hargaTambahLahan: hargaTambahLahan
     };
     localStorage.setItem('saveGameBertani', JSON.stringify(dataGame));
 }
