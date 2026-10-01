@@ -4,7 +4,7 @@ const STORAGE_KEY = 'PETERNAKAN';
 
 let gameState = {
   player: {
-    nickname: 'Petani Handal',
+    nickname: 'Petani Newbie',
     koin: 1500
   },
   aksesorisAktif: {
@@ -388,7 +388,7 @@ function renderInventory() {
 }
 
 // ==========================================
-// MODAL UNIVERSAL JUAL & BELI (DENGAN -10, -1, +1, +10, MAKS)
+// MODAL UNIVERSAL JUAL & BELI (DENGAN -10, -1, +1, +10, MAKS PINTAR)
 // ==========================================
 let itemAktifModal = {
   mode: '', // 'beli' atau 'jual'
@@ -450,27 +450,65 @@ function ubahJumlahJual(delta) {
   let val = parseInt(input.value) || 1;
   val += delta;
   
+  // Hitung batas maksimal cerdas (menyesuaikan uang jika sedang beli)
+  let maxVal = itemAktifModal.limitMaks;
+  if (itemAktifModal.mode === 'beli') {
+    const maxMampuBeli = Math.floor(gameState.player.koin / itemAktifModal.hargaSatuan);
+    maxVal = Math.min(itemAktifModal.limitMaks, maxMampuBeli);
+  }
+  
   if (val < 1) val = 1;
-  if (val > itemAktifModal.limitMaks) val = itemAktifModal.limitMaks;
+  if (val > maxVal) val = Math.max(1, maxVal);
   
   input.value = val;
 }
 
 function setJumlahJualMaks() {
-  document.getElementById('input-jumlah-jual').value = itemAktifModal.limitMaks;
+  let maxVal = itemAktifModal.limitMaks;
+  
+  if (itemAktifModal.mode === 'beli') {
+    // Hitung koin dibagi harga satuan untuk tau maksimal mampunya berapa
+    const maxMampuBeli = Math.floor(gameState.player.koin / itemAktifModal.hargaSatuan);
+    // Ambil nilai terkecil antara batas sistem (99) dan maksimal mampu beli
+    maxVal = Math.min(itemAktifModal.limitMaks, maxMampuBeli);
+    
+    // Jika ternyata koin tidak cukup untuk beli 1 pun
+    if (maxVal < 1) {
+      if (typeof tampilkanToast === 'function') tampilkanToast('Koin Anda tidak cukup!', 'error');
+      maxVal = 1; // Kembalikan ke angka 1 agar input tidak 0
+    }
+  }
+  
+  document.getElementById('input-jumlah-jual').value = maxVal;
 }
 
 function validasiInputJual() {
   const input = document.getElementById('input-jumlah-jual');
   let val = parseInt(input.value) || 1;
+  
+  let maxVal = itemAktifModal.limitMaks;
+  if (itemAktifModal.mode === 'beli') {
+    const maxMampuBeli = Math.floor(gameState.player.koin / itemAktifModal.hargaSatuan);
+    maxVal = Math.min(itemAktifModal.limitMaks, maxMampuBeli);
+  }
+
   if (val < 1) input.value = 1;
-  if (val > itemAktifModal.limitMaks) input.value = itemAktifModal.limitMaks;
+  // Jika mengetik manual melebihi kemampuan beli / batas maksimal
+  if (val > maxVal) input.value = Math.max(1, maxVal);
 }
 
 function eksekusiJualItem() {
   const jumlah = parseInt(document.getElementById('input-jumlah-jual').value) || 0;
-  if (jumlah <= 0 || jumlah > itemAktifModal.limitMaks) {
-    if (typeof tampilkanToast === 'function') tampilkanToast('Jumlah tidak valid!', 'error');
+  
+  // Ambil nilai max aktual (baik untuk stok jual maupun koin saat beli)
+  let maxVal = itemAktifModal.limitMaks;
+  if (itemAktifModal.mode === 'beli') {
+    const maxMampuBeli = Math.floor(gameState.player.koin / itemAktifModal.hargaSatuan);
+    maxVal = Math.min(itemAktifModal.limitMaks, maxMampuBeli);
+  }
+
+  if (jumlah <= 0 || jumlah > maxVal) {
+    if (typeof tampilkanToast === 'function') tampilkanToast('Jumlah tidak valid / Koin tidak cukup!', 'error');
     return;
   }
 
