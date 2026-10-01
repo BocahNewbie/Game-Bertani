@@ -39,6 +39,34 @@ let libraryTanaman = [
         waktuTumbuh: 86400000
     }
 ];
+// ==========================================
+// DATA LOKAL TERNAK & KANDANG
+// ==========================================
+let libraryTernak = [
+    {
+        id: 'ayam',
+        nama: 'Ayam Bertelur',
+        icon: '🐔',
+        iconHasil: '🥚',
+        namaHasil: 'Telur Ayam',
+        hargaBeli: 250,
+        hargaHasilJual: 45,
+        waktuProduksi: 21600000 // 6 Jam (dalam milidetik)
+    },
+    {
+        id: 'sapi',
+        nama: 'Sapi Perah',
+        icon: '🐄',
+        iconHasil: '🥛',
+        namaHasil: 'Susu Sapi',
+        hargaBeli: 1200,
+        hargaHasilJual: 180,
+        waktuProduksi: 43200000 // 12 Jam (dalam milidetik)
+    }
+];
+
+// Menyimpan ternak yang sudah dibeli pemain
+let daftarTernakPemain = [];
 
 let listPupuk = [
     { id: 'pupuk_organik', nama: 'Pupuk Organik', icon: '🍃', hargaBeli: 185, efekWaktu: 18000000 },
@@ -63,6 +91,95 @@ let listAksesori = [
     { id: 'jas', nama: 'Jas Anti Badai', icon: '🧥', slot: 'badan', harga: 500000, bonusPersen: 4, tangkalBadai: 50, deskripsi: 'Menambah +4% bonus dasar & menghilangkan 50% efek pengurangan dari cuaca Storm / Badai.' }
 ];
 
+// Fungsi Membeli Ternak
+function beliTernak(idTernak) {
+    let ternak = libraryTernak.find(t => t.id === idTernak);
+    if (!ternak) return;
+
+    if (uang < ternak.hargaBeli) {
+        showToast('Uang tidak cukup untuk membeli ternak ini!', 'error');
+        return;
+    }
+
+    uang -= ternak.hargaBeli;
+    updateUangDisplay();
+
+    // Tambahkan ternak baru ke kandang
+    daftarTernakPemain.push({
+        instanceId: Date.now(),
+        id: ternak.id,
+        nama: ternak.nama,
+        icon: ternak.icon,
+        waktuSiapPanen: Date.now() + ternak.waktuProduksi,
+        status: 'menghasilkan'
+    });
+
+    showToast(`Berhasil membeli ${ternak.nama}!`, 'success');
+    renderInventory();
+}
+
+// Render tampilan ternak saat subtab 'ternak' aktif
+function renderTernakInventory() {
+    const container = document.getElementById('inventory-container');
+    if (!container) return;
+
+    if (daftarTernakPemain.length === 0) {
+        container.innerHTML = `
+            <div style="text-align: center; color: #64748b; padding: 20px;">
+                Belum ada hewan ternak di kandang. Beli ternak di Toko / Pasar!
+            </div>`;
+        return;
+    }
+
+    let html = '';
+    const sekarang = Date.now();
+
+    daftarTernakPemain.forEach((item, index) => {
+        let ternakInfo = libraryTernak.find(t => t.id === item.id);
+        let sisaWaktu = Math.max(0, Math.ceil((item.waktuSiapPanen - sekarang) / 1000));
+        let siapPanen = sisaWaktu === 0;
+
+        html += `
+            <div class="card-item" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <div>
+                    <strong>${item.icon} ${item.nama}</strong><br>
+                    <small style="color: #64748b;">
+                        Status: ${siapPanen ? '✅ Siap Panen ' + ternakInfo.iconHasil : '⏳ Menghasilkan (' + sisaWaktu + 'd)'}
+                    </small>
+                </div>
+                ${siapPanen 
+                    ? `<button class="btn-buy" style="background-color: #10b981;" onclick="panenHasilTernak(${index})">Panen ${ternakInfo.iconHasil}</button>`
+                    : `<button class="btn-buy" style="background-color: #94a3b8;" disabled>Tunggu</button>`
+                }
+            </div>
+        `;
+    });
+
+    container.innerHTML = html;
+}
+
+// Fungsi Panen Hasil Ternak
+function panenHasilTernak(index) {
+    let item = daftarTernakPemain[index];
+    if (!item) return;
+
+    let ternakInfo = libraryTernak.find(t => t.id === item.id);
+    
+    // Tambahkan hasil panen ke inventory panen dasar
+    let itemDiInv = inventory.find(i => i.nama === ternakInfo.namaHasil);
+    if (itemDiInv) {
+        itemDiInv.jumlah += 1;
+    } else {
+        inventory.push({ nama: ternakInfo.namaHasil, jumlah: 1, type: 'panen' });
+    }
+
+    // Reset waktu produksi berikutnya
+    item.waktuSiapPanen = Date.now() + ternakInfo.waktuProduksi;
+
+    showToast(`Berhasil memanen ${ternakInfo.namaHasil}!`, 'success');
+    renderInventory();
+}
+
 // ==========================================
 // PENGATURAN JADWAL CUACA HARIAN OLEH DEVELOPER
 // ==========================================
@@ -84,7 +201,7 @@ const daftarMasterCuaca = [
 ];
 
 // 🛠️ ATUR DI SINI: Masukkan nama-nama cuaca untuk hari ini
-let jadwalCuacaHariIni = ['Storm / Badai', 'Cerah', 'Gerimis', 'Hujan', 'Storm / Badai', 'Gerimis', 'Panas']; 
+let jadwalCuacaHariIni = ['Cerah', 'Panas', 'Hujan', 'Gerimis', 'Angin Kencang']; 
 
 let indeksCuacaAktif = 0;
 let timerCuacaInterval = null;
@@ -942,6 +1059,10 @@ function renderInventory() {
     const container = document.getElementById('subtab-content-container'); 
     if (!container) return;
 
+    // Di dalam renderInventory() atau switchSubInventory()
+if (currentSubInventory === 'ternak') {
+    renderTernakInventory();
+}
     let filteredItems = inventory.filter(item => {
         if (currentSubInventory === 'bibit') {
             return item.nama.includes('Bibit');
