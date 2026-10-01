@@ -125,6 +125,7 @@ function hitungDanTerapkanJadwalCuaca() {
     renderInfoCuacaDiUI();
     renderPasar();
     renderTokoAksesori();
+    renderPeternakan ();
 
     let statusTutup = cuacaAktif.nama.includes('Badai') ? " (⚠️ Pasar & Toko Tutup!)" : "";
     showToast(`Pergantian Cuaca: ${cuacaAktif.ikon} ${cuacaAktif.nama}${statusTutup}`, 'info');
@@ -193,6 +194,112 @@ function updateFluktuasiHarga() {
 
     renderPasar(); 
 } 
+// ==========================================
+// FITUR PETERNAKAN & PAKAN
+// ==========================================
+function renderPeternakan() {
+  const container = document.getElementById('peternakan-container');
+  if (!container) return;
+
+  let sedangBadai = cuacaAktif.nama.includes('Badai');
+  if (sedangBadai) {
+    container.innerHTML = `
+      <div style="text-align: center; padding: 30px; background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; color: #991b1b;">
+        <div style="font-size: 32px; margin-bottom: 8px;">🌪️</div>
+        <strong>Pasar Peternakan Tutup Sementara!</strong><br>
+        <small style="color: #7f1d1d;">Toko peternakan tutup akibat cuaca buruk (${cuacaAktif.nama}).</small>
+      </div>
+    `;
+    return;
+  }
+
+  let html = `<h4 style="margin: 0 0 8px 0; color: #1e293b; font-size: 14px;">🐄 Jual Beli Hewan Ternak</h4>`;
+  
+  libraryTernak.forEach(hewan => {
+    html += `
+      <div class="card-item" style="margin-bottom: 10px;">
+        <div>
+          <strong>${hewan.icon} ${hewan.nama}</strong><br>
+          <small style="color: #64748b;">Beli: Rp ${formatRupiah(hewan.hargaBeli)} | Jual: Rp ${formatRupiah(hewan.hargaJual)}</small>
+        </div>
+        <div style="display: flex; gap: 5px;">
+          <button class="btn-buy" onclick="bukaModalTransaksi('beli_ternak', '${hewan.nama}', ${hewan.hargaBeli})">Beli</button>
+          <button class="btn-buy" style="background-color: #ef4444;" onclick="bukaModalTransaksi('jual_ternak', '${hewan.nama}', ${hewan.hargaJual})">Jual</button>
+        </div>
+      </div>
+    `;
+  });
+
+  html += `<h4 style="margin: 15px 0 8px 0; color: #1e293b; font-size: 14px;">🌾 Toko Pakan Ternak</h4>`;
+  html += `
+    <div class="card-item">
+      <div>
+        <strong>${itemPakanTernak.icon} ${itemPakanTernak.nama}</strong><br>
+        <small style="color: #64748b;">Harga: Rp ${formatRupiah(itemPakanTernak.hargaBeli)} / pcs (Stokmu: ${stokPakanTernak})</small>
+      </div>
+      <button class="btn-buy" style="background-color: #475569;" onclick="bukaModalTransaksi('beli_pakan', '${itemPakanTernak.id}', ${itemPakanTernak.hargaBeli})">Beli Pakan</button>
+    </div>
+  `;
+
+  container.innerHTML = html;
+}
+
+function renderTabTernak() {
+  const container = document.getElementById('kandang-container');
+  if (!container) return;
+
+  let infoPakan = document.getElementById('info-stok-pakan');
+  if (infoPakan) {
+    infoPakan.innerText = `Stok Pakan Ternak: ${stokPakanTernak} pcs`;
+  }
+
+  if (kandangTernak.length === 0) {
+    container.innerHTML = `
+      <div style="text-align: center; padding: 20px; color: #64748b; font-size: 13px;">
+        Kandang masih kosong. Beli hewan ternak di Tab Pasar/Peternakan!
+      </div>
+    `;
+    return;
+  }
+
+  let html = '';
+  kandangTernak.forEach((item, index) => {
+    let hewan = libraryTernak.find(h => h.nama === item.nama);
+    let statusKenyang = item.kenyang ? 'Kenyang 🟢' : 'Lapar 🔴';
+    
+    html += `
+      <div class="card-item" style="margin-bottom: 8px;">
+        <div>
+          <strong>${hewan ? hewan.icon : '🐾'} ${item.nama}</strong><br>
+          <small style="color: #64748b;">Status: ${statusKenyang}</small>
+        </div>
+        <div>
+          ${!item.kenyang 
+            ? `<button class="btn-submit" style="background-color: #10b981; padding: 5px 10px; font-size: 11px;" onclick="beriPakanTernak(${index})">Beri Pakan</button>`
+            : `<button class="btn-submit" style="background-color: #94a3b8; padding: 5px 10px; font-size: 11px;" disabled>Sudah Kenyang</button>`
+          }
+        </div>
+      </div>
+    `;
+  });
+
+  container.innerHTML = html;
+}
+
+function beriPakanTernak(index) {
+  if (stokPakanTernak <= 0) {
+    showToast("Pakan ternak habis! Beli di Tab Pasar Peternakan.", "error");
+    return;
+  }
+
+  if (kandangTernak[index]) {
+    stokPakanTernak--;
+    kandangTernak[index].kenyang = true;
+    showToast(`Berhasil memberi pakan ${kandangTernak[index].nama}!`, "success");
+    renderTabTernak();
+    if (typeof simpanGame === 'function') simpanGame();
+  }
+}
 
 function formatRupiah(angka) {
     return angka.toLocaleString('id-ID'); 
