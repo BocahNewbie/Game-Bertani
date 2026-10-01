@@ -1,53 +1,68 @@
 // DIRECTORY DATABASE GAME
 
-// 1. Direktori Tumbuhan
+// Direktori Tumbuhan
 const DIREKTORI_TUMBUHAN = {
   'Bibit Padi': {
     nama: 'Bibit Padi',
-    hargaBeli: 50,
-    hargaJual: 100,
-    waktuTumbuh: 10, // dalam detik (atau satuan waktu game)
+    hargaBeliBase: 50,
+    hargaJualBase: 100,
+    waktuTumbuh: 10,
     keterangan: 'Tanaman pokok penghasil padi.'
   },
   'Bibit Jagung': {
     nama: 'Bibit Jagung',
-    hargaBeli: 90,
-    hargaJual: 180,
+    hargaBeliBase: 90,
+    hargaJualBase: 180,
     waktuTumbuh: 20,
     keterangan: 'Jagung manis bernilai jual tinggi.'
   }
 };
 
-// 2. Direktori Hewan Ternak
+// Direktori Hewan Ternak (Pakan disatukan menjadi Rumput Kering)
 const DIREKTORI_HEWAN = {
   ayam: {
     jenis: 'ayam',
     nama: 'Ayam',
-    hargaBeli: 200,
-    hargaJualHewan: 100,
+    hargaBeliBase: 200,
+    hargaJualHewanBase: 100,
     hasilTernak: 'Telur Ayam',
-    hargaJualHasil: 40,
-    pakan: 'Biji-bijian',
-    hargaPakan: 10
+    hargaJualHasilBase: 40,
+    pakan: 'Rumput Kering'
   },
   sapi: {
     jenis: 'sapi',
     nama: 'Sapi',
-    hargaBeli: 1000,
-    hargaJualHewan: 500,
+    hargaBeliBase: 1000,
+    hargaJualHewanBase: 500,
     hasilTernak: 'Susu Sapi',
-    hargaJualHasil: 250,
-    pakan: 'Rumput Segar',
-    hargaPakan: 50
+    hargaJualHasilBase: 250,
+    pakan: 'Rumput Kering'
   },
   domba: {
     jenis: 'domba',
     nama: 'Domba',
-    hargaBeli: 750,
-    hargaJualHewan: 350,
+    hargaBeliBase: 750,
+    hargaJualHewanBase: 350,
     hasilTernak: 'Wol Domba',
-    hargaJualHasil: 180,
-    pakan: 'Rumput Kering',
-    hargaPakan: 40
+    hargaJualHasilBase: 180,
+    pakan: 'Rumput Kering'
+  }
+};
+
+// Direktori Aksesoris Lengkap dengan Efeknya
+const DIREKTORI_AKSESORIS = {
+  'Topi Caping': { 
+    tipe: 'topi', 
+    bonusType: 'jual', 
+    nilai: 10, 
+    harga: 150,
+    efek: 'Meningkatkan harga jual hasil panen & ternak sebesar +10%.' 
+  },
+  'Sepatu Bot': { 
+    tipe: 'sepatu', 
+    bonusType: 'tumbuh', 
+    nilai: 15, 
+    harga: 200,
+    efek: 'Mempercepat proses tumbuh tanaman sebesar +15%.' 
   }
 };
