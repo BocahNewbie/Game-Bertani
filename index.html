@@ -31,7 +31,7 @@
             <div style="background: rgba(255, 255, 255, 0.12); padding: 7px 10px; border-radius: 8px; font-size: 12px; margin-top: 8px; display: flex; justify-content: space-between; align-items: center;">
                 <span>🌤️ Cuaca: <strong id="info-cuaca-display" style="color: #38bdf8;">Memuat cuaca...</strong></span>
             </div>
-
+            
             <div class="player-info-row" style="margin-top: 10px; margin-bottom: 0;">
                 <span style="font-size: 11px; opacity: 0.75;">💾 Data tersimpan otomatis</span>
                 <div class="save-load-btns">
@@ -41,15 +41,13 @@
             </div>
         </div>
 
-        <!-- Navigasi Tab Besar Utama (Diperbarui menjadi 7 Kolom) -->
-        <div class="nav-tabs" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px;">
-            <button class="tab-btn active" onclick="openGameTab('pertanian')" style="font-size: 9px; padding: 7px 1px;">🌾 Tani</button>
-            <button class="tab-btn" onclick="openGameTab('ternak')" style="font-size: 9px; padding: 7px 1px;">🐾 Ternak</button>
-            <button class="tab-btn" onclick="openGameTab('peternakan')" style="font-size: 9px; padding: 7px 1px;">🐄 Pasar</button>
-            <button class="tab-btn" onclick="openGameTab('inventory')" style="font-size: 9px; padding: 7px 1px;">🎒 Tas</button>
-            <button class="tab-btn" onclick="openGameTab('profil')" style="font-size: 9px; padding: 7px 1px;">👤 Profil</button>
-            <button class="tab-btn" onclick="openGameTab('pasar')" style="font-size: 9px; padding: 7px 1px;">🛒 Toko Bibit</button>
-            <button class="tab-btn" onclick="openGameTab('toko_aksesori')" style="font-size: 9px; padding: 7px 1px;">🎩 Aksesori</button>
+        <!-- Navigasi Tab Besar Utama -->
+        <div class="nav-tabs" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px;">
+            <button class="tab-btn active" onclick="openGameTab('pertanian')" style="font-size: 10px; padding: 7px 1px;">🌾 Tani</button>
+            <button class="tab-btn" onclick="openGameTab('inventory')" style="font-size: 10px; padding: 7px 1px;">🎒 Tas</button>
+            <button class="tab-btn" onclick="openGameTab('profil')" style="font-size: 10px; padding: 7px 1px;">👤 Profil</button>
+            <button class="tab-btn" onclick="openGameTab('pasar')" style="font-size: 10px; padding: 7px 1px;">🛒 Pasar</button>
+            <button class="tab-btn" onclick="openGameTab('toko_aksesori')" style="font-size: 10px; padding: 7px 1px;">🎩 Toko</button>
         </div>
 
         <!-- KONTEN 1: TAB PERTANIAN (Lahan & Pupuk) -->
@@ -58,32 +56,21 @@
             <div id="lahan-container" class="farm-grid"></div>
         </div>
 
-        <!-- KONTEN BARU: TAB TERNAK (Pelihara & Beri Pakan) -->
-        <div id="tab-ternak" class="tab-content">
-            <h3 style="color: #1e293b; font-size: 16px; margin-bottom: 8px;">Kandang Hewan Ternak</h3>
-            <div id="info-stok-pakan" style="margin-bottom: 10px; font-weight: bold; font-size: 13px; color: #475569;"></div>
-            <div id="kandang-container"></div>
-        </div>
-
-        <!-- KONTEN BARU: TAB PETERNAKAN (Beli/Jual Hewan & Pakan) -->
-        <div id="tab-peternakan" class="tab-content">
-            <h3 style="color: #1e293b; font-size: 16px; margin-bottom: 8px;">Pasar Peternakan & Pakan</h3>
-            <div id="peternakan-container" class="market-container"></div>
-        </div>
-
         <!-- KONTEN 2: TAB INVENTORY / TAS (Dipisah: Bibit, Panen, Ternak) -->
         <div id="tab-inventory" class="tab-content">
             <h3 style="color: #1e293b; font-size: 16px; margin-bottom: 8px;">Tas Inventory</h3>
+            
             <!-- Sub-tab navigasi dalam tas -->
             <div style="display: flex; gap: 5px; margin-bottom: 12px;">
                 <button class="sub-tab-btn active" id="subtab-bibit-btn" onclick="switchSubInventory('bibit')" style="flex: 1; padding: 6px; font-size: 11px; font-weight: bold; border-radius: 6px; border: none; cursor: pointer; background: #1e293b; color: white;">🌱 Bibit</button>
                 <button class="sub-tab-btn" id="subtab-panen-btn" onclick="switchSubInventory('panen')" style="flex: 1; padding: 6px; font-size: 11px; font-weight: bold; border-radius: 6px; border: none; cursor: pointer; background: #e2e8f0; color: #334155;">🍉 Hasil Panen</button>
                 <button class="sub-tab-btn" id="subtab-ternak-btn" onclick="switchSubInventory('ternak')" style="flex: 1; padding: 6px; font-size: 11px; font-weight: bold; border-radius: 6px; border: none; cursor: pointer; background: #e2e8f0; color: #334155;">🥚 Hasil Ternak</button>
             </div>
+
             <div id="subtab-content-container" class="inventory-container"></div>
         </div>
 
-        <!-- KONTEN 3: TAB PROFIL (Slot Perlengkapan) -->
+        <!-- KONTEN 3: TAB PROFIL (Slot Perlengkapan: Kepala, Badan, Kaki, Telapak) -->
         <div id="tab-profil" class="tab-content">
             <h3 style="color: #1e293b; font-size: 16px; margin-bottom: 5px;">Profil & Perlengkapan Petani</h3>
             <p style="font-size: 11px; color: #64748b; margin-top: 0; margin-bottom: 12px;">Atur slot aksesori aktif dan lihat koleksi milikmu.</p>
@@ -110,6 +97,7 @@
         <div id="tab-pasar" class="tab-content">
             <h3 style="color: #1e293b; font-size: 16px; margin-bottom: 8px;">Pasar Bibit & Pupuk</h3>
             <div id="pasar-container" class="market-container"></div>
+
             <button id="btn-tambah-lahan" class="btn-submit" style="margin-top: 20px; background-color: #1e293b; width: 100%; display: none;" onclick="beliLahan()">➕ Beli Lahan Baru</button>
         </div>
 
@@ -126,13 +114,16 @@
         <div class="modal-card" style="width: 320px; text-align: center;">
             <h3 id="modal-title" style="margin-bottom: 5px; color: #1e293b;">Transaksi</h3>
             <p id="modal-price" style="margin: 5px 0 15px 0; color: #64748b; font-size: 13px;"></p>
+            
             <div id="modal-qty-container" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px;">
                 <div style="display: flex; justify-content: center; gap: 5px;">
                     <button onclick="ubahQty(-10)" style="flex: 1; padding: 6px; font-size: 11px; background: #e2e8f0; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; color: #334155;">-10</button>
                     <button onclick="ubahQty(-5)" style="flex: 1; padding: 6px; font-size: 11px; background: #e2e8f0; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; color: #334155;">-5</button>
                     <button onclick="ubahQty(-1)" style="flex: 1; padding: 6px; font-size: 11px; background: #e2e8f0; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; color: #334155;">-1</button>
                 </div>
+
                 <div style="background: #f1f5f9; padding: 8px; border-radius: 6px; font-size: 20px; font-weight: bold; color: #1e293b;" id="modal-qty-display">1</div>
+
                 <div style="display: flex; justify-content: center; gap: 5px;">
                     <button onclick="ubahQty(1)" style="flex: 1; padding: 6px; font-size: 11px; background: #e2e8f0; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; color: #334155;">+1</button>
                     <button onclick="ubahQty(5)" style="flex: 1; padding: 6px; font-size: 11px; background: #e2e8f0; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; color: #334155;">+5</button>
@@ -140,7 +131,9 @@
                     <button onclick="setQtyMaks()" style="flex: 1.2; padding: 6px; font-size: 11px; background: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">Maks</button>
                 </div>
             </div>
+
             <p style="margin-bottom: 15px; font-size: 14px; color: #334155;">Total: <strong id="modal-total-price" style="color: #1e293b; font-size: 16px;">Rp 0</strong></p>
+
             <div style="display: flex; gap: 10px;">
                 <button id="btn-confirm-transaction" onclick="konfirmasiTransaksi()" style="flex: 1; background-color: #1e293b; padding: 10px; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;">Konfirmasi</button>
                 <button onclick="tutupModalTransaksi()" style="flex: 1; background-color: #64748b; padding: 10px; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;">Batal</button>
