@@ -1,83 +1,115 @@
-// SCRIPT.JS - Pengendali Utama Game & State
-const gameState = {
-    nickname: "Petani Master",
-    koin: 2500,
-    
-    // Lahan awal 1 petak, dengan properti tambahan status pupuk
+// SCRIPT.JS - Logika Utama, State Global, Navigasi Tab, & Sistem Modal Modern
+
+// --- 1. GAME STATE GLOBAL ---
+let gameState = {
+    koin: 1000, // Modal awal koin untuk testing pasar
     lahan: [
         { id: 1, tanaman: null, jumlah: 0, status: "Kosong", pupukAktif: null, waktuTanam: 0 }
     ],
-
-    kapasitas: {
-        lahan: 10,
-        kandang_ayam: 3,
-        kandang_sapi: 2,
-        kandang_domba: 2
+    inventory: {
+        bibit: { bayam: 5 }, // Contoh stok awal bibit
+        pupukPakan: { pupuk_dasar: 2, pakan_ayam: 2 },
+        hasilPanen: {},
+        hasilTernak: {},
+        accessories: {}
     },
-
     kandang: {
         ayam: [],
         sapi: [],
         domba: []
     },
-
-    aksesoris: {
-        kepala: null,
-        tangan: null,
-        baju: null,
-        kaki: null,
-        telapak: null,
-        totalBonus: 0
+    kapasitasKandang: {
+        ayam: 2,
+        sapi: 2,
+        domba: 2
     },
-
-    inventory: {
-        bibit: {
-            padi: 50,
-            jagung: 20,
-            cabai: 10
-        },
-        hasilPanen: {},
-        pupukPakan: {
-            biasa: 5, // Stok awal pupuk urea untuk uji coba
-            super: 2  // Stok awal pupuk super untuk uji coba
-        }
-    }
+    accessoriesTerpasang: []
 };
 
-// --- FUNGSI NAVIGASI TAB UTAMA ---
-function switchTab(tabId) {
-    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-    document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+// --- 2. INISIALISASI SAAT HALAMAN DIMUAT ---
+document.addEventListener("DOMContentLoaded", () => {
+    // Jalankan render awal saat halaman siap
+    bukaTab('pertanian');
+});
 
-    const targetTab = document.getElementById(`tab-${tabId}`);
-    if (targetTab) targetTab.classList.add('active');
+// --- 3. SISTEM NAVIGASI TAB ---
+function bukaTab(namaTab) {
+    // Sembunyikan semua tab pane
+    const panes = document.querySelectorAll(".tab-pane");
+    panes.forEach(pane => pane.classList.remove("active"));
+
+    // Hilangkan kelas active dari semua tombol nav
+    const buttons = document.querySelectorAll(".tab-btn");
+    buttons.forEach(btn => btn.classList.remove("active"));
+
+    // Tampilkan tab yang dipilih
+    const targetPane = document.getElementById(`tab-${namaTab}`);
+    if (targetPane) targetPane.classList.add("active");
+
+    // Cari tombol yang diklik dan beri kelas active
+    // (Opsional sesuaikan dengan struktur HTML tombol nav kamu)
     
-    if (event && event.currentTarget) {
-        event.currentTarget.classList.add('active');
-    }
-
-    if (tabId === 'pertanian' && typeof renderPertanian === 'function') renderPertanian();
-    if (tabId === 'pasar' && typeof renderPasar === 'function') renderPasar();
-    if (tabId === 'inventory' && typeof renderInventory === 'function') renderInventory();
+    // Panggil fungsi render sesuai tab yang dibuka
+    if (namaTab === 'pertanian' && typeof renderPertanian === 'function') renderPertanian();
+    else if (namaTab === 'pasar' && typeof renderPasar === 'function') renderPasar();
+    else if (namaTab === 'inventory' && typeof renderInventory === 'function') renderInventory();
+    else if (namaTab === 'peternakan' && typeof renderPeternakan === 'function') renderPeternakan();
+    else if (namaTab === 'accessories' && typeof renderAccessories === 'function') renderAccessories();
+    
+    updateHeaderStats();
 }
 
-// --- FUNGSI NAVIGASI SUB-TAB ---
-function switchSubTab(parentTab, subId) {
-    const parentContainer = document.getElementById(`tab-${parentTab}`);
-    if (!parentContainer) return;
-
-    parentContainer.querySelectorAll('.sub-content').forEach(el => el.classList.remove('active'));
-    parentContainer.querySelectorAll('.sub-tab-btn').forEach(el => el.classList.remove('active'));
-
-    const targetSub = document.getElementById(`subtab-${subId}`);
-    if (targetSub) targetSub.classList.add('active');
-
-    if (event && event.currentTarget) {
-        event.currentTarget.classList.add('active');
-    }
+// Update tampilan koin atau status di header jika ada elemennya
+function updateHeaderStats() {
+    const elKoin = document.getElementById("stat-koin");
+    if (elKoin) elKoin.innerText = `Rp ${gameState.koin.toLocaleString()}`;
 }
 
-window.onload = function() {
-    console.log("Game-Bertani Berhasil Dimuat!");
-    if (typeof renderPertanian === 'function') renderPertanian();
-};
+
+// --- 4. SISTEM MODAL / POPUP KUSTOM MODERN ---
+function tampilkanModal(judul, pesan, denganInput = false, nilaiAwal = 1, callbackKonfirmasi) {
+    const modal = document.getElementById("game-modal");
+    if (!modal) {
+        // Fallback jika elemen HTML modal belum terpasang
+        if (denganInput) {
+            let res = prompt(`${judul}\n${pesan}`, nilaiAwal);
+            if (res !== null && callbackKonfirmasi) callbackKonfirmasi(parseInt(res));
+        } else {
+            if (confirm(`${judul}\n${pesan}`) && callbackKonfirmasi) callbackKonfirmasi();
+        }
+        return;
+    }
+
+    const elJudul = document.getElementById("modal-title");
+    const elPesan = document.getElementById("modal-message");
+    const inputContainer = document.getElementById("modal-input-container");
+    const inputField = document.getElementById("modal-input-value");
+    const btnKonfirmasi = document.getElementById("modal-btn-confirm");
+
+    elJudul.innerText = judul;
+    elPesan.innerText = pesan;
+
+    if (denganInput) {
+        inputContainer.style.display = "block";
+        inputField.value = nilaiAwal;
+    } else {
+        inputContainer.style.display = "none";
+    }
+
+    modal.style.display = "flex";
+
+    // Bersihkan event listener lama pada tombol konfirmasi agar tidak numpuk
+    const btnBaru = btnKonfirmasi.cloneNode(true);
+    btnKonfirmasi.parentNode.replaceChild(btnBaru, btnKonfirmasi);
+
+    btnBaru.addEventListener("click", () => {
+        let nilaiInput = denganInput ? parseInt(inputField.value) : null;
+        tutupModal();
+        if (callbackKonfirmasi) callbackKonfirmasi(nilaiInput);
+    });
+}
+
+function tutupModal() {
+    const modal = document.getElementById("game-modal");
+    if (modal) modal.style.display = "none";
+}
