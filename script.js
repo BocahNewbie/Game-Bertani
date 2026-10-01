@@ -9,7 +9,7 @@ let libraryTanaman = [
         iconBuah: '🍉',
         BasehargaBeli: 60,
         BasehargaJual: 68,
-        waktuTumbuh: 30000 
+        waktuTumbuh: 300000 
     },
     {
         nama: 'Melon',
@@ -18,7 +18,7 @@ let libraryTanaman = [
         iconBuah: '🍈',
         BasehargaBeli: 40,
         BasehargaJual: 52,
-        waktuTumbuh: 15000
+        waktuTumbuh: 150000
     },
     {
         nama: 'Jagung',
@@ -27,7 +27,7 @@ let libraryTanaman = [
         iconBuah: '🌽',
         BasehargaBeli: 90,
         BasehargaJual: 111,
-        waktuTumbuh: 45000
+        waktuTumbuh: 450000
     },
     {
         nama: 'Apel',
@@ -36,14 +36,14 @@ let libraryTanaman = [
         iconBuah: '🍎',
         BasehargaBeli: 130,
         BasehargaJual: 180,
-        waktuTumbuh: 90000
+        waktuTumbuh: 900000
     }
 ];
 
 let listPupuk = [
-    { id: 'pupuk_organik', nama: 'Pupuk Organik', icon: '🍃', hargaBeli: 185, efekWaktu: 15000 },
-    { id: 'biofertilizer', nama: 'Biofertilizer', icon: '🧪', hargaBeli: 350, efekWaktu: 25000 },
-    { id: 'pupuk_urea', nama: 'Pupuk Urea', icon: '💎', hargaBeli: 580, efekWaktu: 50000 }
+    { id: 'pupuk_organik', nama: 'Pupuk Organik', icon: '🍃', hargaBeli: 185, efekWaktu: 75000 },
+    { id: 'biofertilizer', nama: 'Biofertilizer', icon: '🧪', hargaBeli: 350, efekWaktu: 175000 },
+    { id: 'pupuk_urea', nama: 'Pupuk Urea', icon: '💎', hargaBeli: 580, efekWaktu: 400000 }
 ];
 
 let stokPupuk = {
@@ -84,7 +84,7 @@ const daftarMasterCuaca = [
 ];
 
 // 🛠️ ATUR DI SINI: Masukkan nama-nama cuaca untuk hari ini
-let jadwalCuacaHariIni = ['Cerah', 'Gerimis', 'Hujan', 'Storm / Badai', 'Cerah', 'Gerimis']; 
+let jadwalCuacaHariIni = ['Storm / Badai', 'Cerah', 'Gerimis', 'Hujan', 'Storm / Badai', 'Gerimis', 'Panas']; 
 
 let indeksCuacaAktif = 0;
 let timerCuacaInterval = null;
@@ -126,7 +126,7 @@ function renderInfoCuacaDiUI() {
     }
 }
 
-let uang = 3500; 
+let uang = 1500; 
 let inventory = []; 
 let aksesoriDimiliki = []; 
 
@@ -156,7 +156,7 @@ let currentSubInventory = 'bibit';
 
 let hargaBeliAktif = {}; 
 let hargaJualAktif = {}; 
-let playerName = "Petani Pintar";
+let playerName = "Petani Desa Baru";
 
 function updateFluktuasiHarga() {
     libraryTanaman.forEach(tanaman => {
