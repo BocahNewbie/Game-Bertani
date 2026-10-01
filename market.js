@@ -1,4 +1,4 @@
-// MARKET.JS - Logika Pasar, Harga Fluktuatif, Pembelian, & Toast Modern
+// MARKET.JS - Logika Pasar, Harga Fluktuatif, Ekspansi, & Toast Modern
 
 let hargaPasarAktif = {
   bibit: {},
@@ -76,8 +76,8 @@ function beliItemMassal(kategori, nama, hargaSatuan) {
 
 function beliHewan(jenis, harga) {
   const k = gameState.kandang[jenis];
-  if (k.isi.length >= 5) {
-    tampilkanToast('Kandang sudah mencapai batas maksimal 5 ekor!', 'error');
+  if (k.isi.length >= k.kapasitas) {
+    tampilkanToast(`Kandang ${jenis} sudah penuh (Maksimal ${k.kapasitas} Ekor)!`, 'error');
     return;
   }
   if (gameState.player.koin >= harga) {
@@ -116,7 +116,7 @@ function beliPakanMassal(hargaSatuan) {
   }
 }
 
-// Beli Aksesoris (Maksimal 1 buah, jika sudah punya tombol ter-blok)
+// Beli Aksesoris (Maksimal 1 buah)
 function beliAksesoris(nama, harga) {
   const sudahPunyaInventory = gameState.inventory.aksesoris.includes(nama);
   const sedangDipakai = Object.values(gameState.aksesorisAktif).includes(nama);
@@ -148,19 +148,37 @@ function beliLahan() {
   }
 }
 
-function perbesarKandang(jenis) {
+// Fungsi Upgrade Kandang Berdasarkan Level (Max Lv 10, Kapasitas Max 15)
+function hitungHargaUpgradeKandang(levelSaatIni) {
+  // Level 1 ke Level 2 mulai dari 50.000, naik 350% (dikalikan 3.5 dari harga sebelumnya)
+  let harga = 50000;
+  for (let i = 1; i < levelSaatIni; i++) {
+    harga = Math.round(harga * 3.5);
+  }
+  return harga;
+}
+
+function upgradeKandang(jenis) {
   const k = gameState.kandang[jenis];
-  if (k.kapasitas >= 5) {
-    tampilkanToast('Kandang sudah mencapai kapasitas maksimal mutlak (5 Ekor)!', 'error');
+  
+  if (k.level >= 10) {
+    tampilkanToast(`Kandang ${jenis} sudah mencapai Level Maksimal (Level 10)!`, 'error');
     return;
   }
-  const harga = 300;
-  if (gameState.player.koin >= harga) {
-    gameState.player.koin -= harga;
-    k.kapasitas = Math.min(5, k.kapasitas + 1);
+
+  const hargaUpgrade = hitungHargaUpgradeKandang(k.level);
+
+  if (gameState.player.koin >= hargaUpgrade) {
+    gameState.player.koin -= hargaUpgrade;
+    k.level += 1;
+    
+    // Pemetaan kapasitas tiap level dari Lv 1 (2 ekor) hingga Lv 10 (15 ekor)
+    const kapasitasTabel = { 1: 2, 2: 4, 3: 6, 4: 8, 5: 10, 6: 11, 7: 12, 8: 13, 9: 14, 10: 15 };
+    k.kapasitas = kapasitasTabel[k.level] || 15;
+
     renderAll();
-    tampilkanToast(`Kandang ${jenis} berhasil diperbesar!`);
+    tampilkanToast(`Berhasil mengupgrade Kandang ${jenis} ke Level ${k.level} (Kapasitas: ${k.kapasitas} Ekor)!`);
   } else {
-    tampilkanToast('Koin tidak cukup!', 'error');
+    tampilkanToast(`Koin tidak cukup! Biaya upgrade Rp ${hargaUpgrade.toLocaleString('id-ID')}`, 'error');
   }
 }
