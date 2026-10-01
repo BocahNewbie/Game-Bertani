@@ -1,320 +1,45 @@
-* {
-  box-sizing: border-box;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  margin: 0;
-  padding: 0;
-}
-
-body {
-  background-color: #f0fdf4;
-  color: #1e293b;
-  display: flex;
-  justify-content: center;
-  padding: 15px;
-}
-
-.game-container {
-  width: 100%;
-  max-width: 800px;
-  background: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-  padding: 15px;
-}
-
-/* Header & Player Panel */
-.player-panel {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: #dcfce7;
-  padding: 12px 16px;
-  border-radius: 10px;
-  margin-bottom: 12px;
-}
-
-.player-info h2 {
-  font-size: 16px;
-  cursor: pointer;
-}
-
-.koin-badge {
-  font-size: 14px;
-  font-weight: bold;
-  color: #15803d;
-  margin-top: 4px;
-}
-
-.header-actions {
-  display: flex;
-  gap: 6px;
-}
-
-/* Button Styles */
-button {
-  border: none;
-  border-radius: 6px;
-  padding: 8px 12px;
-  font-size: 12px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-.btn-primary { background: #16a34a; color: white; }
-.btn-primary:hover { background: #15803d; }
-.btn-danger { background: #ef4444; color: white; }
-.btn-danger:hover { background: #dc2626; }
-.btn-secondary { background: #94a3b8; color: white; }
-
-/* Navigation Tabs */
-.nav-tabs, .sub-nav {
-  display: flex;
-  gap: 6px;
-  overflow-x: auto;
-  margin-bottom: 12px;
-  padding-bottom: 4px;
-}
-
-.tab-btn {
-  flex: 1;
-  background: #e2e8f0;
-  color: #475569;
-  white-space: nowrap;
-}
-
-.tab-btn.active {
-  background: #16a34a;
-  color: white;
-}
-
-.sub-tab-btn {
-  background: #f1f5f9;
-  color: #64748b;
-  padding: 6px 10px;
-}
-
-.sub-tab-btn.active {
-  background: #0ea5e9;
-  color: white;
-}
-
-/* Content Views */
-.tab-content, .sub-content {
-  display: none;
-}
-
-.tab-content.active, .sub-content.active {
-  display: block;
-}
-
-/* Grid Layouts */
-.grid-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 10px;
-}
-
-.card-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-/* Cards */
-.card {
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  padding: 10px;
-  background: #fafafa;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
-.card h4 { font-size: 14px; margin-bottom: 6px; }
-.card p { font-size: 11px; color: #64748b; margin-bottom: 8px; }
-
-.kandang-info {
-  background: #fef3c7;
-  padding: 8px 12px;
-  border-radius: 6px;
-  font-size: 12px;
-  margin-bottom: 10px;
-  font-weight: bold;
-}
-
-/* Aksesoris Panel */
-.aksesoris-panel {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  padding: 12px;
-  border-radius: 8px;
-  margin-bottom: 15px;
-}
-
-.slot-list {
-  display: flex;
-  gap: 15px;
-  margin: 8px 0;
-  font-size: 13px;
-}
-
-.bonus-text {
-  font-size: 12px;
-  color: #16a34a;
-  font-weight: bold;
-}
-
-/* Modal Overlay */
-.modal-overlay {
-  position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}
-
-.modal-card {
-  background: white;
-  padding: 20px;
-  border-radius: 10px;
-  max-width: 320px;
-  width: 100%;
-  text-align: center;
-}
-
-.modal-card input {
-  width: 100%;
-  padding: 8px;
-  margin: 10px 0;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
-}
-
-.modal-actions {
-  display: flex;
-  gap: 8px;
-  justify-content: center;
-  margin-top: 10px;
-}
-/* Navigasi Utama Dibuat Besar dan Menonjol */
-.nav-tabs {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 15px;
-}
-
-.tab-btn {
-  flex: 1;
-  background: #e2e8f0;
-  color: #334155;
-  padding: 14px 10px; /* Ukuran diperbesar */
-  font-size: 15px;    /* Teks lebih besar */
-  font-weight: bold;
-  border-radius: 8px;
-  border: 2px solid transparent;
-  transition: 0.2s;
-}
-
-.tab-btn.active {
-  background: #16a34a;
-  color: white;
-  border-color: #14532d;
-  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.2);
-}
-
-/* Sub-nav secara default disembunyikan, hanya muncul jika tab induknya aktif */
-.sub-nav {
-  display: none; 
-  gap: 6px;
-  margin-bottom: 12px;
-  padding-bottom: 4px;
-  overflow-x: auto;
-}
-
-/* Sub-nav aktif akan tampil fleksibel */
-.sub-nav.active-sub {
-  display: flex;
-}
-
-.sub-tab-btn {
-  background: #f1f5f9;
-  color: #64748b;
-  padding: 8px 12px;
-  border-radius: 6px;
-  font-size: 13px;
-  white-space: nowrap;
-}
-
-.sub-tab-btn.active {
-  background: #0ea5e9;
-  color: white;
-}
-/* Styling Modern Toast / Pop-up Notifikasi */
+/* Toast Container Dibuat Mengapung di Pojok Kanan Atas secara Rapi (Satu Baris/Compact) */
 #toast-container {
   position: fixed;
-  top: 20px;
-  right: 20px;
+  top: 15px;
+  right: 15px;
   z-index: 9999;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
+  max-width: 300px;
+  pointer-events: none; /* Agar tidak mengganggu klik area game di bawahnya */
 }
 
 .toast {
-  background: #1e293b;
+  background: rgba(30, 41, 59, 0.95);
+  backdrop-filter: blur(4px);
   color: #ffffff;
-  padding: 12px 18px;
-  border-radius: 8px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-  font-size: 13px;
+  padding: 10px 14px;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  font-size: 12px;
   font-weight: 500;
   display: flex;
   align-items: center;
-  gap: 10px;
-  animation: slideIn 0.3s ease, fadeOut 0.3s ease 2.7s forwards;
+  gap: 8px;
+  animation: fadeInRight 0.25s ease, fadeOutRight 0.25s ease 2.2s forwards;
   border-left: 4px solid #16a34a;
+  pointer-events: auto;
+  white-space: nowrap; /* Memastikan teks tetap dalam satu baris compact */
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.toast.error { border-left-color: #ef4444; }
-
-@keyframes slideIn {
-  from { transform: translateX(100%); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
+.toast.error { 
+  border-left-color: #ef4444; 
 }
 
-@keyframes fadeOut {
-  to { opacity: 0; transform: translateY(-10px); }
+@keyframes fadeInRight {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
 }
 
-/* Kustomisasi Modal Kuantitas Jual */
-.modal-card input[type="number"] {
-  width: 100%;
-  padding: 10px;
-  font-size: 16px;
-  text-align: center;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
-  margin: 10px 0;
-}
-
-.qty-control-grid {
-  display: flex;
-  gap: 5px;
-  justify-content: center;
-  margin-bottom: 12px;
-}
-
-.qty-control-grid button {
-  background: #e2e8f0;
-  color: #334155;
-  padding: 6px 10px;
-  font-size: 11px;
-}
-.qty-control-grid button:hover {
-  background: #cbd5e1;
+@keyframes fadeOutRight {
+  to { opacity: 0; transform: translateX(20px); }
 }
