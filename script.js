@@ -617,26 +617,21 @@ function pilihBibitUntukDitanam(namaBibit) {
 
 // --- FORMAT WAKTU DINAMIS (JAM/MENIT ATAU HARI) ---
 function formatWaktuDinamis(sisaMs) {
-  let totalDetik = Math.floor(sisaMs / 1000);
-  let totalMenit = Math.floor(totalDetik / 60);
-  let totalJam = Math.floor(totalDetik / 3600);
+    let totalDetik = Math.floor(sisaMs / 1000);
+    let totalJam = Math.floor(totalDetik / 3600);
 
-  // 1. Di atas 24 jam: tampilkan format "X Hari Y Jam"
-  if (totalJam >= 24) {
-    let hari = Math.floor(totalJam / 24);
-    let sisaJam = totalJam % 24;
-    return `${hari} Hari ${sisaJam} Jam`;
-  } 
-  // 2. Antara 1 jam hingga 23 jam (di bawah 24 jam): tampilkan format "X Jam"
-  else if (totalJam >= 1) {
-    return `${totalJam} Jam`;
-  } 
-  // 3. Di bawah 1 jam: tampilkan format "Menit:Detik" (contoh: 05:42)
-  else {
-    let sisaMenit = totalMenit % 60;
-    let sisaDetik = totalDetik % 60;
-    return `${String(sisaMenit).padStart(2, '0')}:${String(sisaDetik).padStart(2, '0')}`;
-  }
+    // Jika waktu tersisa mencapai 24 jam (86400 detik) atau lebih
+    if (totalJam >= 24) {
+        let hari = Math.floor(totalJam / 24);
+        let sisaJam = totalJam % 24;
+        return `${hari} Hari ${sisaJam} Jam`;
+    } else {
+        // Jika di bawah 24 jam, tampilkan format Jam:Menit:Detik
+        let jam = Math.floor(totalDetik / 3600);
+        let menit = Math.floor((totalDetik % 3600) / 60);
+        let detik = totalDetik % 60;
+        return `${String(jam).padStart(2, '0')}:${String(menit).padStart(2, '0')}:${String(detik).padStart(2, '0')}`;
+    }
 }
 
 function mulaiTimerLahan(index) {
