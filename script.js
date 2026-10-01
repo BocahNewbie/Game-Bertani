@@ -12,13 +12,31 @@ let libraryTanaman = [
         waktuTumbuh:  28800000
     },
     {
-    nama: 'Cabai',
-    namaBibit: 'Bibit Cabai',
-    iconBibit: '🌱',
-    iconBuah: '🌶️',
-    BasehargaBeli: 65,
-    BasehargaJual: 95,
-    waktuTumbuh: 36000000 // 10 Jam (dalam milidetik)
+        nama: 'Cabai',
+        namaBibit: 'Bibit Cabai',
+        iconBibit: '🌱',
+        iconBuah: '🌶️',
+        BasehargaBeli: 65,
+        BasehargaJual: 105,
+        waktuTumbuh: 36000000
+    },
+    {
+        nama: 'Brokoli',
+        namaBibit: 'Bibit Brokoli',
+        iconBibit: '🌱',
+        iconBuah: '🥦',
+        BasehargaBeli: 75,
+        BasehargaJual: 100,
+        waktuTumbuh: 43242000
+    },
+    {
+        nama: 'Bawang Merah',
+        namaBibit: 'Bibit Bawang Merah',
+        iconBibit: '🌱',
+        iconBuah: '🧅',
+        BasehargaBeli: 27,
+        BasehargaJual: 70,
+        waktuTumbuh: 31600000
     },
     {
         nama: 'Melon',
