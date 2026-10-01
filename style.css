@@ -1,305 +1,144 @@
-* {
-  box-sizing: border-box;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  margin: 0;
-  padding: 0;
+/* --- STYLE.CSS - Tema Biru Soft (Game-Bertani) --- */
+
+:root {
+    --primary-blue: #3b82f6;
+    --soft-blue: #eff6ff;
+    --border-blue: #bfdbfe;
+    --text-dark: #1e293b;
+    --text-muted: #64748b;
+    --accent-green: #10b981;
+    --bg-main: #f8fafc;
 }
 
 body {
-  background-color: #f0fdf4;
-  color: #1e293b;
-  display: flex;
-  justify-content: center;
-  padding: 15px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-main);
+    color: var(--text-dark);
+    margin: 0;
+    padding: 20px;
 }
 
-.game-container {
-  width: 100%;
-  max-width: 800px;
-  background: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-  padding: 15px;
+/* Dashboard Container Utama */
+.dashboard-container {
+    max-width: 900px;
+    margin: 0 auto;
+    background: #ffffff;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.1);
+    border: 1px solid var(--border-blue);
 }
 
-/* Header & Player Panel */
-.player-panel {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: #dcfce7;
-  padding: 12px 16px;
-  border-radius: 10px;
-  margin-bottom: 12px;
-}
-
-.player-info h2 {
-  font-size: 16px;
-  cursor: pointer;
-}
-
-.koin-badge {
-  font-size: 14px;
-  font-weight: bold;
-  color: #15803d;
-  margin-top: 4px;
-}
-
-.header-actions {
-  display: flex;
-  gap: 6px;
-}
-
-/* Button Styles */
-button {
-  border: none;
-  border-radius: 6px;
-  padding: 8px 12px;
-  font-size: 12px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-.btn-primary { background: #16a34a; color: white; }
-.btn-primary:hover { background: #15803d; }
-.btn-danger { background: #ef4444; color: white; }
-.btn-danger:hover { background: #dc2626; }
-.btn-secondary { background: #94a3b8; color: white; }
-
-/* Navigation Tabs - Dibuat kembali bisa digulir horizontal dengan mulus */
-.nav-tabs {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 15px;
-  overflow-x: auto;
-  padding-bottom: 4px;
-  white-space: nowrap;
-  -webkit-overflow-scrolling: touch;
+/* Navigasi Tab Utama */
+.tab-header {
+    display: flex;
+    gap: 10px;
+    border-bottom: 2px solid var(--border-blue);
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
 }
 
 .tab-btn {
-  background: #e2e8f0;
-  color: #334155;
-  padding: 12px 16px;
-  font-size: 14px;
-  font-weight: bold;
-  border-radius: 8px;
-  border: 2px solid transparent;
-  transition: 0.2s;
-  flex-shrink: 0;
+    padding: 10px 18px;
+    background-color: var(--soft-blue);
+    border: 1px solid var(--border-blue);
+    color: var(--primary-blue);
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.tab-btn:hover {
+    background-color: var(--border-blue);
 }
 
 .tab-btn.active {
-  background: #16a34a;
-  color: white;
-  border-color: #14532d;
-  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.2);
+    background-color: var(--primary-blue);
+    color: #ffffff;
+    border-color: var(--primary-blue);
 }
 
-/* Sub-nav */
-.sub-nav {
-  display: none;
-  gap: 6px;
-  margin-bottom: 12px;
-  padding-bottom: 4px;
-  overflow-x: auto;
+/* Konten Tab */
+.tab-content {
+    display: none;
 }
 
-.sub-nav.active-sub {
-  display: flex;
+.tab-content.active {
+    display: block;
+}
+
+/* Sub-Tab Navigasi */
+.sub-tab-header {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 15px;
 }
 
 .sub-tab-btn {
-  background: #f1f5f9;
-  color: #64748b;
-  padding: 8px 12px;
-  border-radius: 6px;
-  font-size: 13px;
-  white-space: nowrap;
-  flex-shrink: 0;
+    padding: 6px 14px;
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
 }
 
 .sub-tab-btn.active {
-  background: #0ea5e9;
-  color: white;
+    background: #93c5fd;
+    color: #1e3a8a;
+    border-color: #60a5fa;
+    font-weight: 600;
 }
 
-/* Content Views */
-.tab-content, .sub-content {
-  display: none;
+.sub-content {
+    display: none;
 }
 
-.tab-content.active, .sub-content.active {
-  display: block;
+.sub-content.active {
+    display: block;
 }
 
-/* Grid Layouts */
+/* Kartu Petak Lahan Pertanian */
 .grid-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 10px;
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
 }
 
-.card-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+.petak-card {
+    border: 2px solid var(--border-blue);
+    padding: 15px;
+    border-radius: 10px;
+    min-width: 160px;
+    background: var(--soft-blue);
+    text-align: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
 }
 
-/* Cards */
-.card {
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  padding: 10px;
-  background: #fafafa;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+.petak-card p {
+    margin: 5px 0;
+    color: var(--text-dark);
 }
 
-.card h4 { font-size: 14px; margin-bottom: 6px; }
-.card p { font-size: 11px; color: #64748b; margin-bottom: 8px; }
-
-.kandang-info {
-  background: #fef3c7;
-  padding: 8px 12px;
-  border-radius: 6px;
-  font-size: 12px;
-  margin-bottom: 10px;
-  font-weight: bold;
+/* Tombol Aksi */
+button {
+    font-family: inherit;
 }
 
-/* Aksesoris Panel */
-.aksesoris-panel {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  padding: 12px;
-  border-radius: 8px;
-  margin-bottom: 15px;
+.btn-primary, button[onclick^="bukaMenuTanam"] {
+    margin-top: 10px;
+    padding: 6px 12px;
+    background: var(--primary-blue);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.2s;
 }
 
-.slot-list {
-  display: flex;
-  gap: 15px;
-  margin: 8px 0;
-  font-size: 13px;
-}
-
-.bonus-text {
-  font-size: 12px;
-  color: #16a34a;
-  font-weight: bold;
-}
-
-/* Modal Overlay */
-.modal-overlay {
-  position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}
-
-.modal-card {
-  background: white;
-  padding: 20px;
-  border-radius: 10px;
-  max-width: 320px;
-  width: 100%;
-  text-align: center;
-}
-
-.modal-card input {
-  width: 100%;
-  padding: 8px;
-  margin: 10px 0;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
-}
-
-.modal-actions {
-  display: flex;
-  gap: 8px;
-  justify-content: center;
-  margin-top: 10px;
-}
-
-/* Kustomisasi Modal Kuantitas Jual/Beli */
-.modal-card input[type="number"] {
-  width: 100%;
-  padding: 10px;
-  font-size: 16px;
-  text-align: center;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
-  margin: 10px 0;
-}
-
-.qty-control-grid {
-  display: flex;
-  gap: 5px;
-  justify-content: center;
-  margin-bottom: 12px;
-}
-
-.qty-control-grid button {
-  background: #e2e8f0;
-  color: #334155;
-  padding: 6px 10px;
-  font-size: 11px;
-}
-.qty-control-grid button:hover {
-  background: #cbd5e1;
-}
-
-/* Toast Container - Dibatasi maksimal 3 baris di pojok kanan atas */
-#toast-container {
-  position: fixed;
-  top: 15px;
-  right: 15px;
-  z-index: 9999;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  max-width: 280px;
-  max-height: 140px;
-  overflow: hidden;
-  pointer-events: none;
-}
-
-.toast {
-  background: rgba(30, 41, 59, 0.95);
-  backdrop-filter: blur(4px);
-  color: #ffffff;
-  padding: 10px 14px;
-  border-radius: 6px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-  font-size: 12px;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  animation: fadeInRight 0.25s ease, fadeOutRight 0.25s ease 2.2s forwards;
-  border-left: 4px solid #16a34a;
-  pointer-events: auto;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.toast.error { 
-  border-left-color: #ef4444; 
-}
-
-@keyframes fadeInRight {
-  from { opacity: 0; transform: translateX(20px); }
-  to { opacity: 1; transform: translateX(0); }
-}
-
-@keyframes fadeOutRight {
-  to { opacity: 0; transform: translateX(20px); }
+.btn-primary:hover, button[onclick^="bukaMenuTanam"]:hover {
+    background: #2563eb;
 }
