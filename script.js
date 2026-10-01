@@ -1,4 +1,4 @@
-// SCRIPT.JS - Logika Utama Game, Waktu Realtime, Pilih Bibit & Modal Modern
+// SCRIPT.JS - Logika Utama Game, Waktu Realtime, Modal Pilih Bibit Modern & Auto-Save
 
 const STORAGE_KEY = 'PETERNAKAN';
 
@@ -232,14 +232,13 @@ function cekWaktuTanamanRealtime() {
   }
 }
 
-// Logika Klik Tanam dengan Pemilihan Bibit
+// Logika Klik Tanam dengan Modal Pilihan Bibit Modern
 let lahanDipilihIndex = 0;
 
 function aksiLahan(index) {
   const lahan = gameState.lahan[index];
   
   if (!lahan.tanaman) {
-    // Ambil daftar semua bibit yang stoknya > 0 di inventory
     const bibitTersediaList = Object.keys(gameState.inventory.bibit).filter(b => gameState.inventory.bibit[b] > 0);
     
     if (bibitTersediaList.length === 0) {
@@ -249,38 +248,13 @@ function aksiLahan(index) {
 
     lahanDipilihIndex = index;
 
-    // Jika hanya ada 1 jenis bibit, langsung pilih. Jika lebih dari 1, tampilkan prompt pilihan.
-    let bibitPilihan = bibitTersediaList[0];
-    if (bibitTersediaList.length > 1) {
-      let pesan = "Pilih bibit yang ingin ditanam:\n";
-      bibitTersediaList.forEach((b, i) => {
-        pesan += `${i + 1}. ${b} (Stok: ${gameState.inventory.bibit[b]})\n`;
-      });
-      pesan += "Masukkan nomor pilihan:";
-
-      let pilihanStr = prompt(pesan, "1");
-      if (pilihanStr === null) return;
-
-      let idxPilihan = parseInt(pilihanStr) - 1;
-      if (isNaN(idxPilihan) || idxPilihan < 0 || idxPilihan >= bibitTersediaList.length) {
-        if (typeof tampilkanToast === 'function') tampilkanToast('Pilihan bibit tidak valid!', 'error');
-        return;
-      }
-      bibitPilihan = bibitTersediaList[idxPilihan];
+    // Jika hanya ada 1 jenis bibit, langsung lewati pemilihan dan buka modal jumlah
+    if (bibitTersediaList.length === 1) {
+      bukaModalJumlahTanam(bibitTersediaList[0]);
+    } else {
+      // Jika lebih dari 1, tampilkan modal pilihan bibit modern
+      bukaModalPilihBibit(bibitTersediaList);
     }
-
-    const stokBibit = gameState.inventory.bibit[bibitPilihan];
-    itemTanamAktif = {
-      lahanIndex: index,
-      namaBibit: bibitPilihan,
-      stokMaks: Math.min(stokBibit, 99)
-    };
-
-    document.getElementById('modal-tanam-title').innerText = `Tanam ${bibitPilihan}`;
-    document.getElementById('modal-tanam-info').innerText = `Stok di Tas: ${stokBibit} | Maks 99 per lahan`;
-    document.getElementById('input-jumlah-tanam').value = 1;
-    document.getElementById('input-jumlah-tanam').max = itemTanamAktif.stokMaks;
-    document.getElementById('modal-tanam').style.display = 'flex';
     
   } else if (lahan.siapPanen) {
     const namaHasil = lahan.tanaman.replace('Bibit ', '');
@@ -625,7 +599,7 @@ function renderInventory() {
 }
 
 // ==========================================
-// MODAL UNIVERSAL
+// MODAL UNIVERSAL & PILIH BIBIT MODERN
 // ==========================================
 let itemAktifModal = {
   mode: '', 
@@ -640,6 +614,54 @@ let itemTanamAktif = {
   namaBibit: '',
   stokMaks: 0
 };
+
+// Fungsi Membuka Modal Pilihan Bibit (Modern Card Grid)
+function bukaModalPilihBibit(bibitList) {
+  const containerList = document.getElementById('modal-pilih-bibit-list');
+  if (!containerList) {
+    // Jika elemen modal belum ada di HTML, fallback ke jumlah langsung jika error
+    bukaModalJumlahTanam(bibitList[0]);
+    return;
+  }
+
+  containerList.innerHTML = '';
+  bibitList.forEach(namaBibit => {
+    const stok = gameState.inventory.bibit[namaBibit];
+    const btn = document.createElement('button');
+    btn.className = 'btn-primary';
+    btn.style.width = '100%';
+    btn.style.padding = '10px';
+    btn.style.marginBottom = '6px';
+    btn.innerHTML = `🌱 ${namaBibit} <span style="font-size: 11px; opacity: 0.9;">(Stok: ${stok})</span>`;
+    btn.onclick = () => {
+      tutupModalPilihBibit();
+      bukaModalJumlahTanam(namaBibit);
+    };
+    containerList.appendChild(btn);
+  });
+
+  document.getElementById('modal-pilih-bibit').style.display = 'flex';
+}
+
+function tutupModalPilihBibit() {
+  const el = document.getElementById('modal-pilih-bibit');
+  if (el) el.style.display = 'none';
+}
+
+function bukaModalJumlahTanam(namaBibit) {
+  const stok = gameState.inventory.bibit[namaBibit] || 0;
+  itemTanamAktif = {
+    lahanIndex: lahanDipilihIndex,
+    namaBibit: namaBibit,
+    stokMaks: Math.min(stok, 99)
+  };
+
+  document.getElementById('modal-tanam-title').innerText = `Tanam ${namaBibit}`;
+  document.getElementById('modal-tanam-info').innerText = `Stok di Tas: ${stok} | Maks 99 per lahan`;
+  document.getElementById('input-jumlah-tanam').value = 1;
+  document.getElementById('input-jumlah-tanam').max = itemTanamAktif.stokMaks;
+  document.getElementById('modal-tanam').style.display = 'flex';
+}
 
 function bukaModalBeli(kategori, namaItem, hargaSatuan) {
   itemAktifModal = {
