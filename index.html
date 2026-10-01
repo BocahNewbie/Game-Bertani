@@ -12,7 +12,7 @@
     <header class="player-panel">
       <div class="player-info">
         <h2 id="player-nickname" onclick="bukaModalNickname()">👨‍🌾 Petani Handal ✏️</h2>
-        <div class="koin-badge">🪙 Koin: <span id="player-koin">Rp 1.000</span></div>
+        <div class="koin-badge">🪙 Koin: <span id="player-koin">Rp 1.500</span></div>
       </div>
       <div class="header-actions">
         <button class="btn-primary" onclick="simpanGame()">💾 Simpan</button>
@@ -29,7 +29,7 @@
       <button class="tab-btn" onclick="switchTab('inventory')">🎒 Inventory</button>
     </nav>
 
-    <!-- TAB 1: PERTANIAM (SUB-TAB: LAHAN & PUPUK) -->
+    <!-- TAB 1: PERTANIAN -->
     <section id="tab-pertanian" class="tab-content active">
       <div class="sub-nav">
         <button class="sub-tab-btn active" onclick="switchSubTab('pertanian', 'lahan')">🌱 Lahan Tani</button>
@@ -45,7 +45,7 @@
       </div>
     </section>
 
-    <!-- TAB 2: PETERNAKAN (KANDANG SAPI, AYAM, DOMBA) -->
+    <!-- TAB 2: PETERNAKAN -->
     <section id="tab-peternakan" class="tab-content">
       <div class="sub-nav">
         <button class="sub-tab-btn active" onclick="switchSubTab('peternakan', 'ayam')">🐔 Kandang Ayam</button>
@@ -78,19 +78,19 @@
           <div>👕 Baju: <b id="slot-baju">Kosong</b></div>
           <div>👟 Sepatu: <b id="slot-sepatu">Kosong</b></div>
         </div>
-        <p class="bonus-text">Total Bonus Hasil Panen/Ternak: <span id="total-bonus">+0%</span></p>
+        <p class="bonus-text">Bonus Harga Jual: <span id="total-bonus">+0%</span></p>
       </div>
       <h3>Koleksi Dimiliki</h3>
       <div class="grid-container" id="koleksi-aksesoris-container"></div>
     </section>
 
-    <!-- TAB 4: PASAR (BIBIT, HEWAN, AKSESORIS, EXPANSION) -->
+    <!-- TAB 4: PASAR (DENGAN ID KONTEN LENGKAP) -->
     <section id="tab-pasar" class="tab-content">
       <div class="sub-nav">
         <button class="sub-tab-btn active" onclick="switchSubTab('pasar', 'pasar-bibit')">🌱 Bibit</button>
         <button class="sub-tab-btn" onclick="switchSubTab('pasar', 'pasar-hewan')">🐾 Hewan Ternak</button>
         <button class="sub-tab-btn" onclick="switchSubTab('pasar', 'pasar-aksesoris')">🎩 Aksesoris</button>
-        <button class="sub-tab-btn" onclick="switchSubTab('pasar', 'pasar-ekspansi')">🏗️ Ekspansi / Lahan</button>
+        <button class="sub-tab-btn" onclick="switchSubTab('pasar', 'pasar-ekspansi')">🏗️ Ekspansi</button>
       </div>
 
       <div id="subtab-pasar-bibit" class="sub-content active">
@@ -103,15 +103,15 @@
         <div class="grid-container" id="pasar-aksesoris-container"></div>
       </div>
       <div id="subtab-pasar-ekspansi" class="sub-content">
-        <div class="card-list" id="pasar-ekspansi-container"></div>
+        <div class="grid-container" id="pasar-ekspansi-container"></div>
       </div>
     </section>
 
-    <!-- TAB 5: INVENTORY -->
+    <!-- TAB 5: INVENTORY (DENGAN ID KONTEN LENGKAP) -->
     <section id="tab-inventory" class="tab-content">
       <div class="sub-nav">
         <button class="sub-tab-btn active" onclick="switchSubTab('inventory', 'inv-hasil')">📦 Hasil Panen & Ternak</button>
-        <button class="sub-tab-btn" onclick="switchSubTab('inventory', 'inv-bibit')">🌱 Stok Bibit & Pupuk</button>
+        <button class="sub-tab-btn" onclick="switchSubTab('inventory', 'inv-bibit')">🌱 Stok Bibit & Pakan</button>
       </div>
 
       <div id="subtab-inv-hasil" class="sub-content active">
@@ -123,13 +123,13 @@
     </section>
   </div>
 
-  <!-- MODAL RESET DATA -->
+  <!-- MODAL RESET -->
   <div class="modal-overlay" id="modal-reset" style="display: none;">
     <div class="modal-card">
       <h3 style="color: #ef4444;">⚠ Hapus Total Data Game?</h3>
-      <p>Tindakan ini akan menghapus seluruh data di local storage dan mengulang game benar-benar dari nol!</p>
+      <p>Seluruh progres akan dihapus dan diulang dari awal!</p>
       <div class="modal-actions">
-        <button class="btn-danger" onclick="eksekusiResetGame()">Ya, Hapus Semua</button>
+        <button class="btn-danger" onclick="eksekusiResetGame()">Ya, Hapus</button>
         <button class="btn-secondary" onclick="tutupModalReset()">Batal</button>
       </div>
     </div>
@@ -139,7 +139,7 @@
   <div class="modal-overlay" id="modal-nickname" style="display: none;">
     <div class="modal-card">
       <h3>Ubah Nama Petani</h3>
-      <input type="text" id="input-nickname" placeholder="Masukkan nama baru..." />
+      <input type="text" id="input-nickname" placeholder="Masukkan nama..." />
       <div class="modal-actions">
         <button class="btn-primary" onclick="simpanNickname()">Simpan</button>
         <button class="btn-secondary" onclick="tutupModalNickname()">Batal</button>
@@ -147,7 +147,7 @@
     </div>
   </div>
 
-<!-- Panggil file terpisah sebelum script.js -->
+  <!-- MODUL SCRIPT -->
   <script src="directory.js"></script>
   <script src="market.js"></script>
   <script src="weather.js"></script>
