@@ -147,6 +147,31 @@
     </div>
   </div>
 
+  <!-- Kontainer Toast Notifikasi Modern -->
+<div id="toast-container"></div>
+
+<!-- MODAL PILIH JUMLAH JUAL -->
+<div class="modal-overlay" id="modal-jual" style="display: none;">
+  <div class="modal-card">
+    <h3 id="modal-jual-title">Jual Barang</h3>
+    <p id="modal-jual-info" style="font-size: 12px; color: #64748b;"></p>
+    <input type="number" id="input-jumlah-jual" min="1" value="1" oninput="validasiInputJual()" />
+    
+    <div class="qty-control-grid">
+      <button onclick="ubahJumlahJual(-10)">-10</button>
+      <button onclick="ubahJumlahJual(-1)">-1</button>
+      <button onclick="ubahJumlahJual(1)">+1</button>
+      <button onclick="ubahJumlahJual(10)">+10</button>
+      <button class="btn-primary" onclick="setJumlahJualMaks()">Maks</button>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-primary" onclick="eksekusiJualItem()">Konfirmasi Jual</button>
+      <button class="btn-secondary" onclick="tutupModalJual()">Batal</button>
+    </div>
+  </div>
+</div>
+
   <!-- MODUL SCRIPT -->
   <script src="directory.js"></script>
   <script src="market.js"></script>
