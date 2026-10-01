@@ -3,12 +3,11 @@ const gameState = {
     nickname: "Petani Master",
     koin: 2500,
     
-    // Lahan awal diberikan gratis HANYA 1 PETAK
+    // Lahan awal 1 petak, dengan properti tambahan status pupuk
     lahan: [
-        { id: 1, tanaman: null, jumlah: 0, status: "Kosong", waktuTanam: 0 }
+        { id: 1, tanaman: null, jumlah: 0, status: "Kosong", pupukAktif: null, waktuTanam: 0 }
     ],
 
-    // Kapasitas maksimal ekspansi lahan sampai 10 petak
     kapasitas: {
         lahan: 10,
         kandang_ayam: 3,
@@ -38,7 +37,10 @@ const gameState = {
             cabai: 10
         },
         hasilPanen: {},
-        pupukPakan: {}
+        pupukPakan: {
+            biasa: 5, // Stok awal pupuk urea untuk uji coba
+            super: 2  // Stok awal pupuk super untuk uji coba
+        }
     }
 };
 
