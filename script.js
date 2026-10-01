@@ -296,6 +296,12 @@ function renderPasar() {
 function renderInventory() {
   const containerHasil = document.getElementById('inv-hasil-container');
   containerHasil.innerHTML = '';
+  // Bagian di dalam renderInventory() saat membuat card hasil panen:
+card.innerHTML = `
+  <h4>${nama}</h4>
+  <p>Jumlah: ${jumlah}</p>
+  <button class="btn-primary" onclick="bukaModalJual('${nama}', ${hargaJual})">Jual</button>
+`;
   
   let daftarHargaJual = {};
   Object.keys(DIREKTORI_TUMBUHAN).forEach(key => {
