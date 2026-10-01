@@ -37,7 +37,7 @@ const DIREKTORI_HEWAN = {
     hargaJualHewanBase: 500,
     hasilTernak: 'Susu Sapi',
     jumlahHasil: 6, // Diubah menjadi 6 susu per panen
-    hargaJualHasilBase: 25000,
+    hargaJualHasilBase: 2500000,
     pakan: 'Rumput Kering'
   },
   domba: {
