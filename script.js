@@ -1,4 +1,4 @@
-// SCRIPT.JS - Logika Utama Game, Waktu Realtime, Pupuk Massal di Atas Lahan & Modal Modern
+// SCRIPT.JS - Logika Utama Game, Pasar Sub-Kategori Pupuk, Panel Pupuk Dinamis & Modal Modern
 
 const STORAGE_KEY = 'PETERNAKAN';
 
@@ -150,7 +150,7 @@ function formatSisaWaktu(detikSisa) {
   return `⏳ Sisa: ${hasilStr.join(' ')}`;
 }
 
-// 1. RENDER PERTANIAN (Panel Pupuk Massal di Atas Lahan)
+// 1. RENDER PERTANIAN (Panel Pupuk Muncul Hanya Jika Stok > 0)
 function renderPertanian() {
   const container = document.getElementById('lahan-container');
   container.innerHTML = '';
@@ -159,22 +159,42 @@ function renderPertanian() {
   const stokKompos = gameState.inventory.pupuk['Pupuk Kompos'] || 0;
   const stokUrea = gameState.inventory.pupuk['Pupuk Urea'] || 0;
 
-  // Render Panel Kontrol Pupuk Massal di Atas Lahan
   const panelAtasLahan = document.getElementById('pupuk-container');
   if (panelAtasLahan) {
-    panelAtasLahan.innerHTML = `
-      <div class="card" style="grid-column: 1 / -1; background: #f0fdf4; border: 1px solid #bbf7d0;">
-        <h4 style="color: #166534; margin-bottom: 6px;">🧪 Panel Pupuk Massal (Berpengaruh ke Semua Lahan)</h4>
-        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-          <button class="btn-primary" style="flex: 1; font-size: 11px; padding: 6px;" onclick="gunakanPupukMassal('Pupuk Kompos')">
-            Gunakan Kompos (Stok: ${stokKompos})
-          </button>
-          <button class="btn-primary" style="flex: 1; font-size: 11px; padding: 6px; background: #0284c7;" onclick="gunakanPupukMassal('Pupuk Urea')">
-            Gunakan Urea (Stok: ${stokUrea})
-          </button>
+    let tombolPupukHTML = '';
+
+    if (stokKompos > 0) {
+      tombolPupukHTML += `
+        <button class="btn-primary" style="flex: 1; font-size: 11px; padding: 6px;" onclick="gunakanPupukMassal('Pupuk Kompos')">
+          🧪 Pakai Kompos (Stok: ${stokKompos})
+        </button>
+      `;
+    }
+    if (stokUrea > 0) {
+      tombolPupukHTML += `
+        <button class="btn-primary" style="flex: 1; font-size: 11px; padding: 6px; background: #0284c7;" onclick="gunakanPupukMassal('Pupuk Urea')">
+          🧪 Pakai Urea (Stok: ${stokUrea})
+        </button>
+      `;
+    }
+
+    // Jika tidak ada stok pupuk sama sekali, sembunyikan atau beri info kosong
+    if (tombolPupukHTML === '') {
+      panelAtasLahan.innerHTML = `
+        <div class="card" style="grid-column: 1 / -1; background: #f8fafc; border: 1px solid #e2e8f0; text-align: center; color: #64748b;">
+          <p style="font-size: 12px; margin: 0;">🧪 Beli Pupuk (Kompos / Urea) di Pasar untuk mempercepat waktu panen serentak!</p>
         </div>
-      </div>
-    `;
+      `;
+    } else {
+      panelAtasLahan.innerHTML = `
+        <div class="card" style="grid-column: 1 / -1; background: #f0fdf4; border: 1px solid #bbf7d0;">
+          <h4 style="color: #166534; margin-bottom: 6px;">🧪 Panel Pupuk Massal (Berpengaruh ke Semua Lahan)</h4>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            ${tombolPupukHTML}
+          </div>
+        </div>
+      `;
+    }
   }
 
   gameState.lahan.forEach((l, index) => {
@@ -211,15 +231,13 @@ function renderPertanian() {
   });
 }
 
-// Fitur Penggunaan Pupuk Massal untuk Semua Lahan Aktif
 function gunakanPupukMassal(namaPupuk) {
   const stokPupuk = gameState.inventory.pupuk[namaPupuk] || 0;
   if (stokPupuk <= 0) {
-    if (typeof tampilkanToast === 'function') tampilkanToast(`Stok ${namaPupuk} habis! Beli di Pasar.`, 'error');
+    if (typeof tampilkanToast === 'function') tampilkanToast(`Stok ${namaPupuk} habis!`, 'error');
     return;
   }
 
-  // Cek apakah ada lahan yang sedang ditanami
   const lahanAktif = gameState.lahan.filter(l => l.tanaman && !l.siapPanen);
   if (lahanAktif.length === 0) {
     if (typeof tampilkanToast === 'function') tampilkanToast('Tidak ada tanaman yang sedang tumbuh di lahan manapun!', 'error');
@@ -229,18 +247,15 @@ function gunakanPupukMassal(namaPupuk) {
   const infoPupuk = DIREKTORI_PUPUK[namaPupuk];
   if (!infoPupuk) return;
 
-  // Kurangi 1 buah stok pupuk
   gameState.inventory.pupuk[namaPupuk]--;
   if (gameState.inventory.pupuk[namaPupuk] <= 0) {
     delete gameState.inventory.pupuk[namaPupuk];
   }
 
-  // Hitung random percepatan jam ke detik (berlaku serentak)
   const randomJam = Math.random() * (infoPupuk.efekMaxJam - infoPupuk.efekMinJam) + infoPupuk.efekMinJam;
   const penguranganDetik = Math.round(randomJam * 3600);
   const sekarang = Date.now();
 
-  // Terapkan efek ke SEMUA lahan yang sedang menanam
   lahanAktif.forEach(l => {
     l.waktuTanam -= (penguranganDetik * 1000);
     const waktuLewatDetik = Math.floor((sekarang - l.waktuTanam) / 1000);
@@ -507,164 +522,181 @@ function renderAksesoris() {
   });
 }
 
-// 4. RENDER PASAR
+// 4. RENDER PASAR (Menu Pupuk Dipisah ke Sub-Kategori Pasar Pupuk)
 function renderPasar() {
   const pasarBibit = document.getElementById('pasar-bibit-container');
-  pasarBibit.innerHTML = '';
-  Object.keys(DIREKTORI_TUMBUHAN).forEach(key => {
-    const t = DIREKTORI_TUMBUHAN[key];
-    const hPasar = hargaPasarAktif.bibit[key] || { beli: t.hargaBeliBase, jual: t.hargaJualBase };
-    pasarBibit.innerHTML += `
-      <div class="card">
-        <h4>🌱 ${t.nama}</h4>
-        <p>Beli: Rp ${hPasar.beli} | Jual: Rp ${hPasar.jual}<br>Waktu: ${t.waktuTumbuh}s</p>
-        <button class="btn-primary" onclick="bukaModalBeli('bibit', '${t.nama}', ${hPasar.beli})">Beli</button>
-      </div>
-    `;
-  });
+  if (pasarBibit) {
+    pasarBibit.innerHTML = '';
+    Object.keys(DIREKTORI_TUMBUHAN).forEach(key => {
+      const t = DIREKTORI_TUMBUHAN[key];
+      const hPasar = hargaPasarAktif.bibit[key] || { beli: t.hargaBeliBase, jual: t.hargaJualBase };
+      pasarBibit.innerHTML += `
+        <div class="card">
+          <h4>🌱 ${t.nama}</h4>
+          <p>Beli: Rp ${hPasar.beli} | Jual: Rp ${hPasar.jual}<br>Waktu: ${t.waktuTumbuh}s</p>
+          <button class="btn-primary" onclick="bukaModalBeli('bibit', '${t.nama}', ${hPasar.beli})">Beli</button>
+        </div>
+      `;
+    });
+  }
 
-  Object.keys(DIREKTORI_PUPUK).forEach(namaPupuk => {
-    const p = DIREKTORI_PUPUK[namaPupuk];
-    pasarBibit.innerHTML += `
-      <div class="card">
-        <h4>🧪 ${p.nama}</h4>
-        <p>Harga: Rp ${p.harga.toLocaleString('id-ID')}<br><span style="font-size:10px; color:#0284c7;">${p.keterangan}</span></p>
-        <button class="btn-primary" onclick="bukaModalBeli('pupuk', '${p.nama}', ${p.harga})">Beli</button>
-      </div>
-    `;
-  });
+  // Render ke Sub-Kategori Pasar Pupuk (Pastikan di HTML ada elemen dengan ID 'pasar-pupuk-container')
+  const pasarPupuk = document.getElementById('pasar-pupuk-container');
+  if (pasarPupuk) {
+    pasarPupuk.innerHTML = '';
+    Object.keys(DIREKTORI_PUPUK).forEach(namaPupuk => {
+      const p = DIREKTORI_PUPUK[namaPupuk];
+      pasarPupuk.innerHTML += `
+        <div class="card">
+          <h4>🧪 ${p.nama}</h4>
+          <p>Harga: Rp ${p.harga.toLocaleString('id-ID')}<br><span style="font-size:10px; color:#0284c7;">${p.keterangan}</span></p>
+          <button class="btn-primary" onclick="bukaModalBeli('pupuk', '${p.nama}', ${p.harga})">Beli</button>
+        </div>
+      `;
+    });
+  }
 
   const pasarHewan = document.getElementById('pasar-hewan-container');
-  pasarHewan.innerHTML = '';
-  Object.keys(DIREKTORI_HEWAN).forEach(key => {
-    const h = DIREKTORI_HEWAN[key];
-    const hPasar = hargaPasarAktif.hewan[key] || { beli: h.hargaBeliBase, jualHewan: h.hargaJualHewanBase };
-    const hPakan = hargaPasarAktif.pakan || 15;
-    pasarHewan.innerHTML += `
-      <div class="card">
-        <h4>🐾 ${h.nama}</h4>
-        <p>Beli Hewan: Rp ${hPasar.beli}<br>Pakan (Rumput Kering): Rp ${hPakan}</p>
-        <button class="btn-primary" onclick="beliHewanCustom('${h.jenis}', ${hPasar.beli})">Beli Hewan</button>
-        <button class="btn-secondary" style="margin-top:4px;" onclick="bukaModalBeli('pakan', 'Rumput Kering', ${hPakan})">Beli Pakan</button>
-      </div>
-    `;
-  });
+  if (pasarHewan) {
+    pasarHewan.innerHTML = '';
+    Object.keys(DIREKTORI_HEWAN).forEach(key => {
+      const h = DIREKTORI_HEWAN[key];
+      const hPasar = hargaPasarAktif.hewan[key] || { beli: h.hargaBeliBase, jualHewan: h.hargaJualHewanBase };
+      const hPakan = hargaPasarAktif.pakan || 15;
+      pasarHewan.innerHTML += `
+        <div class="card">
+          <h4>🐾 ${h.nama}</h4>
+          <p>Beli Hewan: Rp ${hPasar.beli}<br>Pakan (Rumput Kering): Rp ${hPakan}</p>
+          <button class="btn-primary" onclick="beliHewanCustom('${h.jenis}', ${hPasar.beli})">Beli Hewan</button>
+          <button class="btn-secondary" style="margin-top:4px;" onclick="bukaModalBeli('pakan', 'Rumput Kering', ${hPakan})">Beli Pakan</button>
+        </div>
+      `;
+    });
+  }
 
   const pasarAksesoris = document.getElementById('pasar-aksesoris-container');
-  pasarAksesoris.innerHTML = '';
-  Object.keys(DIREKTORI_AKSESORIS).forEach(nama => {
-    const item = DIREKTORI_AKSESORIS[nama];
-    const sudahPunya = gameState.inventory.aksesoris.includes(nama);
-    const sedangDipakai = Object.values(gameState.aksesorisAktif).includes(nama);
-    const milikSiap = sudahPunya || sedangDipakai;
+  if (pasarAksesoris) {
+    pasarAksesoris.innerHTML = '';
+    Object.keys(DIREKTORI_AKSESORIS).forEach(nama => {
+      const item = DIREKTORI_AKSESORIS[nama];
+      const sudahPunya = gameState.inventory.aksesoris.includes(nama);
+      const sedangDipakai = Object.values(gameState.aksesorisAktif).includes(nama);
+      const milikSiap = sudahPunya || sedangDipakai;
 
-    pasarAksesoris.innerHTML += `
-      <div class="card">
-        <h4>${nama}</h4>
-        <p>Harga: Rp ${item.harga}</p>
-        <p style="font-size:10px; color:#0284c7; margin-bottom:6px;">${item.efek}</p>
-        <button class="btn-primary" 
-          onclick="beliAksesoris('${nama}', ${item.harga})"
-          ${milikSiap ? 'disabled style="background: #94a3b8; cursor: not-allowed;"' : ''}>
-          ${milikSiap ? 'Sudah Punya' : 'Beli'}
-        </button>
-      </div>
-    `;
-  });
+      pasarAksesoris.innerHTML += `
+        <div class="card">
+          <h4>${nama}</h4>
+          <p>Harga: Rp ${item.harga}</p>
+          <p style="font-size:10px; color:#0284c7; margin-bottom:6px;">${item.efek}</p>
+          <button class="btn-primary" 
+            onclick="beliAksesoris('${nama}', ${item.harga})"
+            ${milikSiap ? 'disabled style="background: #94a3b8; cursor: not-allowed;"' : ''}>
+            ${milikSiap ? 'Sudah Punya' : 'Beli'}
+          </button>
+        </div>
+      `;
+    });
+  }
 
   const expContainer = document.getElementById('pasar-ekspansi-container');
-  const isMaxLahan = gameState.lahan.length >= 10;
-  const hargaLahan = isMaxLahan ? 0 : typeof hitungHargaUpgradeLahan === 'function' ? hitungHargaUpgradeLahan(gameState.lahan.length) : 150000;
-  
-  expContainer.innerHTML = `
-    <div class="card">
-      <h4>➕ Lahan Tani Baru</h4>
-      <p>Lahan Aktif: ${gameState.lahan.length} / 10<br>${isMaxLahan ? '<b>Maksimal Lahan</b>' : `Harga Upgrade: Rp ${hargaLahan.toLocaleString('id-ID')}`}</p>
-      <button class="btn-primary" onclick="beliLahan()" ${isMaxLahan ? 'disabled style="background:#94a3b8; cursor:not-allowed;"' : ''}>
-        ${isMaxLahan ? 'Max Lahan' : `Beli Lahan ke-${gameState.lahan.length + 1}`}
-      </button>
-    </div>
-  `;
-
-  ['ayam', 'sapi', 'domba'].forEach(jenis => {
-    const kandang = gameState.kandang[jenis];
-    const nextLevel = kandang.level + 1;
-    const isMax = kandang.level >= 10;
-    const hargaUpgrade = isMax ? 0 : typeof hitungHargaUpgradeKandang === 'function' ? hitungHargaUpgradeKandang(kandang.level) : 50000;
-    const namaHewanCapital = jenis.charAt(0).toUpperCase() + jenis.slice(1);
-
-    expContainer.innerHTML += `
+  if (expContainer) {
+    const isMaxLahan = gameState.lahan.length >= 10;
+    const hargaLahan = isMaxLahan ? 0 : typeof hitungHargaUpgradeLahan === 'function' ? hitungHargaUpgradeLahan(gameState.lahan.length) : 150000;
+    
+    expContainer.innerHTML = `
       <div class="card">
-        <h4>🏗 Kandang ${namaHewanCapital}</h4>
-        <p>Level: ${kandang.level} / 10<br>Kapasitas: ${kandang.kapasitas} Ekor<br>${isMax ? '<b>Maksimal Level</b>' : `Biaya Upgrade: Rp ${hargaUpgrade.toLocaleString('id-ID')}`}</p>
-        <button class="btn-primary" onclick="upgradeKandang('${jenis}')" ${isMax ? 'disabled style="background:#94a3b8; cursor:not-allowed;"' : ''}>
-          ${isMax ? 'Max Level' : `Upgrade Lv.${nextLevel}`}
+        <h4>➕ Lahan Tani Baru</h4>
+        <p>Lahan Aktif: ${gameState.lahan.length} / 10<br>${isMaxLahan ? '<b>Maksimal Lahan</b>' : `Harga Upgrade: Rp ${hargaLahan.toLocaleString('id-ID')}`}</p>
+        <button class="btn-primary" onclick="beliLahan()" ${isMaxLahan ? 'disabled style="background:#94a3b8; cursor:not-allowed;"' : ''}>
+          ${isMaxLahan ? 'Max Lahan' : `Beli Lahan ke-${gameState.lahan.length + 1}`}
         </button>
       </div>
     `;
-  });
+
+    ['ayam', 'sapi', 'domba'].forEach(jenis => {
+      const kandang = gameState.kandang[jenis];
+      const nextLevel = kandang.level + 1;
+      const isMax = kandang.level >= 10;
+      const hargaUpgrade = isMax ? 0 : typeof hitungHargaUpgradeKandang === 'function' ? hitungHargaUpgradeKandang(kandang.level) : 50000;
+      const namaHewanCapital = jenis.charAt(0).toUpperCase() + jenis.slice(1);
+
+      expContainer.innerHTML += `
+        <div class="card">
+          <h4>🏗 Kandang ${namaHewanCapital}</h4>
+          <p>Level: ${kandang.level} / 10<br>Kapasitas: ${kandang.kapasitas} Ekor<br>${isMax ? '<b>Maksimal Level</b>' : `Biaya Upgrade: Rp ${hargaUpgrade.toLocaleString('id-ID')}`}</p>
+          <button class="btn-primary" onclick="upgradeKandang('${jenis}')" ${isMax ? 'disabled style="background:#94a3b8; cursor:not-allowed;"' : ''}>
+            ${isMax ? 'Max Level' : `Upgrade Lv.${nextLevel}`}
+          </button>
+        </div>
+      `;
+    });
+  }
 }
 
 // 5. RENDER INVENTORY
 function renderInventory() {
   const containerHasil = document.getElementById('inv-hasil-container');
-  containerHasil.innerHTML = '';
-  
-  let daftarHargaJual = {};
-  Object.keys(DIREKTORI_TUMBUHAN).forEach(key => {
-    const t = DIREKTORI_TUMBUHAN[key];
-    const namaBersih = t.nama.replace('Bibit ', '');
-    daftarHargaJual[namaBersih] = hargaPasarAktif.bibit[key] ? hargaPasarAktif.bibit[key].jual : t.hargaJualBase;
-  });
-  Object.keys(DIREKTORI_HEWAN).forEach(key => {
-    const h = DIREKTORI_HEWAN[key];
-    daftarHargaJual[h.hasilTernak] = hargaPasarAktif.hewan[key] ? hargaPasarAktif.hewan[key].jualHasil : h.hargaJualHasilBase;
-  });
-
-  const totalHasil = Object.values(gameState.inventory.hasil).reduce((a, b) => a + b, 0);
-  if (totalHasil === 0) {
-    containerHasil.innerHTML = `<p style="font-size:12px; color:#64748b;">Belum ada hasil panen atau ternak di inventory.</p>`;
-  } else {
-    Object.entries(gameState.inventory.hasil).forEach(([nama, jumlah]) => {
-      if (jumlah > 0) {
-        const hargaJual = daftarHargaJual[nama] || 100;
-        const card = document.createElement('div');
-        card.className = 'card';
-        card.innerHTML = `
-          <h4>${nama}</h4>
-          <p>Jumlah: ${jumlah}</p>
-          <button class="btn-primary" onclick="bukaModalJual('${nama}', ${hargaJual})">Jual</button>
-        `;
-        containerHasil.appendChild(card);
-      }
+  if (containerHasil) {
+    containerHasil.innerHTML = '';
+    
+    let daftarHargaJual = {};
+    Object.keys(DIREKTORI_TUMBUHAN).forEach(key => {
+      const t = DIREKTORI_TUMBUHAN[key];
+      const namaBersih = t.nama.replace('Bibit ', '');
+      daftarHargaJual[namaBersih] = hargaPasarAktif.bibit[key] ? hargaPasarAktif.bibit[key].jual : t.hargaJualBase;
     });
+    Object.keys(DIREKTORI_HEWAN).forEach(key => {
+      const h = DIREKTORI_HEWAN[key];
+      daftarHargaJual[h.hasilTernak] = hargaPasarAktif.hewan[key] ? hargaPasarAktif.hewan[key].jualHasil : h.hargaJualHasilBase;
+    });
+
+    const totalHasil = Object.values(gameState.inventory.hasil).reduce((a, b) => a + b, 0);
+    if (totalHasil === 0) {
+      containerHasil.innerHTML = `<p style="font-size:12px; color:#64748b;">Belum ada hasil panen atau ternak di inventory.</p>`;
+    } else {
+      Object.entries(gameState.inventory.hasil).forEach(([nama, jumlah]) => {
+        if (jumlah > 0) {
+          const hargaJual = daftarHargaJual[nama] || 100;
+          const card = document.createElement('div');
+          card.className = 'card';
+          card.innerHTML = `
+            <h4>${nama}</h4>
+            <p>Jumlah: ${jumlah}</p>
+            <button class="btn-primary" onclick="bukaModalJual('${nama}', ${hargaJual})">Jual</button>
+          `;
+          containerHasil.appendChild(card);
+        }
+      });
+    }
   }
 
   const containerBibit = document.getElementById('inv-bibit-container');
-  containerBibit.innerHTML = '';
-  
-  let adaStokBibitPakan = false;
-  Object.entries(gameState.inventory.bibit).forEach(([nama, jumlah]) => {
-    if (jumlah > 0) {
-      adaStokBibitPakan = true;
-      containerBibit.innerHTML += `<div class="card"><h4>${nama}</h4><p>Stok: ${jumlah}</p></div>`;
-    }
-  });
-  Object.entries(gameState.inventory.pakan).forEach(([nama, jumlah]) => {
-    if (jumlah > 0) {
-      adaStokBibitPakan = true;
-      containerBibit.innerHTML += `<div class="card"><h4>Pakan: ${nama}</h4><p>Stok: ${jumlah}</p></div>`;
-    }
-  });
-  Object.entries(gameState.inventory.pupuk).forEach(([nama, jumlah]) => {
-    if (jumlah > 0) {
-      adaStokBibitPakan = true;
-      containerBibit.innerHTML += `<div class="card"><h4>Pupuk: ${nama}</h4><p>Stok: ${jumlah}</p></div>`;
-    }
-  });
+  if (containerBibit) {
+    containerBibit.innerHTML = '';
+    
+    let adaStokBibitPakan = false;
+    Object.entries(gameState.inventory.bibit).forEach(([nama, jumlah]) => {
+      if (jumlah > 0) {
+        adaStokBibitPakan = true;
+        containerBibit.innerHTML += `<div class="card"><h4>${nama}</h4><p>Stok: ${jumlah}</p></div>`;
+      }
+    });
+    Object.entries(gameState.inventory.pakan).forEach(([nama, jumlah]) => {
+      if (jumlah > 0) {
+        adaStokBibitPakan = true;
+        containerBibit.innerHTML += `<div class="card"><h4>Pakan: ${nama}</h4><p>Stok: ${jumlah}</p></div>`;
+      }
+    });
+    Object.entries(gameState.inventory.pupuk).forEach(([nama, jumlah]) => {
+      if (jumlah > 0) {
+        adaStokBibitPakan = true;
+        containerBibit.innerHTML += `<div class="card"><h4>Pupuk: ${nama}</h4><p>Stok: ${jumlah}</p></div>`;
+      }
+    });
 
-  if (!adaStokBibitPakan) {
-    containerBibit.innerHTML = `<p style="font-size:12px; color:#64748b;">Stok bibit, pakan, dan pupuk kosong.</p>`;
+    if (!adaStokBibitPakan) {
+      containerBibit.innerHTML = `<p style="font-size:12px; color:#64748b;">Stok bibit, pakan, dan pupuk kosong.</p>`;
+    }
   }
 }
 
