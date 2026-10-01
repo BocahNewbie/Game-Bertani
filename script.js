@@ -2,13 +2,14 @@
 
 // --- 1. GAME STATE GLOBAL ---
 let gameState = {
-    koin: 1500, // Modal awal koin
+    namaPlayer: "Petani Cupu",
+    koin: 1250, // Modal awal sesuai permintaan
     lahan: [
         { id: 1, tanaman: null, jumlah: 0, status: "Kosong", pupukAktif: null, waktuTanam: 0 }
     ],
     inventory: {
-        bibit: { bayam: 5 },
-        pupukPakan: { pupuk_dasar: 2, pakan_ayam: 2 },
+        bibit: {},       // Kosong tanpa apa-apa di awal
+        pupukPakan: {},  // Kosong
         hasilPanen: {},
         hasilTernak: {},
         accessories: {}
@@ -28,52 +29,42 @@ let gameState = {
 
 // --- 2. INISIALISASI SAAT HALAMAN DIMUAT ---
 document.addEventListener("DOMContentLoaded", () => {
-    // Jalankan render awal ke tab pertanian saat halaman siap
     bukaTab('pertanian');
+    updateHeaderStats();
 });
 
-// --- 3. SISTEM NAVIGASI TAB UTAMA & SUB-TAB ---
+// --- 3. SISTEM NAVIGASI TAB UTAMA ---
 function bukaTab(namaTab) {
-    // Sembunyikan semua konten tab utama
     const panes = document.querySelectorAll(".tab-pane");
     panes.forEach(pane => pane.style.display = "none");
 
-    // Tampilkan tab target yang dipilih
     const targetPane = document.getElementById(`tab-${namaTab}`);
     if (targetPane) {
         targetPane.style.display = "block";
     }
 
-    // Panggil fungsi render modul terkait secara otomatis
-    if (namaTab === 'pertanian' && typeof renderPertanian === 'function') {
-        renderPertanian();
-    } else if (namaTab === 'pasar' && typeof renderPasar === 'function') {
-        renderPasar();
-    } else if (namaTab === 'inventory' && typeof renderInventory === 'function') {
-        renderInventory();
-    } else if (namaTab === 'peternakan' && typeof renderPeternakan === 'function') {
-        renderPeternakan();
-    } else if (namaTab === 'accessories' && typeof renderAccessories === 'function') {
-        renderAccessories();
-    }
+    if (namaTab === 'pertanian' && typeof renderPertanian === 'function') renderPertanian();
+    else if (namaTab === 'pasar' && typeof renderPasar === 'function') renderPasar();
+    else if (namaTab === 'inventory' && typeof renderInventory === 'function') renderInventory();
+    else if (namaTab === 'peternakan' && typeof renderPeternakan === 'function') renderPeternakan();
+    else if (namaTab === 'accessories' && typeof renderAccessories === 'function') renderAccessories();
     
     updateHeaderStats();
 }
 
-// Update tampilan informasi koin di bagian atas game
+// Update tampilan Header (Nama & Koin)
 function updateHeaderStats() {
     const elKoin = document.getElementById("stat-koin");
-    if (elKoin) {
-        elKoin.innerText = `Rp ${gameState.koin.toLocaleString()}`;
-    }
-}
+    if (elKoin) elKoin.innerText = `Rp ${gameState.koin.toLocaleString()}`;
 
+    const elNama = document.getElementById("stat-nama-player");
+    if (elNama) elNama.innerText = gameState.namaPlayer;
+}
 
 // --- 4. SISTEM MODAL / POPUP KUSTOM MODERN ---
 function tampilkanModal(judul, pesan, denganInput = false, nilaiAwal = 1, callbackKonfirmasi) {
     const modal = document.getElementById("game-modal");
     if (!modal) {
-        // Fallback pengaman jika elemen modal belum terpasang di HTML
         if (denganInput) {
             let res = prompt(`${judul}\n${pesan}`, nilaiAwal);
             if (res !== null && callbackKonfirmasi) callbackKonfirmasi(parseInt(res));
@@ -102,7 +93,6 @@ function tampilkanModal(judul, pesan, denganInput = false, nilaiAwal = 1, callba
     modal.style.display = "flex";
 
     if (btnKonfirmasi) {
-        // Bersihkan event listener sebelumnya agar tidak terjadi penumpukan aksi
         const btnBaru = btnKonfirmasi.cloneNode(true);
         btnKonfirmasi.parentNode.replaceChild(btnBaru, btnKonfirmasi);
 
@@ -116,7 +106,5 @@ function tampilkanModal(judul, pesan, denganInput = false, nilaiAwal = 1, callba
 
 function tutupModal() {
     const modal = document.getElementById("game-modal");
-    if (modal) {
-        modal.style.display = "none";
-    }
+    if (modal) modal.style.display = "none";
 }
