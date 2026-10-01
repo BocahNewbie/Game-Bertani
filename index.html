@@ -3,180 +3,132 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game Bertani Sederhana</title>
+    <title>Game Bertani & Beternak Sederhana</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <div class="game-container">
-        <!-- Header Game -->
-        <header class="game-header" style="text-align: center; margin-bottom: 12px;">
-            <h2 style="margin: 0; font-size: 22px; color: #1e293b; display: flex; align-items: center; justify-content: center; gap: 8px;">🌾 Game Bertani</h2>
-        </header>
-
-        <!-- Panel Ringkasan Status Atas -->
-        <div class="player-panel">
-            <div class="player-info-row">
-                <div>
-                    <span style="font-size: 11px; opacity: 0.85; display: block; letter-spacing: 0.5px;">PENGELOLA LAHAN</span>
-                    <h3 id="player-nickname" style="cursor: pointer;" onclick="bukaModalNickname()" title="Klik untuk ubah nickname">👨‍🌾 Petani Pintar ✏️</h3>
-                </div>
-                <div style="text-align: right;">
-                    <span style="font-size: 11px; opacity: 0.85; display: block; letter-spacing: 0.5px;">SALDO KAS</span>
-                    <strong id="player-koin" style="font-size: 18px; color: #38bdf8;">Rp 3.500</strong>
-                </div>
-            </div>
-
-            <!-- Panel Informasi Cuaca Aktif -->
-            <div style="background: rgba(255, 255, 255, 0.12); padding: 7px 10px; border-radius: 8px; font-size: 12px; margin-top: 8px; display: flex; justify-content: space-between; align-items: center;">
-                <span>🌤️ Cuaca: <strong id="info-cuaca-display" style="color: #38bdf8;">Memuat cuaca...</strong></span>
-            </div>
-            
-            <div class="player-info-row" style="margin-top: 10px; margin-bottom: 0;">
-                <span style="font-size: 11px; opacity: 0.75;">💾 Data tersimpan otomatis</span>
-                <div class="save-load-btns">
-                    <button class="btn-action-small" onclick="simpanGame()">Simpan</button>
-                    <button class="btn-action-small" onclick="resetGame()" style="background: rgba(239, 68, 68, 0.35);">Reset</button>
-                </div>
+<div class="game-container">
+    <!-- PANEL PEMAIN -->
+    <div class="player-panel">
+        <div class="player-info-row">
+            <h3 id="player-nickname" onclick="bukaModalNickname()" style="cursor:pointer;">👨‍🌾 Petani Pintar ✏️</h3>
+            <div class="save-load-btns">
+                <button class="btn-action-small" onclick="simpanGame()">Simpan</button>
+                <button class="btn-action-small" onclick="resetGame()" style="background:rgba(239,68,68,0.2)">Reset</button>
             </div>
         </div>
-
-        <!-- Navigasi Tab Besar Utama -->
-        <div class="nav-tabs" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px;">
-            <button class="tab-btn active" onclick="openGameTab('pertanian')" style="font-size: 10px; padding: 7px 1px;">🌾 Tani</button>
-            <button class="tab-btn" onclick="openGameTab('inventory')" style="font-size: 10px; padding: 7px 1px;">🎒 Tas</button>
-            <button class="tab-btn" onclick="openGameTab('profil')" style="font-size: 10px; padding: 7px 1px;">👤 Profil</button>
-            <button class="tab-btn" onclick="openGameTab('pasar')" style="font-size: 10px; padding: 7px 1px;">🛒 Pasar</button>
-            <button class="tab-btn" onclick="openGameTab('toko_aksesori')" style="font-size: 10px; padding: 7px 1px;">🎩 Toko</button>
-        </div>
-
-        <!-- KONTEN 1: TAB PERTANIAN (Lahan & Pupuk) -->
-        <div id="tab-pertanian" class="tab-content active">
-            <h3 style="color: #1e293b; font-size: 16px; margin-bottom: 8px;">Lahan Pertanian & Pupuk</h3>
-            <div id="lahan-container" class="farm-grid"></div>
-        </div>
-
-        <!-- KONTEN 2: TAB INVENTORY / TAS (Dipisah: Bibit, Panen, Ternak) -->
-        <div id="tab-inventory" class="tab-content">
-            <h3 style="color: #1e293b; font-size: 16px; margin-bottom: 8px;">Tas Inventory</h3>
-            
-            <!-- Sub-tab navigasi dalam tas -->
-            <div style="display: flex; gap: 5px; margin-bottom: 12px;">
-                <button class="sub-tab-btn active" id="subtab-bibit-btn" onclick="switchSubInventory('bibit')" style="flex: 1; padding: 6px; font-size: 11px; font-weight: bold; border-radius: 6px; border: none; cursor: pointer; background: #1e293b; color: white;">🌱 Bibit</button>
-                <button class="sub-tab-btn" id="subtab-panen-btn" onclick="switchSubInventory('panen')" style="flex: 1; padding: 6px; font-size: 11px; font-weight: bold; border-radius: 6px; border: none; cursor: pointer; background: #e2e8f0; color: #334155;">🍉 Hasil Panen</button>
-                <button class="sub-tab-btn" id="subtab-ternak-btn" onclick="switchSubInventory('ternak')" style="flex: 1; padding: 6px; font-size: 11px; font-weight: bold; border-radius: 6px; border: none; cursor: pointer; background: #e2e8f0; color: #334155;">🥚 Hasil Ternak</button>
-            </div>
-
-            <div id="subtab-content-container" class="inventory-container"></div>
-        </div>
-
-        <!-- KONTEN 3: TAB PROFIL (Slot Perlengkapan: Kepala, Badan, Kaki, Telapak) -->
-        <div id="tab-profil" class="tab-content">
-            <h3 style="color: #1e293b; font-size: 16px; margin-bottom: 5px;">Profil & Perlengkapan Petani</h3>
-            <p style="font-size: 11px; color: #64748b; margin-top: 0; margin-bottom: 12px;">Atur slot aksesori aktif dan lihat koleksi milikmu.</p>
-            
-            <!-- Panel Slot Aksesori Aktif -->
-            <div style="background: #f8fafc; border: 1px solid #cbd5e1; padding: 12px; border-radius: 10px; margin-bottom: 15px;">
-                <h4 style="margin: 0 0 8px 0; font-size: 13px; color: #1e293b;">Slot Aksesori Aktif:</h4>
-                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; font-size: 12px;">
-                    <div style="background: #ffffff; padding: 8px; border-radius: 6px; border: 1px solid #e2e8f0;">👒 Kepala:<br><strong id="slot-kepala-display" style="color: #0f172a;">Kosong</strong></div>
-                    <div style="background: #ffffff; padding: 8px; border-radius: 6px; border: 1px solid #e2e8f0;">👕 Badan:<br><strong id="slot-badan-display" style="color: #0f172a;">Kosong</strong></div>
-                    <div style="background: #ffffff; padding: 8px; border-radius: 6px; border: 1px solid #e2e8f0;">👖 Kaki:<br><strong id="slot-kaki-display" style="color: #0f172a;">Kosong</strong></div>
-                    <div style="background: #ffffff; padding: 8px; border-radius: 6px; border: 1px solid #e2e8f0;">🩴 Telapak:<br><strong id="slot-telapak-display" style="color: #0f172a;">Kosong</strong></div>
-                </div>
-                <div style="font-size: 12px; margin-top: 10px; text-align: right; color: #0284c7; font-weight: bold;">
-                    Total Bonus Panen: <span id="total-bonus-display">0%</span>
-                </div>
-            </div>
-
-            <h4 style="margin: 0 0 8px 0; font-size: 13px; color: #1e293b;">Koleksi Aksesori Dimiliki:</h4>
-            <div id="profil-aksesori-container" class="inventory-container"></div>
-        </div>
-
-        <!-- KONTEN 4: TAB PASAR (Pupuk & Bibit) -->
-        <div id="tab-pasar" class="tab-content">
-            <h3 style="color: #1e293b; font-size: 16px; margin-bottom: 8px;">Pasar Bibit & Pupuk</h3>
-            <div id="pasar-container" class="market-container"></div>
-
-            <button id="btn-tambah-lahan" class="btn-submit" style="margin-top: 20px; background-color: #1e293b; width: 100%; display: none;" onclick="beliLahan()">➕ Beli Lahan Baru</button>
-        </div>
-
-        <!-- KONTEN 5: TAB TOKO AKSESORI -->
-        <div id="tab-toko_aksesori" class="tab-content">
-            <h3 style="color: #1e293b; font-size: 16px; margin-bottom: 8px;">Toko Aksesori Petani</h3>
-            <p style="font-size: 11px; color: #64748b; margin-top: 0; margin-bottom: 12px;">Beli perlengkapan khusus untuk memperkuat hasil panen dan menghadapi cuaca ekstrem.</p>
-            <div id="toko-aksesori-container" class="market-container"></div>
-        </div>
+        <div style="font-size: 20px; font-weight: bold;" id="player-koin">Rp 3.500</div>
+        <div style="font-size: 12px; margin-top: 5px; color: #cbd5e1;" id="info-cuaca-display">🌤️ Cuaca: Memuat cuaca...</div>
     </div>
 
-    <!-- Modal Transaksi Beli/Jual -->
-    <div id="transaction-modal" class="modal-overlay" style="display: none;">
-        <div class="modal-card" style="width: 320px; text-align: center;">
-            <h3 id="modal-title" style="margin-bottom: 5px; color: #1e293b;">Transaksi</h3>
-            <p id="modal-price" style="margin: 5px 0 15px 0; color: #64748b; font-size: 13px;"></p>
-            
-            <div id="modal-qty-container" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px;">
-                <div style="display: flex; justify-content: center; gap: 5px;">
-                    <button onclick="ubahQty(-10)" style="flex: 1; padding: 6px; font-size: 11px; background: #e2e8f0; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; color: #334155;">-10</button>
-                    <button onclick="ubahQty(-5)" style="flex: 1; padding: 6px; font-size: 11px; background: #e2e8f0; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; color: #334155;">-5</button>
-                    <button onclick="ubahQty(-1)" style="flex: 1; padding: 6px; font-size: 11px; background: #e2e8f0; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; color: #334155;">-1</button>
-                </div>
-
-                <div style="background: #f1f5f9; padding: 8px; border-radius: 6px; font-size: 20px; font-weight: bold; color: #1e293b;" id="modal-qty-display">1</div>
-
-                <div style="display: flex; justify-content: center; gap: 5px;">
-                    <button onclick="ubahQty(1)" style="flex: 1; padding: 6px; font-size: 11px; background: #e2e8f0; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; color: #334155;">+1</button>
-                    <button onclick="ubahQty(5)" style="flex: 1; padding: 6px; font-size: 11px; background: #e2e8f0; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; color: #334155;">+5</button>
-                    <button onclick="ubahQty(10)" style="flex: 1; padding: 6px; font-size: 11px; background: #e2e8f0; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; color: #334155;">+10</button>
-                    <button onclick="setQtyMaks()" style="flex: 1.2; padding: 6px; font-size: 11px; background: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">Maks</button>
-                </div>
-            </div>
-
-            <p style="margin-bottom: 15px; font-size: 14px; color: #334155;">Total: <strong id="modal-total-price" style="color: #1e293b; font-size: 16px;">Rp 0</strong></p>
-
-            <div style="display: flex; gap: 10px;">
-                <button id="btn-confirm-transaction" onclick="konfirmasiTransaksi()" style="flex: 1; background-color: #1e293b; padding: 10px; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;">Konfirmasi</button>
-                <button onclick="tutupModalTransaksi()" style="flex: 1; background-color: #64748b; padding: 10px; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;">Batal</button>
-            </div>
-        </div>
+    <!-- NAVIGASI UTAMA -->
+    <div class="nav-tabs">
+        <button class="tab-btn active" onclick="openGameTab('pertanian')">🌾 Tani</button>
+        <button class="tab-btn" onclick="openGameTab('inventory')">🎒 Tas</button>
+        <button class="tab-btn" onclick="openGameTab('profil')">👤 Profil</button>
+        <button class="tab-btn" onclick="openGameTab('pasar')">🛒 Pasar</button>
+        <button class="tab-btn" onclick="openGameTab('toko_aksesori')">🎩 Toko</button>
     </div>
 
-    <!-- Modal Ubah Nickname -->
-    <div id="nickname-modal" class="modal-overlay" style="display: none;">
-        <div class="modal-card" style="text-align: center;">
-            <h3 style="color: #1e293b; margin-top: 0;">Ubah Nama Petani</h3>
-            <p style="margin: 10px 0; font-size: 13px; color: #64748b;">Masukkan nama panggilan baru untuk profilmu:</p>
-            <input type="text" id="input-new-nickname" placeholder="Nama Petani..." style="width: 80%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; margin-bottom: 15px; text-align: center; outline: none;">
-            <div style="display: flex; gap: 10px;">
-                <button class="btn-submit" onclick="simpanNicknameBaru()" style="flex: 1; background-color: #1e293b;">Simpan</button>
-                <button class="btn-submit" onclick="tutupModalNickname()" style="flex: 1; background-color: #64748b;">Batal</button>
+    <!-- TAB PERTANIAN -->
+    <div id="tab-pertanian" class="tab-content active">
+        <div class="farm-grid" id="lahan-container"></div>
+    </div>
+
+    <!-- TAB INVENTORY (TAS) -->
+    <div id="tab-inventory" class="tab-content">
+        <div style="display: flex; gap: 5px; margin-bottom: 12px;">
+            <button id="subtab-bibit-btn" style="flex: 1; padding: 6px; font-size: 12px; border-radius: 6px; border: none; font-weight: bold; background: #1e293b; color: white;" onclick="switchSubInventory('bibit')">🌱 Bibit</button>
+            <button id="subtab-panen-btn" style="flex: 1; padding: 6px; font-size: 12px; border-radius: 6px; border: none; font-weight: bold; background: #e2e8f0; color: #334155;" onclick="switchSubInventory('panen')">🍉 Hasil Panen</button>
+            <button id="subtab-ternak-btn" style="flex: 1; padding: 6px; font-size: 12px; border-radius: 6px; border: none; font-weight: bold; background: #e2e8f0; color: #334155;" onclick="switchSubInventory('ternak')">🐔 Kandang Ternak</button>
+        </div>
+        <div class="inventory-container" id="subtab-content-container"></div>
+        <div class="inventory-container" id="inventory-container"></div>
+    </div>
+
+    <!-- TAB PROFIL & AKSESORI -->
+    <div id="tab-profil" class="tab-content">
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; border-radius: 10px; margin-bottom: 12px;">
+            <h4 style="margin: 0 0 8px 0; font-size: 13px; color: #1e293b;">Slot Aksesori Aktif:</h4>
+            <div style="font-size: 12px; line-height: 1.6; color: #475569;">
+                👒 Kepala: <span id="slot-kepala-display" style="font-weight: bold;">Kosong</span><br>
+                👕 Badan: <span id="slot-badan-display" style="font-weight: bold;">Kosong</span><br>
+                👖 Kaki: <span id="slot-kaki-display" style="font-weight: bold;">Kosong</span><br>
+                🩴 Telapak: <span id="slot-telapak-display" style="font-weight: bold;">Kosong</span>
+            </div>
+            <div style="margin-top: 8px; font-size: 12px; font-weight: bold; color: #16a34a;">
+                Total Bonus Panen: <span id="total-bonus-display">+0%</span>
             </div>
         </div>
+        <h4 style="margin: 0 0 8px 0; font-size: 13px; color: #1e293b;">Koleksi Aksesori Dimiliki:</h4>
+        <div class="inventory-container" id="profil-aksesori-container"></div>
     </div>
 
-    <!-- Modal Konfirmasi Reset Game -->
-    <div id="reset-modal" class="modal-overlay" style="display: none;">
-        <div class="modal-card" style="text-align: center; border-top: 4px solid #ef4444;">
-            <div style="font-size: 32px; margin-bottom: 5px;">⚠️</div>
-            <h3 style="color: #ef4444; margin-bottom: 8px; margin-top: 0;">Reset Semua Progres?</h3>
-            <p style="margin: 0 0 15px 0; font-size: 13px; color: #64748b; line-height: 1.4;">
-                Tindakan ini akan menghapus seluruh data tanaman, saldo, inventory, aksesori, dan lahan yang sudah kamu miliki!
-            </p>
-            <div style="display: flex; gap: 10px;">
-                <button class="btn-submit" onclick="eksekusiResetGame()" style="flex: 1; background-color: #ef4444;">Ya, Reset</button>
-                <button class="btn-submit" onclick="tutupModalReset()" style="flex: 1; background-color: #64748b;">Batal</button>
-            </div>
+    <div id="tab-pasar" class="tab-content">
+        <button id="btn-tambah-lahan" class="btn-submit" style="width: 100%; margin-bottom: 12px; display: block;" onclick="beliLahan()">➕ Beli Lahan Baru</button>
+        <div class="market-container" id="pasar-container"></div>
+    </div>
+
+    <div id="tab-toko_aksesori" class="tab-content">
+        <div class="market-container" id="toko-aksesori-container"></div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="transaction-modal" style="display: none;">
+    <div class="modal-card">
+        <h3 id="modal-title" style="margin-top: 0; color: #1e293b; font-size: 16px;">Transaksi</h3>
+        <p id="modal-price" style="font-size: 13px; color: #64748b; margin-bottom: 15px;">Harga:</p>
+        
+        <div id="modal-qty-container" style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 15px;">
+            <button class="btn-submit" style="padding: 5px 12px;" onclick="ubahQty(-10)">-10</button>
+            <button class="btn-submit" style="padding: 5px 12px;" onclick="ubahQty(-1)">-1</button>
+            <span id="modal-qty-display" style="font-size: 16px; font-weight: bold; min-width: 30px; text-align: center;">1</span>
+            <button class="btn-submit" style="padding: 5px 12px;" onclick="ubahQty(1)">+1</button>
+            <button class="btn-submit" style="padding: 5px 12px;" onclick="ubahQty(10)">+10</button>
+            <button class="btn-submit" style="padding: 5px 8px; font-size: 11px; background-color: #475569;" onclick="setQtyMaks()">Maks</button>
+        </div>
+
+        <p style="font-size: 14px; text-align: center; font-weight: bold; color: #1e293b;">
+            Total: <span id="modal-total-price">Rp 0</span>
+        </p>
+
+        <div style="display: flex; gap: 8px; margin-top: 15px;">
+            <button id="btn-confirm-transaction" class="btn-submit" style="flex: 1; background-color: #16a34a;" onclick="konfirmasiTransaksi()">Konfirmasi</button>
+            <button class="btn-submit" style="flex: 1; background-color: #94a3b8;" onclick="tutupModalTransaksi()">Batal</button>
         </div>
     </div>
+</div>
 
-    <!-- Toast Notification -->
-    <div id="toast-overlay" class="toast-overlay" style="display: none;">
-        <div id="toast-card" class="toast-card">
-            <span id="toast-icon">✓</span>
-            <span id="toast-message">Pesan Berhasil</span>
+<div class="modal-overlay" id="nickname-modal" style="display: none;">
+    <div class="modal-card">
+        <h3 style="margin-top: 0; font-size: 15px;">Ubah Nama Petani</h3>
+        <input type="text" id="input-new-nickname" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; box-sizing: border-box; margin-bottom: 12px;" placeholder="Masukkan nama baru...">
+        <div style="display: flex; gap: 8px;">
+            <button class="btn-submit" style="flex: 1; background-color: #16a34a;" onclick="simpanNicknameBaru()">Simpan</button>
+            <button class="btn-submit" style="flex: 1; background-color: #94a3b8;" onclick="tutupModalNickname()">Batal</button>
         </div>
     </div>
+</div>
 
-    <script src="script.js"></script>
+<div class="modal-overlay" id="reset-modal" style="display: none;">
+    <div class="modal-card" style="text-align: center;">
+        <h3 style="margin-top: 0; color: #ef4444; font-size: 16px;">⚠ Reset Semua Progres?</h3>
+        <p style="font-size: 12px; color: #64748b;">Tindakan ini akan menghapus data tanaman, kandang ternak, saldo koin, dan aksesori Anda secara permanen!</p>
+        <div style="display: flex; gap: 8px; margin-top: 15px;">
+            <button class="btn-submit" style="flex: 1; background-color: #ef4444;" onclick="eksekusiResetGame()">Ya, Reset</button>
+            <button class="btn-submit" style="flex: 1; background-color: #94a3b8;" onclick="tutupModalReset()">Batal</button>
+        </div>
+    </div>
+</div>
+
+<div class="toast-overlay" id="toast-overlay" style="display: none;">
+    <div class="toast-card success" id="toast-card">
+        <span id="toast-icon">✓</span>
+        <span id="toast-message">Pesan Berhasil</span>
+    </div>
+</div>
+
+<script src="script.js"></script>
 </body>
 </html>
