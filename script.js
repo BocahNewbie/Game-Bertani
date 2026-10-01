@@ -9,7 +9,7 @@ let libraryTanaman = [
         iconBuah: '🍉',
         BasehargaBeli: 60,
         BasehargaJual: 68,
-        waktuTumbuh: 300000 
+        waktuTumbuh:  28800000
     },
     {
         nama: 'Melon',
@@ -18,7 +18,7 @@ let libraryTanaman = [
         iconBuah: '🍈',
         BasehargaBeli: 40,
         BasehargaJual: 52,
-        waktuTumbuh: 150000
+        waktuTumbuh: 18000000
     },
     {
         nama: 'Jagung',
@@ -27,7 +27,7 @@ let libraryTanaman = [
         iconBuah: '🌽',
         BasehargaBeli: 90,
         BasehargaJual: 111,
-        waktuTumbuh: 450000
+        waktuTumbuh: 54000000
     },
     {
         nama: 'Apel',
@@ -36,14 +36,14 @@ let libraryTanaman = [
         iconBuah: '🍎',
         BasehargaBeli: 130,
         BasehargaJual: 180,
-        waktuTumbuh: 900000
+        waktuTumbuh: 86400000
     }
 ];
 
 let listPupuk = [
-    { id: 'pupuk_organik', nama: 'Pupuk Organik', icon: '🍃', hargaBeli: 185, efekWaktu: 75000 },
-    { id: 'biofertilizer', nama: 'Biofertilizer', icon: '🧪', hargaBeli: 350, efekWaktu: 175000 },
-    { id: 'pupuk_urea', nama: 'Pupuk Urea', icon: '💎', hargaBeli: 580, efekWaktu: 400000 }
+    { id: 'pupuk_organik', nama: 'Pupuk Organik', icon: '🍃', hargaBeli: 185, efekWaktu: 18000000 },
+    { id: 'biofertilizer', nama: 'Biofertilizer', icon: '🧪', hargaBeli: 350, efekWaktu: 25200000 },
+    { id: 'pupuk_urea', nama: 'Pupuk Urea', icon: '💎', hargaBeli: 580, efekWaktu: 36000000 }
 ];
 
 let stokPupuk = {
