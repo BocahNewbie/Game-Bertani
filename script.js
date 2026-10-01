@@ -13,20 +13,20 @@ let gameState = {
     sepatu: null
   },
   lahan: [
-    { id: 1, tanaman: 'Bibit Padi', umur: 100, siapPanen: true },
+    { id: 1, tanaman: null, umur: 0, siapPanen: false },
     { id: 2, tanaman: null, umur: 0, siapPanen: false }
   ],
   kandang: {
-    ayam: { kapasitas: 3, isi: [{ id: 1, siapPanen: true }] },
+    ayam: { kapasitas: 3, isi: [] },
     sapi: { kapasitas: 1, isi: [] },
     domba: { kapasitas: 1, isi: [] }
   },
   inventory: {
-    bibit: { 'Bibit Padi': 2, 'Bibit Jagung': 1 },
-    pupuk: { 'Pupuk Organik': 3 },
-    hasil: { 'Padi': 5, 'Telur Ayam': 2 },
-    pakan: { 'Biji-bijian': 5, 'Rumput Segar': 2 },
-    aksesoris: ['Topi Caping', 'Sepatu Bot']
+    bibit: {},
+    pupuk: {},
+    hasil: {},
+    pakan: {},
+    aksesoris: []
   }
 };
 
@@ -155,6 +155,11 @@ function renderPeternakan() {
     const container = document.getElementById(`kandang-${j}-container`);
     container.innerHTML = '';
 
+    if (dataKandang.isi.length === 0) {
+      container.innerHTML = `<p style="font-size:12px; color:#64748b;">Kandang masih kosong. Beli hewan di Pasar!</p>`;
+      return;
+    }
+
     dataKandang.isi.forEach((h, index) => {
       const card = document.createElement('div');
       card.className = 'card';
@@ -187,11 +192,17 @@ function renderAksesoris() {
   document.getElementById('slot-baju').innerText = gameState.aksesorisAktif.baju || 'Kosong';
   document.getElementById('slot-sepatu').innerText = gameState.aksesorisAktif.sepatu || 'Kosong';
 
-  const bonusJual = hitungBonusAksesoris('jual');
+  const bonusJual = typeof hitungBonusAksesoris === 'function' ? hitungBonusAksesoris('jual') : 0;
   document.getElementById('total-bonus').innerText = `+${bonusJual}%`;
 
   const container = document.getElementById('koleksi-aksesoris-container');
   container.innerHTML = '';
+  
+  if (gameState.inventory.aksesoris.length === 0) {
+    container.innerHTML = `<p style="font-size:12px; color:#64748b;">Belum ada koleksi aksesoris. Beli di Pasar!</p>`;
+    return;
+  }
+
   gameState.inventory.aksesoris.forEach((item) => {
     const card = document.createElement('div');
     card.className = 'card';
@@ -202,6 +213,7 @@ function renderAksesoris() {
 
 // 4. RENDER PASAR
 function renderPasar() {
+  // Pasar Bibit
   const pasarBibit = document.getElementById('pasar-bibit-container');
   pasarBibit.innerHTML = '';
   Object.values(DIREKTORI_TUMBUHAN).forEach(t => {
@@ -214,6 +226,7 @@ function renderPasar() {
     `;
   });
 
+  // Pasar Hewan
   const pasarHewan = document.getElementById('pasar-hewan-container');
   pasarHewan.innerHTML = '';
   Object.values(DIREKTORI_HEWAN).forEach(h => {
@@ -227,6 +240,7 @@ function renderPasar() {
     `;
   });
 
+  // Pasar Aksesoris
   document.getElementById('pasar-aksesoris-container').innerHTML = `
     <div class="card">
       <h4>🎩 Topi Caping</h4>
@@ -240,6 +254,7 @@ function renderPasar() {
     </div>
   `;
 
+  // Pasar Ekspansi
   document.getElementById('pasar-ekspansi-container').innerHTML = `
     <div class="card">
       <h4>➕ Lahan Baru</h4>
@@ -263,26 +278,45 @@ function renderInventory() {
   Object.values(DIREKTORI_TUMBUHAN).forEach(t => daftarHargaJual[t.nama.replace('Bibit ', '')] = t.hargaJual);
   Object.values(DIREKTORI_HEWAN).forEach(h => daftarHargaJual[h.hasilTernak] = h.hargaJualHasil);
 
-  Object.entries(gameState.inventory.hasil).forEach(([nama, jumlah]) => {
-    const hargaJual = daftarHargaJual[nama] || 100;
-    const card = document.createElement('div');
-    card.className = 'card';
-    card.innerHTML = `
-      <h4>${nama}</h4>
-      <p>Jumlah: ${jumlah}</p>
-      <button class="btn-primary" onclick="jualHasil('${nama}', ${hargaJual})">Jual</button>
-    `;
-    containerHasil.appendChild(card);
-  });
+  const totalHasil = Object.values(gameState.inventory.hasil).reduce((a, b) => a + b, 0);
+  if (totalHasil === 0) {
+    containerHasil.innerHTML = `<p style="font-size:12px; color:#64748b;">Belum ada hasil panen atau ternak di inventory.</p>`;
+  } else {
+    Object.entries(gameState.inventory.hasil).forEach(([nama, jumlah]) => {
+      if (jumlah > 0) {
+        const hargaJual = daftarHargaJual[nama] || 100;
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+          <h4>${nama}</h4>
+          <p>Jumlah: ${jumlah}</p>
+          <button class="btn-primary" onclick="jualHasil('${nama}', ${hargaJual})">Jual</button>
+        `;
+        containerHasil.appendChild(card);
+      }
+    });
+  }
 
   const containerBibit = document.getElementById('inv-bibit-container');
   containerBibit.innerHTML = '';
+  
+  let adaStokBibitPakan = false;
   Object.entries(gameState.inventory.bibit).forEach(([nama, jumlah]) => {
-    containerBibit.innerHTML += `<div class="card"><h4>${nama}</h4><p>Stok: ${jumlah}</p></div>`;
+    if (jumlah > 0) {
+      adaStokBibitPakan = true;
+      containerBibit.innerHTML += `<div class="card"><h4>${nama}</h4><p>Stok: ${jumlah}</p></div>`;
+    }
   });
   Object.entries(gameState.inventory.pakan).forEach(([nama, jumlah]) => {
-    containerBibit.innerHTML += `<div class="card"><h4>Pakan: ${nama}</h4><p>Stok: ${jumlah}</p></div>`;
+    if (jumlah > 0) {
+      adaStokBibitPakan = true;
+      containerBibit.innerHTML += `<div class="card"><h4>Pakan: ${nama}</h4><p>Stok: ${jumlah}</p></div>`;
+    }
   });
+
+  if (!adaStokBibitPakan) {
+    containerBibit.innerHTML = `<p style="font-size:12px; color:#64748b;">Stok bibit dan pakan kosong.</p>`;
+  }
 }
 
 // MODAL NICKNAME
