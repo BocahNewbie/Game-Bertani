@@ -32,7 +32,7 @@ let listAksesori = [
     { id: 'jas', nama: 'Jas Anti Badai', icon: '🧥', slot: 'badan', harga: 500000, bonusPersen: 4, tangkalBadai: 50, deskripsi: 'Menambah +4% bonus dasar & menghilangkan 50% efek pengurangan dari cuaca Storm / Badai.' }
 ];
 
-let uang = 3500; 
+let uang = 750; 
 let inventory = []; 
 let aksesoriDimiliki = []; 
 let slotAktif = { kepala: null, badan: null, kaki: null, telapak: null };
