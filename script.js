@@ -545,7 +545,7 @@ function saveGame() {
         lahan: lahan,
         // Tambahkan variabel lain yang ingin disimpan di sini
     };
-    localStorage.setItem('gameBertaniSave', JSON.stringify(dataGame));
+    localStorage.setItem('saveGameBertani', JSON.stringify(dataGame));
 }
 
 function muatGame() {
