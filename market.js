@@ -1,27 +1,22 @@
-// MARKET.JS - Logika Pasar & Harga Fluktuatif
+// MARKET.JS - Logika Pasar, Batasan Beli, & Sistem Toast Modern
 
-// Penyimpanan harga aktif pasar saat ini
 let hargaPasarAktif = {
   bibit: {},
   hewan: {},
   hasil: {},
-  pakan: 15 // Harga dasar pakan rumput kering
+  pakan: 15
 };
 
-// Inisialisasi & Interval Fluktuasi Harga Pasar (Setiap 30 Detik)
 function initMarketFluctuation() {
   hitungHargaPasarBaru();
   setInterval(() => {
     hitungHargaPasarBaru();
     renderPasar();
-    console.log('🔄 Harga pasar telah diperbarui secara fluktuatif!');
-  }, 30000); // 30.000 ms = 30 detik
+  }, 30000);
 }
 
 function hitungHargaPasarBaru() {
-  // Acak fluktuasi antara -20% sampai +20%
   const getFaktorAcak = () => (Math.random() * 0.4) + 0.8;
-
   Object.keys(DIREKTORI_TUMBUHAN).forEach(key => {
     const item = DIREKTORI_TUMBUHAN[key];
     hargaPasarAktif.bibit[key] = {
@@ -29,7 +24,6 @@ function hitungHargaPasarBaru() {
       jual: Math.round(item.hargaJualBase * getFaktorAcak())
     };
   });
-
   Object.keys(DIREKTORI_HEWAN).forEach(key => {
     const item = DIREKTORI_HEWAN[key];
     hargaPasarAktif.hewan[key] = {
@@ -38,37 +32,87 @@ function hitungHargaPasarBaru() {
       jualHasil: Math.round(item.hargaJualHasilBase * getFaktorAcak())
     };
   });
-
   hargaPasarAktif.pakan = Math.round(15 * getFaktorAcak());
 }
 
-function beliBibit(nama, harga) {
-  if (gameState.player.koin >= harga) {
-    gameState.player.koin -= harga;
-    gameState.inventory.bibit[nama] = (gameState.inventory.bibit[nama] || 0) + 1;
+// Sistem Notifikasi Toast Modern Menggantikan Alert Bawaan Browser
+function tampilkanToast(pesan, tipe = 'sukses') {
+  const container = document.getElementById('toast-container');
+  if (!container) return;
+
+  const toast = document.createElement('div');
+  toast.className = `toast ${tipe === 'error' ? 'error' : ''}`;
+  toast.innerHTML = `<span>${tipe === 'error' ? '⚠️' : '✅'}</span> <span>${pesan}</span>`;
+  
+  container.appendChild(toast);
+  setTimeout(() => { toast.remove(); }, 3000);
+}
+
+// Fungsi Beli dengan Batasan Maksimal 99 Item
+function beliItemMassal(kategori, nama, hargaSatuan) {
+  let jumlahStr = prompt(`Beli ${nama} (Harga @Rp ${hargaSatuan}):\nMasukkan jumlah (Maksimal 99):`, "1");
+  if (jumlahStr === null) return;
+  
+  let jumlah = parseInt(jumlahStr);
+  if (isNaN(jumlah) || jumlah <= 0) {
+    tampilkanToast('Masukkan jumlah yang valid!', 'error');
+    return;
+  }
+  if (jumlah > 99) {
+    tampilkanToast('Batas pembelian maksimal adalah 99 item sekaligus!', 'error');
+    jumlah = 99;
+  }
+
+  let totalHarga = hargaSatuan * jumlah;
+  if (gameState.player.koin >= totalHarga) {
+    gameState.player.koin -= totalHarga;
+    gameState.inventory[kategori][nama] = (gameState.inventory[kategori][nama] || 0) + jumlah;
     renderAll();
-  } else { alert('Koin tidak cukup!'); }
+    tampilkanToast(`Berhasil membeli ${jumlah}x ${nama} seharga Rp ${totalHarga.toLocaleString('id-ID')}!`);
+  } else {
+    tampilkanToast('Koin Anda tidak cukup untuk transaksi ini!', 'error');
+  }
 }
 
 function beliHewan(jenis, harga) {
   const k = gameState.kandang[jenis];
-  if (k.isi.length >= 5) { // Batasan maksimal 5 hewan per jenis
-    alert('Kandang sudah mencapai batas maksimal 5 ekor!');
+  if (k.isi.length >= 5) {
+    tampilkanToast('Kandang sudah mencapai batas maksimal 5 ekor!', 'error');
     return;
   }
   if (gameState.player.koin >= harga) {
     gameState.player.koin -= harga;
     k.isi.push({ id: Date.now(), siapPanen: true });
     renderAll();
-  } else { alert('Koin tidak cukup!'); }
+    tampilkanToast(`Berhasil membeli 1 ekor ${jenis} seharga Rp ${harga.toLocaleString('id-ID')}!`);
+  } else {
+    tampilkanToast('Koin tidak cukup!', 'error');
+  }
 }
 
-function beliPakan(harga) {
-  if (gameState.player.koin >= harga) {
-    gameState.player.koin -= harga;
-    gameState.inventory.pakan['Rumput Kering'] = (gameState.inventory.pakan['Rumput Kering'] || 0) + 1;
+function beliPakanMassal(hargaSatuan) {
+  let jumlahStr = prompt(`Beli Pakan Rumput Kering (Harga @Rp ${hargaSatuan}):\nMasukkan jumlah (Maksimal 99):`, "1");
+  if (jumlahStr === null) return;
+
+  let jumlah = parseInt(jumlahStr);
+  if (isNaN(jumlah) || jumlah <= 0) {
+    tampilkanToast('Masukkan jumlah yang valid!', 'error');
+    return;
+  }
+  if (jumlah > 99) {
+    tampilkanToast('Batas pembelian maksimal adalah 99 item sekaligus!', 'error');
+    jumlah = 99;
+  }
+
+  let totalHarga = hargaSatuan * jumlah;
+  if (gameState.player.koin >= totalHarga) {
+    gameState.player.koin -= totalHarga;
+    gameState.inventory.pakan['Rumput Kering'] = (gameState.inventory.pakan['Rumput Kering'] || 0) + jumlah;
     renderAll();
-  } else { alert('Koin tidak cukup!'); }
+    tampilkanToast(`Berhasil membeli ${jumlah}x Rumput Kering!`);
+  } else {
+    tampilkanToast('Koin tidak cukup!', 'error');
+  }
 }
 
 function beliAksesoris(nama, harga) {
@@ -76,7 +120,10 @@ function beliAksesoris(nama, harga) {
     gameState.player.koin -= harga;
     gameState.inventory.aksesoris.push(nama);
     renderAll();
-  } else { alert('Koin tidak cukup!'); }
+    tampilkanToast(`Berhasil membeli aksesoris ${nama}!`);
+  } else {
+    tampilkanToast('Koin tidak cukup!', 'error');
+  }
 }
 
 function beliLahan() {
@@ -85,29 +132,25 @@ function beliLahan() {
     gameState.player.koin -= hargaLahan;
     gameState.lahan.push({ id: gameState.lahan.length + 1, tanaman: null, umur: 0, siapPanen: false });
     renderAll();
-  } else { alert('Koin tidak cukup!'); }
+    tampilkanToast('Berhasil membuka lahan tani baru!');
+  } else {
+    tampilkanToast('Koin tidak cukup!', 'error');
+  }
 }
 
 function perbesarKandang(jenis) {
   const k = gameState.kandang[jenis];
   if (k.kapasitas >= 5) {
-    alert('Kandang sudah mencapai kapasitas maksimal mutlak (5 Ekor)!');
+    tampilkanToast('Kandang sudah mencapai kapasitas maksimal mutlak (5 Ekor)!', 'error');
     return;
   }
   const harga = 300;
   if (gameState.player.koin >= harga) {
     gameState.player.koin -= harga;
-    k.kapasitas = Math.min(5, k.kapasitas + 1); // Tambah 1 per upgrade hingga batas 5
+    k.kapasitas = Math.min(5, k.kapasitas + 1);
     renderAll();
-  } else { alert('Koin tidak cukup!'); }
-}
-
-function jualHasil(nama, hargaJualDasar) {
-  if ((gameState.inventory.hasil[nama] || 0) > 0) {
-    gameState.inventory.hasil[nama]--;
-    const bonusPersen = typeof hitungBonusAksesoris === 'function' ? hitungBonusAksesoris('jual') : 0;
-    const hargaAkhir = Math.round(hargaJualDasar * (1 + bonusPersen / 100));
-    gameState.player.koin += hargaAkhir;
-    renderAll();
+    tampilkanToast(`Kandang ${jenis} berhasil diperbesar!`);
+  } else {
+    tampilkanToast('Koin tidak cukup!', 'error');
   }
 }
