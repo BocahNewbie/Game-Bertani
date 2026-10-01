@@ -538,22 +538,28 @@ function showToast(msg, type='success') {
     toastTimeout = setTimeout(() => o.style.display='none', 2000);
 }
 
-function simpanGame() {
-    let save = { playerName, uang, inventory, stokPupuk, aksesoriDimiliki, slotAktif, daftarTernakPemain };
-    localStorage.setItem('saveGameBertaniNew', JSON.stringify(save));
+function saveGame() {
+    let dataGame = {
+        uang: uang,
+        inventory: inventory,
+        lahan: lahan,
+        // Tambahkan variabel lain yang ingin disimpan di sini
+    };
+    localStorage.setItem('gameBertaniSave', JSON.stringify(dataGame));
 }
 
-function muatGame() {
-    let saved = localStorage.getItem('saveGameBertaniNew');
-    if(saved) {
-        let d = JSON.parse(saved);
-        playerName = d.playerName || "Petani Pintar";
-        uang = d.uang !== undefined ? d.uang : 3500;
-        inventory = d.inventory || [];
-        stokPupuk = d.stokPupuk || { pupuk_organik: 0, biofertilizer: 0, pupuk_urea: 0 };
-        aksesoriDimiliki = d.aksesoriDimiliki || [];
-        slotAktif = d.slotAktif || { kepala: null, badan: null, kaki: null, telapak: null };
-        daftarTernakPemain = d.daftarTernakPemain || [];
+function loadGame() {
+    let savedData = localStorage.getItem('gameBertaniSave');
+    if (savedData) {
+        let dataGame = JSON.parse(savedData);
+        uang = dataGame.uang !== undefined ? dataGame.uang : uang;
+        inventory = dataGame.inventory || inventory;
+        lahan = dataGame.lahan || lahan;
+        
+        // Perbarui tampilan di layar setelah data dimuat
+        updateUangDisplay();
+        renderLahan();
+        renderInventory();
     }
 }
 
