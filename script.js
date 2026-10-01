@@ -1,4 +1,4 @@
-// SCRIPT.JS - Logika Utama Game, Waktu Realtime, Modal Pilih Bibit Modern & Auto-Save
+// SCRIPT.JS - Logika Utama Game, Waktu Realtime, Pupuk, & Modal Modern
 
 const STORAGE_KEY = 'PETERNAKAN';
 
@@ -156,11 +156,14 @@ function renderPertanian() {
   container.innerHTML = '';
 
   const sekarang = Date.now();
+  const stokKompos = gameState.inventory.pupuk['Pupuk Kompos'] || 0;
+  const stokUrea = gameState.inventory.pupuk['Pupuk Urea'] || 0;
 
   gameState.lahan.forEach((l, index) => {
     let statusTeks = 'Tanah Kosong';
     let tombolLabel = '🌱 Tanam';
     let tombolDisabled = false;
+    let tombolPupukHTML = '';
 
     if (l.tanaman) {
       const waktuLewatDetik = Math.floor((sekarang - l.waktuTanam) / 1000);
@@ -175,6 +178,14 @@ function renderPertanian() {
         statusTeks = `${l.tanaman} (${l.jumlah}x)<br>${formatSisaWaktu(sisaDetik)}`;
         tombolLabel = '⏳ Tumbuh...';
         tombolDisabled = true;
+
+        // Tombol opsi pemupukan saat tanaman sedang tumbuh
+        tombolPupukHTML = `
+          <div style="display:flex; gap:4px; margin-top:6px;">
+            <button class="btn-secondary" style="font-size:10px; padding:4px; flex:1;" onclick="gunakanPupuk(${index}, 'Pupuk Kompos')" ${stokKompos <= 0 ? 'opacity:0.5;' : ''}>🧪 Kompos (${stokKompos})</button>
+            <button class="btn-secondary" style="font-size:10px; padding:4px; flex:1;" onclick="gunakanPupuk(${index}, 'Pupuk Urea')" ${stokUrea <= 0 ? 'opacity:0.5;' : ''}>🧪 Urea (${stokUrea})</button>
+          </div>
+        `;
       }
     }
 
@@ -186,17 +197,62 @@ function renderPertanian() {
       <button class="btn-primary" onclick="aksiLahan(${index})" ${tombolDisabled ? 'disabled style="background:#94a3b8; cursor:not-allowed;"' : ''}>
         ${tombolLabel}
       </button>
+      ${tombolPupukHTML}
     `;
     container.appendChild(card);
   });
 
   document.getElementById('pupuk-container').innerHTML = `
     <div class="card">
-      <h4>🧪 Racik Pupuk Organik</h4>
+      <h4>🧪 Racik Pupuk Organik Lama</h4>
       <p>Stok: ${gameState.inventory.pupuk['Pupuk Organik'] || 0}</p>
       <button class="btn-primary" onclick="racikPupuk()">Racik</button>
     </div>
   `;
+}
+
+// Fitur Penggunaan Pupuk Kompos & Urea
+function gunakanPupuk(lahanIndex, namaPupuk) {
+  const lahan = gameState.lahan[lahanIndex];
+  
+  if (!lahan.tanaman || lahan.siapPanen) {
+    if (typeof tampilkanToast === 'function') tampilkanToast('Tidak ada tanaman yang sedang tumbuh di lahan ini!', 'error');
+    return;
+  }
+
+  const stokPupuk = gameState.inventory.pupuk[namaPupuk] || 0;
+  if (stokPupuk <= 0) {
+    if (typeof tampilkanToast === 'function') tampilkanToast(`Stok ${namaPupuk} habis! Beli di Pasar.`, 'error');
+    return;
+  }
+
+  const infoPupuk = DIREKTORI_PUPUK[namaPupuk];
+  if (!infoPupuk) return;
+
+  // Kurangi stok pupuk
+  gameState.inventory.pupuk[namaPupuk]--;
+  if (gameState.inventory.pupuk[namaPupuk] <= 0) {
+    delete gameState.inventory.pupuk[namaPupuk];
+  }
+
+  // Hitung random percepatan jam ke detik
+  const randomJam = Math.random() * (infoPupuk.efekMaxJam - infoPupuk.efekMinJam) + infoPupuk.efekMinJam;
+  const penguranganDetik = Math.round(randomJam * 3600);
+
+  // Majukan waktu tanam
+  lahan.waktuTanam -= (penguranganDetik * 1000);
+
+  const sekarang = Date.now();
+  const waktuLewatDetik = Math.floor((sekarang - lahan.waktuTanam) / 1000);
+  if (waktuLewatDetik >= lahan.durasiDetik) {
+    lahan.siapPanen = true;
+  }
+
+  autoSaveGame();
+  renderAll();
+  if (typeof tampilkanToast === 'function') {
+    tampilkanToast(`Berhasil menggunakan ${namaPupuk}! Waktu tumbuh dipercepat ${randomJam.toFixed(1)} jam.`);
+  }
 }
 
 function cekWaktuTanamanRealtime() {
@@ -232,7 +288,6 @@ function cekWaktuTanamanRealtime() {
   }
 }
 
-// Logika Klik Tanam dengan Modal Pilihan Bibit Modern
 let lahanDipilihIndex = 0;
 
 function aksiLahan(index) {
@@ -248,11 +303,9 @@ function aksiLahan(index) {
 
     lahanDipilihIndex = index;
 
-    // Jika hanya ada 1 jenis bibit, langsung lewati pemilihan dan buka modal jumlah
     if (bibitTersediaList.length === 1) {
       bukaModalJumlahTanam(bibitTersediaList[0]);
     } else {
-      // Jika lebih dari 1, tampilkan modal pilihan bibit modern
       bukaModalPilihBibit(bibitTersediaList);
     }
     
@@ -453,7 +506,7 @@ function renderAksesoris() {
   });
 }
 
-// 4. RENDER PASAR
+// 4. RENDER PASAR (Termasuk Menu Pupuk Kompos & Urea)
 function renderPasar() {
   const pasarBibit = document.getElementById('pasar-bibit-container');
   pasarBibit.innerHTML = '';
@@ -465,6 +518,18 @@ function renderPasar() {
         <h4>🌱 ${t.nama}</h4>
         <p>Beli: Rp ${hPasar.beli} | Jual: Rp ${hPasar.jual}<br>Waktu: ${t.waktuTumbuh}s</p>
         <button class="btn-primary" onclick="bukaModalBeli('bibit', '${t.nama}', ${hPasar.beli})">Beli</button>
+      </div>
+    `;
+  });
+
+  // Render Pasar Pupuk Kompos & Urea
+  Object.keys(DIREKTORI_PUPUK).forEach(namaPupuk => {
+    const p = DIREKTORI_PUPUK[namaPupuk];
+    pasarBibit.innerHTML += `
+      <div class="card">
+        <h4>🧪 ${p.nama}</h4>
+        <p>Harga: Rp ${p.harga.toLocaleString('id-ID')}<br><span style="font-size:10px; color:#0284c7;">${p.keterangan}</span></p>
+        <button class="btn-primary" onclick="bukaModalBeli('pupuk', '${p.nama}', ${p.harga})">Beli</button>
       </div>
     `;
   });
@@ -508,7 +573,6 @@ function renderPasar() {
   });
 
   const expContainer = document.getElementById('pasar-ekspansi-container');
-  
   const isMaxLahan = gameState.lahan.length >= 10;
   const hargaLahan = isMaxLahan ? 0 : typeof hitungHargaUpgradeLahan === 'function' ? hitungHargaUpgradeLahan(gameState.lahan.length) : 150000;
   
@@ -592,9 +656,15 @@ function renderInventory() {
       containerBibit.innerHTML += `<div class="card"><h4>Pakan: ${nama}</h4><p>Stok: ${jumlah}</p></div>`;
     }
   });
+  Object.entries(gameState.inventory.pupuk).forEach(([nama, jumlah]) => {
+    if (jumlah > 0) {
+      adaStokBibitPakan = true;
+      containerBibit.innerHTML += `<div class="card"><h4>Pupuk: ${nama}</h4><p>Stok: ${jumlah}</p></div>`;
+    }
+  });
 
   if (!adaStokBibitPakan) {
-    containerBibit.innerHTML = `<p style="font-size:12px; color:#64748b;">Stok bibit dan pakan kosong.</p>`;
+    containerBibit.innerHTML = `<p style="font-size:12px; color:#64748b;">Stok bibit, pakan, dan pupuk kosong.</p>`;
   }
 }
 
@@ -615,11 +685,9 @@ let itemTanamAktif = {
   stokMaks: 0
 };
 
-// Fungsi Membuka Modal Pilihan Bibit (Modern Card Grid)
 function bukaModalPilihBibit(bibitList) {
   const containerList = document.getElementById('modal-pilih-bibit-list');
   if (!containerList) {
-    // Jika elemen modal belum ada di HTML, fallback ke jumlah langsung jika error
     bukaModalJumlahTanam(bibitList[0]);
     return;
   }
@@ -844,6 +912,8 @@ function eksekusiJualItem() {
         gameState.inventory.bibit[itemAktifModal.nama] = (gameState.inventory.bibit[itemAktifModal.nama] || 0) + jumlah;
       } else if (itemAktifModal.kategori === 'pakan') {
         gameState.inventory.pakan[itemAktifModal.nama] = (gameState.inventory.pakan[itemAktifModal.nama] || 0) + jumlah;
+      } else if (itemAktifModal.kategori === 'pupuk') {
+        gameState.inventory.pupuk[itemAktifModal.nama] = (gameState.inventory.pupuk[itemAktifModal.nama] || 0) + jumlah;
       }
 
       tutupModalJual();
