@@ -1,4 +1,4 @@
-// SCRIPT.JS - Logika Utama Game & Modal Universal (Beli & Jual)
+// SCRIPT.JS - Logika Utama Game, Modal Universal & Sistem Tanam Massal
 
 const STORAGE_KEY = 'PETERNAKAN';
 
@@ -12,9 +12,9 @@ let gameState = {
     baju: null,
     sepatu: null
   },
+  // Lahan awal hanya 1 (Bisa di-upgrade hingga 10)
   lahan: [
-    { id: 1, tanaman: null, umur: 0, siapPanen: false },
-    { id: 2, tanaman: null, umur: 0, siapPanen: false }
+    { id: 1, tanaman: null, jumlah: 0, umur: 0, siapPanen: false }
   ],
   kandang: {
     ayam: { level: 1, kapasitas: 2, isi: [] },
@@ -89,12 +89,19 @@ function muatGame() {
     try { 
       const parsed = JSON.parse(savedData);
       gameState = parsed;
+      
+      // Auto-fix properti lama (Pencegah Bug jika menggunakan save-an lama)
       ['ayam', 'sapi', 'domba'].forEach(j => {
         if (gameState.kandang[j]) {
           if (!gameState.kandang[j].level) gameState.kandang[j].level = 1;
           if (!gameState.kandang[j].kapasitas) gameState.kandang[j].kapasitas = 2;
         }
       });
+      if (gameState.lahan) {
+        gameState.lahan.forEach(l => {
+          if (l.tanaman && !l.jumlah) l.jumlah = 1; 
+        });
+      }
     } catch (e) { console.error(e); }
   }
 }
@@ -110,7 +117,7 @@ function renderAll() {
   renderInventory();
 }
 
-// 1. RENDER PERTANIAN
+// 1. RENDER PERTANIAN (Dengan Fitur Tanam 99)
 function renderPertanian() {
   const container = document.getElementById('lahan-container');
   container.innerHTML = '';
@@ -120,9 +127,9 @@ function renderPertanian() {
     card.className = 'card';
     card.innerHTML = `
       <h4>Lahan ${index + 1}</h4>
-      <p>${l.tanaman ? `${l.tanaman}<br>${l.siapPanen ? '🌾 Siap Panen!' : '⏳ Tumbuh'}` : 'Tanah Kosong'}</p>
+      <p>${l.tanaman ? `${l.tanaman} (${l.jumlah}x)<br>${l.siapPanen ? '🌾 Siap Panen!' : '⏳ Tumbuh'}` : 'Tanah Kosong'}</p>
       <button class="btn-primary" onclick="aksiLahan(${index})">
-        ${l.tanaman ? (l.siapPanen ? 'Panen' : 'Siram') : 'Tanam'}
+        ${l.tanaman ? (l.siapPanen ? '🧺 Panen' : '⏳ Siram') : '🌱 Tanam'}
       </button>
     `;
     container.appendChild(card);
@@ -139,22 +146,55 @@ function renderPertanian() {
 
 function aksiLahan(index) {
   const lahan = gameState.lahan[index];
+  
+  // LOGIKA TANAM
   if (!lahan.tanaman) {
     const bibitTersedia = Object.keys(gameState.inventory.bibit).find(b => gameState.inventory.bibit[b] > 0);
     if (bibitTersedia) {
-      gameState.inventory.bibit[bibitTersedia]--;
+      const stok = gameState.inventory.bibit[bibitTersedia];
+      
+      // Tanya pakai prompt bawaan browser untuk tanam massal
+      let strQty = prompt(`Tanam ${bibitTersedia} (Stok di tas: ${stok})\nMasukkan jumlah yang ingin ditanam (Maksimal 99 per lahan):`, "1");
+      if (strQty === null) return; // Batal ditekan
+      
+      let qty = parseInt(strQty);
+      if (isNaN(qty) || qty <= 0) {
+        if (typeof tampilkanToast === 'function') tampilkanToast('Jumlah tanam tidak valid!', 'error');
+        return;
+      }
+      
+      // Limitasi Maks 99 dan menyesuaikan stok
+      if (qty > 99) qty = 99;
+      if (qty > stok) qty = stok; 
+      
+      // Potong stok dan terapkan ke lahan
+      gameState.inventory.bibit[bibitTersedia] -= qty;
       lahan.tanaman = bibitTersedia;
+      lahan.jumlah = qty;
       lahan.siapPanen = true; 
+      
       renderAll();
+      if (typeof tampilkanToast === 'function') tampilkanToast(`Berhasil menanam ${qty}x ${bibitTersedia}!`);
+      
     } else { 
       if (typeof tampilkanToast === 'function') tampilkanToast('Tidak ada bibit di inventory! Beli di Pasar.', 'error'); 
     }
+    
+  // LOGIKA PANEN
   } else if (lahan.siapPanen) {
     const namaHasil = lahan.tanaman.replace('Bibit ', '');
-    gameState.inventory.hasil[namaHasil] = (gameState.inventory.hasil[namaHasil] || 0) + 1;
+    const jumlahPanen = lahan.jumlah || 1;
+    
+    // Masukkan ke inventory sesuai jumlah yang ditanam
+    gameState.inventory.hasil[namaHasil] = (gameState.inventory.hasil[namaHasil] || 0) + jumlahPanen;
+    
+    // Reset lahan
     lahan.tanaman = null;
+    lahan.jumlah = 0;
     lahan.siapPanen = false;
+    
     renderAll();
+    if (typeof tampilkanToast === 'function') tampilkanToast(`Berhasil memanen ${jumlahPanen}x ${namaHasil}!`);
   }
 }
 
@@ -206,7 +246,7 @@ function panenTernak(jenis, index) {
   }
 }
 
-// 3. RENDER AKSESORIS (Dengan Fitur Lepas / Unequip)
+// 3. RENDER AKSESORIS
 function renderAksesoris() {
   const topName = gameState.aksesorisAktif.topi || 'Kosong';
   const bajuName = gameState.aksesorisAktif.baju || 'Kosong';
@@ -302,15 +342,24 @@ function renderPasar() {
     `;
   });
 
+  // Render menu ekspansi (Lahan Tani + Kandang)
   const expContainer = document.getElementById('pasar-ekspansi-container');
+  
+  // Ekspansi Lahan (Max 10)
+  const isMaxLahan = gameState.lahan.length >= 10;
+  const hargaLahan = isMaxLahan ? 0 : typeof hitungHargaUpgradeLahan === 'function' ? hitungHargaUpgradeLahan(gameState.lahan.length) : 150000;
+  
   expContainer.innerHTML = `
     <div class="card">
       <h4>➕ Lahan Tani Baru</h4>
-      <p>Harga: Rp 500</p>
-      <button class="btn-primary" onclick="beliLahan()">Tambah</button>
+      <p>Lahan Aktif: ${gameState.lahan.length} / 10<br>${isMaxLahan ? '<b>Maksimal Lahan</b>' : `Harga Upgrade: Rp ${hargaLahan.toLocaleString('id-ID')}`}</p>
+      <button class="btn-primary" onclick="beliLahan()" ${isMaxLahan ? 'disabled style="background:#94a3b8; cursor:not-allowed;"' : ''}>
+        ${isMaxLahan ? 'Max Lahan' : `Beli Lahan ke-${gameState.lahan.length + 1}`}
+      </button>
     </div>
   `;
 
+  // Ekspansi Kandang
   ['ayam', 'sapi', 'domba'].forEach(jenis => {
     const kandang = gameState.kandang[jenis];
     const nextLevel = kandang.level + 1;
@@ -391,7 +440,7 @@ function renderInventory() {
 // MODAL UNIVERSAL JUAL & BELI (DENGAN -10, -1, +1, +10, MAKS PINTAR)
 // ==========================================
 let itemAktifModal = {
-  mode: '', // 'beli' atau 'jual'
+  mode: '', 
   kategori: '',
   nama: '',
   hargaSatuan: 0,
@@ -405,7 +454,7 @@ function bukaModalBeli(kategori, namaItem, hargaSatuan) {
     kategori: kategori,
     nama: namaItem,
     hargaSatuan: hargaSatuan,
-    limitMaks: 99 // Maksimal beli 99 item sekaligus
+    limitMaks: 99 // Batas sistem untuk sekali transaksi beli
   };
 
   document.getElementById('modal-jual-title').innerText = `Beli ${namaItem}`;
@@ -450,7 +499,6 @@ function ubahJumlahJual(delta) {
   let val = parseInt(input.value) || 1;
   val += delta;
   
-  // Hitung batas maksimal cerdas (menyesuaikan uang jika sedang beli)
   let maxVal = itemAktifModal.limitMaks;
   if (itemAktifModal.mode === 'beli') {
     const maxMampuBeli = Math.floor(gameState.player.koin / itemAktifModal.hargaSatuan);
@@ -465,20 +513,14 @@ function ubahJumlahJual(delta) {
 
 function setJumlahJualMaks() {
   let maxVal = itemAktifModal.limitMaks;
-  
   if (itemAktifModal.mode === 'beli') {
-    // Hitung koin dibagi harga satuan untuk tau maksimal mampunya berapa
     const maxMampuBeli = Math.floor(gameState.player.koin / itemAktifModal.hargaSatuan);
-    // Ambil nilai terkecil antara batas sistem (99) dan maksimal mampu beli
     maxVal = Math.min(itemAktifModal.limitMaks, maxMampuBeli);
-    
-    // Jika ternyata koin tidak cukup untuk beli 1 pun
     if (maxVal < 1) {
       if (typeof tampilkanToast === 'function') tampilkanToast('Koin Anda tidak cukup!', 'error');
-      maxVal = 1; // Kembalikan ke angka 1 agar input tidak 0
+      maxVal = 1; 
     }
   }
-  
   document.getElementById('input-jumlah-jual').value = maxVal;
 }
 
@@ -493,14 +535,12 @@ function validasiInputJual() {
   }
 
   if (val < 1) input.value = 1;
-  // Jika mengetik manual melebihi kemampuan beli / batas maksimal
   if (val > maxVal) input.value = Math.max(1, maxVal);
 }
 
 function eksekusiJualItem() {
   const jumlah = parseInt(document.getElementById('input-jumlah-jual').value) || 0;
   
-  // Ambil nilai max aktual (baik untuk stok jual maupun koin saat beli)
   let maxVal = itemAktifModal.limitMaks;
   if (itemAktifModal.mode === 'beli') {
     const maxMampuBeli = Math.floor(gameState.player.koin / itemAktifModal.hargaSatuan);
