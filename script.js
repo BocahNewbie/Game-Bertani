@@ -2,12 +2,12 @@
 
 // --- 1. GAME STATE GLOBAL ---
 let gameState = {
-    koin: 1000, // Modal awal koin untuk testing pasar
+    koin: 1500, // Modal awal koin
     lahan: [
         { id: 1, tanaman: null, jumlah: 0, status: "Kosong", pupukAktif: null, waktuTanam: 0 }
     ],
     inventory: {
-        bibit: { bayam: 5 }, // Contoh stok awal bibit
+        bibit: { bayam: 5 },
         pupukPakan: { pupuk_dasar: 2, pakan_ayam: 2 },
         hasilPanen: {},
         hasilTernak: {},
@@ -28,41 +28,44 @@ let gameState = {
 
 // --- 2. INISIALISASI SAAT HALAMAN DIMUAT ---
 document.addEventListener("DOMContentLoaded", () => {
-    // Jalankan render awal saat halaman siap
+    // Jalankan render awal ke tab pertanian saat halaman siap
     bukaTab('pertanian');
 });
 
-// --- 3. SISTEM NAVIGASI TAB ---
+// --- 3. SISTEM NAVIGASI TAB UTAMA & SUB-TAB ---
 function bukaTab(namaTab) {
-    // Sembunyikan semua tab pane
+    // Sembunyikan semua konten tab utama
     const panes = document.querySelectorAll(".tab-pane");
-    panes.forEach(pane => pane.classList.remove("active"));
+    panes.forEach(pane => pane.style.display = "none");
 
-    // Hilangkan kelas active dari semua tombol nav
-    const buttons = document.querySelectorAll(".tab-btn");
-    buttons.forEach(btn => btn.classList.remove("active"));
-
-    // Tampilkan tab yang dipilih
+    // Tampilkan tab target yang dipilih
     const targetPane = document.getElementById(`tab-${namaTab}`);
-    if (targetPane) targetPane.classList.add("active");
+    if (targetPane) {
+        targetPane.style.display = "block";
+    }
 
-    // Cari tombol yang diklik dan beri kelas active
-    // (Opsional sesuaikan dengan struktur HTML tombol nav kamu)
-    
-    // Panggil fungsi render sesuai tab yang dibuka
-    if (namaTab === 'pertanian' && typeof renderPertanian === 'function') renderPertanian();
-    else if (namaTab === 'pasar' && typeof renderPasar === 'function') renderPasar();
-    else if (namaTab === 'inventory' && typeof renderInventory === 'function') renderInventory();
-    else if (namaTab === 'peternakan' && typeof renderPeternakan === 'function') renderPeternakan();
-    else if (namaTab === 'accessories' && typeof renderAccessories === 'function') renderAccessories();
+    // Panggil fungsi render modul terkait secara otomatis
+    if (namaTab === 'pertanian' && typeof renderPertanian === 'function') {
+        renderPertanian();
+    } else if (namaTab === 'pasar' && typeof renderPasar === 'function') {
+        renderPasar();
+    } else if (namaTab === 'inventory' && typeof renderInventory === 'function') {
+        renderInventory();
+    } else if (namaTab === 'peternakan' && typeof renderPeternakan === 'function') {
+        renderPeternakan();
+    } else if (namaTab === 'accessories' && typeof renderAccessories === 'function') {
+        renderAccessories();
+    }
     
     updateHeaderStats();
 }
 
-// Update tampilan koin atau status di header jika ada elemennya
+// Update tampilan informasi koin di bagian atas game
 function updateHeaderStats() {
     const elKoin = document.getElementById("stat-koin");
-    if (elKoin) elKoin.innerText = `Rp ${gameState.koin.toLocaleString()}`;
+    if (elKoin) {
+        elKoin.innerText = `Rp ${gameState.koin.toLocaleString()}`;
+    }
 }
 
 
@@ -70,7 +73,7 @@ function updateHeaderStats() {
 function tampilkanModal(judul, pesan, denganInput = false, nilaiAwal = 1, callbackKonfirmasi) {
     const modal = document.getElementById("game-modal");
     if (!modal) {
-        // Fallback jika elemen HTML modal belum terpasang
+        // Fallback pengaman jika elemen modal belum terpasang di HTML
         if (denganInput) {
             let res = prompt(`${judul}\n${pesan}`, nilaiAwal);
             if (res !== null && callbackKonfirmasi) callbackKonfirmasi(parseInt(res));
@@ -86,30 +89,34 @@ function tampilkanModal(judul, pesan, denganInput = false, nilaiAwal = 1, callba
     const inputField = document.getElementById("modal-input-value");
     const btnKonfirmasi = document.getElementById("modal-btn-confirm");
 
-    elJudul.innerText = judul;
-    elPesan.innerText = pesan;
+    if (elJudul) elJudul.innerText = judul;
+    if (elPesan) elPesan.innerText = pesan;
 
-    if (denganInput) {
+    if (denganInput && inputContainer && inputField) {
         inputContainer.style.display = "block";
         inputField.value = nilaiAwal;
-    } else {
+    } else if (inputContainer) {
         inputContainer.style.display = "none";
     }
 
     modal.style.display = "flex";
 
-    // Bersihkan event listener lama pada tombol konfirmasi agar tidak numpuk
-    const btnBaru = btnKonfirmasi.cloneNode(true);
-    btnKonfirmasi.parentNode.replaceChild(btnBaru, btnKonfirmasi);
+    if (btnKonfirmasi) {
+        // Bersihkan event listener sebelumnya agar tidak terjadi penumpukan aksi
+        const btnBaru = btnKonfirmasi.cloneNode(true);
+        btnKonfirmasi.parentNode.replaceChild(btnBaru, btnKonfirmasi);
 
-    btnBaru.addEventListener("click", () => {
-        let nilaiInput = denganInput ? parseInt(inputField.value) : null;
-        tutupModal();
-        if (callbackKonfirmasi) callbackKonfirmasi(nilaiInput);
-    });
+        btnBaru.addEventListener("click", () => {
+            let nilaiInput = (denganInput && inputField) ? parseInt(inputField.value) : null;
+            tutupModal();
+            if (callbackKonfirmasi) callbackKonfirmasi(nilaiInput);
+        });
+    }
 }
 
 function tutupModal() {
     const modal = document.getElementById("game-modal");
-    if (modal) modal.style.display = "none";
+    if (modal) {
+        modal.style.display = "none";
+    }
 }
