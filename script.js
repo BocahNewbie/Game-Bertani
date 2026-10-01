@@ -346,7 +346,7 @@ function renderPasar() {
   const expContainer = document.getElementById('pasar-ekspansi-container');
   
   const isMaxLahan = gameState.lahan.length >= 10;
-  const hargaLahan = isMaxLahan ? 0 : typeof hitungHargaUpgradeLahan === 'function' ? hitungHargaUpgradeLahan(gameState.lahan.length) : 150000;
+  const hargaLahan = isMaxLahan ? 0 : typeof hitungHargaUpgradeLahan === 'function' ? hitungHargaUpgradeLahan(gameState.lahan.length) : 350000;
   
   expContainer.innerHTML = `
     <div class="card">
