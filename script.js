@@ -1,4 +1,4 @@
-// SCRIPT.JS - Logika Utama Game, Pasar Sub-Kategori Pupuk, Panel Pupuk Dinamis & Modal Modern
+// SCRIPT.JS - Perbaikan Pasar Sub-Tab Pupuk & Panel Dinamis di Atas Lahan
 
 const STORAGE_KEY = 'PETERNAKAN';
 
@@ -87,7 +87,8 @@ function switchSubTab(parentTab, subName) {
   parent.querySelectorAll('.sub-content').forEach(el => el.classList.remove('active'));
   parent.querySelectorAll('.sub-nav .sub-tab-btn').forEach(el => el.classList.remove('active'));
   
-  document.getElementById(`subtab-${subName}`).classList.add('active');
+  const targetSub = document.getElementById(`subtab-${subName}`);
+  if (targetSub) targetSub.classList.add('active');
   event.currentTarget.classList.add('active');
 }
 
@@ -120,8 +121,11 @@ function muatGame() {
 }
 
 function renderAll() {
-  document.getElementById('player-nickname').innerText = `👨‍🌾 ${gameState.player.nickname} ✏️`;
-  document.getElementById('player-koin').innerText = `Rp ${gameState.player.koin.toLocaleString('id-ID')}`;
+  const nicknameEl = document.getElementById('player-nickname');
+  if (nicknameEl) nicknameEl.innerText = `👨‍🌾 ${gameState.player.nickname} ✏️`;
+  
+  const koinEl = document.getElementById('player-koin');
+  if (koinEl) koinEl.innerText = `Rp ${gameState.player.koin.toLocaleString('id-ID')}`;
 
   renderPertanian();
   renderPeternakan();
@@ -150,15 +154,17 @@ function formatSisaWaktu(detikSisa) {
   return `⏳ Sisa: ${hasilStr.join(' ')}`;
 }
 
-// 1. RENDER PERTANIAN (Panel Pupuk Muncul Hanya Jika Stok > 0)
+// 1. RENDER PERTANIAN
 function renderPertanian() {
   const container = document.getElementById('lahan-container');
+  if (!container) return;
   container.innerHTML = '';
 
   const sekarang = Date.now();
   const stokKompos = gameState.inventory.pupuk['Pupuk Kompos'] || 0;
   const stokUrea = gameState.inventory.pupuk['Pupuk Urea'] || 0;
 
+  // Panel Pupuk di Atas Lahan (Hanya muncul jika stok salah satu pupuk > 0)
   const panelAtasLahan = document.getElementById('pupuk-container');
   if (panelAtasLahan) {
     let tombolPupukHTML = '';
@@ -178,16 +184,11 @@ function renderPertanian() {
       `;
     }
 
-    // Jika tidak ada stok pupuk sama sekali, sembunyikan atau beri info kosong
     if (tombolPupukHTML === '') {
-      panelAtasLahan.innerHTML = `
-        <div class="card" style="grid-column: 1 / -1; background: #f8fafc; border: 1px solid #e2e8f0; text-align: center; color: #64748b;">
-          <p style="font-size: 12px; margin: 0;">🧪 Beli Pupuk (Kompos / Urea) di Pasar untuk mempercepat waktu panen serentak!</p>
-        </div>
-      `;
+      panelAtasLahan.innerHTML = ''; // Kosongkan jika belum beli pupuk
     } else {
       panelAtasLahan.innerHTML = `
-        <div class="card" style="grid-column: 1 / -1; background: #f0fdf4; border: 1px solid #bbf7d0;">
+        <div class="card" style="grid-column: 1 / -1; background: #f0fdf4; border: 1px solid #bbf7d0; margin-bottom: 12px;">
           <h4 style="color: #166534; margin-bottom: 6px;">🧪 Panel Pupuk Massal (Berpengaruh ke Semua Lahan)</h4>
           <div style="display: flex; gap: 8px; flex-wrap: wrap;">
             ${tombolPupukHTML}
@@ -357,10 +358,13 @@ function renderPeternakan() {
     const infoHewan = DIREKTORI_HEWAN[j];
     const stokPakan = gameState.inventory.pakan['Rumput Kering'] || 0;
     
-    document.getElementById(`info-kandang-${j}`).innerText = 
-      `Level Kandang: Lv.${dataKandang.level} | Kapasitas: ${dataKandang.isi.length} / ${dataKandang.kapasitas} Ekor | Pakan: ${stokPakan}`;
+    const infoEl = document.getElementById(`info-kandang-${j}`);
+    if (infoEl) {
+      infoEl.innerText = `Level Kandang: Lv.${dataKandang.level} | Kapasitas: ${dataKandang.isi.length} / ${dataKandang.kapasitas} Ekor | Pakan: ${stokPakan}`;
+    }
 
     const container = document.getElementById(`kandang-${j}-container`);
+    if (!container) return;
     container.innerHTML = '';
 
     if (dataKandang.isi.length === 0) {
@@ -412,12 +416,16 @@ function bukaModalNamaHewan(jenis, index) {
   targetHewanAktif = { jenis, index };
   const hewan = gameState.kandang[jenis].isi[index];
   
-  document.getElementById('input-nama-hewan').value = hewan.namaCustom || "";
-  document.getElementById('modal-nama-hewan').style.display = 'flex';
+  const inputEl = document.getElementById('input-nama-hewan');
+  if (inputEl) inputEl.value = hewan.namaCustom || "";
+  
+  const modalEl = document.getElementById('modal-nama-hewan');
+  if (modalEl) modalEl.style.display = 'flex';
 }
 
 function tutupModalNamaHewan() {
-  document.getElementById('modal-nama-hewan').style.display = 'none';
+  const modalEl = document.getElementById('modal-nama-hewan');
+  if (modalEl) modalEl.style.display = 'none';
 }
 
 function simpanNamaHewanBaru() {
@@ -436,12 +444,16 @@ function bukaModalKonfirmasiJualHewan(jenis, index, hargaJual) {
   const hewan = gameState.kandang[jenis].isi[index];
   const namaLabel = hewan.namaCustom || `${jenis} #${index + 1}`;
 
-  document.getElementById('modal-jual-hewan-text').innerText = `Yakin ingin menjual ${namaLabel} seharga Rp ${hargaJual.toLocaleString('id-ID')}?`;
-  document.getElementById('modal-jual-hewan').style.display = 'flex';
+  const textEl = document.getElementById('modal-jual-hewan-text');
+  if (textEl) textEl.innerText = `Yakin ingin menjual ${namaLabel} seharga Rp ${hargaJual.toLocaleString('id-ID')}?`;
+  
+  const modalEl = document.getElementById('modal-jual-hewan');
+  if (modalEl) modalEl.style.display = 'flex';
 }
 
 function tutupModalJualHewan() {
-  document.getElementById('modal-jual-hewan').style.display = 'none';
+  const modalEl = document.getElementById('modal-jual-hewan');
+  if (modalEl) modalEl.style.display = 'none';
 }
 
 function eksekusiJualHewanModal() {
@@ -488,14 +500,21 @@ function renderAksesoris() {
 
   const btnLepas = (tipe) => `<span style="color:#ef4444; cursor:pointer; font-size:11px; margin-left:8px; font-weight:bold;" onclick="lepasAksesoris('${tipe}')">[Lepas]</span>`;
 
-  document.getElementById('slot-topi').innerHTML = `${topName} ${topName !== 'Kosong' ? btnLepas('topi') : ''}`;
-  document.getElementById('slot-baju').innerHTML = `${bajuName} ${bajuName !== 'Kosong' ? btnLepas('baju') : ''}`;
-  document.getElementById('slot-sepatu').innerHTML = `${sepatuName} ${sepatuName !== 'Kosong' ? btnLepas('sepatu') : ''}`;
+  const topEl = document.getElementById('slot-topi');
+  if (topEl) topEl.innerHTML = `${topName} ${topName !== 'Kosong' ? btnLepas('topi') : ''}`;
+  
+  const bajuEl = document.getElementById('slot-baju');
+  if (bajuEl) bajuEl.innerHTML = `${bajuName} ${bajuName !== 'Kosong' ? btnLepas('baju') : ''}`;
+  
+  const sepatuEl = document.getElementById('slot-sepatu');
+  if (sepatuEl) sepatuEl.innerHTML = `${sepatuName} ${sepatuName !== 'Kosong' ? btnLepas('sepatu') : ''}`;
 
   const bonusJual = typeof hitungBonusAksesoris === 'function' ? hitungBonusAksesoris('jual') : 0;
-  document.getElementById('total-bonus').innerText = `+${bonusJual}%`;
+  const bonusEl = document.getElementById('total-bonus');
+  if (bonusEl) bonusEl.innerText = `+${bonusJual}%`;
 
   const container = document.getElementById('koleksi-aksesoris-container');
+  if (!container) return;
   container.innerHTML = '';
   
   if (gameState.inventory.aksesoris.length === 0) {
@@ -522,7 +541,7 @@ function renderAksesoris() {
   });
 }
 
-// 4. RENDER PASAR (Menu Pupuk Dipisah ke Sub-Kategori Pasar Pupuk)
+// 4. RENDER PASAR (Sub-Tab Pasar Pupuk Terhubung)
 function renderPasar() {
   const pasarBibit = document.getElementById('pasar-bibit-container');
   if (pasarBibit) {
@@ -540,7 +559,7 @@ function renderPasar() {
     });
   }
 
-  // Render ke Sub-Kategori Pasar Pupuk (Pastikan di HTML ada elemen dengan ID 'pasar-pupuk-container')
+  // Render Pasar Pupuk (Kompos & Urea) ke sub-kategori pasar pupuk
   const pasarPupuk = document.getElementById('pasar-pupuk-container');
   if (pasarPupuk) {
     pasarPupuk.innerHTML = '';
@@ -701,7 +720,7 @@ function renderInventory() {
 }
 
 // ==========================================
-// MODAL UNIVERSAL & PILIH BIBIT MODERN
+// MODAL UNIVERSAL & TRANSAKSI
 // ==========================================
 let itemAktifModal = {
   mode: '', 
@@ -740,7 +759,8 @@ function bukaModalPilihBibit(bibitList) {
     containerList.appendChild(btn);
   });
 
-  document.getElementById('modal-pilih-bibit').style.display = 'flex';
+  const modalEl = document.getElementById('modal-pilih-bibit');
+  if (modalEl) modalEl.style.display = 'flex';
 }
 
 function tutupModalPilihBibit() {
@@ -756,11 +776,20 @@ function bukaModalJumlahTanam(namaBibit) {
     stokMaks: Math.min(stok, 99)
   };
 
-  document.getElementById('modal-tanam-title').innerText = `Tanam ${namaBibit}`;
-  document.getElementById('modal-tanam-info').innerText = `Stok di Tas: ${stok} | Maks 99 per lahan`;
-  document.getElementById('input-jumlah-tanam').value = 1;
-  document.getElementById('input-jumlah-tanam').max = itemTanamAktif.stokMaks;
-  document.getElementById('modal-tanam').style.display = 'flex';
+  const titleEl = document.getElementById('modal-tanam-title');
+  if (titleEl) titleEl.innerText = `Tanam ${namaBibit}`;
+  
+  const infoEl = document.getElementById('modal-tanam-info');
+  if (infoEl) infoEl.innerText = `Stok di Tas: ${stok} | Maks 99 per lahan`;
+  
+  const inputEl = document.getElementById('input-jumlah-tanam');
+  if (inputEl) {
+    inputEl.value = 1;
+    inputEl.max = itemTanamAktif.stokMaks;
+  }
+  
+  const modalEl = document.getElementById('modal-tanam');
+  if (modalEl) modalEl.style.display = 'flex';
 }
 
 function bukaModalBeli(kategori, namaItem, hargaSatuan) {
@@ -772,11 +801,20 @@ function bukaModalBeli(kategori, namaItem, hargaSatuan) {
     limitMaks: 99
   };
 
-  document.getElementById('modal-jual-title').innerText = `Beli ${namaItem}`;
-  document.getElementById('modal-jual-info').innerText = `Harga @Rp ${hargaSatuan} | Maks 99`;
-  document.getElementById('input-jumlah-jual').value = 1;
-  document.getElementById('input-jumlah-jual').max = 99;
-  document.getElementById('modal-jual').style.display = 'flex';
+  const titleEl = document.getElementById('modal-jual-title');
+  if (titleEl) titleEl.innerText = `Beli ${namaItem}`;
+  
+  const infoEl = document.getElementById('modal-jual-info');
+  if (infoEl) infoEl.innerText = `Harga @Rp ${hargaSatuan} | Maks 99`;
+  
+  const inputEl = document.getElementById('input-jumlah-jual');
+  if (inputEl) {
+    inputEl.value = 1;
+    inputEl.max = 99;
+  }
+  
+  const modalEl = document.getElementById('modal-jual');
+  if (modalEl) modalEl.style.display = 'flex';
 }
 
 function bukaModalJual(namaItem, hargaDasar) {
@@ -797,23 +835,35 @@ function bukaModalJual(namaItem, hargaDasar) {
     limitMaks: stok
   };
 
-  document.getElementById('modal-jual-title').innerText = `Jual ${namaItem}`;
-  document.getElementById('modal-jual-info').innerText = `Stok Tersedia: ${stok} | Harga @Rp ${hargaAkhirSatuan}`;
-  document.getElementById('input-jumlah-jual').value = 1;
-  document.getElementById('input-jumlah-jual').max = stok;
-  document.getElementById('modal-jual').style.display = 'flex';
+  const titleEl = document.getElementById('modal-jual-title');
+  if (titleEl) titleEl.innerText = `Jual ${namaItem}`;
+  
+  const infoEl = document.getElementById('modal-jual-info');
+  if (infoEl) infoEl.innerText = `Stok Tersedia: ${stok} | Harga @Rp ${hargaAkhirSatuan}`;
+  
+  const inputEl = document.getElementById('input-jumlah-jual');
+  if (inputEl) {
+    inputEl.value = 1;
+    inputEl.max = stok;
+  }
+  
+  const modalEl = document.getElementById('modal-jual');
+  if (modalEl) modalEl.style.display = 'flex';
 }
 
 function tutupModalJual() {
-  document.getElementById('modal-jual').style.display = 'none';
+  const modalEl = document.getElementById('modal-jual');
+  if (modalEl) modalEl.style.display = 'none';
 }
 
 function tutupModalTanam() {
-  document.getElementById('modal-tanam').style.display = 'none';
+  const modalEl = document.getElementById('modal-tanam');
+  if (modalEl) modalEl.style.display = 'none';
 }
 
 function ubahJumlahJual(delta) {
   const input = document.getElementById('input-jumlah-jual');
+  if (!input) return;
   let val = parseInt(input.value) || 1;
   val += delta;
   
@@ -839,11 +889,13 @@ function setJumlahJualMaks() {
       maxVal = 1; 
     }
   }
-  document.getElementById('input-jumlah-jual').value = maxVal;
+  const input = document.getElementById('input-jumlah-jual');
+  if (input) input.value = maxVal;
 }
 
 function validasiInputJual() {
   const input = document.getElementById('input-jumlah-jual');
+  if (!input) return;
   let val = parseInt(input.value) || 1;
   
   let maxVal = itemAktifModal.limitMaks;
@@ -858,6 +910,7 @@ function validasiInputJual() {
 
 function ubahJumlahTanam(delta) {
   const input = document.getElementById('input-jumlah-tanam');
+  if (!input) return;
   let val = parseInt(input.value) || 1;
   val += delta;
   
@@ -868,18 +921,22 @@ function ubahJumlahTanam(delta) {
 }
 
 function setJumlahTanamMaks() {
-  document.getElementById('input-jumlah-tanam').value = itemTanamAktif.stokMaks;
+  const input = document.getElementById('input-jumlah-tanam');
+  if (input) input.value = itemTanamAktif.stokMaks;
 }
 
 function validasiInputTanam() {
   const input = document.getElementById('input-jumlah-tanam');
+  if (!input) return;
   let val = parseInt(input.value) || 1;
   if (val < 1) input.value = 1;
   if (val > itemTanamAktif.stokMaks) input.value = itemTanamAktif.stokMaks;
 }
 
 function eksekusiTanamBibit() {
-  const jumlahTanam = parseInt(document.getElementById('input-jumlah-tanam').value) || 0;
+  const inputEl = document.getElementById('input-jumlah-tanam');
+  const jumlahTanam = inputEl ? (parseInt(inputEl.value) || 0) : 0;
+  
   if (jumlahTanam <= 0 || jumlahTanam > itemTanamAktif.stokMaks) {
     if (typeof tampilkanToast === 'function') tampilkanToast('Jumlah tanam tidak valid!', 'error');
     return;
@@ -909,7 +966,8 @@ function eksekusiTanamBibit() {
 }
 
 function eksekusiJualItem() {
-  const jumlah = parseInt(document.getElementById('input-jumlah-jual').value) || 0;
+  const inputEl = document.getElementById('input-jumlah-jual');
+  const jumlah = inputEl ? (parseInt(inputEl.value) || 0) : 0;
   
   let maxVal = itemAktifModal.limitMaks;
   if (itemAktifModal.mode === 'beli') {
@@ -960,12 +1018,16 @@ function eksekusiJualItem() {
 
 // MODAL NICKNAME
 function bukaModalNickname() {
-  document.getElementById('input-nickname').value = gameState.player.nickname;
-  document.getElementById('modal-nickname').style.display = 'flex';
+  const nicknameInput = document.getElementById('input-nickname');
+  if (nicknameInput) nicknameInput.value = gameState.player.nickname;
+  
+  const modalNickname = document.getElementById('modal-nickname');
+  if (modalNickname) modalNickname.style.display = 'flex';
 }
 
 function tutupModalNickname() {
-  document.getElementById('modal-nickname').style.display = 'none';
+  const modalNickname = document.getElementById('modal-nickname');
+  if (modalNickname) modalNickname.style.display = 'none';
 }
 
 function simpanNickname() {
