@@ -1,4 +1,4 @@
-// MARKET.JS - Logika Pasar, Harga Fluktuatif Seragam (-10% s.d +35%), & Toast Modern
+// MARKET.JS - Logika Pasar, Harga Fluktuatif, Pupuk, & Ekspansi
 
 let hargaPasarAktif = {
   bibit: {},
@@ -16,11 +16,8 @@ function initMarketFluctuation() {
 }
 
 function hitungHargaPasarBaru() {
-  // Menghasilkan faktor fluktuasi seragam: Turun max 10% (0.90) hingga Naik max 35% (1.35)
-  // Rumus: Min 0.90 sampai Max 1.35
   const faktorFluktuasi = 0.90 + Math.random() * (1.35 - 0.90);
 
-  // 1. Terapkan pada Tumbuhan (Bibit & Hasil)
   Object.keys(DIREKTORI_TUMBUHAN).forEach(key => {
     const item = DIREKTORI_TUMBUHAN[key];
     hargaPasarAktif.bibit[key] = {
@@ -29,7 +26,6 @@ function hitungHargaPasarBaru() {
     };
   });
 
-  // 2. Terapkan pada Hewan Ternak (Beli Hewan, Jual Hewan, Hasil Ternak)
   Object.keys(DIREKTORI_HEWAN).forEach(key => {
     const item = DIREKTORI_HEWAN[key];
     hargaPasarAktif.hewan[key] = {
@@ -39,7 +35,6 @@ function hitungHargaPasarBaru() {
     };
   });
 
-  // 3. Terapkan juga pada Pakan Rumput Kering
   hargaPasarAktif.pakan = Math.round(15 * faktorFluktuasi);
 }
 
@@ -65,6 +60,7 @@ function beliHewan(jenis, harga) {
   if (gameState.player.koin >= harga) {
     gameState.player.koin -= harga;
     k.isi.push({ id: Date.now(), siapPanen: true });
+    autoSaveGame();
     renderAll();
     tampilkanToast(`Berhasil membeli 1 ekor ${jenis} seharga Rp ${harga.toLocaleString('id-ID')}!`);
   } else {
@@ -84,6 +80,7 @@ function beliAksesoris(nama, harga) {
   if (gameState.player.koin >= harga) {
     gameState.player.koin -= harga;
     gameState.inventory.aksesoris.push(nama);
+    autoSaveGame();
     renderAll();
     tampilkanToast(`Berhasil membeli aksesoris ${nama}!`);
   } else {
@@ -93,7 +90,7 @@ function beliAksesoris(nama, harga) {
 
 // --- LOGIKA UPGRADE KANDANG ---
 function hitungHargaUpgradeKandang(levelSaatIni) {
-  let harga = 550000;
+  let harga = 50000;
   for (let i = 1; i < levelSaatIni; i++) {
     harga = Math.round(harga * 3.5);
   }
@@ -112,6 +109,7 @@ function upgradeKandang(jenis) {
     k.level += 1;
     const kapasitasTabel = { 1: 2, 2: 4, 3: 6, 4: 8, 5: 10, 6: 11, 7: 12, 8: 13, 9: 14, 10: 15 };
     k.kapasitas = kapasitasTabel[k.level] || 15;
+    autoSaveGame();
     renderAll();
     tampilkanToast(`Berhasil mengupgrade Kandang ${jenis} ke Level ${k.level}!`);
   } else {
@@ -121,7 +119,7 @@ function upgradeKandang(jenis) {
 
 // --- LOGIKA UPGRADE LAHAN ---
 function hitungHargaUpgradeLahan(jumlahLahanSaatIni) {
-  let harga = 875000;
+  let harga = 150000;
   for (let i = 1; i < jumlahLahanSaatIni; i++) {
     harga = Math.round(harga * 7.9);
   }
@@ -137,7 +135,8 @@ function beliLahan() {
   const hargaLahan = hitungHargaUpgradeLahan(jumlahLahan);
   if (gameState.player.koin >= hargaLahan) {
     gameState.player.koin -= hargaLahan;
-    gameState.lahan.push({ id: jumlahLahan + 1, tanaman: null, jumlah: 0, umur: 0, siapPanen: false });
+    gameState.lahan.push({ id: jumlahLahan + 1, tanaman: null, jumlah: 0, waktuTanam: null, durasiDetik: 0, siapPanen: false });
+    autoSaveGame();
     renderAll();
     tampilkanToast(`Berhasil membuka Lahan ke-${jumlahLahan + 1}!`);
   } else {
