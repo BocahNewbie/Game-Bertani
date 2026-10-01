@@ -1,4 +1,4 @@
-// SCRIPT.JS - Logika Utama Game, Waktu Realtime (Detik/Menit/Jam/Hari), Auto-Save & Modal Modern
+// SCRIPT.JS - Logika Utama Game, Waktu Realtime, Pilih Bibit & Modal Modern
 
 const STORAGE_KEY = 'PETERNAKAN';
 
@@ -37,7 +37,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   renderAll();
 
-  // Jalankan pengecekan waktu tanaman setiap 1 detik
   setInterval(() => {
     cekWaktuTanamanRealtime();
   }, 1000);
@@ -113,7 +112,7 @@ function muatGame() {
       if (gameState.lahan) {
         gameState.lahan.forEach(l => {
           if (l.tanaman && !l.jumlah) l.jumlah = 1;
-          if (l.tanaman && !l.waktuTanam) l.waktuTanam = Date.now(); // Fallback keamanan waktu
+          if (l.tanaman && !l.waktuTanam) l.waktuTanam = Date.now();
         });
       }
     } catch (e) { console.error(e); }
@@ -131,14 +130,14 @@ function renderAll() {
   renderInventory();
 }
 
-// FORMATTER WAKTU CERDAS (Menit, Jam, Hari)
+// FORMATTER WAKTU CERDAS
 function formatSisaWaktu(detikSisa) {
   if (detikSisa <= 0) return '🌾 Siap Panen!';
   
   const totalMenit = Math.floor(detikSisa / 60);
   const detik = detikSisa % 60;
   
-  const hari = Math.floor(totalMenit / 1440); // 1 hari = 1440 menit
+  const hari = Math.floor(totalMenit / 1440);
   const jam = Math.floor((totalMenit % 1440) / 60);
   const menit = totalMenit % 60;
 
@@ -151,7 +150,7 @@ function formatSisaWaktu(detikSisa) {
   return `⏳ Sisa: ${hasilStr.join(' ')}`;
 }
 
-// 1. RENDER PERTANIAN (Realtime Checker)
+// 1. RENDER PERTANIAN
 function renderPertanian() {
   const container = document.getElementById('lahan-container');
   container.innerHTML = '';
@@ -175,7 +174,7 @@ function renderPertanian() {
         l.siapPanen = false;
         statusTeks = `${l.tanaman} (${l.jumlah}x)<br>${formatSisaWaktu(sisaDetik)}`;
         tombolLabel = '⏳ Tumbuh...';
-        tombolDisabled = true; // Tombol nonaktif selama tanaman belum siap panen
+        tombolDisabled = true;
       }
     }
 
@@ -200,7 +199,6 @@ function renderPertanian() {
   `;
 }
 
-// Background Loop Cek Lahan Tanpa Harus Re-render Total Terus Menerus secara Paksa
 function cekWaktuTanamanRealtime() {
   let adaPerubahan = false;
   const sekarang = Date.now();
@@ -215,16 +213,13 @@ function cekWaktuTanamanRealtime() {
     }
   });
 
-  // Hanya render ulang halaman pertanian jika ada tanaman yang baru saja matang
   if (adaPerubahan) {
     renderPertanian();
   } else {
-    // Update teks timer secara halus langsung ke elemen DOM tanpa mengganggu klik user
     gameState.lahan.forEach((l, index) => {
       if (l.tanaman && !l.siapPanen) {
         const waktuLewatDetik = Math.floor((sekarang - l.waktuTanam) / 1000);
         const sisaDetik = l.durasiDetik - waktuLewatDetik;
-        // Cari card lahan yang sesuai di UI lalu update teksnya
         const container = document.getElementById('lahan-container');
         if (container && container.children[index]) {
           const pEl = container.children[index].querySelector('p');
@@ -237,29 +232,55 @@ function cekWaktuTanamanRealtime() {
   }
 }
 
+// Logika Klik Tanam dengan Pemilihan Bibit
+let lahanDipilihIndex = 0;
+
 function aksiLahan(index) {
   const lahan = gameState.lahan[index];
   
   if (!lahan.tanaman) {
-    const bibitTersedia = Object.keys(gameState.inventory.bibit).find(b => gameState.inventory.bibit[b] > 0);
-    if (bibitTersedia) {
-      const stok = gameState.inventory.bibit[bibitTersedia];
-      
-      itemTanamAktif = {
-        lahanIndex: index,
-        namaBibit: bibitTersedia,
-        stokMaks: Math.min(stok, 99)
-      };
-
-      document.getElementById('modal-tanam-title').innerText = `Tanam ${bibitTersedia}`;
-      document.getElementById('modal-tanam-info').innerText = `Stok di Tas: ${stok} | Maks 99 per lahan`;
-      document.getElementById('input-jumlah-tanam').value = 1;
-      document.getElementById('input-jumlah-tanam').max = itemTanamAktif.stokMaks;
-      document.getElementById('modal-tanam').style.display = 'flex';
-      
-    } else { 
-      if (typeof tampilkanToast === 'function') tampilkanToast('Tidak ada bibit di inventory! Beli di Pasar.', 'error'); 
+    // Ambil daftar semua bibit yang stoknya > 0 di inventory
+    const bibitTersediaList = Object.keys(gameState.inventory.bibit).filter(b => gameState.inventory.bibit[b] > 0);
+    
+    if (bibitTersediaList.length === 0) {
+      if (typeof tampilkanToast === 'function') tampilkanToast('Tidak ada bibit di inventory! Beli di Pasar.', 'error');
+      return;
     }
+
+    lahanDipilihIndex = index;
+
+    // Jika hanya ada 1 jenis bibit, langsung pilih. Jika lebih dari 1, tampilkan prompt pilihan.
+    let bibitPilihan = bibitTersediaList[0];
+    if (bibitTersediaList.length > 1) {
+      let pesan = "Pilih bibit yang ingin ditanam:\n";
+      bibitTersediaList.forEach((b, i) => {
+        pesan += `${i + 1}. ${b} (Stok: ${gameState.inventory.bibit[b]})\n`;
+      });
+      pesan += "Masukkan nomor pilihan:";
+
+      let pilihanStr = prompt(pesan, "1");
+      if (pilihanStr === null) return;
+
+      let idxPilihan = parseInt(pilihanStr) - 1;
+      if (isNaN(idxPilihan) || idxPilihan < 0 || idxPilihan >= bibitTersediaList.length) {
+        if (typeof tampilkanToast === 'function') tampilkanToast('Pilihan bibit tidak valid!', 'error');
+        return;
+      }
+      bibitPilihan = bibitTersediaList[idxPilihan];
+    }
+
+    const stokBibit = gameState.inventory.bibit[bibitPilihan];
+    itemTanamAktif = {
+      lahanIndex: index,
+      namaBibit: bibitPilihan,
+      stokMaks: Math.min(stokBibit, 99)
+    };
+
+    document.getElementById('modal-tanam-title').innerText = `Tanam ${bibitPilihan}`;
+    document.getElementById('modal-tanam-info').innerText = `Stok di Tas: ${stokBibit} | Maks 99 per lahan`;
+    document.getElementById('input-jumlah-tanam').value = 1;
+    document.getElementById('input-jumlah-tanam').max = itemTanamAktif.stokMaks;
+    document.getElementById('modal-tanam').style.display = 'flex';
     
   } else if (lahan.siapPanen) {
     const namaHasil = lahan.tanaman.replace('Bibit ', '');
@@ -341,7 +362,7 @@ function panenTernak(jenis, index) {
   }
 }
 
-// --- LOGIKA MODAL GANTI NAMA & JUAL HEWAN ---
+// Modal Ganti Nama & Jual Hewan
 let targetHewanAktif = { jenis: '', index: 0, harga: 0 };
 
 function bukaModalNamaHewan(jenis, index) {
@@ -604,7 +625,7 @@ function renderInventory() {
 }
 
 // ==========================================
-// MODAL UNIVERSAL (GANTI NAMA, JUAL, BELI, TANAM)
+// MODAL UNIVERSAL
 // ==========================================
 let itemAktifModal = {
   mode: '', 
@@ -743,10 +764,7 @@ function eksekusiTanamBibit() {
   }
 
   const lahan = gameState.lahan[itemTanamAktif.lahanIndex];
-  const infoBibit = DIREKTORI_TUMBUH[itemTanamAktif.namaBibit] || DIREKTORI_TUMBUHAN[itemTanamAktif.namaBibit];
-  
-  // Ambil durasi tumbuh dari direktori (dalam detik). Jika di direktori menggunakan detik, ambil langsung.
-  // Contoh: wakuTumbuh di directory.js diatur dalam detik (misal 10 detik atau bisa diubah sesuai kebutuhan jam/menit).
+  const infoBibit = typeof DIREKTORI_TUMBUHAN !== 'undefined' ? DIREKTORI_TUMBUHAN[itemTanamAktif.namaBibit] : null;
   const durasiTumbuhDetik = infoBibit ? (infoBibit.waktuTumbuh || 60) : 60;
 
   gameState.inventory.bibit[itemTanamAktif.namaBibit] -= jumlahTanam;
@@ -756,7 +774,7 @@ function eksekusiTanamBibit() {
 
   lahan.tanaman = itemTanamAktif.namaBibit;
   lahan.jumlah = jumlahTanam;
-  lahan.waktuTanam = Date.now(); // Catat waktu mulai tanam secara realtime
+  lahan.waktuTanam = Date.now();
   lahan.durasiDetik = durasiTumbuhDetik;
   lahan.siapPanen = false;
 
