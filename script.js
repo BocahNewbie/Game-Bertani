@@ -12,6 +12,15 @@ let libraryTanaman = [
         waktuTumbuh:  28800000
     },
     {
+    nama: 'Cabai',
+    namaBibit: 'Bibit Cabai',
+    iconBibit: '🌱',
+    iconBuah: '🌶️',
+    BasehargaBeli: 75,
+    BasehargaJual: 95,
+    waktuTumbuh: 36000000 // 10 Jam (dalam milidetik)
+    },
+    {
         nama: 'Melon',
         namaBibit: 'Bibit Melon',
         iconBibit: '🌱',
