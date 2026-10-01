@@ -80,7 +80,7 @@ function switchSubTab(parentTab, subName) {
 
 function simpanGame() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(gameState));
-  alert('Game berhasil disimpan!');
+  tampilkanToast('Game berhasil disimpan!');
 }
 
 function muatGame() {
@@ -137,7 +137,7 @@ function aksiLahan(index) {
       lahan.tanaman = bibitTersedia;
       lahan.siapPanen = true; 
       renderAll();
-    } else { alert('Tidak ada bibit di inventory! Beli di Pasar.'); }
+    } else { tampilkanToast('Tidak ada bibit di inventory! Beli di Pasar.', 'error'); }
   } else if (lahan.siapPanen) {
     const namaHasil = lahan.tanaman.replace('Bibit ', '');
     gameState.inventory.hasil[namaHasil] = (gameState.inventory.hasil[namaHasil] || 0) + 1;
@@ -150,6 +150,7 @@ function aksiLahan(index) {
 function racikPupuk() {
   gameState.inventory.pupuk['Pupuk Organik'] = (gameState.inventory.pupuk['Pupuk Organik'] || 0) + 1;
   renderAll();
+  tampilkanToast('Berhasil meracik Pupuk Organik!');
 }
 
 // 2. RENDER PETERNAKAN
@@ -189,10 +190,10 @@ function panenTernak(jenis, index) {
     gameState.inventory.pakan['Rumput Kering']--;
     gameState.inventory.hasil[infoHewan.hasilTernak] = (gameState.inventory.hasil[infoHewan.hasilTernak] || 0) + 1;
     renderAll();
-  } else { alert('Pakan Rumput Kering habis! Beli di Pasar.'); }
+  } else { tampilkanToast('Pakan Rumput Kering habis! Beli di Pasar.', 'error'); }
 }
 
-// 3. RENDER AKSESORIS (Menampilkan deskripsi efek aksesoris)
+// 3. RENDER AKSESORIS
 function renderAksesoris() {
   document.getElementById('slot-topi').innerText = gameState.aksesorisAktif.topi || 'Kosong';
   document.getElementById('slot-baju').innerText = gameState.aksesorisAktif.baju || 'Kosong';
@@ -222,7 +223,7 @@ function renderAksesoris() {
   });
 }
 
-// 4. RENDER PASAR (Menampilkan harga fluktuatif & deskripsi efek aksesoris)
+// 4. RENDER PASAR
 function renderPasar() {
   const pasarBibit = document.getElementById('pasar-bibit-container');
   pasarBibit.innerHTML = '';
@@ -233,7 +234,7 @@ function renderPasar() {
       <div class="card">
         <h4>🌱 ${t.nama}</h4>
         <p>Beli: Rp ${hPasar.beli} | Jual: Rp ${hPasar.jual}<br>Waktu: ${t.waktuTumbuh}s</p>
-        <button class="btn-primary" onclick="beliBibit('${t.nama}', ${hPasar.beli})">Beli</button>
+        <button class="btn-primary" onclick="beliItemMassal('bibit', '${t.nama}', ${hPasar.beli})">Beli</button>
       </div>
     `;
   });
@@ -249,7 +250,7 @@ function renderPasar() {
         <h4>🐾 ${h.nama}</h4>
         <p>Beli Hewan: Rp ${hPasar.beli}<br>Pakan (Rumput Kering): Rp ${hPakan}</p>
         <button class="btn-primary" onclick="beliHewan('${h.jenis}', ${hPasar.beli})">Beli Hewan</button>
-        <button class="btn-secondary" style="margin-top:4px;" onclick="beliPakan(${hPakan})">Beli Pakan</button>
+        <button class="btn-secondary" style="margin-top:4px;" onclick="beliPakanMassal(${hPakan})">Beli Pakan</button>
       </div>
     `;
   });
@@ -258,12 +259,20 @@ function renderPasar() {
   pasarAksesoris.innerHTML = '';
   Object.keys(DIREKTORI_AKSESORIS).forEach(nama => {
     const item = DIREKTORI_AKSESORIS[nama];
+    const sudahPunya = gameState.inventory.aksesoris.includes(nama);
+    const sedangDipakai = Object.values(gameState.aksesorisAktif).includes(nama);
+    const milikSiap = sudahPunya || sedangDipakai;
+
     pasarAksesoris.innerHTML += `
       <div class="card">
         <h4>${nama}</h4>
         <p>Harga: Rp ${item.harga}</p>
         <p style="font-size:10px; color:#0284c7; margin-bottom:6px;">${item.efek}</p>
-        <button class="btn-primary" onclick="beliAksesoris('${nama}', ${item.harga})">Beli</button>
+        <button class="btn-primary" 
+          onclick="beliAksesoris('${nama}', ${item.harga})"
+          ${milikSiap ? 'disabled style="background: #94a3b8; cursor: not-allowed;"' : ''}>
+          ${milikSiap ? 'Sudah Punya' : 'Beli'}
+        </button>
       </div>
     `;
   });
@@ -296,12 +305,6 @@ function renderPasar() {
 function renderInventory() {
   const containerHasil = document.getElementById('inv-hasil-container');
   containerHasil.innerHTML = '';
-  // Bagian di dalam renderInventory() saat membuat card hasil panen:
-card.innerHTML = `
-  <h4>${nama}</h4>
-  <p>Jumlah: ${jumlah}</p>
-  <button class="btn-primary" onclick="bukaModalJual('${nama}', ${hargaJual})">Jual</button>
-`;
   
   let daftarHargaJual = {};
   Object.keys(DIREKTORI_TUMBUHAN).forEach(key => {
@@ -326,7 +329,7 @@ card.innerHTML = `
         card.innerHTML = `
           <h4>${nama}</h4>
           <p>Jumlah: ${jumlah}</p>
-          <button class="btn-primary" onclick="jualHasil('${nama}', ${hargaJual})">Jual (Rp ${hargaJual})</button>
+          <button class="btn-primary" onclick="bukaModalJual('${nama}', ${hargaJual})">Jual</button>
         `;
         containerHasil.appendChild(card);
       }
@@ -354,6 +357,7 @@ card.innerHTML = `
     containerBibit.innerHTML = `<p style="font-size:12px; color:#64748b;">Stok bibit dan pakan kosong.</p>`;
   }
 }
+
 // VARIABEL KONTROL MODAL JUAL
 let itemJualAktif = {
   nama: '',
@@ -417,13 +421,11 @@ function eksekusiJualItem() {
     return;
   }
 
-  // Kurangi inventory
   gameState.inventory.hasil[itemJualAktif.nama] -= jumlahJual;
   if (gameState.inventory.hasil[itemJualAktif.nama] <= 0) {
     delete gameState.inventory.hasil[itemJualAktif.nama];
   }
 
-  // Hitung total koin dengan bonus aksesoris
   const bonusPersen = typeof hitungBonusAksesoris === 'function' ? hitungBonusAksesoris('jual') : 0;
   const hargaAkhirSatuan = Math.round(itemJualAktif.hargaSatuanDasar * (1 + bonusPersen / 100));
   const totalPendapatan = hargaAkhirSatuan * jumlahJual;
