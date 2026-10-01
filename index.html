@@ -1,135 +1,152 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game Bertani & Beternak Sederhana</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Game Pertanian & Peternakan Modern</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="game-container">
-        <!-- PANEL PEMAIN -->
-        <div class="player-panel">
-            <div class="player-info-row">
-                <h3 id="player-nickname" onclick="bukaModalNickname()" style="cursor:pointer;">👨‍🌾 Petani Baru Sederhana ✏️</h3>
-                <div class="save-load-btns">
-                    <button class="btn-action-small" onclick="simpanGame()">Simpan</button>
-                    <button class="btn-action-small" onclick="resetGame()" style="background:rgba(239,68,68,0.2)">Reset</button>
-                </div>
-            </div>
-            <div style="font-size: 20px; font-weight: bold;" id="player-koin">Rp 750</div>
-            <div style="font-size: 12px; margin-top: 5px; color: #cbd5e1;" id="info-cuaca-display">🌤️ Cuaca: Memuat cuaca...</div>
-        </div>
+  <div class="game-container">
+    <!-- PANEL PEMAIN -->
+    <header class="player-panel">
+      <div class="player-info">
+        <h2 id="player-nickname" onclick="bukaModalNickname()">👨‍🌾 Petani Handal ✏️</h2>
+        <div class="koin-badge">🪙 Koin: <span id="player-koin">Rp 1.000</span></div>
+      </div>
+      <div class="header-actions">
+        <button class="btn-primary" onclick="simpanGame()">💾 Simpan</button>
+        <button class="btn-danger" onclick="bukaModalReset()">🔄 Reset Total</button>
+      </div>
+    </header>
 
-        <!-- NAVIGASI UTAMA -->
-        <div class="nav-tabs">
-            <button class="tab-btn active" onclick="openGameTab('pertanian')">🌾 Tani</button>
-            <button class="tab-btn" onclick="openGameTab('ternak')">🐔 Ternak</button>
-            <button class="tab-btn" onclick="openGameTab('inventory')">🎒 Tas</button>
-            <button class="tab-btn" onclick="openGameTab('profil')">👤 Profil</button>
-            <button class="tab-btn" onclick="openGameTab('pasar')">🛒 Pasar</button>
-            <button class="tab-btn" onclick="openGameTab('toko_aksesori')">🎩 Toko</button>
-        </div>
+    <!-- NAVIGASI UTAMA -->
+    <nav class="nav-tabs">
+      <button class="tab-btn active" onclick="switchTab('pertanian')">🌾 Pertanian</button>
+      <button class="tab-btn" onclick="switchTab('peternakan')">🐄 Peternakan</button>
+      <button class="tab-btn" onclick="switchTab('aksesoris')">🎩 Aksesoris</button>
+      <button class="tab-btn" onclick="switchTab('pasar')">🛒 Pasar</button>
+      <button class="tab-btn" onclick="switchTab('inventory')">🎒 Inventory</button>
+    </nav>
 
-        <!-- TAB PERTANIAN -->
-        <div id="tab-pertanian" class="tab-content active">
-            <div class="farm-grid" id="lahan-container"></div>
-        </div>
+    <!-- TAB 1: PERTANIAM (SUB-TAB: LAHAN & PUPUK) -->
+    <section id="tab-pertanian" class="tab-content active">
+      <div class="sub-nav">
+        <button class="sub-tab-btn active" onclick="switchSubTab('pertanian', 'lahan')">🌱 Lahan Tani</button>
+        <button class="sub-tab-btn" onclick="switchSubTab('pertanian', 'pupuk')">🧪 Stok & Racik Pupuk</button>
+      </div>
 
-        <!-- TAB TERNAK -->
-        <div id="tab-ternak" class="tab-content">
-            <div class="farm-grid" id="kandang-container"></div>
-        </div>
+      <div id="subtab-lahan" class="sub-content active">
+        <div class="grid-container" id="lahan-container"></div>
+      </div>
 
-        <!-- TAB INVENTORY (TAS) -->
-        <div id="tab-inventory" class="tab-content">
-            <div style="display: flex; gap: 5px; margin-bottom: 12px;">
-                <button id="subtab-bibit-btn" style="flex: 1; padding: 6px; font-size: 12px; border-radius: 6px; border: none; font-weight: bold; background: #1e293b; color: white;" onclick="switchSubInventory('bibit')">🌱 Bibit</button>
-                <button id="subtab-panen-btn" style="flex: 1; padding: 6px; font-size: 12px; border-radius: 6px; border: none; font-weight: bold; background: #e2e8f0; color: #334155;" onclick="switchSubInventory('panen')">🍉 Hasil Panen</button>
-            </div>
-            <div class="inventory-container" id="subtab-content-container"></div>
-            <div class="inventory-container" id="inventory-container"></div>
-        </div>
+      <div id="subtab-pupuk" class="sub-content">
+        <div class="card-list" id="pupuk-container"></div>
+      </div>
+    </section>
 
-        <!-- TAB PROFIL & AKSESORI -->
-        <div id="tab-profil" class="tab-content">
-            <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; border-radius: 10px; margin-bottom: 12px;">
-                <h4 style="margin: 0 0 8px 0; font-size: 13px; color: #1e293b;">Slot Aksesori Aktif:</h4>
-                <div style="font-size: 12px; line-height: 1.6; color: #475569;">
-                    👒 Kepala: <span id="slot-kepala-display" style="font-weight: bold;">Kosong</span><br>
-                    👕 Badan: <span id="slot-badan-display" style="font-weight: bold;">Kosong</span><br>
-                    👖 Kaki: <span id="slot-kaki-display" style="font-weight: bold;">Kosong</span><br>
-                    🩴 Telapak: <span id="slot-telapak-display" style="font-weight: bold;">Kosong</span>
-                </div>
-                <div style="margin-top: 8px; font-size: 12px; font-weight: bold; color: #16a34a;">
-                    Total Bonus Panen: <span id="total-bonus-display">+0%</span>
-                </div>
-            </div>
-            <h4 style="margin: 0 0 8px 0; font-size: 13px; color: #1e293b;">Koleksi Aksesori Dimiliki:</h4>
-            <div class="inventory-container" id="profil-aksesori-container"></div>
-        </div>
+    <!-- TAB 2: PETERNAKAN (KANDANG SAPI, AYAM, DOMBA) -->
+    <section id="tab-peternakan" class="tab-content">
+      <div class="sub-nav">
+        <button class="sub-tab-btn active" onclick="switchSubTab('peternakan', 'ayam')">🐔 Kandang Ayam</button>
+        <button class="sub-tab-btn" onclick="switchSubTab('peternakan', 'sapi')">🐄 Kandang Sapi</button>
+        <button class="sub-tab-btn" onclick="switchSubTab('peternakan', 'domba')">🐑 Kandang Domba</button>
+      </div>
 
-        <div id="tab-pasar" class="tab-content">
-            <button id="btn-tambah-lahan" class="btn-submit" style="width: 100%; margin-bottom: 12px; display: block;" onclick="beliLahan()">➕ Beli Lahan Baru</button>
-            <div class="market-container" id="pasar-container"></div>
-        </div>
+      <div id="subtab-ayam" class="sub-content active">
+        <div class="kandang-info" id="info-kandang-ayam"></div>
+        <div class="grid-container" id="kandang-ayam-container"></div>
+      </div>
 
-        <div id="tab-toko_aksesori" class="tab-content">
-            <div class="market-container" id="toko-aksesori-container"></div>
+      <div id="subtab-sapi" class="sub-content">
+        <div class="kandang-info" id="info-kandang-sapi"></div>
+        <div class="grid-container" id="kandang-sapi-container"></div>
+      </div>
+
+      <div id="subtab-domba" class="sub-content">
+        <div class="kandang-info" id="info-kandang-domba"></div>
+        <div class="grid-container" id="kandang-domba-container"></div>
+      </div>
+    </section>
+
+    <!-- TAB 3: AKSESORIS -->
+    <section id="tab-aksesoris" class="tab-content">
+      <div class="aksesoris-panel">
+        <h3>Slot Aksesoris Aktif</h3>
+        <div class="slot-list">
+          <div>🎩 Topi: <b id="slot-topi">Kosong</b></div>
+          <div>👕 Baju: <b id="slot-baju">Kosong</b></div>
+          <div>👟 Sepatu: <b id="slot-sepatu">Kosong</b></div>
         </div>
+        <p class="bonus-text">Total Bonus Hasil Panen/Ternak: <span id="total-bonus">+0%</span></p>
+      </div>
+      <h3>Koleksi Dimiliki</h3>
+      <div class="grid-container" id="koleksi-aksesoris-container"></div>
+    </section>
+
+    <!-- TAB 4: PASAR (BIBIT, HEWAN, AKSESORIS, EXPANSION) -->
+    <section id="tab-pasar" class="tab-content">
+      <div class="sub-nav">
+        <button class="sub-tab-btn active" onclick="switchSubTab('pasar', 'pasar-bibit')">🌱 Bibit</button>
+        <button class="sub-tab-btn" onclick="switchSubTab('pasar', 'pasar-hewan')">🐾 Hewan Ternak</button>
+        <button class="sub-tab-btn" onclick="switchSubTab('pasar', 'pasar-aksesoris')">🎩 Aksesoris</button>
+        <button class="sub-tab-btn" onclick="switchSubTab('pasar', 'pasar-ekspansi')">🏗️ Ekspansi / Lahan</button>
+      </div>
+
+      <div id="subtab-pasar-bibit" class="sub-content active">
+        <div class="grid-container" id="pasar-bibit-container"></div>
+      </div>
+      <div id="subtab-pasar-hewan" class="sub-content">
+        <div class="grid-container" id="pasar-hewan-container"></div>
+      </div>
+      <div id="subtab-pasar-aksesoris" class="sub-content">
+        <div class="grid-container" id="pasar-aksesoris-container"></div>
+      </div>
+      <div id="subtab-pasar-ekspansi" class="sub-content">
+        <div class="card-list" id="pasar-ekspansi-container"></div>
+      </div>
+    </section>
+
+    <!-- TAB 5: INVENTORY -->
+    <section id="tab-inventory" class="tab-content">
+      <div class="sub-nav">
+        <button class="sub-tab-btn active" onclick="switchSubTab('inventory', 'inv-hasil')">📦 Hasil Panen & Ternak</button>
+        <button class="sub-tab-btn" onclick="switchSubTab('inventory', 'inv-bibit')">🌱 Stok Bibit & Pupuk</button>
+      </div>
+
+      <div id="subtab-inv-hasil" class="sub-content active">
+        <div class="grid-container" id="inv-hasil-container"></div>
+      </div>
+      <div id="subtab-inv-bibit" class="sub-content">
+        <div class="grid-container" id="inv-bibit-container"></div>
+      </div>
+    </section>
+  </div>
+
+  <!-- MODAL RESET DATA -->
+  <div class="modal-overlay" id="modal-reset" style="display: none;">
+    <div class="modal-card">
+      <h3 style="color: #ef4444;">⚠ Hapus Total Data Game?</h3>
+      <p>Tindakan ini akan menghapus seluruh data di local storage dan mengulang game benar-benar dari nol!</p>
+      <div class="modal-actions">
+        <button class="btn-danger" onclick="eksekusiResetGame()">Ya, Hapus Semua</button>
+        <button class="btn-secondary" onclick="tutupModalReset()">Batal</button>
+      </div>
     </div>
+  </div>
 
-    <div class="modal-overlay" id="transaction-modal" style="display: none;">
-        <div class="modal-card">
-            <h3 id="modal-title" style="margin-top: 0; color: #1e293b; font-size: 16px;">Transaksi</h3>
-            <p id="modal-price" style="font-size: 13px; color: #64748b; margin-bottom: 15px;">Harga:</p>
-            <div id="modal-qty-container" style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 15px;">
-                <button class="btn-submit" style="padding: 5px 12px;" onclick="ubahQty(-10)">-10</button>
-                <button class="btn-submit" style="padding: 5px 12px;" onclick="ubahQty(-1)">-1</button>
-                <span id="modal-qty-display" style="font-size: 16px; font-weight: bold; min-width: 30px; text-align: center;">1</span>
-                <button class="btn-submit" style="padding: 5px 12px;" onclick="ubahQty(1)">+1</button>
-                <button class="btn-submit" style="padding: 5px 12px;" onclick="ubahQty(10)">+10</button>
-                <button class="btn-submit" style="padding: 5px 8px; font-size: 11px; background-color: #475569;" onclick="setQtyMaks()">Maks</button>
-            </div>
-            <p style="font-size: 14px; text-align: center; font-weight: bold; color: #1e293b;">
-                Total: <span id="modal-total-price">Rp 0</span>
-            </p>
-            <div style="display: flex; gap: 8px; margin-top: 15px;">
-                <button id="btn-confirm-transaction" class="btn-submit" style="flex: 1; background-color: #16a34a;" onclick="konfirmasiTransaksi()">Konfirmasi</button>
-                <button class="btn-submit" style="flex: 1; background-color: #94a3b8;" onclick="tutupModalTransaksi()">Batal</button>
-            </div>
-        </div>
+  <!-- MODAL NICKNAME -->
+  <div class="modal-overlay" id="modal-nickname" style="display: none;">
+    <div class="modal-card">
+      <h3>Ubah Nama Petani</h3>
+      <input type="text" id="input-nickname" placeholder="Masukkan nama baru..." />
+      <div class="modal-actions">
+        <button class="btn-primary" onclick="simpanNickname()">Simpan</button>
+        <button class="btn-secondary" onclick="tutupModalNickname()">Batal</button>
+      </div>
     </div>
+  </div>
 
-    <div class="modal-overlay" id="nickname-modal" style="display: none;">
-        <div class="modal-card">
-            <h3 style="margin-top: 0; font-size: 15px;">Ubah Nama Petani</h3>
-            <input type="text" id="input-new-nickname" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; box-sizing: border-box; margin-bottom: 12px;" placeholder="Masukkan nama baru...">
-            <div style="display: flex; gap: 8px;">
-                <button class="btn-submit" style="flex: 1; background-color: #16a34a;" onclick="simpanNicknameBaru()">Simpan</button>
-                <button class="btn-submit" style="flex: 1; background-color: #94a3b8;" onclick="tutupModalNickname()">Batal</button>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="reset-modal" style="display: none;">
-        <div class="modal-card" style="text-align: center;">
-            <h3 style="margin-top: 0; color: #ef4444; font-size: 16px;">⚠ Reset Semua Progres?</h3>
-            <p style="font-size: 12px; color: #64748b;">Tindakan ini akan menghapus data tanaman, kandang ternak, saldo koin, dan aksesori Anda secara permanen!</p>
-            <div style="display: flex; gap: 8px; margin-top: 15px;">
-                <button class="btn-submit" style="flex: 1; background-color: #ef4444;" onclick="eksekusiResetGame()">Ya, Reset</button>
-                <button class="btn-submit" style="flex: 1; background-color: #94a3b8;" onclick="tutupModalReset()">Batal</button>
-            </div>
-        </div>
-    </div>
-
-    <div class="toast-overlay" id="toast-overlay" style="display: none;">
-        <div class="toast-card success" id="toast-card">
-            <span id="toast-icon">✓</span>
-            <span id="toast-message">Pesan Berhasil</span>
-        </div>
-    </div>
-
-    <script src="script.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
