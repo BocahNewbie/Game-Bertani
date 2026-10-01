@@ -75,6 +75,11 @@ let libraryTernak = [
 let hargaPakanBase = 75000;
 let hargaPakanAktif = 75000;
 
+// Penampung harga aktif fluktuatif (jika belum ada object-nya, deklarasikan di sini)
+if (typeof hargaBeliAktif === 'undefined') var hargaBeliAktif = {};
+if (typeof hargaJualAktif === 'undefined') var hargaJualAktif = {};
+
+
 // State Baru untuk Peternakan (Pastikan di-load & di-save nanti)
 let stokPakan = 0;
 let listTernakDimiliki = []; // Array of object: { id: timestamp, jenis: 'Sapi'/'Ayam'/'Domba', waktuMakanTerakhir: timestamp }
