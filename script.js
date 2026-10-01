@@ -64,6 +64,27 @@ let listAksesori = [
 ];
 
 // ==========================================
+// DATA MASTER PETERNAKAN (NEW TAB FEATURE)
+// ==========================================
+const libraryTernak = [
+  { jenis: 'Sapi', icon: '🐄', baseHargaBeli: 10000000, baseHargaJual: 7250000, maxPopulasi: 10, waktuHamilMs: 10 * 24 * 60 * 60 * 1000 },
+  { jenis: 'Domba', icon: '🐑', baseHargaBeli: 1900000, baseHargaJual: 1200000, maxPopulasi: 10, waktuHamilMs: 3 * 24 * 60 * 60 * 1000 },
+  { jenis: 'Ayam', icon: '🐓', baseHargaBeli: 145000, baseHargaJual: 90000, maxPopulasi: 10 }
+];
+
+const tokoPeternakan = {
+  obatHamilSapi: { nama: 'Obat Hamil Sapi', harga: 4500000, icon: '🧪' },
+  obatHamilDomba: { nama: 'Obat Hamil Domba', harga: 1000000, icon: '🧪' },
+  pakanTernak: { nama: 'Pakan Ternak Master', harga: 15000, icon: '🌾' } // Tambahan komoditas pakan
+};
+
+// State data peternakan yang disimpan pemain
+let listTernakDimiliki = []; 
+let stokPakanTernak = 0; 
+let hargaBeliTernakAktif = {};
+let hargaJualTernakAktif = {};
+
+// ==========================================
 // PENGATURAN JADWAL CUACA HARIAN OLEH DEVELOPER
 // ==========================================
 let cuacaAktif = {
@@ -174,6 +195,17 @@ function updateFluktuasiHarga() {
 
     renderPasar(); 
 } 
+
+function updateFluktuasiHargaTernak() {
+  libraryTernak.forEach(hewan => {
+    let variasiBeli = (Math.random() * 0.16) - 0.06; // -6% sampai +10%
+    let variasiJual = (Math.random() * 1.03) - 0.35; // -35% sampai +68%
+
+    hargaBeliTernakAktif[hewan.jenis] = Math.round(hewan.baseHargaBeli * (1 + variasiBeli));
+    hargaJualTernakAktif[hewan.jenis] = Math.round(hewan.baseHargaJual * (1 + variasiJual));
+  });
+}
+// Panggil fungsi ini di dalam initGame() dan setInterval fluktuasi harga kamu
 
 function formatRupiah(angka) {
     return angka.toLocaleString('id-ID'); 
@@ -997,7 +1029,10 @@ function simpanGame() {
         })),
         lahanTambahanDibeli: lahanTambahanDibeli,
         hargaTambahLahan: hargaTambahLahan
+        dataGame.listTernakDimiliki = listTernakDimiliki;
+dataGame.stokPakanTernak = stokPakanTernak;
     };
+    
     localStorage.setItem('saveGameBertani', JSON.stringify(dataGame));
 }
 
@@ -1028,6 +1063,9 @@ function muatGame() {
                     timerInterval: null
                 }));
             }
+            listTernakDimiliki = data.listTernakDimiliki || [];
+stokPakanTernak = data.stokPakanTernak || 0;
+
         } catch (e) {
             console.error("Gagal memuat save data", e);
         }
@@ -1049,6 +1087,170 @@ function eksekusiResetGame() {
         location.reload();
     }, 500);
 }
+
+// Struktur Object Hewan saat dibeli/lahir:
+// { id: timestamp, jenis: 'Sapi'|'Ayam'|'Domba', darah: 80, status: 'normal'|'hamil'|'mengeram', waktuKasihPakan Terakhir: ms, waktuSiklusBerikutnya: ms, waktuLahirAnak: ms }
+
+function beliHewanTernak(jenis) {
+  let master = libraryTernak.find(h => h.jenis === jenis);
+  let totalPopulasi = listTernakDimiliki.filter(h => h.jenis === jenis).length;
+
+  if (totalPopulasi >= master.maxPopulasi) {
+    showToast(`Gagal! Maksimal memelihara ${master.maxPopulasi} ekor ${jenis}.`, 'error');
+    return;
+  }
+
+  let hargaBeli = hargaBeliTernakAktif[jenis] || master.baseHargaBeli;
+  if (uang < hargaBeli) {
+    showToast("Uang tidak cukup untuk membeli ternak ini!", 'error');
+    return;
+  }
+
+  uang -= hargaBeli;
+  let waktuSekarang = new Date().getTime();
+  
+  listTernakDimiliki.push({
+    id: waktuSekarang + Math.random(),
+    jenis: jenis,
+    darah: 80, // Darah awal 80 poin
+    status: 'normal',
+    waktuKasihPakanTerakhir: waktuSekarang,
+    waktuSiklusBerikutnya: waktuSekarang + (24 * 60 * 60 * 1000) // 24 jam ke depan harus dipakan
+  });
+
+  updateUangDisplay();
+  simpanGame();
+  showToast(`Berhasil membeli 1 ekor ${jenis}!`, 'success');
+}
+
+function kasihPakanTernak(hewanId) {
+  let hewan = listTernakDimiliki.find(h => h.id === hewanId);
+  if (!hewan) return;
+
+  if (stokPakanTernak <= 0) {
+    showToast("Stok pakan habis! Beli terlebih dahulu di pasar.", 'error');
+    return;
+  }
+
+  let waktuSekarang = new Date().getTime();
+  
+  // Batasi hanya bisa diberi pakan jika sudah mendekati atau melewati waktu siklus lapar
+  if (waktuSekarang < hewan.waktuSiklusBerikutnya - (2 * 60 * 60 * 1000)) { 
+    showToast("Hewan masih kenyang! Beri pakan jika sudah masuk waktu makan harian.", 'error');
+    return;
+  }
+
+  stokPakanTernak--;
+  hewan.darah = Math.min(100, hewan.darah + 5); // Menambah 5 poin darah (Maksimal 100)
+  hewan.waktuKasihPakanTerakhir = waktuSekarang;
+  hewan.waktuSiklusBerikutnya = waktuSekarang + (24 * 60 * 60 * 1000); // 24 jam dari sekarang
+
+  // Logika khusus Ayam: Setelah diberi pakan, 24 jam berikutnya bertelur
+  if (hewan.jenis === 'Ayam' && hewan.status === 'normal') {
+    hewan.waktuProduksiTelur = waktuSekarang + (24 * 60 * 60 * 1000);
+  }
+
+  simpanGame();
+  showToast(`Berhasil memberi pakan! Darah ${hewan.jenis} bertambah +5.`, 'success');
+}
+
+function prosesHamilAtauMengeram(hewanId) {
+  let hewan = listTernakDimiliki.find(h => h.id === hewanId);
+  if (!hewan) return;
+
+  let master = libraryTernak.find(h => h.jenis === hewan.jenis);
+  let totalPopulasi = listTernakDimiliki.filter(h => h.jenis === hewan.jenis).length;
+
+  if (totalPopulasi >= master.maxPopulasi) {
+    showToast(`Gagal! Populasi ${hewan.jenis} sudah penuh (10/10). Tidak bisa reproduksi.`, 'error');
+    return;
+  }
+
+  if (hewan.status !== 'normal') {
+    showToast("Hewan sedang dalam masa reproduksi/tidak siap!", 'error');
+    return;
+  }
+
+  let hargaObat = 0;
+  if (hewan.jenis === 'Sapi') hargaObat = tokoPeternakan.obatHamilSapi.harga;
+  if (hewan.jenis === 'Domba') hargaObat = tokoPeternakan.obatHamilDomba.harga;
+  
+  if (hewan.jenis === 'Ayam') {
+    // Ayam menggunakan mekanisme Mengerami Telur (Asumsi gratis/memakai resource telur sendiri)
+    hewan.status = 'mengeram';
+    hewan.waktuLahirAnak = new Date().getTime() + (24 * 60 * 60 * 1000); // Ayam asumsikan 1 hari/sesuai keinginan
+    showToast("Ayam sekarang mulai mengerami telur!", 'success');
+  } else {
+    // Sapi dan Domba memakai obat hamil
+    if (uang < hargaObat) {
+      showToast("Uang tidak cukup untuk membeli obat kehamilan!", 'error');
+      return;
+    }
+    uang -= hargaObat;
+    hewan.status = 'hamil';
+    hewan.waktuLahirAnak = new Date().getTime() + master.waktuHamilMs;
+    updateUangDisplay();
+    showToast(`${hewan.jenis} berhasil dibuat hamil!`, 'success');
+  }
+  simpanGame();
+}
+
+// FUNGSI UTAMA: Jalankan loop ini secara reguler untuk memantau status kesehatan & kelahiran
+function cekSiklusPeternakan() {
+  let waktuSekarang = new Date().getTime();
+
+  listTernakDimiliki.forEach((hewan, index) => {
+    // 1. Cek Kelaparan (Jika melewati waktuSiklusBerikutnya dan belum dipakan)
+    if (waktuSekarang > hewan.waktuSiklusBerikutnya) {
+      let jumlahSiklusTerlewat = Math.floor((waktuSekarang - hewan.waktuSiklusBerikutnya) / (24 * 60 * 60 * 1000)) + 1;
+      
+      // Mengurangi 15 poin darah per hari yang terlewat
+      hewan.darah -= (jumlahSiklusTerlewat * 15);
+      hewan.waktuSiklusBerikutnya += (jumlahSiklusTerlewat * 24 * 60 * 60 * 1000);
+
+      if (hewan.darah <= 0) {
+        showToast(`Kabar duka: Ekor ${hewan.jenis} meninggal karena kelaparan.`, 'error');
+        listTernakDimiliki.splice(index, 1); // Menghapus hewan yang meninggal
+        return;
+      } else {
+        showToast(`Peringatan: ${hewan.jenis} kelaparan! Darah berkurang.`, 'error');
+      }
+    }
+
+    // 2. Cek Kelahiran (Untuk Sapi, Domba, Ayam Mengeram)
+    if (hewan.status === 'hamil' || hewan.status === 'mengeram') {
+      if (waktuSekarang >= hewan.waktuLahirAnak) {
+        let master = libraryTernak.find(h => h.jenis === hewan.jenis);
+        let totalPopulasi = listTernakDimiliki.filter(h => h.jenis === hewan.jenis).length;
+
+        if (totalPopulasi < master.maxPopulasi) {
+          listTernakDimiliki.push({
+            id: waktuSekarang + Math.random(),
+            jenis: hewan.jenis,
+            darah: 30, // Anak baru lahir mendapatkan 30 poin darah
+            status: 'normal',
+            waktuKasihPakanTerakhir: waktuSekarang,
+            waktuSiklusBerikutnya: waktuSekarang + (24 * 60 * 60 * 1000)
+          });
+          showToast(`Selamat! Seekor anak ${hewan.jenis} baru saja lahir (Darah: 30)!`, 'success');
+        } else {
+          showToast(`Kelahiran anak ${hewan.jenis} gagal karena kandang penuh (max 10).`, 'error');
+        }
+        hewan.status = 'normal'; // Induk kembali normal
+      }
+    }
+
+    // 3. Cek Produksi Telur Ayam (24 Jam setelah dikasih pakan)
+    if (hewan.jenis === 'Ayam' && hewan.waktuProduksiTelur && waktuSekarang >= hewan.waktuProduksiTelur) {
+      tambahKeInventory('Telur Ayam', 1);
+      delete hewan.waktuProduksiTelur; // Reset status siap telur
+      showToast("Ayam kamu menghasilkan 1 Telur Ayam di inventory!", 'success');
+    }
+  });
+
+  simpanGame();
+}
+
 
 // ==========================================
 // INISIALISASI GAME
