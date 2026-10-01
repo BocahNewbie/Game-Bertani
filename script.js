@@ -84,11 +84,11 @@ function hitungDanTerapkanJadwalCuaca() {
   renderInfoCuacaDiUI();
   renderPasar();
   renderTokoAksesori();
-  renderPeternakan(); // Update status pasar peternakan jika badai
-  let statusTutup = cuacaAktif.nama.includes('Badai') ? " (⚠️️ Pasar & Toko Tutup!)" : "";
+  renderPeternakan();
+  let statusTutup = cuacaAktif.nama.includes('Badai') ? " (⚠ Pasar & Toko Tutup!)" : "";
   showToast(`Pergantian Cuaca: ${cuacaAktif.ikon} ${cuacaAktif.nama}${statusTutup}`, 'info');
   
-  let totalDurasiSiklusMs = 720000; // 12 Menit total
+  let totalDurasiSiklusMs = 720000;
   let durasiPerCuacaMs = totalDurasiSiklusMs / jadwalCuacaHariIni.length;
   if (timerCuacaInterval) clearTimeout(timerCuacaInterval);
   timerCuacaInterval = setTimeout(hitungDanTerapkanJadwalCuaca, durasiPerCuacaMs);
@@ -205,7 +205,6 @@ function openGameTab(tabName) {
   const targetTab = document.getElementById('tab-' + tabName);
   if (targetTab) targetTab.classList.add('active');
 
-  // Mencocokkan tombol navigasi aktif
   const navButtons = document.querySelectorAll('.nav-tabs .tab-btn');
   navButtons.forEach(btn => {
     if (btn.getAttribute('onclick')?.includes(`'${tabName}'`)) {
