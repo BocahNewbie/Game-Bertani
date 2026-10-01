@@ -172,6 +172,28 @@
   </div>
 </div>
 
+  <!-- MODAL PILIH JUMLAH TANAM -->
+<div class="modal-overlay" id="modal-tanam" style="display: none;">
+  <div class="modal-card">
+    <h3 id="modal-tanam-title">Tanam Bibit</h3>
+    <p id="modal-tanam-info" style="font-size: 12px; color: #64748b;"></p>
+    <input type="number" id="input-jumlah-tanam" min="1" value="1" oninput="validasiInputTanam()" />
+    
+    <div class="qty-control-grid">
+      <button onclick="ubahJumlahTanam(-10)">-10</button>
+      <button onclick="ubahJumlahTanam(-1)">-1</button>
+      <button onclick="ubahJumlahTanam(1)">+1</button>
+      <button onclick="ubahJumlahTanam(10)">+10</button>
+      <button class="btn-primary" onclick="setJumlahTanamMaks()">Maks</button>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-primary" onclick="eksekusiTanamBibit()">Konfirmasi Tanam</button>
+      <button class="btn-secondary" onclick="tutupModalTanam()">Batal</button>
+    </div>
+  </div>
+</div>
+  
   <!-- MODUL SCRIPT -->
   <script src="directory.js"></script>
   <script src="market.js"></script>
