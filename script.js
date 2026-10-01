@@ -80,7 +80,7 @@ function switchSubTab(parentTab, subName) {
 
 function simpanGame() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(gameState));
-  tampilkanToast('Game berhasil disimpan!');
+  if (typeof tampilkanToast === 'function') tampilkanToast('Game berhasil disimpan!');
 }
 
 function muatGame() {
@@ -146,7 +146,9 @@ function aksiLahan(index) {
       lahan.tanaman = bibitTersedia;
       lahan.siapPanen = true; 
       renderAll();
-    } else { tampilkanToast('Tidak ada bibit di inventory! Beli di Pasar.', 'error'); }
+    } else { 
+      if (typeof tampilkanToast === 'function') tampilkanToast('Tidak ada bibit di inventory! Beli di Pasar.', 'error'); 
+    }
   } else if (lahan.siapPanen) {
     const namaHasil = lahan.tanaman.replace('Bibit ', '');
     gameState.inventory.hasil[namaHasil] = (gameState.inventory.hasil[namaHasil] || 0) + 1;
@@ -159,7 +161,7 @@ function aksiLahan(index) {
 function racikPupuk() {
   gameState.inventory.pupuk['Pupuk Organik'] = (gameState.inventory.pupuk['Pupuk Organik'] || 0) + 1;
   renderAll();
-  tampilkanToast('Berhasil meracik Pupuk Organik!');
+  if (typeof tampilkanToast === 'function') tampilkanToast('Berhasil meracik Pupuk Organik!');
 }
 
 // 2. RENDER PETERNAKAN
@@ -199,14 +201,22 @@ function panenTernak(jenis, index) {
     gameState.inventory.pakan['Rumput Kering']--;
     gameState.inventory.hasil[infoHewan.hasilTernak] = (gameState.inventory.hasil[infoHewan.hasilTernak] || 0) + 1;
     renderAll();
-  } else { tampilkanToast('Pakan Rumput Kering habis! Beli di Pasar.', 'error'); }
+  } else { 
+    if (typeof tampilkanToast === 'function') tampilkanToast('Pakan Rumput Kering habis! Beli di Pasar.', 'error'); 
+  }
 }
 
-// 3. RENDER AKSESORIS
+// 3. RENDER AKSESORIS (Dengan Fitur Lepas / Unequip)
 function renderAksesoris() {
-  document.getElementById('slot-topi').innerText = gameState.aksesorisAktif.topi || 'Kosong';
-  document.getElementById('slot-baju').innerText = gameState.aksesorisAktif.baju || 'Kosong';
-  document.getElementById('slot-sepatu').innerText = gameState.aksesorisAktif.sepatu || 'Kosong';
+  const topName = gameState.aksesorisAktif.topi || 'Kosong';
+  const bajuName = gameState.aksesorisAktif.baju || 'Kosong';
+  const sepatuName = gameState.aksesorisAktif.sepatu || 'Kosong';
+
+  const btnLepas = (tipe) => `<span style="color:#ef4444; cursor:pointer; font-size:11px; margin-left:8px; font-weight:bold;" onclick="lepasAksesoris('${tipe}')">[Lepas]</span>`;
+
+  document.getElementById('slot-topi').innerHTML = `${topName} ${topName !== 'Kosong' ? btnLepas('topi') : ''}`;
+  document.getElementById('slot-baju').innerHTML = `${bajuName} ${bajuName !== 'Kosong' ? btnLepas('baju') : ''}`;
+  document.getElementById('slot-sepatu').innerHTML = `${sepatuName} ${sepatuName !== 'Kosong' ? btnLepas('sepatu') : ''}`;
 
   const bonusJual = typeof hitungBonusAksesoris === 'function' ? hitungBonusAksesoris('jual') : 0;
   document.getElementById('total-bonus').innerText = `+${bonusJual}%`;
@@ -221,12 +231,18 @@ function renderAksesoris() {
 
   gameState.inventory.aksesoris.forEach((item) => {
     const infoDetail = DIREKTORI_AKSESORIS[item];
+    const sedangDipakai = Object.values(gameState.aksesorisAktif).includes(item);
+
     const card = document.createElement('div');
     card.className = 'card';
     card.innerHTML = `
       <h4>${item}</h4>
       <p style="font-size:10px; color:#0284c7; margin-bottom:6px;">${infoDetail ? infoDetail.efek : ''}</p>
-      <button class="btn-primary" onclick="pakaiAksesoris('${item}')">Pakai</button>
+      <button class="btn-primary" 
+        onclick="pakaiAksesoris('${item}')"
+        ${sedangDipakai ? 'disabled style="background: #94a3b8; cursor: not-allowed;"' : ''}>
+        ${sedangDipakai ? 'Sedang Dipakai' : 'Pakai'}
+      </button>
     `;
     container.appendChild(card);
   });
@@ -299,12 +315,12 @@ function renderPasar() {
     const kandang = gameState.kandang[jenis];
     const nextLevel = kandang.level + 1;
     const isMax = kandang.level >= 10;
-    const hargaUpgrade = isMax ? 0 : hitungHargaUpgradeKandang(kandang.level);
+    const hargaUpgrade = isMax ? 0 : typeof hitungHargaUpgradeKandang === 'function' ? hitungHargaUpgradeKandang(kandang.level) : 50000;
     const namaHewanCapital = jenis.charAt(0).toUpperCase() + jenis.slice(1);
 
     expContainer.innerHTML += `
       <div class="card">
-        <h4>🏗️️ Kandang ${namaHewanCapital}</h4>
+        <h4>🏗 Kandang ${namaHewanCapital}</h4>
         <p>Level: ${kandang.level} / 10<br>Kapasitas: ${kandang.kapasitas} Ekor<br>${isMax ? '<b>Maksimal Level</b>' : `Biaya Upgrade: Rp ${hargaUpgrade.toLocaleString('id-ID')}`}</p>
         <button class="btn-primary" onclick="upgradeKandang('${jenis}')" ${isMax ? 'disabled style="background:#94a3b8; cursor:not-allowed;"' : ''}>
           ${isMax ? 'Max Level' : `Upgrade Lv.${nextLevel}`}
@@ -374,7 +390,6 @@ function renderInventory() {
 // ==========================================
 // MODAL UNIVERSAL JUAL & BELI (DENGAN -10, -1, +1, +10, MAKS)
 // ==========================================
-
 let itemAktifModal = {
   mode: '', // 'beli' atau 'jual'
   kategori: '',
@@ -404,7 +419,7 @@ function bukaModalBeli(kategori, namaItem, hargaSatuan) {
 function bukaModalJual(namaItem, hargaDasar) {
   const stok = gameState.inventory.hasil[namaItem] || 0;
   if (stok <= 0) {
-    tampilkanToast('Stok barang kosong di inventory!', 'error');
+    if (typeof tampilkanToast === 'function') tampilkanToast('Stok barang kosong di inventory!', 'error');
     return;
   }
 
@@ -455,12 +470,11 @@ function validasiInputJual() {
 function eksekusiJualItem() {
   const jumlah = parseInt(document.getElementById('input-jumlah-jual').value) || 0;
   if (jumlah <= 0 || jumlah > itemAktifModal.limitMaks) {
-    tampilkanToast('Jumlah tidak valid!', 'error');
+    if (typeof tampilkanToast === 'function') tampilkanToast('Jumlah tidak valid!', 'error');
     return;
   }
 
   if (itemAktifModal.mode === 'jual') {
-    // Logika Eksekusi Jual
     gameState.inventory.hasil[itemAktifModal.nama] -= jumlah;
     if (gameState.inventory.hasil[itemAktifModal.nama] <= 0) {
       delete gameState.inventory.hasil[itemAktifModal.nama];
@@ -470,10 +484,9 @@ function eksekusiJualItem() {
     
     tutupModalJual();
     renderAll();
-    tampilkanToast(`Berhasil menjual ${jumlah}x ${itemAktifModal.nama} seharga Rp ${totalPendapatan.toLocaleString('id-ID')}!`);
+    if (typeof tampilkanToast === 'function') tampilkanToast(`Berhasil menjual ${jumlah}x ${itemAktifModal.nama} seharga Rp ${totalPendapatan.toLocaleString('id-ID')}!`);
 
   } else if (itemAktifModal.mode === 'beli') {
-    // Logika Eksekusi Beli
     const totalHarga = itemAktifModal.hargaSatuan * jumlah;
     if (gameState.player.koin >= totalHarga) {
       gameState.player.koin -= totalHarga;
@@ -486,9 +499,9 @@ function eksekusiJualItem() {
 
       tutupModalJual();
       renderAll();
-      tampilkanToast(`Berhasil membeli ${jumlah}x ${itemAktifModal.nama} seharga Rp ${totalHarga.toLocaleString('id-ID')}!`);
+      if (typeof tampilkanToast === 'function') tampilkanToast(`Berhasil membeli ${jumlah}x ${itemAktifModal.nama} seharga Rp ${totalHarga.toLocaleString('id-ID')}!`);
     } else {
-      tampilkanToast('Koin Anda tidak cukup untuk transaksi ini!', 'error');
+      if (typeof tampilkanToast === 'function') tampilkanToast('Koin Anda tidak cukup untuk transaksi ini!', 'error');
     }
   }
 }
