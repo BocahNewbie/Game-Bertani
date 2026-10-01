@@ -49,18 +49,32 @@ function tutupModalReset() {
   document.getElementById('modal-reset').style.display = 'none';
 }
 
-// NAVIGASI TAB
+// NAVIGASI TAB UTAMA & OTOMATIS BUKA SUB-TAB PERTAMA
 function switchTab(tabName) {
   document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
   document.querySelectorAll('.nav-tabs .tab-btn').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.sub-nav').forEach(el => el.classList.remove('active-sub'));
+
   document.getElementById(`tab-${tabName}`).classList.add('active');
   event.currentTarget.classList.add('active');
+
+  const currentTabSection = document.getElementById(`tab-${tabName}`);
+  const targetSubNav = currentTabSection.querySelector('.sub-nav');
+  
+  if (targetSubNav) {
+    targetSubNav.classList.add('active-sub');
+    const firstSubBtn = targetSubNav.querySelector('.sub-tab-btn');
+    if (firstSubBtn) {
+      firstSubBtn.click();
+    }
+  }
 }
 
 function switchSubTab(parentTab, subName) {
   const parent = document.getElementById(`tab-${parentTab}`);
   parent.querySelectorAll('.sub-content').forEach(el => el.classList.remove('active'));
   parent.querySelectorAll('.sub-nav .sub-tab-btn').forEach(el => el.classList.remove('active'));
+  
   document.getElementById(`subtab-${subName}`).classList.add('active');
   event.currentTarget.classList.add('active');
 }
@@ -213,7 +227,6 @@ function renderAksesoris() {
 
 // 4. RENDER PASAR
 function renderPasar() {
-  // Pasar Bibit
   const pasarBibit = document.getElementById('pasar-bibit-container');
   pasarBibit.innerHTML = '';
   Object.values(DIREKTORI_TUMBUHAN).forEach(t => {
@@ -226,7 +239,6 @@ function renderPasar() {
     `;
   });
 
-  // Pasar Hewan
   const pasarHewan = document.getElementById('pasar-hewan-container');
   pasarHewan.innerHTML = '';
   Object.values(DIREKTORI_HEWAN).forEach(h => {
@@ -240,7 +252,6 @@ function renderPasar() {
     `;
   });
 
-  // Pasar Aksesoris
   document.getElementById('pasar-aksesoris-container').innerHTML = `
     <div class="card">
       <h4>🎩 Topi Caping</h4>
@@ -254,7 +265,6 @@ function renderPasar() {
     </div>
   `;
 
-  // Pasar Ekspansi
   document.getElementById('pasar-ekspansi-container').innerHTML = `
     <div class="card">
       <h4>➕ Lahan Baru</h4>
