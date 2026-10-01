@@ -37,7 +37,6 @@ function bukaMenuTanam(index) {
     const petak = gameState.lahan[index];
 
     if (petak.tanaman === null) {
-        // Jika kosong, tawarkan pilihan bibit dari inventory (Contoh pakai Padi)
         let jumlahTanam = prompt(`Lahan #${index + 1} kosong.\nMasukkan jumlah bibit Padi yang ingin ditanam (Maksimal 99):`, "1");
         jumlahTanam = parseInt(jumlahTanam);
 
@@ -60,7 +59,6 @@ function bukaMenuTanam(index) {
             alert("Bibit Padi di inventory kamu tidak mencukupi!");
         }
     } else {
-        // Jika sudah ada tanaman, opsi panen atau cek status
         alert(`Lahan ini ditanami ${petak.tanaman} sebanyak ${petak.jumlah} buah. Status: ${petak.status}`);
     }
 }
