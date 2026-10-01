@@ -1,4 +1,4 @@
-// SCRIPT.JS - Logika Utama Game, Auto-Save, & Modal Interaktif Universal
+// SCRIPT.JS - Logika Utama Game, Auto-Save, Penamaan & Penjualan Hewan Ternak
 
 const STORAGE_KEY = 'PETERNAKAN';
 
@@ -198,7 +198,7 @@ function racikPupuk() {
   if (typeof tampilkanToast === 'function') tampilkanToast('Berhasil meracik Pupuk Organik!');
 }
 
-// 2. RENDER PETERNAKAN
+// 2. RENDER PETERNAKAN (Dengan Tombol Ganti Nama & Jual Hewan)
 function renderPeternakan() {
   ['ayam', 'sapi', 'domba'].forEach(j => {
     const dataKandang = gameState.kandang[j];
@@ -217,12 +217,18 @@ function renderPeternakan() {
     }
 
     dataKandang.isi.forEach((h, index) => {
+      const namaHewanTampil = h.namaCustom || `${infoHewan.nama} #${index + 1}`;
+      const hJual = hargaPasarAktif.hewan[j] ? hargaPasarAktif.hewan[j].jualHewan : infoHewan.hargaJualHewanBase;
+
       const card = document.createElement('div');
       card.className = 'card';
       card.innerHTML = `
-        <h4>${infoHewan.nama} #${index + 1}</h4>
+        <h4 style="cursor:pointer;" onclick="ubahNamaHewan('${j}', ${index})" title="Klik untuk ubah nama">🏷️ ${namaHewanTampil} ✏️</h4>
         <p>Hasilkan: ${infoHewan.hasilTernak} (${infoHewan.jumlahHasil || 1}x)</p>
-        <button class="btn-primary" onclick="panenTernak('${j}', ${index})">🧺 Beri Pakan & Ambil</button>
+        <div style="display: flex; flex-direction: column; gap: 4px; margin-top: auto;">
+          <button class="btn-primary" onclick="panenTernak('${j}', ${index})">🧺 Beri Pakan & Ambil</button>
+          <button class="btn-danger" style="font-size: 10px; padding: 4px;" onclick="jualHewan('${j}', ${index}, ${hJual})">Jual (Rp ${hJual})</button>
+        </div>
       `;
       container.appendChild(card);
     });
@@ -244,6 +250,56 @@ function panenTernak(jenis, index) {
     }
   } else { 
     if (typeof tampilkanToast === 'function') tampilkanToast('Pakan Rumput Kering habis! Beli di Pasar.', 'error'); 
+  }
+}
+
+function ubahNamaHewan(jenis, index) {
+  const hewan = gameState.kandang[jenis].isi[index];
+  const namaBaru = prompt("Masukkan nama baru untuk hewan ternak ini:", hewan.namaCustom || "");
+  if (namaBaru !== null && namaBaru.trim() !== "") {
+    hewan.namaCustom = namaBaru.trim();
+    autoSaveGame();
+    renderAll();
+    if (typeof tampilkanToast === 'function') tampilkanToast('Nama hewan berhasil diubah!');
+  }
+}
+
+function jualHewan(jenis, index, hargaJual) {
+  const hewan = gameState.kandang[jenis].isi[index];
+  const namaLabel = hewan.namaCustom || `${jenis} #${index + 1}`;
+  
+  if (confirm(`Apakah Anda yakin ingin menjual ${namaLabel} seharga Rp ${hargaJual.toLocaleString('id-ID')}?`)) {
+    gameState.player.koin += hargaJual;
+    gameState.kandang[jenis].isi.splice(index, 1); // Hapus hewan dari kandang
+    autoSaveGame();
+    renderAll();
+    if (typeof tampilkanToast === 'function') tampilkanToast(`Berhasil menjual ${namaLabel}!`);
+  }
+}
+
+function beliHewanCustom(jenis, hargaBeli) {
+  const k = gameState.kandang[jenis];
+  if (k.isi.length >= k.kapasitas) {
+    if (typeof tampilkanToast === 'function') tampilkanToast(`Kandang ${jenis} sudah penuh (Maksimal ${k.kapasitas} Ekor)!`, 'error');
+    return;
+  }
+  if (gameState.player.koin >= hargaBeli) {
+    gameState.player.koin -= hargaBeli;
+    
+    // Beri prompt nama opsional saat membeli hewan baru
+    let namaCustom = prompt(`Berhasil membeli 1 ekor ${jenis}!\nMasukkan nama untuk hewan ini (Opsional):`, "");
+    
+    k.isi.push({ 
+      id: Date.now(), 
+      namaCustom: namaCustom ? namaCustom.trim() : null,
+      siapPanen: true 
+    });
+
+    autoSaveGame();
+    renderAll();
+    if (typeof tampilkanToast === 'function') tampilkanToast(`Berhasil menambahkan hewan baru ke kandang!`);
+  } else {
+    if (typeof tampilkanToast === 'function') tampilkanToast('Koin tidak cukup!', 'error');
   }
 }
 
@@ -315,7 +371,7 @@ function renderPasar() {
       <div class="card">
         <h4>🐾 ${h.nama}</h4>
         <p>Beli Hewan: Rp ${hPasar.beli}<br>Pakan (Rumput Kering): Rp ${hPakan}</p>
-        <button class="btn-primary" onclick="beliHewan('${h.jenis}', ${hPasar.beli})">Beli Hewan</button>
+        <button class="btn-primary" onclick="beliHewanCustom('${h.jenis}', ${hPasar.beli})">Beli Hewan</button>
         <button class="btn-secondary" style="margin-top:4px;" onclick="bukaModalBeli('pakan', 'Rumput Kering', ${hPakan})">Beli Pakan</button>
       </div>
     `;
@@ -346,7 +402,7 @@ function renderPasar() {
   const expContainer = document.getElementById('pasar-ekspansi-container');
   
   const isMaxLahan = gameState.lahan.length >= 10;
-  const hargaLahan = isMaxLahan ? 0 : typeof hitungHargaUpgradeLahan === 'function' ? hitungHargaUpgradeLahan(gameState.lahan.length) : 350000;
+  const hargaLahan = isMaxLahan ? 0 : typeof hitungHargaUpgradeLahan === 'function' ? hitungHargaUpgradeLahan(gameState.lahan.length) : 150000;
   
   expContainer.innerHTML = `
     <div class="card">
@@ -544,7 +600,6 @@ function validasiInputJual() {
   if (val > maxVal) input.value = Math.max(1, maxVal);
 }
 
-// Kontrol Modal Tanam
 function ubahJumlahTanam(delta) {
   const input = document.getElementById('input-jumlah-tanam');
   let val = parseInt(input.value) || 1;
