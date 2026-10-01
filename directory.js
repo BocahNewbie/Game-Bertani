@@ -75,15 +75,15 @@ const DIREKTORI_AKSESORIS = {
   'Topi Caping': { 
     tipe: 'topi', 
     bonusType: 'jual', 
-    nilai: 15, 
-    harga: 150000,
+    nilai: 10, 
+    harga: 150,
     efek: 'Meningkatkan harga jual hasil panen & ternak sebesar +10%.' 
   },
   'Sepatu Bot': { 
     tipe: 'sepatu', 
     bonusType: 'tumbuh', 
-    nilai: 10, 
-    harga: 200000,
-    efek: 'Meningkatkan hasil panen sebesar +10%.' 
+    nilai: 15, 
+    harga: 200,
+    efek: 'Mempercepat proses tumbuh tanaman sebesar +15%.' 
   }
 };
