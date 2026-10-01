@@ -1,4 +1,4 @@
-// SCRIPT.JS - Logika Utama Game, Modal Universal & Sistem Tanam Massal
+// SCRIPT.JS - Logika Utama Game, Auto-Save, & Modal Interaktif Universal
 
 const STORAGE_KEY = 'PETERNAKAN';
 
@@ -12,7 +12,6 @@ let gameState = {
     baju: null,
     sepatu: null
   },
-  // Lahan awal hanya 1 (Bisa di-upgrade hingga 10)
   lahan: [
     { id: 1, tanaman: null, jumlah: 0, umur: 0, siapPanen: false }
   ],
@@ -36,6 +35,15 @@ document.addEventListener('DOMContentLoaded', () => {
     initMarketFluctuation();
   }
   renderAll();
+});
+
+// SIMPAN OTOMATIS (AUTO-SAVE)
+function autoSaveGame() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(gameState));
+}
+
+window.addEventListener('beforeunload', () => {
+  autoSaveGame();
 });
 
 function eksekusiResetGame() {
@@ -78,22 +86,8 @@ function switchSubTab(parentTab, subName) {
   event.currentTarget.classList.add('active');
 }
 
-// SIMPAN OTOMATIS (AUTO-SAVE) KE LOCALSTORAGE
-function autoSaveGame() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(gameState));
-  // Notifikasi auto-save dibuat senyap di background (tanpa popup toast mengganggu), 
-  // tapi jika ingin melihat log bisa cek console.
-  console.log('💾 Auto-saved!');
-}
-
-// Tambahkan event agar otomatis tersimpan saat menutup tab/browser
-window.addEventListener('beforeunload', () => {
-  autoSaveGame();
-});
-
-// SIMPAN MANUAL (Tombol Simpan Tetap Berfungsi)
 function simpanGame() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(gameState));
+  autoSaveGame();
   if (typeof tampilkanToast === 'function') tampilkanToast('Game berhasil disimpan!');
 }
 
@@ -104,7 +98,6 @@ function muatGame() {
       const parsed = JSON.parse(savedData);
       gameState = parsed;
       
-      // Auto-fix properti lama (Pencegah Bug jika menggunakan save-an lama)
       ['ayam', 'sapi', 'domba'].forEach(j => {
         if (gameState.kandang[j]) {
           if (!gameState.kandang[j].level) gameState.kandang[j].level = 1;
@@ -131,7 +124,7 @@ function renderAll() {
   renderInventory();
 }
 
-// 1. RENDER PERTANIAN (Dengan Fitur Tanam 99)
+// 1. RENDER PERTANIAN
 function renderPertanian() {
   const container = document.getElementById('lahan-container');
   container.innerHTML = '';
@@ -161,52 +154,38 @@ function renderPertanian() {
 function aksiLahan(index) {
   const lahan = gameState.lahan[index];
   
-  // LOGIKA TANAM
   if (!lahan.tanaman) {
     const bibitTersedia = Object.keys(gameState.inventory.bibit).find(b => gameState.inventory.bibit[b] > 0);
     if (bibitTersedia) {
       const stok = gameState.inventory.bibit[bibitTersedia];
       
-      // Tanya pakai prompt bawaan browser untuk tanam massal
-      let strQty = prompt(`Tanam ${bibitTersedia} (Stok di tas: ${stok})\nMasukkan jumlah yang ingin ditanam (Maksimal 99 per lahan):`, "1");
-      if (strQty === null) return; // Batal ditekan
-      
-      let qty = parseInt(strQty);
-      if (isNaN(qty) || qty <= 0) {
-        if (typeof tampilkanToast === 'function') tampilkanToast('Jumlah tanam tidak valid!', 'error');
-        return;
-      }
-      
-      // Limitasi Maks 99 dan menyesuaikan stok
-      if (qty > 99) qty = 99;
-      if (qty > stok) qty = stok; 
-      
-      // Potong stok dan terapkan ke lahan
-      gameState.inventory.bibit[bibitTersedia] -= qty;
-      lahan.tanaman = bibitTersedia;
-      lahan.jumlah = qty;
-      lahan.siapPanen = true; 
-      
-      renderAll();
-      if (typeof tampilkanToast === 'function') tampilkanToast(`Berhasil menanam ${qty}x ${bibitTersedia}!`);
+      itemTanamAktif = {
+        lahanIndex: index,
+        namaBibit: bibitTersedia,
+        stokMaks: Math.min(stok, 99)
+      };
+
+      document.getElementById('modal-tanam-title').innerText = `Tanam ${bibitTersedia}`;
+      document.getElementById('modal-tanam-info').innerText = `Stok di Tas: ${stok} | Maks 99 per lahan`;
+      document.getElementById('input-jumlah-tanam').value = 1;
+      document.getElementById('input-jumlah-tanam').max = itemTanamAktif.stokMaks;
+      document.getElementById('modal-tanam').style.display = 'flex';
       
     } else { 
       if (typeof tampilkanToast === 'function') tampilkanToast('Tidak ada bibit di inventory! Beli di Pasar.', 'error'); 
     }
     
-  // LOGIKA PANEN
   } else if (lahan.siapPanen) {
     const namaHasil = lahan.tanaman.replace('Bibit ', '');
     const jumlahPanen = lahan.jumlah || 1;
     
-    // Masukkan ke inventory sesuai jumlah yang ditanam
     gameState.inventory.hasil[namaHasil] = (gameState.inventory.hasil[namaHasil] || 0) + jumlahPanen;
     
-    // Reset lahan
     lahan.tanaman = null;
     lahan.jumlah = 0;
     lahan.siapPanen = false;
     
+    autoSaveGame();
     renderAll();
     if (typeof tampilkanToast === 'function') tampilkanToast(`Berhasil memanen ${jumlahPanen}x ${namaHasil}!`);
   }
@@ -214,6 +193,7 @@ function aksiLahan(index) {
 
 function racikPupuk() {
   gameState.inventory.pupuk['Pupuk Organik'] = (gameState.inventory.pupuk['Pupuk Organik'] || 0) + 1;
+  autoSaveGame();
   renderAll();
   if (typeof tampilkanToast === 'function') tampilkanToast('Berhasil meracik Pupuk Organik!');
 }
@@ -241,7 +221,7 @@ function renderPeternakan() {
       card.className = 'card';
       card.innerHTML = `
         <h4>${infoHewan.nama} #${index + 1}</h4>
-        <p>Hasilkan: ${infoHewan.hasilTernak}</p>
+        <p>Hasilkan: ${infoHewan.hasilTernak} (${infoHewan.jumlahHasil || 1}x)</p>
         <button class="btn-primary" onclick="panenTernak('${j}', ${index})">🧺 Beri Pakan & Ambil</button>
       `;
       container.appendChild(card);
@@ -251,14 +231,16 @@ function renderPeternakan() {
 
 function panenTernak(jenis, index) {
   const infoHewan = DIREKTORI_HEWAN[jenis];
-  const jumlahDapat = infoHewan.jumlahHasil || 1; // Membaca jumlah hasil dari direktori
+  const jumlahDapat = infoHewan.jumlahHasil || 1;
 
   if ((gameState.inventory.pakan['Rumput Kering'] || 0) > 0) {
     gameState.inventory.pakan['Rumput Kering']--;
     gameState.inventory.hasil[infoHewan.hasilTernak] = (gameState.inventory.hasil[infoHewan.hasilTernak] || 0) + jumlahDapat;
+    
+    autoSaveGame();
     renderAll();
     if (typeof tampilkanToast === 'function') {
-      tampilkanToast(`Berhasil mendapatkan ${jumlahDapat}x ${infoHewan.hasilTernak}!`);
+      tampilkanToast(`Berhasil memerah dan mendapatkan ${jumlahDapat}x ${infoHewan.hasilTernak}!`);
     }
   } else { 
     if (typeof tampilkanToast === 'function') tampilkanToast('Pakan Rumput Kering habis! Beli di Pasar.', 'error'); 
@@ -361,10 +343,8 @@ function renderPasar() {
     `;
   });
 
-  // Render menu ekspansi (Lahan Tani + Kandang)
   const expContainer = document.getElementById('pasar-ekspansi-container');
   
-  // Ekspansi Lahan (Max 10)
   const isMaxLahan = gameState.lahan.length >= 10;
   const hargaLahan = isMaxLahan ? 0 : typeof hitungHargaUpgradeLahan === 'function' ? hitungHargaUpgradeLahan(gameState.lahan.length) : 150000;
   
@@ -378,7 +358,6 @@ function renderPasar() {
     </div>
   `;
 
-  // Ekspansi Kandang
   ['ayam', 'sapi', 'domba'].forEach(jenis => {
     const kandang = gameState.kandang[jenis];
     const nextLevel = kandang.level + 1;
@@ -456,7 +435,7 @@ function renderInventory() {
 }
 
 // ==========================================
-// MODAL UNIVERSAL JUAL & BELI (DENGAN -10, -1, +1, +10, MAKS PINTAR)
+// MODAL UNIVERSAL JUAL, BELI & TANAM
 // ==========================================
 let itemAktifModal = {
   mode: '', 
@@ -466,14 +445,19 @@ let itemAktifModal = {
   limitMaks: 0
 };
 
-// 1. MODAL BELI
+let itemTanamAktif = {
+  lahanIndex: 0,
+  namaBibit: '',
+  stokMaks: 0
+};
+
 function bukaModalBeli(kategori, namaItem, hargaSatuan) {
   itemAktifModal = {
     mode: 'beli',
     kategori: kategori,
     nama: namaItem,
     hargaSatuan: hargaSatuan,
-    limitMaks: 99 // Batas sistem untuk sekali transaksi beli
+    limitMaks: 99
   };
 
   document.getElementById('modal-jual-title').innerText = `Beli ${namaItem}`;
@@ -483,7 +467,6 @@ function bukaModalBeli(kategori, namaItem, hargaSatuan) {
   document.getElementById('modal-jual').style.display = 'flex';
 }
 
-// 2. MODAL JUAL
 function bukaModalJual(namaItem, hargaDasar) {
   const stok = gameState.inventory.hasil[namaItem] || 0;
   if (stok <= 0) {
@@ -511,6 +494,10 @@ function bukaModalJual(namaItem, hargaDasar) {
 
 function tutupModalJual() {
   document.getElementById('modal-jual').style.display = 'none';
+}
+
+function tutupModalTanam() {
+  document.getElementById('modal-tanam').style.display = 'none';
 }
 
 function ubahJumlahJual(delta) {
@@ -557,6 +544,55 @@ function validasiInputJual() {
   if (val > maxVal) input.value = Math.max(1, maxVal);
 }
 
+// Kontrol Modal Tanam
+function ubahJumlahTanam(delta) {
+  const input = document.getElementById('input-jumlah-tanam');
+  let val = parseInt(input.value) || 1;
+  val += delta;
+  
+  if (val < 1) val = 1;
+  if (val > itemTanamAktif.stokMaks) val = itemTanamAktif.stokMaks;
+  
+  input.value = val;
+}
+
+function setJumlahTanamMaks() {
+  document.getElementById('input-jumlah-tanam').value = itemTanamAktif.stokMaks;
+}
+
+function validasiInputTanam() {
+  const input = document.getElementById('input-jumlah-tanam');
+  let val = parseInt(input.value) || 1;
+  if (val < 1) input.value = 1;
+  if (val > itemTanamAktif.stokMaks) input.value = itemTanamAktif.stokMaks;
+}
+
+function eksekusiTanamBibit() {
+  const jumlahTanam = parseInt(document.getElementById('input-jumlah-tanam').value) || 0;
+  if (jumlahTanam <= 0 || jumlahTanam > itemTanamAktif.stokMaks) {
+    if (typeof tampilkanToast === 'function') tampilkanToast('Jumlah tanam tidak valid!', 'error');
+    return;
+  }
+
+  const lahan = gameState.lahan[itemTanamAktif.lahanIndex];
+  
+  gameState.inventory.bibit[itemTanamAktif.namaBibit] -= jumlahTanam;
+  if (gameState.inventory.bibit[itemTanamAktif.namaBibit] <= 0) {
+    delete gameState.inventory.bibit[itemTanamAktif.namaBibit];
+  }
+
+  lahan.tanaman = itemTanamAktif.namaBibit;
+  lahan.jumlah = jumlahTanam;
+  lahan.siapPanen = true;
+
+  tutupModalTanam();
+  autoSaveGame();
+  renderAll();
+  if (typeof tampilkanToast === 'function') {
+    tampilkanToast(`Berhasil menanam ${jumlahTanam}x ${itemTanamAktif.namaBibit}!`);
+  }
+}
+
 function eksekusiJualItem() {
   const jumlah = parseInt(document.getElementById('input-jumlah-jual').value) || 0;
   
@@ -580,6 +616,7 @@ function eksekusiJualItem() {
     gameState.player.koin += totalPendapatan;
     
     tutupModalJual();
+    autoSaveGame();
     renderAll();
     if (typeof tampilkanToast === 'function') tampilkanToast(`Berhasil menjual ${jumlah}x ${itemAktifModal.nama} seharga Rp ${totalPendapatan.toLocaleString('id-ID')}!`);
 
@@ -595,6 +632,7 @@ function eksekusiJualItem() {
       }
 
       tutupModalJual();
+      autoSaveGame();
       renderAll();
       if (typeof tampilkanToast === 'function') tampilkanToast(`Berhasil membeli ${jumlah}x ${itemAktifModal.nama} seharga Rp ${totalHarga.toLocaleString('id-ID')}!`);
     } else {
@@ -617,74 +655,8 @@ function simpanNickname() {
   const val = document.getElementById('input-nickname').value;
   if (val.trim() !== '') {
     gameState.player.nickname = val.trim();
+    autoSaveGame();
     renderAll();
     tutupModalNickname();
-  }
-}
-
-function aksiLahan(index) {
-  const lahan = gameState.lahan[index];
-  
-  if (!lahan.tanaman) {
-    const bibitTersedia = Object.keys(gameState.inventory.bibit).find(b => gameState.inventory.bibit[b] > 0);
-    if (bibitTersedia) {
-      const stok = gameState.inventory.bibit[bibitTersedia];
-      
-      let strQty = prompt(`Tanam ${bibitTersedia} (Stok di tas: ${stok})\nMasukkan jumlah yang ingin ditanam (Maksimal 99 per lahan):`, "1");
-      if (strQty === null) return; 
-      
-      let qty = parseInt(strQty);
-      if (isNaN(qty) || qty <= 0) {
-        if (typeof tampilkanToast === 'function') tampilkanToast('Jumlah tanam tidak valid!', 'error');
-        return;
-      }
-      
-      if (qty > 99) qty = 99;
-      if (qty > stok) qty = stok; 
-      
-      gameState.inventory.bibit[bibitTersedia] -= qty;
-      lahan.tanaman = bibitTersedia;
-      lahan.jumlah = qty;
-      lahan.siapPanen = true; 
-      
-      autoSaveGame(); // <-- Auto Save Aktif
-      renderAll();
-      if (typeof tampilkanToast === 'function') tampilkanToast(`Berhasil menanam ${qty}x ${bibitTersedia}!`);
-      
-    } else { 
-      if (typeof tampilkanToast === 'function') tampilkanToast('Tidak ada bibit di inventory! Beli di Pasar.', 'error'); 
-    }
-    
-  } else if (lahan.siapPanen) {
-    const namaHasil = lahan.tanaman.replace('Bibit ', '');
-    const jumlahPanen = lahan.jumlah || 1;
-    
-    gameState.inventory.hasil[namaHasil] = (gameState.inventory.hasil[namaHasil] || 0) + jumlahPanen;
-    
-    lahan.tanaman = null;
-    lahan.jumlah = 0;
-    lahan.siapPanen = false;
-    
-    autoSaveGame(); // <-- Auto Save Aktif
-    renderAll();
-    if (typeof tampilkanToast === 'function') tampilkanToast(`Berhasil memanen ${jumlahPanen}x ${namaHasil}!`);
-  }
-}
-
-function panenTernak(jenis, index) {
-  const infoHewan = DIREKTORI_HEWAN[jenis];
-  const jumlahDapat = infoHewan.jumlahHasil || 1;
-
-  if ((gameState.inventory.pakan['Rumput Kering'] || 0) > 0) {
-    gameState.inventory.pakan['Rumput Kering']--;
-    gameState.inventory.hasil[infoHewan.hasilTernak] = (gameState.inventory.hasil[infoHewan.hasilTernak] || 0) + jumlahDapat;
-    
-    autoSaveGame(); // <-- Auto Save Aktif
-    renderAll();
-    if (typeof tampilkanToast === 'function') {
-      tampilkanToast(`Berhasil memerah dan mendapatkan ${jumlahDapat}x ${infoHewan.hasilTernak}!`);
-    }
-  } else { 
-    if (typeof tampilkanToast === 'function') tampilkanToast('Pakan Rumput Kering habis! Beli di Pasar.', 'error'); 
   }
 }
