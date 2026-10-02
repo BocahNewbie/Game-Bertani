@@ -215,6 +215,222 @@ button:hover {
     color: #475569;
 }
 
+.btn-danger {
+    background: #ef4444;
+    color: white;
+}
+
+/* Header Player Panel */
+.player-panel {
+    background: #0f172a;
+    color: white;
+    padding: 16px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.player-info {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.player-info h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: #f8fafc;
+}
+
+.koin-badge {
+    background: #1e293b;
+    color: #fbbf24;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 14px;
+    border: 1px solid #334155;
+}
+
+.cuaca-badge {
+    background: #1e293b;
+    color: #38bdf8;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 13px;
+    border: 1px solid #334155;
+}
+
+.header-actions {
+    display: flex;
+    gap: 8px;
+}
+
+/* Nav Tabs */
+.nav-tabs {
+    display: flex;
+    background: #1e293b;
+    overflow-x: auto;
+    padding: 0 10px;
+    border-bottom: 1px solid #334155;
+}
+
+/* Tab Content */
+.tab-content {
+    display: none;
+    padding: 24px;
+    flex: 1;
+    overflow-y: auto;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* Sub Navigation */
+.sub-nav {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+
+.sub-tab-btn {
+    padding: 8px 14px;
+    background: #e2e8f0;
+    color: #475569;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.sub-tab-btn:hover {
+    background: #cbd5e1;
+}
+
+.sub-tab-btn.active {
+    background: #2563eb;
+    color: white;
+}
+
+.sub-content {
+    display: none;
+}
+
+.sub-content.active {
+    display: block;
+}
+
+/* Modal Card */
+.modal-card {
+    background: #ffffff;
+    width: 100%;
+    max-width: 440px;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    animation: scaleUp 0.2s ease;
+}
+
+.modal-card h3 {
+    margin-top: 0;
+    color: #0f172a;
+}
+
+.modal-card input[type="text"],
+.modal-card input[type="number"] {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px 14px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 15px;
+    margin-bottom: 12px;
+}
+
+.qty-control-grid {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 16px;
+    justify-content: center;
+}
+
+.qty-control-grid button {
+    padding: 6px 10px;
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    color: #334155;
+    font-size: 12px;
+}
+
+/* Aksesoris Panel */
+.aksesoris-panel {
+    background: #f8fafc;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 20px;
+}
+
+.aksesoris-panel h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+.slot-list {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    font-size: 14px;
+    color: #334155;
+    margin-bottom: 10px;
+}
+
+.bonus-text {
+    font-weight: 700;
+    color: #16a34a;
+    font-size: 14px;
+}
+
+/* Toast Container - Mengambang di atas, tidak menghalangi permainan */
+#toast-container {
+    position: fixed;
+    top: 14px;
+    right: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 100000;
+    pointer-events: none !important;
+    max-width: 320px;
+}
+
+.toast-item {
+    background: #0f172a;
+    color: white;
+    padding: 10px 16px;
+    border-radius: 8px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+    font-size: 13px;
+    font-weight: 600;
+    animation: fadeIn 0.2s ease;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    border-left: 4px solid #22c55e;
+    pointer-events: none !important;
+    user-select: none;
+}
+
+.toast-item.fade-out {
+    opacity: 0;
+}
+
 @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
