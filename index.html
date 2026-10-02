@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Game Pertanian & Peternakan Modern</title>
+  <meta name="description" content="Game simulasi pertanian dan peternakan modern berbasis web dengan sistem lahan, kandang ternak, aksesoris, pasar jual-beli, dan inventory.">
+  <meta property="og:title" content="Game Pertanian & Peternakan Modern">
+  <meta property="og:description" content="Game simulasi pertanian dan peternakan modern berbasis web dengan sistem lahan, kandang ternak, aksesoris, pasar jual-beli, dan inventory.">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -13,8 +16,9 @@
     <!-- HEADER PLAYER PANEL -->
     <div class="player-panel">
       <div class="player-info">
-        <h2 id="player-nickname" onclick="bukaModalNickname()">👨‍🌾 Petani Newbie ✏️</h2>
-        <div class="koin-badge" id="player-koin">Rp 1.500</div>
+        <h2 id="player-nickname" onclick="bukaModalNickname()" style="cursor: pointer;">👨‍🌾 Petani Newbie ✏️</h2>
+        <div class="koin-badge" id="player-koin">Rp 1.250</div>
+        <div class="cuaca-badge" id="info-cuaca">Cuaca: ☀️ Cerah</div>
       </div>
       <div class="header-actions">
         <button class="btn-primary" onclick="simpanGame()">💾 Simpan</button>
@@ -26,115 +30,29 @@
     <div class="nav-tabs">
       <button class="tab-btn active" onclick="switchTab('pertanian')">🌱 Pertanian</button>
       <button class="tab-btn" onclick="switchTab('peternakan')">🐾 Peternakan</button>
-      <button class="tab-btn" onclick="switchTab('aksesoris')">🎩 Aksesoris</button>
+      <button class="tab-btn" onclick="switchTab('aksesoris')">🎩 Aksesoris Saya</button>
+      <button class="tab-btn" onclick="switchTab('toko-aksesoris')">🛍️ Toko Aksesoris</button>
       <button class="tab-btn" onclick="switchTab('pasar')">🛒 Pasar</button>
       <button class="tab-btn" onclick="switchTab('inventory')">🎒 Inventory</button>
     </div>
 
     <!-- 1. TAB PERTANIAN -->
-    <div id="tab-pertanian" class="tab-content active">
-      <!-- Container Panel Pupuk Massal di Atas Lahan -->
-      <div id="pupuk-container"></div>
-      
-      <h3>Lahan Pertanian Anda</h3>
-      <div class="grid-container" id="lahan-container" style="margin-top: 10px;">
-        <!-- Lahan dirender dinamis via script.js -->
-      </div>
-    </div>
+    <div id="tab-pertanian" class="tab-content active"></div>
 
     <!-- 2. TAB PETERNAKAN -->
-    <div id="tab-peternakan" class="tab-content">
-      <div class="sub-nav active-sub">
-        <button class="sub-tab-btn active" onclick="switchSubTab('peternakan', 'ayam')">🐔 Ayam</button>
-        <button class="sub-tab-btn" onclick="switchSubTab('peternakan', 'sapi')">🐮 Sapi</button>
-        <button class="sub-tab-btn" onclick="switchSubTab('peternakan', 'domba')">🐑 Domba</button>
-      </div>
+    <div id="tab-peternakan" class="tab-content"></div>
 
-      <!-- Sub-Tab Ayam -->
-      <div id="subtab-ayam" class="sub-content active">
-        <div class="kandang-info" id="info-kandang-ayam">Level Kandang: Lv.1 | Kapasitas: 0 / 2 Ekor</div>
-        <div class="grid-container" id="kandang-ayam-container"></div>
-      </div>
+    <!-- 3. TAB AKSESORIS SAYA -->
+    <div id="tab-aksesoris" class="tab-content"></div>
 
-      <!-- Sub-Tab Sapi -->
-      <div id="subtab-sapi" class="sub-content">
-        <div class="kandang-info" id="info-kandang-sapi">Level Kandang: Lv.1 | Kapasitas: 0 / 2 Ekor</div>
-        <div class="grid-container" id="kandang-sapi-container"></div>
-      </div>
+    <!-- 4. TAB TOKO AKSESORIS -->
+    <div id="tab-toko-aksesoris" class="tab-content"></div>
 
-      <!-- Sub-Tab Domba -->
-      <div id="subtab-domba" class="sub-content">
-        <div class="kandang-info" id="info-kandang-domba">Level Kandang: Lv.1 | Kapasitas: 0 / 2 Ekor</div>
-        <div class="grid-container" id="kandang-domba-container"></div>
-      </div>
-    </div>
+    <!-- 5. TAB PASAR -->
+    <div id="tab-pasar" class="tab-content"></div>
 
-    <!-- 3. TAB AKSESORIS -->
-    <div id="tab-aksesoris" class="tab-content">
-      <div class="aksesoris-panel">
-        <h4>Aksesoris yang Sedang Dipakai</h4>
-        <div class="slot-list">
-          <div>Topi: <span id="slot-topi">Kosong</span></div>
-          <div>Baju: <span id="slot-baju">Kosong</span></div>
-          <div>Sepatu: <span id="slot-sepatu">Kosong</span></div>
-        </div>
-        <div class="bonus-text">Total Bonus Jual: <span id="total-bonus">+0%</span></div>
-      </div>
-      <h3>Koleksi Aksesoris</h3>
-      <div class="grid-container" id="koleksi-aksesoris-container" style="margin-top: 10px;"></div>
-    </div>
-
-    <!-- 4. TAB PASAR -->
-    <div id="tab-pasar" class="tab-content">
-      <div class="sub-nav active-sub">
-        <button class="sub-tab-btn active" onclick="switchSubTab('pasar', 'pasar-bibit')">🌱 Bibit</button>
-        <button class="sub-tab-btn" onclick="switchSubTab('pasar', 'pasar-pupuk')">🧪 Pupuk</button>
-        <button class="sub-tab-btn" onclick="switchSubTab('pasar', 'pasar-hewan')">🐾 Hewan & Pakan</button>
-        <button class="sub-tab-btn" onclick="switchSubTab('pasar', 'pasar-aksesoris')">🎩 Aksesoris</button>
-        <button class="sub-tab-btn" onclick="switchSubTab('pasar', 'pasar-ekspansi')">🏗️ Ekspansi</button>
-      </div>
-
-      <!-- Sub-Tab Pasar Bibit -->
-      <div id="subtab-pasar-bibit" class="sub-content active">
-        <div class="grid-container" id="pasar-bibit-container"></div>
-      </div>
-
-      <!-- Sub-Tab Pasar Pupuk -->
-      <div id="subtab-pasar-pupuk" class="sub-content">
-        <div class="grid-container" id="pasar-pupuk-container"></div>
-      </div>
-
-      <!-- Sub-Tab Pasar Hewan -->
-      <div id="subtab-pasar-hewan" class="sub-content">
-        <div class="grid-container" id="pasar-hewan-container"></div>
-      </div>
-
-      <!-- Sub-Tab Pasar Aksesoris -->
-      <div id="subtab-pasar-aksesoris" class="sub-content">
-        <div class="grid-container" id="pasar-aksesoris-container"></div>
-      </div>
-
-      <!-- Sub-Tab Pasar Ekspansi -->
-      <div id="subtab-pasar-ekspansi" class="sub-content">
-        <div class="grid-container" id="pasar-ekspansi-container"></div>
-      </div>
-    </div>
-
-    <!-- 5. TAB INVENTORY -->
-    <div id="tab-inventory" class="tab-content">
-      <div class="sub-nav active-sub">
-        <button class="sub-tab-btn active" onclick="switchSubTab('inventory', 'inv-hasil')">🌾 Hasil Panen & Ternak</button>
-        <button class="sub-tab-btn" onclick="switchSubTab('inventory', 'inv-bibit')">🌱 Bibit, Pakan & Pupuk</button>
-      </div>
-
-      <div id="subtab-inv-hasil" class="sub-content active">
-        <div class="grid-container" id="inv-hasil-container"></div>
-      </div>
-
-      <div id="subtab-inv-bibit" class="sub-content">
-        <div class="grid-container" id="inv-bibit-container"></div>
-      </div>
-    </div>
+    <!-- 6. TAB INVENTORY -->
+    <div id="tab-inventory" class="tab-content"></div>
 
   </div>
 
@@ -143,11 +61,37 @@
 
   <!-- ================= MODAL KUSTOM MODERN ================= -->
 
-  <!-- MODAL JUAL / BELI UNIVERSAL -->
+  <!-- MODAL BELI PASAR DENGAN PILIHAN JUMLAH -->
+  <div class="modal-overlay" id="modal-beli" style="display: none;">
+    <div class="modal-card">
+      <h3 id="modal-beli-title">Beli Barang di Pasar</h3>
+      <p id="modal-beli-info" style="font-size: 13px; color: #64748b; margin-bottom: 8px;"></p>
+      <input type="number" id="input-jumlah-beli" min="1" max="999" value="1" oninput="validasiInputBeli()" />
+      
+      <div class="qty-control-grid">
+        <button onclick="ubahJumlahBeli(-10)">-10</button>
+        <button onclick="ubahJumlahBeli(-1)">-1</button>
+        <button onclick="ubahJumlahBeli(1)">+1</button>
+        <button onclick="ubahJumlahBeli(10)">+10</button>
+        <button class="btn-primary" onclick="setJumlahBeliMaks()">Maks</button>
+      </div>
+
+      <div id="modal-beli-total" style="background: #f1f5f9; padding: 10px; border-radius: 8px; font-weight: bold; color: #2563eb; margin: 12px 0; text-align: center;">
+        Total: Rp 0
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-primary" onclick="eksekusiBeliItem()">Konfirmasi Beli</button>
+        <button class="btn-secondary" onclick="tutupModalBeli()">Batal</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL JUAL INVENTORY DENGAN PILIHAN JUMLAH -->
   <div class="modal-overlay" id="modal-jual" style="display: none;">
     <div class="modal-card">
-      <h3 id="modal-jual-title">Transaksi Item</h3>
-      <p id="modal-jual-info" style="font-size: 12px; color: #64748b; margin-bottom: 8px;"></p>
+      <h3 id="modal-jual-title">Jual Produk Hasil Panen</h3>
+      <p id="modal-jual-info" style="font-size: 13px; color: #64748b; margin-bottom: 8px;"></p>
       <input type="number" id="input-jumlah-jual" min="1" value="1" oninput="validasiInputJual()" />
       
       <div class="qty-control-grid">
@@ -158,9 +102,25 @@
         <button class="btn-primary" onclick="setJumlahJualMaks()">Maks</button>
       </div>
 
+      <div id="modal-jual-total" style="background: #f0fdf4; padding: 10px; border-radius: 8px; font-weight: bold; color: #16a34a; margin: 12px 0; text-align: center;">
+        Total Pendapatan: Rp 0
+      </div>
+
       <div class="modal-actions">
-        <button class="btn-primary" onclick="eksekusiJualItem()">Konfirmasi</button>
+        <button class="btn-primary" onclick="eksekusiJualItemModal()">Konfirmasi Jual</button>
         <button class="btn-secondary" onclick="tutupModalJual()">Batal</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL PILIH PUPUK MASSAL DENGAN COOLDOWN -->
+  <div class="modal-overlay" id="modal-pupuk" style="display: none;">
+    <div class="modal-card">
+      <h3>Pilih Pupuk untuk Lahan</h3>
+      <p style="font-size: 13px; color: #64748b; margin-bottom: 12px;">Pilih pupuk untuk disebar ke semua petak lahan pertanian aktif:</p>
+      <div id="modal-pupuk-list" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px;"></div>
+      <div class="modal-actions">
+        <button class="btn-secondary" onclick="tutupModalPupuk()" style="width: 100%;">Tutup</button>
       </div>
     </div>
   </div>
@@ -211,13 +171,25 @@
     </div>
   </div>
 
-  <!-- MODAL KONFIRMASI JUAL HEWAN -->
+  <!-- MODAL PILIH HEWAN UNTUK DIJUAL -->
+  <div class="modal-overlay" id="modal-pilih-hewan-jual" style="display: none;">
+    <div class="modal-card">
+      <h3 style="color: #ef4444;">Pilih Hewan untuk Dijual</h3>
+      <p style="font-size: 13px; color: #64748b; margin-bottom: 12px;">Pilih nama hewan ternak yang ingin kamu jual:</p>
+      <div id="modal-pilih-hewan-jual-list" style="display: flex; flex-direction: column; gap: 8px; max-height: 280px; overflow-y: auto; margin-bottom: 14px;"></div>
+      <div class="modal-actions">
+        <button class="btn-secondary" onclick="tutupModalPilihHewanJual()" style="width: 100%;">Tutup</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL ALERT PERSETUJUAN JUAL HEWAN -->
   <div class="modal-overlay" id="modal-jual-hewan" style="display: none;">
     <div class="modal-card">
-      <h3 style="color: #ef4444;">Konfirmasi Jual Hewan</h3>
-      <p id="modal-jual-hewan-text" style="font-size: 13px; color: #475569; margin: 10px 0;"></p>
+      <h3 style="color: #ef4444;">⚠️ Persetujuan Jual Hewan</h3>
+      <p id="modal-jual-hewan-text" style="font-size: 14px; color: #334155; margin: 14px 0; line-height: 1.5;"></p>
       <div class="modal-actions">
-        <button class="btn-danger" onclick="eksekusiJualHewanModal()">Ya, Jual</button>
+        <button class="btn-danger" onclick="eksekusiJualHewanModal()">Setujui & Jual</button>
         <button class="btn-secondary" onclick="tutupModalJualHewan()">Batal</button>
       </div>
     </div>
@@ -270,8 +242,8 @@
     <script src="cuaca.js"></script>
     <script src="pertanian.js"></script>
     <script src="peternakan.js"></script>
-    <script src="aksesoris.js"></script>
-    <script src="market.js"></script>
+    <script src="accessories.js"></script>
+    <script src="pasar.js"></script>
     <script src="inventory.js"></script>
     <script src="script.js"></script> <!-- Pengontrol Utama / State Global -->
 </body>
