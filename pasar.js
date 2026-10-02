@@ -24,7 +24,7 @@ function renderPasar() {
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 8px;">
                 <h3 style="margin: 0;">🛒 Pasar Desa</h3>
                 <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 6px 14px; display: inline-flex; align-items: center; gap: 12px; font-size: 13px; font-weight: 600;">
-                    <span style="color: #1e40af;">🏷️ Fluktuasi Beli: <b style="color: ${(typeof MarketEconomy !== 'undefined' && MarketEconomy.buyMultiplier > 1) ? '#dc2626' : '#16a34a'};">${persenBeli}</b> (-2% s.d +50%)</span>
+                    <span style="color: #1e40af;">🏷️ Fluktuasi Beli: <b style="color: ${(typeof MarketEconomy !== 'undefined' && MarketEconomy.buyMultiplier > 1) ? '#dc2626' : '#16a34a'};">${persenBeli}</b> 🏷️</span>
                     <span style="color: #cbd5e1;">|</span>
                     <span style="color: #166534;">📈 Fluktuasi Jual: <b>${persenJual}</b> (-70% s.d +21%)</span>
                 </div>
