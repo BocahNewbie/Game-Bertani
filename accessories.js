@@ -1,112 +1,266 @@
-// ACCESSORIES.JS - Logika Pengelolaan & Tampilan Aksesoris / Item Tambahan
+// ACCESSORIES.JS - Logika Aksesoris Saya & Toko Aksesoris per Kategori (Kepala, Tangan, Badan, Kaki, Telapak Kaki)
 
+function hitungTotalBonusAksesoris() {
+    let totalBonus = 0;
+    if (!gameState.accessoriesTerpasang) {
+        gameState.accessoriesTerpasang = { kepala: null, tangan: null, badan: null, kaki: null, telapak: null };
+    }
+    
+    // Support jika masih format array lama
+    if (Array.isArray(gameState.accessoriesTerpasang)) {
+        const tempObj = { kepala: null, tangan: null, badan: null, kaki: null, telapak: null };
+        gameState.accessoriesTerpasang.forEach(idAcc => {
+            const item = GAME_DATABASE.accessories[idAcc];
+            if (item && item.kategori) tempObj[item.kategori] = idAcc;
+        });
+        gameState.accessoriesTerpasang = tempObj;
+    }
+
+    Object.values(gameState.accessoriesTerpasang).forEach(idAcc => {
+        if (idAcc) {
+            const item = GAME_DATABASE.accessories[idAcc];
+            if (item) totalBonus += (item.bonus || 0);
+        }
+    });
+
+    return totalBonus;
+}
+
+// ==========================================
+// 1. TAB: AKSESORIS SAYA (WARDROBE & KOLEKSI)
+// ==========================================
 function renderAccessories() {
-    const container = document.getElementById("tab-accessories"); // Sesuaikan dengan ID container halaman aksesoris di HTML kamu
+    const container = document.getElementById("tab-aksesoris");
     if (!container || typeof GAME_DATABASE === 'undefined' || !gameState) return;
+
+    if (!gameState.inventory.accessories) gameState.inventory.accessories = {};
+    if (!gameState.accessoriesTerpasang || Array.isArray(gameState.accessoriesTerpasang)) {
+        hitungTotalBonusAksesoris(); // Normalize format
+    }
+
+    const totalBonus = hitungTotalBonusAksesoris();
 
     let html = `
         <div class="accessories-header" style="margin-bottom: 20px;">
-            <h3>Toko & Koleksi Aksesoris</h3>
-            <p style="font-size: 14px; color: #475569;">Percantik area pertanian atau tingkatkan fitur spesial dengan aksesoris menarik.</p>
+            <h3 style="margin: 0 0 6px 0;">🎩 Aksesoris yang Sedang Dipakai</h3>
+            <p style="font-size: 14px; color: #475569; margin: 0 0 12px 0;">
+                Hanya bisa memakai <b>1 aksesoris untuk setiap kategori</b> (Kepala, Tangan, Badan, Kaki, Telapak Kaki).
+            </p>
+            <div style="background: #e0f2fe; border: 1px solid #7dd3fc; border-radius: 8px; padding: 10px 16px; font-weight: bold; color: #0369a1; display: inline-flex; align-items: center; gap: 8px;">
+                <span>✨ Total Bonus Harga Jual:</span>
+                <span style="font-size: 16px; color: #0284c7;">+${totalBonus}%</span>
+            </div>
         </div>
-        <div class="grid-accessories" style="display: flex; flex-direction: column; gap: 20px;">
+
+        <!-- 5 SLOT KATEGORI TERPASANG -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 24px;">
     `;
 
-    // Pastikan struktur state aksesoris tersedia
-    if (!gameState.inventory.accessories) gameState.inventory.accessories = {};
-    if (!gameState.accessoriesTerpasang) gameState.accessoriesTerpasang = [];
+    KATEGORI_AKSESORIS.forEach(kat => {
+        const idTerpasang = gameState.accessoriesTerpasang[kat.id];
+        const itemTerpasang = idTerpasang ? GAME_DATABASE.accessories[idTerpasang] : null;
 
-    // 1. Bagian Daftar Aksesoris yang Dimiliki / Bisa Dipasang
+        html += `
+            <div style="background: ${itemTerpasang ? '#f0fdf4' : '#f8fafc'}; border: 2px solid ${itemTerpasang ? '#86efac' : '#e2e8f0'}; border-radius: 12px; padding: 14px; text-align: center;">
+                <p style="font-size: 12px; font-weight: bold; color: #64748b; margin: 0 0 6px 0; text-transform: uppercase;">
+                    ${kat.icon} ${kat.nama}
+                </p>
+                <div style="font-size: 32px; margin-bottom: 6px;">
+                    ${itemTerpasang ? itemTerpasang.icon : '⚪'}
+                </div>
+                <p style="font-weight: bold; margin: 0 0 4px 0; font-size: 13px; color: ${itemTerpasang ? '#15803d' : '#94a3b8'};">
+                    ${itemTerpasang ? itemTerpasang.nama : 'Kosong'}
+                </p>
+                ${itemTerpasang ? `
+                    <p style="font-size: 11px; color: #16a34a; font-weight: bold; margin: 0 0 8px 0;">+${itemTerpasang.bonus}% Bonus Jual</p>
+                    <button onclick="lepasAksesoris('${kat.id}')" style="padding: 4px 10px; background: #ef4444; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: bold;">
+                        Lepas
+                    </button>
+                ` : `
+                    <p style="font-size: 11px; color: #94a3b8; margin: 0;">Belum dipakai</p>
+                `}
+            </div>
+        `;
+    });
+
+    html += `</div>`;
+
+    // 2. KOLEKSI SAYA PER KATEGORI
     html += `
-        <div style="background: #f8fafc; border: 2px solid #cbd5e1; border-radius: 10px; padding: 15px;">
-            <h4 style="margin-top: 0; color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px;">Aksesoris Saya</h4>
-            <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px;">
+        <div style="border-top: 2px solid #e2e8f0; padding-top: 20px;">
+            <h3 style="margin: 0 0 6px 0;">📦 Koleksi Aksesoris Milikmu</h3>
+            <p style="font-size: 13px; color: #64748b; margin: 0 0 16px 0;">Pilih aksesoris yang ingin dipakai. Memakai aksesoris baru akan menggantikan yang sedang terpasang di kategori yang sama.</p>
     `;
 
-    let totalAksesorisDimiliki = Object.values(gameState.inventory.accessories).reduce((a, b) => a + b, 0);
+    KATEGORI_AKSESORIS.forEach(kat => {
+        html += `
+            <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 10px; padding: 14px; margin-bottom: 16px;">
+                <h4 style="margin: 0 0 10px 0; color: #1e293b; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px;">
+                    ${kat.icon} Kategori: ${kat.nama}
+                </h4>
+                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+        `;
 
-    if (totalAksesorisDimiliki === 0) {
-        html += `<p style="font-size: 13px; color: #94a3b8; font-style: italic; margin: 5px 0;">Kamu belum memiliki aksesoris. Beli di bawah ini!</p>`;
-    } else {
+        let adaKoleksiKategori = false;
         Object.entries(gameState.inventory.accessories).forEach(([idAcc, jumlah]) => {
-            if (jumlah > 0) {
-                let isTerpasang = gameState.accessoriesTerpasang.includes(idAcc);
+            const dataAcc = GAME_DATABASE.accessories[idAcc];
+            if (jumlah > 0 && dataAcc && dataAcc.kategori === kat.id) {
+                adaKoleksiKategori = true;
+                const sedangDipakai = gameState.accessoriesTerpasang[kat.id] === idAcc;
                 html += `
-                    <div style="background: white; border: 1px solid #94a3b8; border-radius: 8px; padding: 10px 15px; min-width: 140px; text-align: center;">
-                        <p style="font-weight: bold; margin: 0 0 5px 0; text-transform: capitalize;">${idAcc}</p>
-                        <p style="font-size: 13px; color: ${isTerpasang ? '#16a34a' : '#475569'}; margin: 0 0 8px 0; font-weight: 600;">
-                            ${isTerpasang ? '✨ Terpasang' : `Miliki: ${jumlah}`}
-                        </p>
-                        <button onclick="togglePasangAksesoris('${idAcc}')" style="padding: 4px 10px; background: ${isTerpasang ? '#dc2626' : '#2563eb'}; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold;">
-                            ${isTerpasang ? 'Lepas' : 'Pasang'}
+                    <div style="background: white; border: 1px solid ${sedangDipakai ? '#22c55e' : '#cbd5e1'}; border-radius: 8px; padding: 10px 14px; min-width: 140px; text-align: center;">
+                        <span style="font-size: 26px;">${dataAcc.icon}</span>
+                        <p style="font-weight: bold; margin: 4px 0 2px 0; font-size: 13px;">${dataAcc.nama}</p>
+                        <p style="font-size: 11px; color: #16a34a; font-weight: bold; margin: 0 0 6px 0;">Bonus: +${dataAcc.bonus}%</p>
+                        <button onclick="togglePakaiAksesoris('${idAcc}')" style="padding: 4px 10px; background: ${sedangDipakai ? '#ef4444' : '#2563eb'}; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold;">
+                            ${sedangDipakai ? 'Lepas' : 'Pakai'}
                         </button>
                     </div>
                 `;
             }
         });
-    }
 
-    html += `</div></div>`;
+        if (!adaKoleksiKategori) {
+            html += `<p style="font-size: 12px; color: #94a3b8; font-style: italic; margin: 4px 0;">Belum memiliki aksesoris kategori ${kat.nama}. Beli di Toko Aksesoris!</p>`;
+        }
 
-    // 2. Bagian Toko Pembelian Aksesoris (jika ada database aksesoris)
-    html += `
-        <div style="background: #f8fafc; border: 2px solid #cbd5e1; border-radius: 10px; padding: 15px;">
-            <h4 style="margin-top: 0; color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px;">Toko Aksesoris</h4>
-            <div style="display: flex; gap: 15px; flex-wrap: wrap;">
-    `;
+        html += `</div></div>`;
+    });
 
-    // Cek apakah database menyediakan kategori aksesoris
-    const dbAccessories = GAME_DATABASE.accessories || GAME_DATABASE.aksesoris || {};
-    
-    if (Object.keys(dbAccessories).length === 0) {
-        html += `<p style="font-size: 13px; color: #94a3b8; font-style: italic; margin: 5px 0;">Belum ada item aksesoris di database.</p>`;
-    } else {
-        Object.values(dbAccessories).forEach(item => {
-            html += `
-                <div style="background: white; border: 1px solid #bfdbfe; padding: 15px; border-radius: 8px; min-width: 150px; text-align: center;">
-                    <span style="font-size: 24px;">${item.icon || '🎀'}</span>
-                    <p style="font-weight: bold; margin: 5px 0;">${item.nama}</p>
-                    <p style="color: #475569; font-size: 13px; margin-bottom: 8px;">Harga: Rp ${item.hargaBeli}</p>
-                    <button onclick="beliAksesoris('${item.id}', ${item.hargaBeli})" style="padding: 6px 12px; background: #16a34a; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 12px;">Beli</button>
-                </div>
-            `;
-        });
-    }
-
-    html += `</div></div></div>`;
+    html += `</div>`;
     container.innerHTML = html;
 }
 
-// --- FUNGSI AKSI AKSESORIS ---
+// ==========================================
+// 2. TAB: TOKO AKSESORIS (BELI PER KATEGORI)
+// ==========================================
+let subTabTokoAksesorisAktif = 'kepala';
 
-function beliAksesoris(idItem, harga) {
-    if (gameState.koin < harga) {
-        alert("Koin kamu tidak mencukupi untuk membeli aksesoris ini!");
-        return;
-    }
-
-    gameState.koin -= harga;
-    if (!gameState.inventory.accessories) gameState.inventory.accessories = {};
-    gameState.inventory.accessories[idItem] = (gameState.inventory.accessories[idItem] || 0) + 1;
-
-    alert(`Berhasil membeli aksesoris ${idItem}!`);
-    renderAccessories();
-    if (typeof renderInventory === 'function') renderInventory();
+function switchSubTabToko(kategoriId) {
+    subTabTokoAksesorisAktif = kategoriId;
+    renderTokoAccessories();
 }
 
-function togglePasangAksesoris(idItem) {
-    if (!gameState.accessoriesTerpasang) gameState.accessoriesTerpasang = [];
+function renderTokoAccessories() {
+    const container = document.getElementById("tab-toko-aksesoris");
+    if (!container || typeof GAME_DATABASE === 'undefined' || !gameState) return;
 
-    const index = gameState.accessoriesTerpasang.indexOf(idItem);
-    if (index > -1) {
-        // Jika sudah terpasang, lepas
-        gameState.accessoriesTerpasang.splice(index, 1);
-        alert(`Aksesoris ${idItem} berhasil dilepas.`);
+    let html = `
+        <div style="margin-bottom: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 8px;">
+                <h3 style="margin: 0;">🛍️ Toko Aksesoris Petani</h3>
+                <span style="background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; padding: 4px 12px; border-radius: 6px; font-size: 13px; font-weight: bold;">
+                    🏷️ Fluktuasi Beli: ${typeof MarketEconomy !== 'undefined' ? MarketEconomy.getPersentaseBeli() : '0%'}
+                </span>
+            </div>
+            <p style="font-size: 14px; color: #475569; margin: 0 0 14px 0;">Aksesoris eksklusif hanya dapat dibeli 1 kali. Beli aksesoris keren untuk meningkatkan harga jual hasil panen.</p>
+            
+            <!-- SUB-NAV KATEGORI TOKO -->
+            <div class="sub-nav" style="display: flex; gap: 8px; flex-wrap: wrap;">
+    `;
+
+    KATEGORI_AKSESORIS.forEach(kat => {
+        const isActive = subTabTokoAksesorisAktif === kat.id;
+        html += `
+            <button onclick="switchSubTabToko('${kat.id}')" class="sub-tab-btn ${isActive ? 'active' : ''}">
+                ${kat.icon} ${kat.nama}
+            </button>
+        `;
+    });
+
+    html += `</div></div>`;
+
+    // DAFTAR ITEM SESUAI KATEGORI AKTIF
+    const katData = KATEGORI_AKSESORIS.find(k => k.id === subTabTokoAksesorisAktif) || KATEGORI_AKSESORIS[0];
+    
+    html += `
+        <div style="background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 12px; padding: 18px;">
+            <h4 style="margin: 0 0 14px 0; color: #1e293b; border-bottom: 2px solid #cbd5e1; padding-bottom: 8px;">
+                ${katData.icon} Pilihan Aksesoris: ${katData.nama}
+            </h4>
+            <div style="display: flex; gap: 14px; flex-wrap: wrap;">
+    `;
+
+    const itemsKategori = Object.values(GAME_DATABASE.accessories).filter(item => item.kategori === katData.id);
+
+    itemsKategori.forEach(item => {
+        const jumlahDimiliki = (gameState.inventory.accessories && gameState.inventory.accessories[item.id]) || 0;
+        const sudahDimiliki = jumlahDimiliki > 0;
+        const hargaBeliAktif = typeof MarketEconomy !== 'undefined' ? MarketEconomy.getHargaBeli(item.hargaBeli) : item.hargaBeli;
+
+        html += `
+            <div style="background: white; border: 1px solid ${sudahDimiliki ? '#86efac' : '#bfdbfe'}; border-radius: 10px; padding: 16px; min-width: 160px; max-width: 200px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.03);">
+                <div style="font-size: 32px; margin-bottom: 6px;">${item.icon}</div>
+                <p style="font-weight: bold; margin: 4px 0; font-size: 14px;">${item.nama}</p>
+                <p style="font-size: 12px; color: #16a34a; font-weight: bold; margin: 0 0 6px 0;">Bonus Jual: +${item.bonus}%</p>
+                <p style="color: #2563eb; font-weight: bold; font-size: 14px; margin: 0 0 4px 0;">Rp ${hargaBeliAktif.toLocaleString()}</p>
+                <p style="font-size: 12px; color: ${sudahDimiliki ? '#16a34a' : '#64748b'}; font-weight: bold; margin: 0 0 10px 0;">
+                    ${sudahDimiliki ? '✅ Dimiliki' : 'Belum Dimiliki'}
+                </p>
+                ${sudahDimiliki ? `
+                    <button disabled style="padding: 6px 14px; background: #cbd5e1; color: #475569; border: none; border-radius: 6px; font-size: 12px; font-weight: bold; width: 100%; cursor: not-allowed;">
+                        Dimiliki
+                    </button>
+                ` : `
+                    <button onclick="bukaModalBeliItem('accessories', '${item.id}', ${hargaBeliAktif}, '${item.nama.replace(/'/g, "\\'")}', '${item.icon}')" style="padding: 6px 14px; background: #16a34a; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold; width: 100%;">
+                        Beli
+                    </button>
+                `}
+            </div>
+        `;
+    });
+
+    html += `</div></div>`;
+    container.innerHTML = html;
+}
+
+// ==========================================
+// 3. FUNGSI EQUIPPING / PASANG AKSESORIS
+// ==========================================
+function togglePakaiAksesoris(idItem) {
+    if (!gameState.accessoriesTerpasang || Array.isArray(gameState.accessoriesTerpasang)) {
+        hitungTotalBonusAksesoris();
+    }
+
+    const item = GAME_DATABASE.accessories[idItem];
+    if (!item || !item.kategori) return;
+
+    const kat = item.kategori;
+    if (gameState.accessoriesTerpasang[kat] === idItem) {
+        // Lepas item
+        gameState.accessoriesTerpasang[kat] = null;
+        if (typeof tampilkanToast === 'function') {
+            tampilkanToast(`Aksesoris ${item.nama} dilepas dari slot ${kat}.`);
+        }
     } else {
-        // Jika belum, pasang
-        gameState.accessoriesTerpasang.push(idItem);
-        alert(`Aksesoris ${idItem} berhasil dipasang!`);
+        // Pasang item (otomatis gantikan yang ada di kategori tersebut)
+        const itemSebelumnya = gameState.accessoriesTerpasang[kat] ? GAME_DATABASE.accessories[gameState.accessoriesTerpasang[kat]] : null;
+        gameState.accessoriesTerpasang[kat] = idItem;
+        if (typeof tampilkanToast === 'function') {
+            if (itemSebelumnya) {
+                tampilkanToast(`✨ ${item.nama} dipakai (menggantikan ${itemSebelumnya.nama} di ${kat})!`);
+            } else {
+                tampilkanToast(`✨ Aksesoris ${item.nama} berhasil dipakai di ${kat}!`);
+            }
+        }
     }
 
     renderAccessories();
+    if (typeof updateHeaderStats === 'function') updateHeaderStats();
+    if (typeof simpanGame === 'function') simpanGame();
+}
+
+function lepasAksesoris(kategoriId) {
+    if (!gameState.accessoriesTerpasang) return;
+    const idItem = gameState.accessoriesTerpasang[kategoriId];
+    if (idItem) {
+        const item = GAME_DATABASE.accessories[idItem];
+        gameState.accessoriesTerpasang[kategoriId] = null;
+        if (typeof tampilkanToast === 'function') {
+            tampilkanToast(`Aksesoris ${item ? item.nama : idItem} dilepas.`);
+        }
+        renderAccessories();
+        if (typeof updateHeaderStats === 'function') updateHeaderStats();
+        if (typeof simpanGame === 'function') simpanGame();
+    }
 }
