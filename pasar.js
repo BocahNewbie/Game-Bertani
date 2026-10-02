@@ -51,7 +51,7 @@ function renderPasar() {
     // 5. Hewan Ternak
     html += renderKategoriPasar("🐾 Hewan Ternak", GAME_DATABASE.ternak, 'ternak');
 
-    // 6. Ekspansi & Perluasan (Dibeli 1 per 1, harga naik 674%)
+    // 6. Ekspansi & Perluasan
     html += renderKategoriPasar("🏗️ Ekspansi & Perluasan (Satu per Satu)", GAME_DATABASE.ekspansi, 'ekspansi');
 
     html += `</div>`;
@@ -71,7 +71,7 @@ function renderKategoriPasar(judul, dataItem, tipeKategori) {
 
         if (tipeKategori === 'ekspansi') {
             hargaBeliAktif = (gameState.hargaEkspansi && gameState.hargaEkspansi[item.id]) ? gameState.hargaEkspansi[item.id] : item.hargaBeli;
-            infoTambahan = `<p style="font-size: 11px; color: #b45309; font-weight: bold; margin: 0 0 6px 0;">Beli 1 unit (Naik 674% berikutnya)</p>`;
+            infoTambahan = `<p style="font-size: 11px; color: #b45309; font-weight: bold; margin: 0 0 6px 0;">Hehehe</p>`;
         } else {
             // Hitung harga beli dengan fluktuasi
             hargaBeliAktif = typeof MarketEconomy !== 'undefined' ? MarketEconomy.getHargaBeli(item.hargaBeli) : item.hargaBeli;
