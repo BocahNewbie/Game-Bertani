@@ -8,10 +8,10 @@ function renderPasar() {
 
     if (!gameState.hargaEkspansi) {
         gameState.hargaEkspansi = {
-            lahan: 1000,
-            kandang_ayam: 2500,
-            kandang_sapi: 7500,
-            kandang_domba: 5000
+            lahan: 650000,
+            kandang_ayam: 250000,
+            kandang_sapi: 750000,
+            kandang_domba: 450000
         };
     }
 
@@ -118,11 +118,11 @@ function renderKategoriPasar(judul, dataItem, tipeKategori) {
 function beliSatuEkspansi(idItem, namaItem) {
     if (!gameState.hargaEkspansi) {
         gameState.hargaEkspansi = {
-            lahan: 1000,
-            kandang_ayam: 2500,
-            kandang_sapi: 7500,
-            kandang_domba: 5000,
-            inkubasi: 1500
+            lahan: 650000,
+            kandang_ayam: 250000,
+            kandang_sapi: 750000,
+            kandang_domba: 450000,
+            inkubasi: 65000
         };
     }
 
