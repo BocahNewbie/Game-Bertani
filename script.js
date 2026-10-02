@@ -43,11 +43,11 @@ const DEFAULT_GAME_STATE = {
         super: 0
     },
     hargaEkspansi: {
-        lahan: 1000,
-        kandang_ayam: 2500,
-        kandang_sapi: 7500,
-        kandang_domba: 5000,
-        inkubasi: 1500
+        lahan: 650000,
+        kandang_ayam: 250000,
+        kandang_sapi: 750000,
+        kandang_domba: 450000,
+        inkubasi: 75000
     }
 };
 
