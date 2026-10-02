@@ -153,7 +153,7 @@ function renderTokoAccessories() {
                     🏷️ Fluktuasi Beli: ${typeof MarketEconomy !== 'undefined' ? MarketEconomy.getPersentaseBeli() : '0%'}
                 </span>
             </div>
-            <p style="font-size: 14px; color: #475569; margin: 0 0 14px 0;">Aksesoris eksklusif hanya dapat dibeli 1 kali. Beli aksesoris keren untuk meningkatkan harga jual hasil panen.</p>
+            <p style="font-size: 14px; color: #475569; margin: 0 0 14px 0;">Aksesoris buat bergaya.</p>
             
             <!-- SUB-NAV KATEGORI TOKO -->
             <div class="sub-nav" style="display: flex; gap: 8px; flex-wrap: wrap;">
