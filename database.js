@@ -12,15 +12,13 @@ const GAME_DATABASE = {
         padi: { id: "padi", nama: "Padi", hargaBeli: 10, hargaJual: 20, durasi: 60, xp: 15, icon: "🌾" },
         jagung: { id: "jagung", nama: "Jagung", hargaBeli: 17, hargaJual: 33, durasi: 120, xp: 30, icon: "🌽" },
         cabai: { id: "cabai", nama: "Cabai", hargaBeli: 25, hargaJual: 59, durasi: 300, xp: 60, icon: "🌶️" },
-        // Tanaman Baru Tambahan
         tomat: { id: "tomat", nama: "Tomat", hargaBeli: 26, hargaJual: 50, durasi: 270, xp: 20, icon: "🍅" },
         apel: { id: "apel", nama: "Apel", hargaBeli: 60, hargaJual: 150, durasi: 259200, xp: 90, icon: "🍎" },
         bawang_merah: { id: "bawang_merah", nama: "Bawang Merah", hargaBeli: 25, hargaJual: 42, durasi: 43200, xp: 25, icon: "🧅" },
         wortel: { id: "wortel", nama: "Wortel", hargaBeli: 18, hargaJual: 45, durasi: 86400, xp: 18, icon: "🥕" },
         kacang: { id: "kacang", nama: "Kacang", hargaBeli: 12, hargaJual: 34, durasi: 43200, xp: 16, icon: "🥜" },
         kol: { id: "kol", nama: "Kol", hargaBeli: 10, hargaJual: 25, durasi: 30, xp: 1800, icon: "🥬" }
-    }, 
-    
+    },
     pupuk: {
         biasa: { id: "biasa", nama: "Pupuk Urea", hargaBeli: 370, efekPengurangDurasi: 10800, cooldownDetik: 1800, icon: "🧪", deskripsi: "Kurangi durasi 3 Jam (Cooldown 30 menit)" },
         super: { id: "super", nama: "Pupuk Super", hargaBeli: 750, efekPengurangDurasi: 21600, cooldownDetik: 3600, icon: "✨", deskripsi: "Kurangi durasi 6 Jam (Cooldown 1 Jam)" }
