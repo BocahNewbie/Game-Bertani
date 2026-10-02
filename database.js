@@ -1,5 +1,4 @@
 // DATABASE.JS - Data Master Game-Bertani
-
 const KATEGORI_AKSESORIS = [
     { id: 'kepala', nama: 'Kepala', icon: '🧢' },
     { id: 'tangan', nama: 'Tangan', icon: '🧤' },
@@ -9,20 +8,19 @@ const KATEGORI_AKSESORIS = [
 ];
 
 const GAME_DATABASE = {
-    
     tanaman: {
-    padi: { id: "padi", nama: "Padi", hargaBeli: 10, hargaJual: 20, durasi: 60, xp: 15, icon: "🌾" },
-    jagung: { id: "jagung", nama: "Jagung", hargaBeli: 17, hargaJual: 33, durasi: 120, xp: 30, icon: "🌽" },
-    cabai: { id: "cabai", nama: "Cabai", hargaBeli: 25, hargaJual: 59, durasi: 300, xp: 60, icon: "🌶️" },
-    // Tanaman Baru Tambahan
-    tomat: { id: "tomat", nama: "Tomat", hargaBeli: 26, hargaJual: 50, durasi: 270, xp: 20, icon: "🍅" },
-    apel: { id: "apel", nama: "Apel", hargaBeli: 60, hargaJual: 150, durasi: 259200, xp: 90, icon: "🍎" },
-    bawang_merah: { id: "bawang_merah", nama: "Bawang Merah", hargaBeli: 25, hargaJual: 42, durasi: 43200, xp: 25, icon: "🧅" },
-    wortel: { id: "wortel", nama: "Wortel", hargaBeli: 18, hargaJual: 45, durasi: 86400, xp: 18, icon: "🥕" },
-    kacang: { id: "kacang", nama: "Kacang", hargaBeli: 12, hargaJual: 34, durasi: 43200, xp: 16, icon: "🥜" },
-    kol: { id: "kol", nama: "Kol", hargaBeli: 10, hargaJual: 25, durasi: 30, xp: 1800, icon: "🥬" }
-}
-        
+        padi: { id: "padi", nama: "Padi", hargaBeli: 10, hargaJual: 20, durasi: 60, xp: 15, icon: "🌾" },
+        jagung: { id: "jagung", nama: "Jagung", hargaBeli: 17, hargaJual: 33, durasi: 120, xp: 30, icon: "🌽" },
+        cabai: { id: "cabai", nama: "Cabai", hargaBeli: 25, hargaJual: 59, durasi: 300, xp: 60, icon: "🌶️" },
+        // Tanaman Baru Tambahan
+        tomat: { id: "tomat", nama: "Tomat", hargaBeli: 26, hargaJual: 50, durasi: 270, xp: 20, icon: "🍅" },
+        apel: { id: "apel", nama: "Apel", hargaBeli: 60, hargaJual: 150, durasi: 259200, xp: 90, icon: "🍎" },
+        bawang_merah: { id: "bawang_merah", nama: "Bawang Merah", hargaBeli: 25, hargaJual: 42, durasi: 43200, xp: 25, icon: "🧅" },
+        wortel: { id: "wortel", nama: "Wortel", hargaBeli: 18, hargaJual: 45, durasi: 86400, xp: 18, icon: "🥕" },
+        kacang: { id: "kacang", nama: "Kacang", hargaBeli: 12, hargaJual: 34, durasi: 43200, xp: 16, icon: "🥜" },
+        kol: { id: "kol", nama: "Kol", hargaBeli: 10, hargaJual: 25, durasi: 30, xp: 1800, icon: "🥬" }
+    }, 
+    
     pupuk: {
         biasa: { id: "biasa", nama: "Pupuk Urea", hargaBeli: 370, efekPengurangDurasi: 10800, cooldownDetik: 1800, icon: "🧪", deskripsi: "Kurangi durasi 3 Jam (Cooldown 30 menit)" },
         super: { id: "super", nama: "Pupuk Super", hargaBeli: 750, efekPengurangDurasi: 21600, cooldownDetik: 3600, icon: "✨", deskripsi: "Kurangi durasi 6 Jam (Cooldown 1 Jam)" }
@@ -39,7 +37,6 @@ const GAME_DATABASE = {
         sapi: { id: "sapi", nama: "Sapi", subKandang: "sapi", hargaBeli: 10000000, hargaJual: 3950000, hasilPanen: "2-7 Susu", durasiProduksi: 1440, icon: "🐮" },
         domba: { id: "domba", nama: "Domba", subKandang: "domba", hargaBeli: 3545000, hargaJual: 650000, hasilPanen: "1 Wol", durasiProduksi: 1440, icon: "🐑" }
     },
-
     ekspansi: {
         lahan: { id: "lahan", nama: "Lahan Pertanian", hargaBeli: 650000, maxLimit: 10, icon: "🚜" },
         kandang_ayam: { id: "kandang_ayam", nama: "Kandang Ayam", hargaBeli: 250000, maxLimit: 10, icon: "🐔" },
@@ -47,7 +44,6 @@ const GAME_DATABASE = {
         kandang_domba: { id: "kandang_domba", nama: "Kandang Domba", hargaBeli: 450000, maxLimit: 10, icon: "🐑" },
         inkubasi: { id: "inkubasi", nama: "Mesin Inkubasi", hargaBeli: 75000, maxLimit: 8, icon: "🥚" }
     },
-
     accessories: {
         // 1. Kepala
         topi_biasa: { id: "topi_biasa", nama: "Topi Biasa", kategori: "kepala", hargaBeli: 150000, bonusPanen: 0.05, bonusTernak: 1, icon: "🧢" },
