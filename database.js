@@ -67,7 +67,7 @@ const GAME_DATABASE = {
         kaos_partai: { id: "kaos_partai", nama: "Kaos Partai", kategori: "badan", hargaBeli: 400000, bonusPanen: 0.02, bonusHargaJualPanen: 0.20, icon: "🚩" },
         baju_petani: { id: "baju_petani", nama: "Baju Petani", kategori: "badan", hargaBeli: 600000, bonusPanen: 0.18, bonusHargaJualTernak: 0.05, icon: "🧑‍🌾" },
         hoodie_petani: { id: "hoodie_petani", nama: "Hoodie Petani", kategori: "badan", hargaBeli: 950000, bonusPanenAbsolut: 17, bonusTernak: 0.50, syaratTangan: "sarung_biasa", icon: "🧥" },
-        baju_partai: { id: "baju_partai", nama: "Baju Partai", kategori: "badan", hargaBeli: 1300000, bonusPanen: 0.10, bonusHargaJualSemua: 0.23, icon: "⭐" },
+        baju_partai: { id: "baju_hazmat", nama: "Baju Hazmat", kategori: "badan", hargaBeli: 1300000, bonusPanen: 0.10, bonusHargaJualSemua: 0.23, icon: "⭐" },
         baju_kerajaan: { id: "baju_kerajaan", nama: "Baju Kerajaan", kategori: "badan", hargaBeli: 3000000, bonusPanen: 0.40, bonusHargaJualKol: 0.50, icon: "👑" },
 
         // 4. Kaki (Celana)
