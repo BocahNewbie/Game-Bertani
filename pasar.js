@@ -29,7 +29,7 @@ function renderPasar() {
                     <span style="color: #166534;">📈 Fluktuasi Jual: <b>${persenJual}</b> (-70% s.d +21%)</span>
                 </div>
             </div>
-            <p style="font-size: 14px; color: #475569; margin: 0;">Harga beli barang di pasar (termasuk hewan ternak) berfluktuasi antara -2% s.d +50%, dan harga jual (termasuk hewan ternak) berfluktuasi antara -70% s.d +21%. Maksimal pembelian per transaksi adalah 999 unit.</p>
+            <p style="font-size: 14px; color: #475569; margin: 0;">Harga beli barang di pasar (termasuk hewan ternak) berfluktuasi.</p>
         </div>
         <div style="display: flex; flex-direction: column; gap: 20px;">
     `;
