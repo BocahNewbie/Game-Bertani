@@ -22,9 +22,9 @@ const DEFAULT_GAME_STATE = {
         domba: []
     },
     kapasitasKandang: {
-        ayam: 2,
-        sapi: 2,
-        domba: 2
+        ayam: 1,
+        sapi: 1,
+        domba: 1
     },
     kapasitasInkubasi: 1,
     inkubasi: [],
