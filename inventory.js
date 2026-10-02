@@ -38,10 +38,10 @@ function renderInventory() {
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 8px;">
                 <h3 style="margin: 0;">🎒 Tas Inventory Kamu</h3>
                 <div style="background: ${bgPersen}; border: 1px solid ${borderPersen}; border-radius: 8px; padding: 6px 14px; display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: ${warnaPersen};">
-                    <span>📈 Fluktuasi Jual Pasar: <b>${persenJual}</b> (-70% s.d +21%)</span>
+                    <span>📈 Fluktuasi Jual Pasar: <b>${persenJual}</b>🏷️</span>
                 </div>
             </div>
-            <p style="font-size: 14px; color: #475569; margin: 0;">Semua barang hasil panen dan ternak mengikuti fluktuasi harga jual pasar global secara realtime (-70% s.d +21%).</p>
+            <p style="font-size: 14px; color: #475569; margin: 0;">Semua barang hasil panen dan ternak mengikuti fluktuasi harga jual pasar global.</p>
         </div>
         <div class="inventory-categories" style="display: flex; flex-direction: column; gap: 20px;">
     `;
