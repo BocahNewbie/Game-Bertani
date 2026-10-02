@@ -107,7 +107,7 @@ function renderPeternakan() {
                 <div>
                     <h3 style="margin: 0 0 4px 0;">🐾 Area Peternakan & Inkubasi Telur</h3>
                     <p style="font-size: 13px; color: #475569; margin: 0;">
-                        Rawat hewan ternak, beri pakan, ganti nama, pengeraman telur, atau jual hewan melalui tombol khusus.
+                        Rawat hewan mu dengan baik.
                     </p>
                 </div>
                 <!-- BUTTON KHUSUS JUAL HEWAN TERNAK -->
