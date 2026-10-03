@@ -455,3 +455,8 @@ button:hover {
     background: #cbd5e1;
     border-radius: 4px;
 }
+
+button:active {
+    transform: scale(0.97); /* Efek tekan ringan tanpa memantul */
+    transition: transform 0.1s ease;
+}
