@@ -34,11 +34,11 @@ const MarketEconomy = {
 
     acakFluktuasi() {
         // Harga jual berfluktuasi antara penurunan 70% (0.40) hingga kenaikan 17% (1.17)
-        const randomSell = Math.random() * (1.17 - 0.40) + 0.30;
+        const randomSell = Math.random() * (1.26 - 0.40) + 0.40;
         this.multiplier = parseFloat(randomSell.toFixed(2));
 
         // Harga beli di pasar: penurunan sekitar 2% (0.98) hingga kenaikan sekitar 50% (1.50)
-        const randomBuy = Math.random() * (1.50 - 0.98) + 0.98;
+        const randomBuy = Math.random() * (1.60 - 0.95) + 0.95;
         this.buyMultiplier = parseFloat(randomBuy.toFixed(2));
 
         // Simpan ke localStorage agar tidak reset saat halaman di-refresh
