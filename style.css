@@ -1,14 +1,13 @@
 /* ==========================================
-   STYLE.CSS - Tema Biru Dongker & Kotak Konten Bersih
+   STYLE.CSS - Tata Letak Terstruktur & Elegan
    ========================================== */
 
 :root {
     --bg-primary: #0b1329;       /* Biru Dongker Gelap (Latar Belakang Utama) */
-    --bg-card: #ffffff;          /* Warna Kotak Konten (Putih Bersih agar kontras) */
+    --bg-card: #ffffff;          /* Putih Bersih untuk Kotak Kartu */
     --accent-tosca: #06b6d4;     /* Biru Tosca Utama */
     --accent-tosca-hover: #22d3ee;/* Tosca Lebih Terang saat di-hover */
-    --text-main: #1e293b;        /* Teks Gelap di dalam Kotak Putih */
-    --text-title: #0f172a;       /* Judul Utama */
+    --text-main: #1e293b;        /* Teks Utama Gelap */
     --border-color: #e2e8f0;     /* Garis Batas Lembut */
 }
 
@@ -20,7 +19,7 @@ body {
     padding: 0;
 }
 
-/* Header Atas & Navigasi Utama Game */
+/* Header Atas & Navigasi */
 .game-header, 
 .header-container,
 .top-bar {
@@ -28,16 +27,15 @@ body {
     color: #f1f5f9;
 }
 
-/* Kotak Konten / Tab Game (Dibuat putih bersih kembali seperti semula) */
+/* Kontainer Utama Tab (Transparan agar tidak menumpuk kotak putih) */
 .game-container, 
 div[id^="tab-"] {
-    background-color: #f8fafc !important;
-    border: 1px solid #cbd5e1;
-    border-radius: 12px;
-    color: var(--text-main) !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    padding: 20px;
-    margin: 15px;
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 10px 20px;
+    margin: 0 auto;
+    max-width: 1000px;
 }
 
 /* Navigasi Tab Menu */
@@ -72,7 +70,6 @@ input[type="submit"] {
     cursor: pointer;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     transition: background 0.2s ease, box-shadow 0.2s ease;
-    /* Mencegah tombol memantul/bergeser saat diklik */
     transform: none !important;
     outline: none;
 }
@@ -88,7 +85,6 @@ button:active, .btn:active {
     transform: none !important;
 }
 
-/* Tombol Bahaya / Hapus */
 button.danger, .btn-danger {
     background: linear-gradient(135deg, #ef4444, #dc2626) !important;
     color: white !important;
@@ -101,17 +97,22 @@ button:disabled, .btn:disabled {
     cursor: not-allowed;
 }
 
-/* Kartu Item, Inventory, Pasar, & Toko */
+/* Kartu / Kotak Konten Terstruktur (Inventory, Pasar, Lahan, dll) */
 .card, 
 div[style*="background: white"], 
-div[style*="background: #f8fafc"] {
+div[style*="background: #f8fafc"],
+.inventory-section,
+.lahan-card {
     background-color: #ffffff !important;
     border: 1px solid #cbd5e1 !important;
     color: #1e293b !important;
-    border-radius: 10px;
+    border-radius: 12px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    padding: 16px;
+    margin-bottom: 16px;
 }
 
-/* Judul di dalam Konten */
+/* Penyesuaian Teks di dalam Kotak Putih agar Terbaca Jelas */
 div[id^="tab-"] h1, 
 div[id^="tab-"] h2, 
 div[id^="tab-"] h3, 
