@@ -17,12 +17,12 @@ const GAME_DATABASE = {
         kacang: { id: "kacang", nama: "Kacang", hargaBeli: 12, hargaJual: 34, durasi: 43200, xp: 16, icon: "🥜" },
         bawang_merah: { id: "bawang_merah", nama: "Bawang Merah", hargaBeli: 25, hargaJual: 42, durasi: 43200, xp: 25, icon: "🧅" },
         wortel: { id: "wortel", nama: "Wortel", hargaBeli: 18, hargaJual: 45, durasi: 86400, xp: 18, icon: "🥕" },
-        apel: { id: "apel", nama: "Apel", hargaBeli: 60, hargaJual: 71, durasi: 259200, xp: 90, icon: "🍎" }
+        apel: { id: "apel", nama: "Apel", hargaBeli: 54, hargaJual: 71, durasi: 259200, xp: 90, icon: "🍎" }
     
     },
     pupuk: {
-        biasa: { id: "biasa", nama: "Pupuk Urea", hargaBeli: 370, efekPengurangDurasi: 10800, cooldownDetik: 1800, icon: "🧪", deskripsi: "Kurangi durasi 3 Jam (Cooldown 30 menit)" },
-        super: { id: "super", nama: "Pupuk Super", hargaBeli: 750, efekPengurangDurasi: 21600, cooldownDetik: 3600, icon: "✨", deskripsi: "Kurangi durasi 6 Jam (Cooldown 1 Jam)" }
+        biasa: { id: "biasa", nama: "Pupuk Urea", hargaBeli: 300, efekPengurangDurasi: 10800, cooldownDetik: 1800, icon: "🧪", deskripsi: "Kurangi durasi 3 Jam (Cooldown 30 menit)" },
+        super: { id: "super", nama: "Pupuk Super", hargaBeli: 550, efekPengurangDurasi: 21600, cooldownDetik: 3600, icon: "✨", deskripsi: "Kurangi durasi 6 Jam (Cooldown 1 Jam)" }
     },
     pakan: {
         jagung_pakan: { id: "jagung_pakan", nama: "Pakan Jagung", hargaBeli: 500, icon: "🌽", deskripsi: "Pakan khusus ayam" },
