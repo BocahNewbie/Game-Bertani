@@ -1,15 +1,15 @@
 /* ==========================================
-   STYLE.CSS - Tema Biru Dongker & Biru Tosca
+   STYLE.CSS - Tema Biru Dongker & Tosca Elegan
    ========================================== */
 
 :root {
-    --bg-primary: #0f172a;        /* Biru Dongker Gelap (Background Utama) */
-    --bg-card: #1e293b;          /* Biru Dongker Terang (Card/Kotak) */
+    --bg-primary: #0b1329;       /* Biru Dongker Gelap Elegan */
+    --bg-card: #141e38;          /* Biru Dongker Card/Kotak Lebih Terang */
     --accent-tosca: #06b6d4;     /* Biru Tosca Utama */
-    --accent-tosca-hover: #0891b2;/* Tosca Gelap saat di-hover */
-    --text-main: #f8fafc;        /* Putih Tulisan Terang */
+    --accent-tosca-hover: #22d3ee;/* Tosca Lebih Terang saat di-hover */
+    --text-main: #f1f5f9;        /* Putih Tulisan Terang */
     --text-muted: #94a3b8;       /* Abu-abu teks sekunder */
-    --border-color: #334155;     /* Garis Batas */
+    --border-color: #2a3b5c;     /* Garis Batas Lembut */
 }
 
 body {
@@ -20,69 +20,75 @@ body {
     padding: 0;
 }
 
-/* Container & Layout Umum */
+/* Container & Layout Kotak */
 .game-container, 
 div[id^="tab-"] {
     background-color: var(--bg-card);
-    border-color: var(--border-color);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
     color: var(--text-main);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 /* Navigasi Tab Utama & Sub-Tab */
 .tab-btn, .sub-tab-btn {
-    background-color: #1e293b;
+    background-color: #1a2744;
     color: var(--text-muted);
     border: 1px solid var(--border-color);
-    transition: background-color 0.2s ease, color 0.2s ease;
+    border-radius: 8px;
+    transition: all 0.2s ease;
 }
 
 .tab-btn.active, .sub-tab-btn.active {
     background-color: var(--accent-tosca) !important;
-    color: #0f172a !important;
+    color: #0b1329 !important;
     font-weight: bold;
     border-color: var(--accent-tosca);
+    box-shadow: 0 0 10px rgba(6, 182, 212, 0.4);
 }
 
 /* ==========================================
-   PERBAIKAN TOMBOL (TIDAK MEMANTUL & STABIL)
+   TOMBOL STABIL, RESPONSIF & ELEGAN
    ========================================== */
 button, 
 .btn, 
 input[type="button"], 
 input[type="submit"] {
-    background-color: var(--accent-tosca);
-    color: #0f172a;
+    background: linear-gradient(135deg, #06b6d4, #0891b2);
+    color: #ffffff;
     border: none;
     border-radius: 8px;
     font-weight: bold;
     cursor: pointer;
-    transition: background-color 0.15s ease, opacity 0.15s ease;
-    /* Dihilangkan efek transform/scale agar tombol tidak memantul saat diklik */
-    transform: none !important; 
-    box-shadow: none !important;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    transition: background 0.2s ease, box-shadow 0.2s ease;
+    /* Mencegah tombol memantul/bergeser saat diklik */
+    transform: none !important;
     outline: none;
 }
 
 button:hover, .btn:hover {
-    background-color: var(--accent-tosca-hover);
-    opacity: 0.95;
+    background: linear-gradient(135deg, #22d3ee, #06b6d4);
+    box-shadow: 0 4px 8px rgba(6, 182, 212, 0.3);
 }
 
-/* Saat tombol ditekan (active), cukup ubah warna sedikit tanpa animasi memantul */
+/* Saat tombol diklik: hanya meredupkan sedikit bayangan tanpa efek melompat/memantul */
 button:active, .btn:active {
-    background-color: #0e7490 !important;
+    background: #0891b2 !important;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3) !important;
     transform: none !important;
 }
 
 /* Tombol Khusus / Non-Aktif / Danger */
 button.danger, .btn-danger {
-    background-color: #ef4444 !important;
+    background: linear-gradient(135deg, #ef4444, #dc2626) !important;
     color: white !important;
 }
 
 button:disabled, .btn:disabled {
-    background-color: #334155 !important;
-    color: #64748b !important;
+    background: #1e293b !important;
+    color: #475569 !important;
+    box-shadow: none !important;
     cursor: not-allowed;
 }
 
@@ -90,14 +96,15 @@ button:disabled, .btn:disabled {
 .card, 
 div[style*="background: white"], 
 div[style*="background: #f8fafc"] {
-    background-color: #1e293b !important;
+    background-color: var(--bg-card) !important;
     border: 1px solid var(--border-color) !important;
     color: var(--text-main) !important;
+    border-radius: 10px;
 }
 
 /* Teks dan Judul */
 h1, h2, h3, h4, h5, h6 {
-    color: #22d3ee; /* Warna Tosca Terang untuk Header */
+    color: #22d3ee; /* Warna Tosca Terang untuk Judul */
 }
 
 p, span, label {
