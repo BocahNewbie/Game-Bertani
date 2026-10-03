@@ -1,13 +1,13 @@
-// MARKET.JS - Sistem Fluktuasi Pasar Real-Time (Per 15 Detik & Tersimpan)
+// MARKET.JS - Sistem Fluktuasi Pasar Real-Time (Persisten & Otomatis)
 
 const MarketEconomy = {
-    // Inisialisasi atau ambil data fluktuasi dari localStorage agar tidak reset saat refresh
     init() {
-        if (!localStorage.getItem('market_persen')) {
+        // Cek apakah data fluktuasi sudah ada di localStorage, jika belum buat baru
+        if (localStorage.getItem('market_persen') === null) {
             this.setPersentaseBaru(this.generateRandomPersen());
         }
-        
-        // Jalankan interval perubahan harga otomatis setiap 15 detik (15000 ms)
+
+        // Jalankan interval real-time setiap 15 detik di latar belakang
         if (!window.marketIntervalID) {
             window.marketIntervalID = setInterval(() => {
                 this.updateFluktuasiOtomatis();
@@ -16,7 +16,7 @@ const MarketEconomy = {
     },
 
     generateRandomPersen() {
-        // Menghasilkan angka fluktuasi acak antara -25% sampai +35%
+        // Fluktuasi acak antara -25% sampai +35%
         return Math.floor(Math.random() * 61) - 25;
     },
 
@@ -26,23 +26,20 @@ const MarketEconomy = {
     },
 
     getPersentaseBeli() {
-        // Mengambil persentase fluktuasi untuk harga beli barang
         const val = localStorage.getItem('market_persen');
         return val !== null ? parseInt(val) : 0;
     },
 
     getPersentaseJual() {
-        // Fluktuasi harga jual biasanya berbanding terbalik atau disesuaikan dengan pasar
         const val = localStorage.getItem('market_persen');
         return val !== null ? Math.round(parseInt(val) * 0.8) : 0;
     },
 
     updateFluktuasiOtomatis() {
-        // Ubah persentase fluktuasi secara berkala setiap 15 detik
         const persenBaru = this.generateRandomPersen();
         this.setPersentaseBaru(persenBaru);
 
-        // Jika fungsi render toko sedang aktif di layar, update tampilannya secara otomatis
+        // Update tampilan secara otomatis jika tab toko atau pasar sedang dibuka
         if (typeof renderTokoAccessories === 'function' && document.getElementById("tab-toko-aksesoris")) {
             renderTokoAccessories();
         }
@@ -64,5 +61,5 @@ const MarketEconomy = {
     }
 };
 
-// Jalankan otomatis sistem market saat file ini dimuat
+// Jalankan otomatis sistem market saat file dimuat
 MarketEconomy.init();
