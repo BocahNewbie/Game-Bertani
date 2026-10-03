@@ -63,9 +63,19 @@ body {
     color: var(--text-light);
 }
 
+.player-info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+/* Membuat Saldo dan Cuaca Bersampingan (Sejajar Horizontal) */
 .player-stats {
     display: flex;
-    gap: 12px;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
     font-weight: 600;
     font-size: 14px;
 }
@@ -76,6 +86,7 @@ body {
     border-radius: 20px;
     color: var(--accent-tosca);
     border: 1px solid var(--border-dark);
+    white-space: nowrap;
 }
 
 .koin-badge {
@@ -169,7 +180,7 @@ body {
     display: block;
 }
 
-/* Kumpulan Grid & Card Modern (Inventory, Toko, Lahan, dll) */
+/* Kumpulan Grid & Card Modern */
 .grid-container, .grid-lahan, .grid-kandang, .grid-accessories {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -209,7 +220,6 @@ button, .btn, input[type="button"], input[type="submit"] {
     color: var(--bg-main);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     transition: background-color 0.15s ease, opacity 0.15s ease;
-    /* Mencegah tombol memantul/bergeser saat diklik */
     transform: none !important;
     outline: none;
 }
@@ -225,7 +235,6 @@ button:active, .btn:active {
     transform: none !important;
 }
 
-/* Variasi Tombol Khusus */
 .btn-primary {
     background: var(--accent-tosca);
     color: var(--bg-main);
