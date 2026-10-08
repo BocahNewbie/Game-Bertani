@@ -1,51 +1,58 @@
-// HARGA.JS - Sistem Fluktuasi Harga Pasar Real-Time (Persisten & Otomatis)
-
+// HARGA.JS - Sistem Fluktuasi Harga Pasar yang Lebih Stabil & Adil
 const MarketEconomy = {
     multiplier: 1.0,     // Multiplier harga jual
     buyMultiplier: 1.0,  // Multiplier harga beli
 
     init() {
-        // Cek apakah data fluktuasi sudah tersimpan di localStorage
         const savedMultiplier = localStorage.getItem('market_multiplier');
         const savedBuyMultiplier = localStorage.getItem('market_buyMultiplier');
+        const savedTimestamp = localStorage.getItem('market_timestamp');
+        const now = new Date().getTime();
 
-        if (savedMultiplier !== null && savedBuyMultiplier !== null) {
+        // Interval diperpanjang jadi 5 menit (300000 ms) agar pemain tidak gabut/spam refresh
+        const intervalDuration = 5 * 60 * 1000; 
+
+        if (savedMultiplier !== null && savedBuyMultiplier !== null && savedTimestamp !== null) {
             this.multiplier = parseFloat(savedMultiplier);
             this.buyMultiplier = parseFloat(savedBuyMultiplier);
+
+            // Cek apakah sudah waktunya update harga berdasarkan waktu asli (opsional)
+            if (now - parseInt(savedTimestamp) > intervalDuration) {
+                this.acakFluktuasi();
+            }
         } else {
-            // Jika belum ada, buat fluktuasi baru pertama kali
             this.acakFluktuasi();
         }
 
-        // Jalankan interval otomatis setiap 15 detik di latar belakang
+        // Jalankan interval otomatis setiap 5 menit di latar belakang
         if (!window.marketIntervalID) {
             window.marketIntervalID = setInterval(() => {
                 this.acakFluktuasi();
-                // Update tampilan jika fungsi render tersedia di halaman aktif
                 if (typeof renderPasar === 'function' && document.getElementById("tab-pasar")) {
                     renderPasar();
                 }
                 if (typeof renderTokoAccessories === 'function' && document.getElementById("tab-toko-aksesoris")) {
                     renderTokoAccessories();
                 }
-            }, 15000);
+            }, intervalDuration);
         }
     },
 
     acakFluktuasi() {
-        // Harga jual berfluktuasi antara penurunan 70% (0.40) hingga kenaikan 17% (1.17)
-        const randomSell = Math.random() * (1.26 - 0.40) + 0.40;
+        // Rentang harga jual diperhalus (antara turun 25% hingga naik 15%) agar tidak terlalu jomplang
+        const randomSell = Math.random() * (1.15 - 0.75) + 0.75;
         this.multiplier = parseFloat(randomSell.toFixed(2));
 
-        // Harga beli di pasar: penurunan sekitar 2% (0.98) hingga kenaikan sekitar 50% (1.50)
-        const randomBuy = Math.random() * (1.60 - 0.95) + 0.95;
+        // Rentang harga beli juga dibuat stabil (antara 0.90 hingga 1.20)
+        const randomBuy = Math.random() * (1.40 - 0.90) + 0.90;
         this.buyMultiplier = parseFloat(randomBuy.toFixed(2));
 
-        // Simpan ke localStorage agar tidak reset saat halaman di-refresh
+        // Simpan ke localStorage beserta timestamp-nya
         localStorage.setItem('market_multiplier', this.multiplier);
         localStorage.setItem('market_buyMultiplier', this.buyMultiplier);
+        localStorage.setItem('market_timestamp', new Date().getTime());
 
-        console.log(`[Ekonomi] Fluktuasi diperbarui -> Jual: ${this.multiplier} x (${this.getPersentaseJual()}) | Beli: ${this.buyMultiplier} x (${this.getPersentaseBeli()})`);
+        console.log(`[Ekonomi] Pasar Stabil -> Jual: ${this.multiplier}x | Beli: ${this.buyMultiplier}x`);
     },
 
     getHargaJual(baseHarga) {
