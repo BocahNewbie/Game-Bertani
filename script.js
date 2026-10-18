@@ -9,7 +9,7 @@ let gameState = {
     tas: {},    
     lahan: {},   
     kandang: {},
-    durasiPisau: 300 // Durability awal pisau
+    durasiPisau: 300
 };
 
 let transaksiAktif = { idItem: "", namaItem: "", hargaSatuan: 0, stokMaks: 0, tipe: "" };
@@ -171,7 +171,8 @@ function renderLahan() {
                     <div class="card lahan-card" style="border: 1px solid #3b82f6;">
                         <h3>Lahan #${i} ❌</h3>
                         <p style="color: #60a5fa;">Sedang Dikerjakan</p>
-                        <p style="font-size: 0.85rem;">Sisa: <b>${teksKonstruksi}</b></p>${tombolProses}
+                        <p style="font-size: 0.85rem;">Sisa: <b>${teksKonstruksi}</b></p>
+                        ${tombolProses}
                     </div>
                 `;
             } else {
@@ -189,7 +190,8 @@ function renderLahan() {
                         <div style="font-size: 2.5rem; margin: 5px 0;">${hasilInfo.icon}</div>
                         <p><b>${hasilInfo.nama}</b></p>
                         <p>Jumlah: <b>${dataLahan.jumlah} Pcs</b></p>
-                        <p style="font-size: 0.85rem; color: #34d399;">⏱️ ${teksWaktu}</p>${tombolAksi}
+                        <p style="font-size: 0.85rem; color: #34d399;">⏱️ ${teksWaktu}</p>
+                        ${tombolAksi}
                     </div>
                 `;
             }
@@ -237,8 +239,6 @@ function konfirmasiBukaLahan(nomorLahan) {
         `;
         document.body.appendChild(modal);
     }
-    document.getElementById("konf-teks.innerHTML = `Ingin membuka <b>Lahan #${nomorLahan}</b>?<br>Biaya: 🪵 ${biaya.kayu} Kayu & 💰 Rp. ${biaya.uang.toLocaleString('id-ID')}`;`
-    // Perbaikan penulisan teks modal
     document.getElementById("konf-teks").innerHTML = `Ingin membuka <b>Lahan #${nomorLahan}</b>?<br>Biaya: 🪵 ${biaya.kayu} Kayu & 💰 Rp. ${biaya.uang.toLocaleString('id-ID')}<br>⏱️ 2 Hari In-Game`;
     modal.style.display = "flex";
 }
@@ -521,7 +521,6 @@ function beriPakanKandang(nomorKandang) {
         if (gameState.tas[idPakan] <= 0) delete gameState.tas[idPakan];
         dataKandang.idTernak = idHewan;
 
-        // Jadwal panen selalu pukul 09.00 pagi hari berikutnya
         let hariIniMenit = getTotalMenitInGame(gameState.waktuHari, gameState.waktuJam, gameState.waktuMenit);
         let sisaMenitHariIni = 1440 - ((gameState.waktuJam * 60) + gameState.waktuMenit);
         let menitMenujuBesokJam9 = sisaMenitHariIni + 1440 + (9 * 60);
@@ -605,7 +604,7 @@ function prosesJagal(index, jenis) {
         return;
     }
 
-    gameState.durasiPisau -= 1; // Kurangi durability 1x pakai
+    gameState.durasiPisau -= 1;
     gameState.penyimpananJagal.splice(index, 1);
     let mapHasil = { ayam: 'daging_ayam', sapi: 'daging_sapi', kambing: 'daging_kambing', babi: 'daging_babi_mentah' };
     let idHasilJagal = mapHasil[jenis];
@@ -682,7 +681,7 @@ function renderTukangKayu() {
             <h3>${itemKayu.nama}</h3>
             <p>Beli: <b>Rp. ${f.harga.toLocaleString('id-ID')}</b></p>
             ${getInfoGrafikHarga(f.harga, itemKayu.hargaBeli)}
-            <button onclick="bukaModalBeli('${itemKayu.id}', '${itemKayu.nama}', ${f.harga}, 'tukang_kayu')">Beli Kayu</button>
+            <button onclick="bukaModalBeli('${itemKayu.id}', '${item.nama}', ${f.harga}, 'tukang_kayu')">Beli Kayu</button>
         </div>
         <div class="card" style="border: 1px solid #60a5fa;">
             <div style="font-size:2.5rem;">🔪</div>
