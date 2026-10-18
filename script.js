@@ -1,4 +1,4 @@
-// State Utama Game & Inventaris Tas (Mulai dari Nol/Kosong)
+// State Utama Game
 let gameState = {
     namaPemain: "Pak Tani",
     uang: 500,
@@ -18,6 +18,33 @@ let transaksiAktif = {
 };
 
 let lahanTargetAktif = null;
+let fluktuasiCache = {}; // Menyimpan persentase fluktuasi per item agar berubah tiap 10 menit in-game
+
+// Inisialisasi Fluktuasi Pasar Awal
+function getFluktuasiItem(idItem) {
+    let kunciWaktu = `${gameState.waktuJam}-${Math.floor(gameState.waktuMenit / 10)}`;
+    if (!fluktuasiCache[idItem] || fluktuasiCache[idItem].waktu !== kunciWaktu) {
+        // Rentang fluktuasi -20% sampai +30%
+        let persen = Math.floor(Math.random() * 51) - 20;
+        fluktuasiCache[idItem] = { persen: persen, waktu: kunciWaktu };
+    }
+    return fluktuasiCache[idItem].persen;
+}
+
+function hitungHargaDinamis(hargaBase, jenis = 'beli') {
+    // Bisa digunakan bersama sistem ekonomi atau dihitung langsung
+    return hargaBase;
+}
+
+function getInfoGrafikHarga(hargaAktif, hargaBase) {
+    if (hargaAktif > hargaBase) {
+        return `<span style="color: #34d399;" title="Harga Naik">📈 Naik (+${hargaAktif - hargaBase})</span>`;
+    } else if (hargaAktif < hargaBase) {
+        return `<span style="color: #f87171;" title="Harga Turun">📉 Turun (${hargaAktif - hargaBase})</span>`;
+    } else {
+        return `<span style="color: var(--text-muted);" title="Stabil">➖ Stabil</span>`;
+    }
+}
 
 // Fungsi Ganti Tab Menu
 function gantiTab(evt, tabId) {
@@ -36,9 +63,36 @@ function gantiTab(evt, tabId) {
     if (tabId === 'tab-pengepul') renderPengepul();
 }
 
+// Konfirmasi Ubah Nama Petani
 function ubahNama() {
-    const labelNama = document.getElementById("label-nama");
-    labelNama.focus();
+    let container = document.querySelector(".player-info");
+    container.innerHTML = `
+        <input type="text" id="input-nama-baru" value="${gameState.namaPemain}" style="background: #101622; border: 1px solid var(--border-color); color: var(--text-main); padding: 4px 8px; border-radius: 4px; font-size: 1rem;">
+        <button onclick="acceptUbahNama()" style="background: #059669; color: white; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-weight: bold;">✔</button>
+        <button onclick="batalUbahNama()" style="background: #ef4444; color: white; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-weight: bold;">✖</button>
+    `;
+    document.getElementById("input-nama-baru").focus();
+}
+
+function acceptUbahNama() {
+    let inputBaru = document.getElementById("input-nama-baru");
+    let namaBaru = inputBaru.value.trim();
+    if (namaBaru !== "") {
+        gameState.namaPemain = namaBaru;
+    }
+    resetHeaderNamaUI();
+}
+
+function batalUbahNama() {
+    resetHeaderNamaUI();
+}
+
+function resetHeaderNamaUI() {
+    let container = document.querySelector(".player-info");
+    container.innerHTML = `
+        <span id="label-nama">${gameState.namaPemain}</span> 
+        <button id="btn-edit-nama" onclick="ubahNama()" style="background: transparent; border: none; cursor: pointer; font-size: 1rem;">✏️</button>
+    `;
 }
 
 // Update Tampilan Header
@@ -55,15 +109,18 @@ function getTotalMenitInGame(jam, menit) {
     return (jam * 60) + menit;
 }
 
-function formatDurasiInGame(sisaMenitInGame) {
-    if (sisaMenitInGame <= 0) return "Siap Panen! ✨";
-    let jam = Math.floor(sisaMenitInGame / 60);
-    let menit = sisaMenitInGame % 60;
+// Format Durasi Tanpa Tulisan In-Game
+function formatDurasiBersih(totalMenit) {
+    if (totalMenit <= 0) return "Siap Panen! ✨";
+    let jam = Math.floor(totalMenit / 60);
+    let menit = totalMenit % 60;
     
-    if (jam > 0) {
-        return `${jam} Jam ${menit} Menit In-Game`;
+    if (jam > 0 && menit > 0) {
+        return `${jam} Jam ${menit} Menit`;
+    } else if (jam > 0) {
+        return `${jam} Jam`;
     } else {
-        return `${menit} Menit In-Game`;
+        return `${menit} Menit`;
     }
 }
 
@@ -91,7 +148,7 @@ function renderLahan() {
         } else {
             let infoBibit = GAME_DATABASE.tanaman[dataLahan.idBibit] || { nama: "Tanaman", icon: "🌱" };
             let sisaMenitInGame = Math.max(0, dataLahan.targetMenitInGame - totalMenitSekarang);
-            let teksWaktu = formatDurasiInGame(sisaMenitInGame);
+            let teksWaktu = formatDurasiBersih(sisaMenitInGame);
 
             let tombolAksi = sisaMenitInGame === 0 
                 ? `<button onclick="panenHasil(${i})" style="background: #d97706; color:white;">Panen (${dataLahan.jumlah})</button>`
@@ -246,7 +303,7 @@ function panenHasil(nomorLahan) {
 }
 
 
-// --- TAB SUPERMARKET ---
+// --- TAB SUPERMARKET (DENGAN GRAFIK FLUKTUASI HARGA) ---
 
 function renderSupermarket() {
     const container = document.getElementById("list-supermarket");
@@ -257,17 +314,25 @@ function renderSupermarket() {
 
     for (let key in daftarTanaman) {
         let item = daftarTanaman[key];
-        let hargaDinamis = MarketEconomy ? MarketEconomy.getHargaBeli(item.hargaBeli) : item.hargaBeli;
+        
+        // Hitung fluktuasi harga beli berdasarkan siklus 10 menit in-game
+        let persen = getFluktuasiItem(key);
+        let hargaBeliAktif = Math.round(item.hargaBeli * (1 + persen / 100));
+        if (hargaBeliAktif < 1) hargaBeliAktif = 1;
+
+        let grafikBeli = getInfoGrafikHarga(hargaBeliAktif, item.hargaBeli);
         let durasiMenit = Math.ceil(item.durasi / 60);
+        let teksDurasiBersih = formatDurasiBersih(durasiMenit);
 
         container.innerHTML += `
             <div class="card">
                 <div style="font-size: 2.5rem;">${item.icon}</div>
                 <h3>${item.nama}</h3>
-                <p>Beli: <b style="color: #34d399;">Rp. ${hargaDinamis}</b></p>
+                <p>Beli: <b style="color: #34d399;">Rp. ${hargaBeliAktif}</b></p>
+                <p style="font-size: 0.85rem; margin: 4px 0;">${grafikBeli} <small style="color:var(--text-muted);">(Base: ${item.hargaBeli})</small></p>
                 <p style="color: var(--text-muted); font-size: 0.9rem;">Jual Standar: Rp. ${item.hargaJual}</p>
-                <p style="font-size: 0.85rem; color: #60a5fa;">⏱️ ${durasiMenit} Menit In-Game</p>
-                <button onclick="bukaModalBeli('${item.id}', '${item.nama}', ${hargaDinamis})">Beli Bibit</button>
+                <p style="font-size: 0.85rem; color: #60a5fa;">⏱️ ${teksDurasiBersih}</p>
+                <button onclick="bukaModalBeli('${item.id}', '${item.nama}', ${hargaBeliAktif})">Beli Bibit</button>
             </div>
         `;
     }
@@ -278,7 +343,6 @@ function bukaModalBeli(idItem, namaItem, harga) {
     
     let modalBeli = document.getElementById("modal-beli");
     if (!modalBeli) {
-        // Buat otomatis jika belum ada di HTML
         modalBeli = document.createElement("div");
         modalBeli.id = "modal-beli";
         modalBeli.className = "modal-overlay";
@@ -366,7 +430,7 @@ function konfirmasiBeli() {
 }
 
 
-// --- TAB PENGEPUL (HARGA JUAL BERFLUKTUASI SESUAI PASAR) ---
+// --- TAB PENGEPUL (DENGAN GRAFIK FLUKTUASI HARGA JUAL) ---
 
 function renderPengepul() {
     const container = document.getElementById("list-pengepul");
@@ -384,16 +448,21 @@ function renderPengepul() {
             adaTanamanJual = true;
             let item = daftarTanaman[idItem];
             
-            // Harga jual ikut berfluktuasi menggunakan MarketEconomy.getHargaJual
-            let hargaJualDinamis = MarketEconomy ? MarketEconomy.getHargaJual(item.hargaJual) : item.hargaJual;
+            // Hitung fluktuasi harga jual berdasarkan siklus 10 menit in-game
+            let persen = getFluktuasiItem(idItem);
+            let hargaJualAktif = Math.round(item.hargaJual * (1 + persen / 100));
+            if (hargaJualAktif < 1) hargaJualAktif = 1;
+
+            let grafikJual = getInfoGrafikHarga(hargaJualAktif, item.hargaJual);
 
             cardTanamanHTML += `
                 <div class="card">
                     <div style="font-size: 2.5rem;">${item.icon}</div>
                     <h3>${item.nama}</h3>
                     <p style="color: var(--text-muted);">Stok: <b>${jumlahStok} Pcs</b></p>
-                    <p>Harga Jual: <b style="color: #60a5fa;">Rp. ${hargaJualDinamis}</b></p>
-                    <button onclick="bukaModalJual('${idItem}', '${item.nama}', ${hargaJualDinamis}, ${jumlahStok})" style="background: #2563eb;">Jual ke Pengepul</button>
+                    <p>Harga Jual: <b style="color: #60a5fa;">Rp. ${hargaJualAktif}</b></p>
+                    <p style="font-size: 0.85rem; margin: 4px 0;">${grafikJual} <small style="color:var(--text-muted);">(Base: ${item.hargaJual})</small></p>
+                    <button onclick="bukaModalJual('${idItem}', '${item.nama}', ${hargaJualAktif}, ${jumlahStok})" style="background: #2563eb;">Jual ke Pengepul</button>
                 </div>
             `;
         }
@@ -413,15 +482,20 @@ function renderPengepul() {
         if (jumlahStok > 0 && daftarTernakHasil[idItem]) {
             adaTernakJual = true;
             let item = daftarTernakHasil[idItem];
-            let hargaJualDinamis = MarketEconomy ? MarketEconomy.getHargaJual(item.hargaJual) : item.hargaJual;
+            let persen = getFluktuasiItem(idItem);
+            let hargaJualAktif = Math.round(item.hargaJual * (1 + persen / 100));
+            if (hargaJualAktif < 1) hargaJualAktif = 1;
+
+            let grafikJual = getInfoGrafikHarga(hargaJualAktif, item.hargaJual);
 
             cardTernakHTML += `
                 <div class="card">
                     <div style="font-size: 2.5rem;">${item.icon}</div>
                     <h3>${item.nama}</h3>
                     <p style="color: var(--text-muted);">Stok: <b>${jumlahStok} Pcs</b></p>
-                    <p>Harga Jual: <b style="color: #fbbf24;">Rp. ${hargaJualDinamis}</b></p>
-                    <button onclick="bukaModalJual('${idItem}', '${item.nama}', ${hargaJualDinamis}, ${jumlahStok})" style="background: #d97706;">Jual ke Pengepul</button>
+                    <p>Harga Jual: <b style="color: #fbbf24;">Rp. ${hargaJualAktif}</b></p>
+                    <p style="font-size: 0.85rem; margin: 4px 0;">${grafikJual} <small style="color:var(--text-muted);">(Base: ${item.hargaJual})</small></p>
+                    <button onclick="bukaModalJual('${idItem}', '${item.nama}', ${hargaJualAktif}, ${jumlahStok})" style="background: #d97706;">Jual ke Pengepul</button>
                 </div>
             `;
         }
