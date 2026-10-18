@@ -1,387 +1,74 @@
-/* ==========================================
-   STYLE.CSS - Palet Warna Terpusat & Modern
-   ========================================== */
-
-:root {
-    /* Palet Warna Utama */
-    --bg-main: #0b1329;          /* Biru Dongker Gelap (Latar Belakang) */
-    --bg-container: #ffffff;     /* Putih Bersih (Warna Kotak Konten/Card) */
-    --bg-header: #0d4f1a;        /* Biru Dongker Header */
-    
-    --accent-tosca: #06b6d4;     /* Biru Tosca Utama */
-    --accent-tosca-hover: #22d3ee;/* Tosca Terang saat Hover */
-    --accent-tosca-dark: #0891b2; /* Tosca Gelap saat Active */
-
-    --text-primary: #1e293b;     /* Teks Utama Gelap di dalam Card */
-    --text-secondary: #475569;   /* Teks Sekunder/Abu-abu */
-    --text-light: #f8fafc;       /* Teks Terang */
-    
-    --border-color: #ff0000;     /* Garis Batas Kotak */
-    --border-dark: #334155;      /* Garis Batas Tema Gelap */
-}
-
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: var(--bg-main);
-    color: var(--text-primary);
+    font-family: Arial, sans-serif;
+    background-color: #f4f6f9;
     margin: 0;
-    padding: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
+    padding: 20px;
 }
 
-.game-container {
-    width: 100%;
-    max-width: 950px;
-    background: var(--bg-container);
-    border-radius: 16px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    margin: 20px;
+#game-container {
+    max-width: 900px;
+    margin: 0 auto;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 
-/* Header Game & Status */
-.game-header, .player-panel {
-    background: var(--bg-header);
-    color: var(--text-light);
-    padding: 18px 24px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 12px;
-}
-
-.game-header h2, .player-info h2 {
-    margin: 0;
-    font-size: 20px;
-    font-weight: 700;
-    color: var(--text-light);
-}
-
-.player-info {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    flex-wrap: wrap;
-}
-
-/* Membuat Saldo dan Cuaca Bersampingan (Sejajar Horizontal) */
-.player-stats {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 8px;
-    font-weight: 600;
-    font-size: 14px;
-}
-
-.stat-badge, .koin-badge, .cuaca-badge {
-    background: var(--bg-main);
-    padding: 6px 14px;
-    border-radius: 20px;
-    color: var(--accent-tosca);
-    border: 1px solid var(--border-dark);
-    white-space: nowrap;
-}
-
-.koin-badge {
-    color: #fbbf24;
-}
-
-/* Navigasi Tab Utama & Sub-Tab */
-.game-nav, .nav-tabs {
-    display: flex;
-    background: var(--bg-header);
-    overflow-x: auto;
-    padding: 0 10px;
-    border-bottom: 1px solid var(--border-dark);
-}
-
-.tab-btn {
-    padding: 14px 20px;
-    background: transparent;
-    color: #94a3b8;
-    border: none;
-    cursor: pointer;
-    font-weight: 600;
-    font-size: 14px;
-    transition: all 0.2s ease;
-    white-space: nowrap;
+header {
     text-align: center;
-    border-bottom: 3px solid transparent;
+    border-bottom: 2px solid #ddd;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
 }
 
-.tab-btn:hover {
-    color: var(--text-light);
-}
-
-.tab-btn.active {
-    color: var(--text-light);
-    border-bottom: 3px solid var(--accent-tosca);
-    background: rgba(6, 182, 212, 0.1);
-}
-
-/* Area Konten */
-.game-content, .tab-content {
-    padding: 24px;
-    flex: 1;
-    overflow-y: auto;
-    max-height: 600px;
-    background: #f8fafc;
-}
-
-.tab-pane, .tab-content {
-    display: none;
-}
-
-.tab-pane.active, .tab-content.active {
-    display: block;
-}
-
-/* Sub Navigation */
-.sub-nav {
+#stats-bar {
     display: flex;
-    gap: 8px;
-    margin-bottom: 16px;
-    flex-wrap: wrap;
+    justify-content: space-around;
+    font-size: 1.1em;
+    background: #eef2f5;
+    padding: 10px;
+    border-radius: 5px;
 }
 
-.sub-tab-btn {
-    padding: 8px 14px;
-    background: #e2e8f0;
-    color: var(--text-secondary);
+#location-nav {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+#location-nav button {
+    padding: 10px 15px;
+    background-color: #28a745;
+    color: white;
     border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+#location-nav button:hover {
+    background-color: #218838;
+}
+
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.petak-lahan, .kandang-slot {
+    background: #d4a373;
+    border: 2px solid #bc6c25;
+    padding: 20px;
+    text-align: center;
     border-radius: 6px;
     cursor: pointer;
-    font-size: 13px;
-    font-weight: 600;
-    transition: all 0.2s ease;
+    min-height: 60px;
 }
 
-.sub-tab-btn:hover {
-    background: #cbd5e1;
-}
-
-.sub-tab-btn.active {
-    background: var(--accent-tosca);
-    color: var(--bg-main);
-}
-
-.sub-content {
-    display: none;
-}
-
-.sub-content.active {
-    display: block;
-}
-
-/* Kumpulan Grid & Card Modern */
-.grid-container, .grid-lahan, .grid-kandang, .grid-accessories {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 16px;
-    margin-top: 12px;
-}
-
-.petak-card, .petak-lahan-card, .card, 
-div[style*="background: white"], 
-div[style*="background: #f8fafc"],
-.inventory-section, .aksesoris-panel {
-    background: var(--bg-container);
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    padding: 18px;
-    text-align: center;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
-    transition: box-shadow 0.2s ease, border-color 0.2s ease;
-}
-
-.petak-card:hover, .petak-lahan-card:hover {
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.06);
-    border-color: var(--accent-tosca);
-}
-
-/* ==========================================
-   TOMBOL STABIL, RESPONSIF & TIDAK MEMANTUL
-   ========================================== */
-button, .btn, input[type="button"], input[type="submit"] {
-    cursor: pointer;
-    font-family: inherit;
-    border-radius: 8px;
-    font-weight: 600;
-    padding: 8px 16px;
-    border: none;
-    background-color: var(--accent-tosca);
-    color: var(--bg-main);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    transition: background-color 0.15s ease, opacity 0.15s ease;
-    transform: none !important;
-    outline: none;
-}
-
-button:hover, .btn:hover {
-    background-color: var(--accent-tosca-hover);
-    opacity: 1;
-    transform: none !important;
-}
-
-button:active, .btn:active {
-    background-color: var(--accent-tosca-dark) !important;
-    transform: none !important;
-}
-
-.btn-primary {
-    background: var(--accent-tosca);
-    color: var(--bg-main);
-}
-
-.btn-secondary {
-    background: #e2e8f0;
-    color: var(--text-secondary);
-}
-
-.btn-danger, button.danger {
-    background: #ef4444 !important;
-    color: white !important;
-}
-
-button:disabled, .btn:disabled {
-    background: #cbd5e1 !important;
-    color: #94a3b8 !important;
-    cursor: not-allowed;
-    box-shadow: none !important;
-}
-
-/* --- MODAL / POPUP MODERN STYLES --- */
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(15, 23, 42, 0.6);
-    backdrop-filter: blur(4px);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-    animation: fadeIn 0.2s ease;
-}
-
-.modal-box, .modal-card {
-    background: var(--bg-container);
-    width: 100%;
-    max-width: 400px;
-    border-radius: 16px;
-    padding: 24px;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-    text-align: center;
-    animation: scaleUp 0.2s ease;
-}
-
-.modal-box h3, .modal-card h3 {
-    margin-top: 0;
-    color: var(--bg-header);
-    font-size: 18px;
-}
-
-.modal-box p {
-    color: var(--text-secondary);
-    font-size: 14px;
-    margin-bottom: 20px;
-    line-height: 1.5;
-}
-
-.modal-input, .modal-card input[type="text"], .modal-card input[type="number"] {
-    width: 100%;
-    box-sizing: border-box;
-    padding: 10px 14px;
-    border: 2px solid var(--border-color);
-    border-radius: 8px;
-    font-size: 15px;
-    margin-bottom: 12px;
-    outline: none;
-    transition: border-color 0.2s;
-}
-
-.modal-input:focus, .modal-card input:focus {
-    border-color: var(--accent-tosca);
-}
-
-.modal-actions {
-    display: flex;
-    gap: 12px;
-    justify-content: center;
-}
-
-.qty-control-grid {
-    display: flex;
-    gap: 6px;
-    margin-bottom: 16px;
-    justify-content: center;
-}
-
-.qty-control-grid button {
-    padding: 6px 10px;
-    background: #f1f5f9;
-    border: 1px solid var(--border-color);
-    color: var(--text-primary);
-    font-size: 12px;
-}
-
-/* Toast Container */
-#toast-container {
-    position: fixed;
-    top: 14px;
-    right: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    z-index: 100000;
-    pointer-events: none !important;
-    max-width: 320px;
-}
-
-.toast-item {
-    background: var(--bg-header);
+.petak-lahan.terisi {
+    background: #90be6d;
     color: white;
-    padding: 10px 16px;
-    border-radius: 8px;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.25);
-    font-size: 13px;
-    font-weight: 600;
-    animation: fadeIn 0.2s ease;
-    border-left: 4px solid var(--accent-tosca);
-    pointer-events: none !important;
-    user-select: none;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-@keyframes scaleUp {
-    from { transform: scale(0.95); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
-}
-
-/* Scrollbar Modern */
-::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-}
-
-::-webkit-scrollbar-track {
-    background: #f1f5f9;
-}
-
-::-webkit-scrollbar-thumb {
-    background: var(--border-color);
-    border-radius: 4px;
 }
