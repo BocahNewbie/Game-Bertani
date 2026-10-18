@@ -3,109 +3,96 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game Bertani Sederhana</title>
+    <title>Harvest Moon</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <!-- Header Informasi Pemain & Game -->
+    <!-- Header Informasi Pemain & Statistik -->
     <header class="game-header">
         <div class="player-info">
-            <span id="label-nama" contenteditable="true" title="Klik untuk ubah nama">Pak Tani</span> 
-            <button id="btn-edit-nama" onclick="ubahNama()">✏️</button>
+            <span id="label-nama">Pak Tani</span>
+            <button id="btn-edit-nama" onclick="ubahNama()" style="background: transparent; border: none; cursor: pointer; font-size: 1rem;">✏️</button>
         </div>
         <div class="game-stats">
-            <span id="stat-uang">💰 Rp. 500</span>
-            <span id="stat-cuaca">☀️ Cerah</span>
-            <span id="stat-waktu">⏰ 08:00</span>
+            <span id="stat-uang">💰 Rp. 1.500</span>
+            <span id="stat-waktu">🌸 Hari 1 (Spring) ⏰ 08:00</span>
         </div>
     </header>
 
-    <!-- Navigasi Tab Menu -->
+    <!-- Menu Navigasi Tab -->
     <nav class="game-tabs">
-        <button class="tab-btn active" onclick="gantiTab(event, 'tab-lahan')">🌾 Lahan</button>
+        <button class="tab-btn active" onclick="gantiTab(event, 'tab-lahan')">🌱 Lahan</button>
         <button class="tab-btn" onclick="gantiTab(event, 'tab-kandang')">🐮 Kandang</button>
         <button class="tab-btn" onclick="gantiTab(event, 'tab-supermarket')">🛒 Supermarket</button>
-        <button class="tab-btn" onclick="gantiTab(event, 'tab-pasar')">🐂 Pasar</button>
+        <button class="tab-btn" onclick="gantiTab(event, 'tab-pasar')">🏬 Pasar</button>
+        <button class="tab-btn" onclick="gantiTab(event, 'tab-jagal')">🔪 Jagal</button>
         <button class="tab-btn" onclick="gantiTab(event, 'tab-tukang-kayu')">🪵 Tukang Kayu</button>
-        <button class="tab-btn" onclick="gantiTab(event, 'tab-pengepul')">📦 Pengepul</button>
+        <button class="tab-btn" onclick="gantiTab(event, 'tab-pengepul')">💰 Pengepul</button>
         <button class="tab-btn" onclick="gantiTab(event, 'tab-tas')">🎒 Tas</button>
+        <button class="tab-btn" onclick="gantiTab(event, 'tab-wikipedia')">📚 Wikipedia</button>
     </nav>
 
-    <!-- Konten Utama Setiap Tab -->
+    <!-- Konten Utama Game -->
     <main class="game-content">
-        <!-- 1. Tab Lahan -->
-        <div id="tab-lahan" class="tab-content active">
-            <h2>Lahan Pertanian</h2>
-            <p>Pilih lahan untuk menanam bibit.</p>
-            <div class="grid-container" id="grid-lahan"></div>
-        </div>
+        
+        <!-- Tab Lahan -->
+        <section id="tab-lahan" class="tab-content active">
+            <h2>Kebun & Lahan Tanam</h2>
+            <div id="grid-lahan" class="grid-container"></div>
+        </section>
 
-        <!-- 2. Tab Kandang -->
-        <div id="tab-kandang" class="tab-content">
-            <h2>Kandang Ternak</h2>
-            <p>Rawat hewan ternakmu di sini.</p>
-            <div class="grid-container" id="grid-kandang"></div>
-        </div>
+        <!-- Tab Kandang -->
+        <section id="tab-kandang" class="tab-content">
+            <h2>Kandang Hewan Ternak</h2>
+            <div id="grid-kandang" class="grid-container"></div>
+        </section>
 
-        <!-- 3. Tab Supermarket -->
-        <div id="tab-supermarket" class="tab-content">
-            <h2>Supermarket (Bibit & Pupuk)</h2>
-            <div class="shop-grid" id="list-supermarket"></div>
-        </div>
+        <!-- Tab Supermarket (Bibit) -->
+        <section id="tab-supermarket" class="tab-content">
+            <h2>Supermarket (Bibit Tanaman)</h2>
+            <div id="list-supermarket" class="shop-grid"></div>
+        </section>
 
-        <!-- 4. Tab Pasar -->
-        <div id="tab-pasar" class="tab-content">
-            <h2>Pasar (Hewan Ternak & Pakan)</h2>
-            <div class="shop-grid" id="list-pasar"></div>
-        </div>
+        <!-- Tab Pasar (Ternak, Pakan, Alat) -->
+        <section id="tab-pasar" class="tab-content">
+            <h2>Pasar Hewan & Pakan</h2>
+            <div id="list-pasar" class="shop-grid"></div>
+        </section>
 
-        <!-- 5. Tab Tukang Kayu -->
-        <div id="tab-tukang-kayu" class="tab-content">
-            <h2>Tukang Kayu (Upgrade)</h2>
-            <p>Tingkatkan kapasitas lahan dan kandang.</p>
-            <div class="shop-grid" id="list-tukang-kayu"></div>
-        </div>
+        <!-- Tab Jagal -->
+        <section id="tab-jagal" class="tab-content">
+            <h2>Fasilitas Pemotongan (Jagal)</h2>
+            <div id="grid-jagal" class="grid-container"></div>
+        </section>
 
-        <!-- 6. Tab Pengepul -->
-        <div id="tab-pengepul" class="tab-content">
-            <h2>Pengepul Hasil Panen</h2>
-            <p>Jual hasil panen dan produk ternakmu.</p>
-            <div class="shop-grid" id="list-pengepul"></div>
-        </div>
+        <!-- Tab Tukang Kayu -->
+        <section id="tab-tukang-kayu" class="tab-content">
+            <h2>Tukang Kayu & Perbaikan Alat</h2>
+            <div id="list-tukang-kayu" class="shop-grid"></div>
+        </section>
 
-        <!-- 7. Tab Tas -->
-        <div id="tab-tas" class="tab-content">
-            <h2>Tas / Inventaris</h2>
-            <div class="inventory-grid" id="grid-tas"></div>
-        </div>
+        <!-- Tab Pengepul -->
+        <section id="tab-pengepul" class="tab-content">
+            <h2>Pengepul Hasil Panen & Ternak</h2>
+            <div id="list-pengepul" class="shop-grid"></div>
+        </section>
+
+        <!-- Tab Tas / Inventaris -->
+        <section id="tab-tas" class="tab-content">
+            <h2>Tas Inventaris</h2>
+            <div id="grid-tas" class="inventory-grid"></div>
+        </section>
+
+        <!-- Tab Wikipedia -->
+        <section id="tab-wikipedia" class="tab-content">
+            <div id="content-wikipedia"></div>
+        </section>
+
     </main>
 
-    <!-- Modal / Popup Pembelian Modern -->
-    <div id="modal-beli" class="modal-overlay" style="display: none;">
-        <div class="modal-card">
-            <h3 id="modal-title">Beli Bibit</h3>
-            <p id="modal-info">Harga: Rp. 0 / biji</p>
-            
-            <div class="modal-input-group">
-                <button onclick="ubahJumlahBeli(-1)">-</button>
-                <input type="number" id="input-jumlah-beli" value="1" min="1" max="99" oninput="validasiInputBeli()">
-                <button onclick="ubahJumlahBeli(1)">+</button>
-                <button class="btn-max" onclick="beliMaksimal()">MAX</button>
-            </div>
-
-            <p id="modal-total" style="margin: 15px 0; font-weight: bold;">Total: Rp. 0</p>
-
-            <div class="modal-actions">
-                <button class="btn-cancel" onclick="tutupModalBeli()">Batal</button>
-                <button class="btn-confirm" onclick="konfirmasiBeli()">Beli</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Panggil File Script Game -->
+    <!-- Script Game -->
     <script src="database.js"></script>
-    <script src="supermarket.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
