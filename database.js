@@ -1,4 +1,4 @@
-// database.js - Pusat Data Game
+// database.js - Pusat Data Game Pertanian & Peternakan
 const GAME_DATABASE = {
     bibit: {
         bibit_padi: { id: "bibit_padi", hasilId: "padi", nama: "Bibit Padi", hargaBeli: 9, durasi: 600, icon: "🌾" },
@@ -21,6 +21,24 @@ const GAME_DATABASE = {
         bawang_merah: { id: "bawang_merah", nama: "Bawang Merah", hargaJual: 42, icon: "🧅" },
         wortel: { id: "wortel", nama: "Wortel", hargaJual: 45, icon: "🥕" },
         apel: { id: "apel", nama: "Apel", hargaJual: 71, icon: "🍎" }
+    },
+    ternak: {
+        ayam: { id: "ayam", nama: "Ayam", hargaBeli: 37000, hasilId: "telur_ayam", durasi: 3600, icon: "🐔" },
+        sapi: { id: "sapi", nama: "Sapi", hargaBeli: 157000, hasilId: "susu_sapi", durasi: 14400, icon: "🐮" },
+        kambing: { id: "kambing", nama: "Kambing", hargaBeli: 77000, hasilId: "susu_kambing", durasi: 10800, icon: "🐐" },
+        babi: { id: "babi", nama: "Babi", hargaBeli: 97000, hasilId: "daging_babi", durasi: 21600, icon: "🐖" }
+    },
+    pakan: {
+        pakan_ayam: { id: "pakan_ayam", targetTernak: "ayam", nama: "Pakan Ayam", hargaBeli: 500, icon: "🌾" },
+        pakan_sapi: { id: "pakan_sapi", targetTernak: "sapi", nama: "Pakan Sapi", hargaBeli: 2000, icon: "🌿" },
+        pakan_kambing: { id: "pakan_kambing", targetTernak: "kambing", nama: "Pakan Kambing", hargaBeli: 1200, icon: "🍃" },
+        pakan_babi: { id: "pakan_babi", targetTernak: "babi", nama: "Pakan Babi", hargaBeli: 1500, icon: "🌽" }
+    },
+    ternakHasil: {
+        telur_ayam: { id: "telur_ayam", nama: "Telur Ayam", hargaJual: 5000, icon: "🥚" },
+        susu_sapi: { id: "susu_sapi", nama: "Susu Sapi", hargaJual: 25000, icon: "🥛" },
+        susu_kambing: { id: "susu_kambing", nama: "Susu Kambing", hargaJual: 14000, icon: "🍼" },
+        daging_babi: { id: "daging_babi", nama: "Daging Babi", hargaJual: 30000, icon: "🥩" }
     },
     material: {
         kayu: { id: "kayu", nama: "Kayu", hargaBeli: 17, icon: "🪵" }
