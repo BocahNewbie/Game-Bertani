@@ -14,7 +14,7 @@ let transaksiAktif = {
     idItem: "",
     namaItem: "",
     hargaSatuan: 0,
-    tipe: "" 
+    tipe: "" // "beli" atau "jual"
 };
 
 let lahanTargetAktif = null;
@@ -33,6 +33,7 @@ function gantiTab(evt, tabId) {
     if (tabId === 'tab-tas') renderTas();
     if (tabId === 'tab-supermarket') renderSupermarket();
     if (tabId === 'tab-lahan') renderLahan();
+    if (tabId === 'tab-pengepul') renderPengepul();
 }
 
 function ubahNama() {
@@ -50,12 +51,10 @@ function updateHeaderUI() {
     document.getElementById("stat-waktu").innerText = `⏰ ${jamFormatted}:${menitFormatted}`;
 }
 
-// Mendapatkan Total Menit In-Game Saat Ini
 function getTotalMenitInGame(jam, menit) {
     return (jam * 60) + menit;
 }
 
-// Format Sisa Waktu In-Game ke Teks Jam & Menit
 function formatDurasiInGame(sisaMenitInGame) {
     if (sisaMenitInGame <= 0) return "Siap Panen! ✨";
     let jam = Math.floor(sisaMenitInGame / 60);
@@ -211,7 +210,6 @@ function eksekusiTanamBibit(idBibit, stokTas) {
     gameState.tas[idBibit] -= jumlahTanam;
     if (gameState.tas[idBibit] <= 0) delete gameState.tas[idBibit];
 
-    // Konversi durasi database (detik) ke menit in-game (misal: 600 detik = 10 menit durasi in-game)
     let durasiDetikDatabase = GAME_DATABASE.tanaman[idBibit].durasi;
     let durasiMenitInGame = Math.ceil(durasiDetikDatabase / 60);
 
@@ -248,7 +246,7 @@ function panenHasil(nomorLahan) {
 }
 
 
-// --- TAB SUPERMARKET & POPUP MODERN ---
+// --- TAB SUPERMARKET & POPUP PEMBELIAN ---
 
 function renderSupermarket() {
     const container = document.getElementById("list-supermarket");
@@ -287,7 +285,9 @@ function bukaModalBeli(idItem, namaItem, harga) {
 }
 
 function tutupModalBeli() {
-    document.getElementById("modal-beli").style.display = "none";
+    let modalTanam = document.getElementById("modal-tanam"); // Aman-in
+    let modalBeli = document.getElementById("modal-beli");
+    if (modalBeli) modalBeli.style.display = "none";
 }
 
 function ubahJumlahBeli(delta) {
@@ -353,6 +353,150 @@ function konfirmasiBeli() {
 }
 
 
+// --- TAB PENGEPUL (JUAL HASIL PANEN DENGAN HARGA DINAMIS) ---
+
+function renderPengepul() {
+    const container = document.getElementById("list-pengepul");
+    if (!container) return;
+    container.innerHTML = "";
+
+    let adaBarangJual = false;
+    const daftarTanaman = GAME_DATABASE.tanaman;
+
+    for (let idItem in gameState.tas) {
+        let jumlahStok = gameState.tas[idItem];
+        if (jumlahStok > 0 && daftarTanaman[idItem]) {
+            adaBarangJual = true;
+            let item = daftarTanaman[idItem];
+            
+            // Hitung harga jual dinamis berdasarkan MarketEconomy
+            let hargaJualDinamis = MarketEconomy ? MarketEconomy.getHargaJual(item.hargaJual) : item.hargaJual;
+
+            container.innerHTML += `
+                <div class="card">
+                    <div style="font-size: 2.5rem;">${item.icon}</div>
+                    <h3>${item.nama}</h3>
+                    <p>Stok Tas: <b>${jumlahStok} Pcs</b></p>
+                    <p>Harga Jual: <b>Rp. ${hargaJualDinamis}</b> <small style="color:gray;">(Asli: ${item.hargaJual})</small></p>
+                    <button onclick="bukaModalJual('${idItem}', '${item.nama}', ${hargaJualDinamis}, ${jumlahStok})" style="background: #2980b9;">Jual ke Pengepul</button>
+                </div>
+            `;
+        }
+    }
+
+    if (!adaBarangJual) {
+        container.innerHTML = `<p style="grid-column: 1 / -1; text-align: center; color: gray;">Tidak ada hasil panen di Tas untuk dijual ke Pengepul. Lakukan panen terlebih dahulu!</p>`;
+    }
+}
+
+// Buka Modal Jual ke Pengepul
+function bukaModalJual(idItem, namaItem, hargaJualSatuan, stokMaksimal) {
+    transaksiAktif = { idItem, namaItem, hargaSatuan: hargaJualSatuan, tipe: 'jual', stokMaksimal };
+
+    let modalJual = document.getElementById("modal-jual");
+    if (!modalJual) {
+        modalJual = document.createElement("div");
+        modalJual.id = "modal-jual";
+        modalJual.className = "modal-overlay";
+        modalJual.innerHTML = `
+            <div class="modal-card">
+                <h3 id="modal-jual-title">Jual Barang</h3>
+                <p id="modal-jual-info">Harga: Rp. 0 / pcs</p>
+                
+                <div class="modal-input-group">
+                    <button onclick="ubahJumlahJual(-1)">-</button>
+                    <input type="number" id="input-jumlah-jual" value="1" min="1" oninput="validasiInputJual()">
+                    <button onclick="ubahJumlahJual(1)">+</button>
+                    <button class="btn-max" onclick="jualMaksimal()">MAX</button>
+                </div>
+
+                <p id="modal-jual-total" style="margin: 15px 0; font-weight: bold;">Total Pendapatan: Rp. 0</p>
+
+                <div class="modal-actions">
+                    <button class="btn-cancel" onclick="tutupModalJual()">Batal</button>
+                    <button class="btn-confirm" onclick="konfirmasiJual()" style="background: #2980b9;">Jual</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modalJual);
+    }
+
+    document.getElementById("modal-jual-title").innerText = `Jual ${namaItem}`;
+    document.getElementById("modal-jual-info").innerText = `Harga Jual: Rp. ${hargaJualSatuan.toLocaleString('id-ID')} / pcs (Stok: ${stokMaksimal})`;
+    
+    let inputJual = document.getElementById("input-jumlah-jual");
+    inputJual.value = 1;
+    inputJual.max = stokMaksimal;
+
+    updateTotalHargaModalJual();
+    modalJual.style.display = "flex";
+}
+
+function tutupModalJual() {
+    let modalJual = document.getElementById("modal-jual");
+    if (modalJual) modalJual.style.display = "none";
+}
+
+function ubahJumlahJual(delta) {
+    let input = document.getElementById("input-jumlah-jual");
+    let nilaiBaru = parseInt(input.value || 1) + delta;
+    let maks = transaksiAktif.stokMaksimal || 1;
+    
+    if (nilaiBaru < 1) nilaiBaru = 1;
+    if (nilaiBaru > maks) nilaiBaru = maks;
+    
+    input.value = nilaiBaru;
+    updateTotalHargaModalJual();
+}
+
+function validasiInputJual() {
+    let input = document.getElementById("input-jumlah-jual");
+    let val = parseInt(input.value);
+    let maks = transaksiAktif.stokMaksimal || 1;
+    
+    if (val > maks) input.value = maks;
+    if (val < 1 && input.value !== "") input.value = 1;
+    
+    updateTotalHargaModalJual();
+}
+
+function jualMaksimal() {
+    document.getElementById("input-jumlah-jual").value = transaksiAktif.stokMaksimal;
+    updateTotalHargaModalJual();
+}
+
+function updateTotalHargaModalJual() {
+    let jumlah = parseInt(document.getElementById("input-jumlah-jual").value) || 0;
+    let totalPendapatan = jumlah * transaksiAktif.hargaSatuan;
+    
+    document.getElementById("modal-jual-total").innerText = `Total Pendapatan: Rp. ${totalPendapatan.toLocaleString('id-ID')}`;
+}
+
+function konfirmasiJual() {
+    let jumlah = parseInt(document.getElementById("input-jumlah-jual").value) || 0;
+    let totalPendapatan = jumlah * transaksiAktif.hargaSatuan;
+
+    if (jumlah > 0 && gameState.tas[transaksiAktif.idItem] >= jumlah) {
+        // Kurangi tas & tambah uang pemain
+        gameState.tas[transaksiAktif.idItem] -= jumlah;
+        if (gameState.tas[transaksiAktif.idItem] <= 0) {
+            delete gameState.tas[transaksiAktif.idItem];
+        }
+        gameState.uang += totalPendapatan;
+
+        updateHeaderUI();
+        tutupModalJual();
+
+        tampilkanPopupNotifikasi(`💰 Penjualan Berhasil!`, `Kamu menjual ${jumlah} ${transaksiAktif.namaItem} ke Pengepul dan mendapatkan Rp. ${totalPendapatan.toLocaleString('id-ID')}.`);
+        
+        renderPengepul();
+        renderTas();
+    } else {
+        alert("⚠️ Stok di tas tidak mencukupi!");
+    }
+}
+
+
 // --- POPUP NOTIFIKASI MODERN ESTETIK ---
 
 function tampilkanPopupNotifikasi(judul, pesan) {
@@ -414,7 +558,6 @@ function renderTas() {
 
 
 // --- SISTEM WAKTU IN-GAME ---
-// 1.5 detik real-time = 1 menit in-game
 setInterval(() => {
     gameState.waktuMenit += 1;
     if (gameState.waktuMenit >= 60) {
@@ -426,7 +569,6 @@ setInterval(() => {
     }
     updateHeaderUI();
 
-    // Render ulang hitung mundur lahan berdasarkan menit in-game jika tab lahan sedang aktif
     let adaTanamanAktif = Object.keys(gameState.lahan).length > 0;
     if (adaTanamanAktif && document.getElementById("tab-lahan").classList.contains("active")) {
         renderLahan();
@@ -439,5 +581,6 @@ window.onload = function() {
     updateHeaderUI();
     renderLahan();
     renderSupermarket();
+    renderPengepul();
     renderTas();
 };
