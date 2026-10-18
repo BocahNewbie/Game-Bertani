@@ -14,7 +14,7 @@ let transaksiAktif = {
     idItem: "",
     namaItem: "",
     hargaSatuan: 0,
-    tipe: "" // "beli" atau "jual"
+    tipe: "" 
 };
 
 let lahanTargetAktif = null;
@@ -285,7 +285,6 @@ function bukaModalBeli(idItem, namaItem, harga) {
 }
 
 function tutupModalBeli() {
-    let modalTanam = document.getElementById("modal-tanam"); // Aman-in
     let modalBeli = document.getElementById("modal-beli");
     if (modalBeli) modalBeli.style.display = "none";
 }
@@ -353,40 +352,75 @@ function konfirmasiBeli() {
 }
 
 
-// --- TAB PENGEPUL (JUAL HASIL PANEN DENGAN HARGA DINAMIS) ---
+// --- TAB PENGEPUL (2 OPSI TERPISAH: HASIL TANAMAN & HASIL TERNAK) ---
 
 function renderPengepul() {
     const container = document.getElementById("list-pengepul");
     if (!container) return;
     container.innerHTML = "";
 
-    let adaBarangJual = false;
-    const daftarTanaman = GAME_DATABASE.tanaman;
+    // Header & Section 1: Hasil Tanaman
+    let htmlTanaman = `<div style="grid-column: 1 / -1; margin-top: 10px;"><h3 style="border-bottom: 2px solid #27ae60; padding-bottom: 5px; color: #27ae60;">🌾 Hasil Tanaman</h3></div>`;
+    let adaTanamanJual = false;
+    let cardTanamanHTML = "";
 
+    const daftarTanaman = GAME_DATABASE.tanaman || {};
     for (let idItem in gameState.tas) {
         let jumlahStok = gameState.tas[idItem];
         if (jumlahStok > 0 && daftarTanaman[idItem]) {
-            adaBarangJual = true;
+            adaTanamanJual = true;
             let item = daftarTanaman[idItem];
-            
-            // Hitung harga jual dinamis berdasarkan MarketEconomy
             let hargaJualDinamis = MarketEconomy ? MarketEconomy.getHargaJual(item.hargaJual) : item.hargaJual;
 
-            container.innerHTML += `
+            cardTanamanHTML += `
                 <div class="card">
                     <div style="font-size: 2.5rem;">${item.icon}</div>
                     <h3>${item.nama}</h3>
                     <p>Stok Tas: <b>${jumlahStok} Pcs</b></p>
-                    <p>Harga Jual: <b>Rp. ${hargaJualDinamis}</b> <small style="color:gray;">(Asli: ${item.hargaJual})</small></p>
+                    <p>Harga Jual: <b>Rp. ${hargaJualDinamis}</b></p>
                     <button onclick="bukaModalJual('${idItem}', '${item.nama}', ${hargaJualDinamis}, ${jumlahStok})" style="background: #2980b9;">Jual ke Pengepul</button>
                 </div>
             `;
         }
     }
 
-    if (!adaBarangJual) {
-        container.innerHTML = `<p style="grid-column: 1 / -1; text-align: center; color: gray;">Tidak ada hasil panen di Tas untuk dijual ke Pengepul. Lakukan panen terlebih dahulu!</p>`;
+    if (!adaTanamanJual) {
+        cardTanamanHTML = `<p style="grid-column: 1 / -1; color: gray; font-style: italic;">Belum ada hasil tanaman di Tas.</p>`;
     }
+
+
+    // Section 2: Hasil Ternak (Disediakan tempatnya jika nanti database ternak aktif)
+    let htmlTernak = `<div style="grid-column: 1 / -1; margin-top: 20px;"><h3 style="border-bottom: 2px solid #e67e22; padding-bottom: 5px; color: #e67e22;">🐮 Hasil Ternak (Susu, Telur, Daging, dll)</h3></div>`;
+    let adaTernakJual = false;
+    let cardTernakHTML = "";
+
+    // Contoh pengecekan item hasil ternak di masa depan (jika ada di database ternak)
+    const daftarTernakHasil = (typeof GAME_DATABASE.ternakHasil !== 'undefined') ? GAME_DATABASE.ternakHasil : {};
+    for (let idItem in gameState.tas) {
+        let jumlahStok = gameState.tas[idItem];
+        if (jumlahStok > 0 && daftarTernakHasil[idItem]) {
+            adaTernakJual = true;
+            let item = daftarTernakHasil[idItem];
+            let hargaJualDinamis = MarketEconomy ? MarketEconomy.getHargaJual(item.hargaJual) : item.hargaJual;
+
+            cardTernakHTML += `
+                <div class="card">
+                    <div style="font-size: 2.5rem;">${item.icon}</div>
+                    <h3>${item.nama}</h3>
+                    <p>Stok Tas: <b>${jumlahStok} Pcs</b></p>
+                    <p>Harga Jual: <b>Rp. ${hargaJualDinamis}</b></p>
+                    <button onclick="bukaModalJual('${idItem}', '${item.nama}', ${hargaJualDinamis}, ${jumlahStok})" style="background: #e67e22;">Jual ke Pengepul</button>
+                </div>
+            `;
+        }
+    }
+
+    if (!adaTernakJual) {
+        cardTernakHTML = `<p style="grid-column: 1 / -1; color: gray; font-style: italic;">Belum ada hasil ternak di Tas.</p>`;
+    }
+
+    // Gabungkan ke container pengepul
+    container.innerHTML = htmlTanaman + cardTanamanHTML + htmlTernak + cardTernakHTML;
 }
 
 // Buka Modal Jual ke Pengepul
@@ -477,7 +511,6 @@ function konfirmasiJual() {
     let totalPendapatan = jumlah * transaksiAktif.hargaSatuan;
 
     if (jumlah > 0 && gameState.tas[transaksiAktif.idItem] >= jumlah) {
-        // Kurangi tas & tambah uang pemain
         gameState.tas[transaksiAktif.idItem] -= jumlah;
         if (gameState.tas[transaksiAktif.idItem] <= 0) {
             delete gameState.tas[transaksiAktif.idItem];
@@ -533,7 +566,7 @@ function renderTas() {
     container.innerHTML = "";
 
     let adaIsi = false;
-    const daftarTanaman = GAME_DATABASE.tanaman;
+    const daftarTanaman = GAME_DATABASE.tanaman || {};
 
     for (let idItem in gameState.tas) {
         let jumlah = gameState.tas[idItem];
