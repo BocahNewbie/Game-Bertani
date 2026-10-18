@@ -135,67 +135,67 @@ body {
     background-color: #047857;
 }
 
-/* Modal / Popup Soft Modern Neon */
+/* --- POPUP MODERN DENGAN EFEK HOVER SOROT CAHAYA SESUAI WARNA --- */
 .modal-overlay {
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(10, 14, 23, 0.8);
-    backdrop-filter: blur(4px);
+    background: rgba(8, 11, 18, 0.85);
+    backdrop-filter: blur(6px);
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 1000;
+    animation: fadeInOverlay 0.25s ease-out;
 }
 
 .modal-card {
-    background: #182030;
-    border: 1px solid rgba(59, 130, 246, 0.3);
-    padding: 25px;
-    border-radius: 16px;
-    width: 320px;
+    background: linear-gradient(145deg, #161f30, #101622);
+    border: 1px solid rgba(59, 130, 246, 0.4);
+    padding: 28px;
+    border-radius: 18px;
+    width: 340px;
     text-align: center;
-    box-shadow: 0 0 25px rgba(59, 130, 246, 0.12);
+    box-shadow: 0 0 25px rgba(59, 130, 246, 0.2);
+    transition: box-shadow 0.3s ease, border-color 0.3s ease;
+    animation: scaleUpModal 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.modal-input-group {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-    margin-top: 20px;
+/* Efek sorot cahaya saat mouse mendekat ke modal */
+.modal-card.neon-blue:hover {
+    border-color: #3b82f6;
+    box-shadow: 0 0 35px rgba(59, 130, 246, 0.6), inset 0 0 15px rgba(59, 130, 246, 0.2);
 }
 
-.modal-input-group input {
-    width: 70px;
-    text-align: center;
-    font-size: 1.2rem;
-    padding: 6px;
-    background: #101622;
-    border: 1px solid var(--border-color);
-    color: var(--text-main);
-    border-radius: 6px;
-    outline: none;
+.modal-card.neon-green:hover {
+    border-color: #10b981;
+    box-shadow: 0 0 35px rgba(16, 185, 129, 0.6), inset 0 0 15px rgba(16, 185, 129, 0.2);
 }
 
-.modal-input-group button {
-    padding: 8px 14px;
-    background-color: #232d42;
-    color: var(--text-main);
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: bold;
+.modal-card.neon-amber:hover {
+    border-color: #f59e0b;
+    box-shadow: 0 0 35px rgba(245, 158, 11, 0.6), inset 0 0 15px rgba(245, 158, 11, 0.2);
 }
 
-.btn-max {
-    background-color: rgba(245, 158, 11, 0.15) !important;
-    color: #fbbf24 !important;
-    border-color: rgba(245, 158, 11, 0.3) !important;
+@keyframes fadeInOverlay {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes scaleUpModal {
+    from { transform: scale(0.9); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.modal-card h3 {
+    margin-top: 0;
+    color: #60a5fa;
+    font-size: 1.3rem;
+    letter-spacing: 0.5px;
 }
 
 .modal-actions {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     gap: 12px;
     margin-top: 25px;
 }
@@ -203,20 +203,45 @@ body {
 .modal-actions button {
     flex: 1;
     padding: 10px;
-    border: none;
-    border-radius: 6px;
+    border-radius: 8px;
     cursor: pointer;
     font-weight: 600;
+    transition: all 0.2s;
 }
 
 .btn-cancel {
     background-color: rgba(239, 68, 68, 0.15);
     color: #f87171;
-    border: 1px solid rgba(239, 68, 68, 0.3);
+    border: 1px solid rgba(239, 68, 68, 0.35);
+}
+
+.btn-cancel:hover {
+    background-color: rgba(239, 68, 68, 0.25);
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.2);
 }
 
 .btn-confirm {
     background-color: rgba(16, 185, 129, 0.2);
     color: #34d399;
-    border: 1px solid rgba(16, 185, 129, 0.3);
+    border: 1px solid rgba(16, 185, 129, 0.35);
+}
+
+.btn-confirm:hover {
+    background-color: rgba(16, 185, 129, 0.3);
+    box-shadow: 0 0 12px rgba(16, 185, 129, 0.25);
+}
+
+/* Animasi Kelap-Kelip Credit Wikipedia */
+@keyframes neonBlink {
+    0%, 100% { opacity: 1; text-shadow: 0 0 10px #34d399, 0 0 20px #34d399; }
+    50% { opacity: 0.4; text-shadow: 0 0 2px #10b981; }
+}
+
+.neon-credit {
+    animation: neonBlink 1.5s infinite;
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: #34d399;
+    text-align: center;
+    margin-bottom: 20px;
 }
