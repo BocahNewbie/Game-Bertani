@@ -7,11 +7,10 @@ const MarketEconomy = {
         if (!window.marketIntervalID) {
             window.marketIntervalID = setInterval(() => {
                 this.updateFluktuasiOtomatis();
-            }, 30000); // Update fluktuasi setiap 30 detik
+            }, 30000); 
         }
     },
     generateRandomPersen() {
-        // Fluktuasi acak antara -25% sampai +35%
         return Math.floor(Math.random() * 61) - 25;
     },
     setPersentaseBaru(nilaiBaru) {
@@ -29,7 +28,6 @@ const MarketEconomy = {
     updateFluktuasiOtomatis() {
         const persenBaru = this.generateRandomPersen();
         this.setPersentaseBaru(persenBaru);
-        // Refresh UI jika fungsi render tersedia
         if (typeof renderSupermarket === 'function') renderSupermarket();
         if (typeof renderPasar === 'function') renderPasar();
     },
