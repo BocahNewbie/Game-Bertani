@@ -6,8 +6,8 @@ let gameState = {
     waktuJam: 8, 
     waktuMenit: 0,
     jumlahLahanAktif: 3,
-    tas: {},    // Kosong tanpa item awal
-    lahan: {}   // Kosong tanpa tanaman awal
+    tas: {},    
+    lahan: {}   
 };
 
 let transaksiAktif = {
@@ -50,19 +50,21 @@ function updateHeaderUI() {
     document.getElementById("stat-waktu").innerText = `⏰ ${jamFormatted}:${menitFormatted}`;
 }
 
-// Format Durasi Waktu Detik ke Teks
-function formatDurasiWaktu(detikSisa) {
-    if (detikSisa <= 0) return "Siap Panen! ✨";
-    let jam = Math.floor(detikSisa / 3600);
-    let menit = Math.floor((detikSisa % 3600) / 60);
-    let detik = detikSisa % 60;
+// Mendapatkan Total Menit In-Game Saat Ini
+function getTotalMenitInGame(jam, menit) {
+    return (jam * 60) + menit;
+}
+
+// Format Sisa Waktu In-Game ke Teks Jam & Menit
+function formatDurasiInGame(sisaMenitInGame) {
+    if (sisaMenitInGame <= 0) return "Siap Panen! ✨";
+    let jam = Math.floor(sisaMenitInGame / 60);
+    let menit = sisaMenitInGame % 60;
     
     if (jam > 0) {
-        return `${jam}j ${menit}m ${detik}d`;
-    } else if (menit > 0) {
-        return `${menit}m ${detik}d`;
+        return `${jam} Jam ${menit} Menit In-Game`;
     } else {
-        return `${detik} Detik`;
+        return `${menit} Menit In-Game`;
     }
 }
 
@@ -74,7 +76,7 @@ function renderLahan() {
     if (!container) return;
     container.innerHTML = "";
 
-    const waktuSekarang = Date.now();
+    const totalMenitSekarang = getTotalMenitInGame(gameState.waktuJam, gameState.waktuMenit);
 
     for (let i = 1; i <= gameState.jumlahLahanAktif; i++) {
         let dataLahan = gameState.lahan[i];
@@ -89,10 +91,10 @@ function renderLahan() {
             `;
         } else {
             let infoBibit = GAME_DATABASE.tanaman[dataLahan.idBibit] || { nama: "Tanaman", icon: "🌱" };
-            let sisaDetik = Math.max(0, Math.floor((dataLahan.waktuSelesai - waktuSekarang) / 1000));
-            let teksWaktu = formatDurasiWaktu(sisaDetik);
+            let sisaMenitInGame = Math.max(0, dataLahan.targetMenitInGame - totalMenitSekarang);
+            let teksWaktu = formatDurasiInGame(sisaMenitInGame);
 
-            let tombolAksi = sisaDetik === 0 
+            let tombolAksi = sisaMenitInGame === 0 
                 ? `<button onclick="panenHasil(${i})" style="background: #e67e22; color:white; border:none; padding:6px 12px; border-radius:4px; cursor:pointer;">Panen (${dataLahan.jumlah})</button>`
                 : `<button disabled style="background: #95a5a6; color:white; border:none; padding:6px 12px; border-radius:4px; cursor: not-allowed;">Tumbuh... (${teksWaktu})</button>`;
 
@@ -102,7 +104,7 @@ function renderLahan() {
                     <div style="font-size: 2.5rem; margin: 5px 0;">${infoBibit.icon}</div>
                     <p><b>${infoBibit.nama}</b></p>
                     <p>Jumlah: <b>${dataLahan.jumlah} Pcs</b></p>
-                    <p style="font-size: 0.9rem; color: #c0392b; font-weight: bold;">⏱️ ${teksWaktu}</p>
+                    <p style="font-size: 0.85rem; color: #c0392b; font-weight: bold;">⏱️ ${teksWaktu}</p>
                     ${tombolAksi}
                 </div>
             `;
@@ -209,13 +211,17 @@ function eksekusiTanamBibit(idBibit, stokTas) {
     gameState.tas[idBibit] -= jumlahTanam;
     if (gameState.tas[idBibit] <= 0) delete gameState.tas[idBibit];
 
-    let durasiSatuan = GAME_DATABASE.tanaman[idBibit].durasi;
-    let waktuSelesai = Date.now() + (durasiSatuan * 1000);
+    // Konversi durasi database (detik) ke menit in-game (misal: 600 detik = 10 menit durasi in-game)
+    let durasiDetikDatabase = GAME_DATABASE.tanaman[idBibit].durasi;
+    let durasiMenitInGame = Math.ceil(durasiDetikDatabase / 60);
+
+    let totalMenitSekarang = getTotalMenitInGame(gameState.waktuJam, gameState.waktuMenit);
+    let targetMenitInGame = totalMenitSekarang + durasiMenitInGame;
 
     gameState.lahan[lahanTargetAktif] = {
         idBibit: idBibit,
         jumlah: jumlahTanam,
-        waktuSelesai: waktuSelesai
+        targetMenitInGame: targetMenitInGame
     };
 
     tutupModalTanam();
@@ -254,7 +260,7 @@ function renderSupermarket() {
     for (let key in daftarTanaman) {
         let item = daftarTanaman[key];
         let hargaDinamis = MarketEconomy ? MarketEconomy.getHargaBeli(item.hargaBeli) : item.hargaBeli;
-        let durasiTumbuh = formatDurasiWaktu(item.durasi);
+        let durasiMenit = Math.ceil(item.durasi / 60);
 
         container.innerHTML += `
             <div class="card">
@@ -262,7 +268,7 @@ function renderSupermarket() {
                 <h3>${item.nama}</h3>
                 <p>Beli: <b>Rp. ${hargaDinamis}</b></p>
                 <p>Jual: Rp. ${item.hargaJual}</p>
-                <p>⏱️ ${durasiTumbuh}</p>
+                <p>⏱️ ${durasiMenit} Menit In-Game</p>
                 <button onclick="bukaModalBeli('${item.id}', '${item.nama}', ${hargaDinamis})">Beli Bibit</button>
             </div>
         `;
@@ -408,20 +414,19 @@ function renderTas() {
 
 
 // --- SISTEM WAKTU IN-GAME ---
-// 15 detik real-time = 10 detik in-game (artinya 1.5 detik real = 1 menit in-game)
+// 1.5 detik real-time = 1 menit in-game
 setInterval(() => {
-    // Tambah 1 menit in-game setiap 1.5 detik real-time
     gameState.waktuMenit += 1;
     if (gameState.waktuMenit >= 60) {
         gameState.waktuMenit = 0;
         gameState.waktuJam += 1;
         if (gameState.waktuJam >= 24) {
-            gameState.waktuJam = 0; // Reset ke jam 00:00 hari baru
+            gameState.waktuJam = 0; 
         }
     }
     updateHeaderUI();
 
-    // Render ulang hitung mundur lahan jika tab lahan sedang aktif
+    // Render ulang hitung mundur lahan berdasarkan menit in-game jika tab lahan sedang aktif
     let adaTanamanAktif = Object.keys(gameState.lahan).length > 0;
     if (adaTanamanAktif && document.getElementById("tab-lahan").classList.contains("active")) {
         renderLahan();
