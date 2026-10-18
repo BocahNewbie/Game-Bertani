@@ -1,251 +1,61 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Desa Petani</title>
-  <meta name="description" content="Game simulasi pertanian dan peternakan modern berbasis web dengan sistem lahan, kandang ternak, aksesoris, pasar jual-beli, dan inventory.">
-  <meta property="og:title" content="Game Pertanian & Peternakan Modern">
-  <meta property="og:description" content="Game simulasi pertanian dan peternakan modern berbasis web dengan sistem lahan, kandang ternak, aksesoris, pasar jual-beli, dan inventory.">
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Bertani & Peternakan Modular</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div id="game-container">
+        <!-- Header / Informasi Pemain -->
+        <header>
+            <h1>Desa Makmur Game</h1>
+            <div id="stats-bar">
+                <span>Uang: <strong id="player-money">1000</strong> Koin</span>
+                <span>Hari: <strong id="game-day">1</strong></span>
+                <span>Waktu: <strong id="game-time">06:00</strong></span>
+                <span>Cuaca: <strong id="game-cuaca">Cerah</strong></span>
+            </div>
+        </header>
 
-  <div class="game-container">
-    
-    <!-- HEADER PLAYER PANEL -->
-    <div class="player-panel">
-      <div class="player-info">
-        <h2 id="player-nickname" onclick="bukaModalNickname()" style="cursor: pointer;">👨‍🌾 Petani Newbie ✏️</h2>
-        <div class="koin-badge" id="player-koin">Rp 1.250</div>
-        <div class="cuaca-badge" id="info-cuaca">Cuaca: ☀️ Cerah</div>
-      </div>
-      <div class="header-actions">
-        <button class="btn-primary" onclick="simpanGame()">💾 Simpan</button>
-        <button class="btn-danger" onclick="bukaModalReset()">🔄 Reset</button>
-      </div>
+        <!-- Area Navigasi Toko / Lokasi -->
+        <nav id="location-nav">
+            <button onclick="bukaModal('supermarket')">Supermarket (Bibit)</button>
+            <button onclick="bukaModal('pasar')">Pasar (Hewan & Pakan)</button>
+            <button onclick="bukaModal('pengepul')">Pengepul (Jual Hasil)</button>
+            <button onclick="bukaInventory()">Inventory</button>
+        </nav>
+
+        <!-- Area Utama Permainan -->
+        <main>
+            <!-- Lahan Pertanian -->
+            <section id="farm-section">
+                <h2>Lahan Pertanian</h2>
+                <div id="lahan-grid" class="grid-container">
+                    <!-- Petak lahan akan dirender otomatis via JavaScript -->
+                </div>
+            </section>
+
+            <!-- Peternakan -->
+            <section id="farm-animal-section">
+                <h2>Peternakan Hewan</h2>
+                <div id="kandang-container">
+                    <!-- Kandang & hewan akan dirender otomatis via JavaScript -->
+                </div>
+            </section>
+        </main>
     </div>
 
-    <!-- NAVIGATION TABS -->
-    <div class="nav-tabs">
-      <button class="tab-btn active" onclick="switchTab('pertanian')">🌱 Pertanian</button>
-      <button class="tab-btn" onclick="switchTab('peternakan')">🐾 Peternakan</button>
-      <button class="tab-btn" onclick="switchTab('aksesoris')">🎩 Aksesoris Saya</button>
-      <button class="tab-btn" onclick="switchTab('toko-aksesoris')">🛍️ Toko Aksesoris</button>
-      <button class="tab-btn" onclick="switchTab('pasar')">🛒 Pasar</button>
-      <button class="tab-btn" onclick="switchTab('inventory')">🎒 Inventory</button>
-    </div>
-
-    <!-- 1. TAB PERTANIAN -->
-    <div id="tab-pertanian" class="tab-content active"></div>
-
-    <!-- 2. TAB PETERNAKAN -->
-    <div id="tab-peternakan" class="tab-content"></div>
-
-    <!-- 3. TAB AKSESORIS SAYA -->
-    <div id="tab-aksesoris" class="tab-content"></div>
-
-    <!-- 4. TAB TOKO AKSESORIS -->
-    <div id="tab-toko-aksesoris" class="tab-content"></div>
-
-    <!-- 5. TAB PASAR -->
-    <div id="tab-pasar" class="tab-content"></div>
-
-    <!-- 6. TAB INVENTORY -->
-    <div id="tab-inventory" class="tab-content"></div>
-
-  </div>
-
-  <!-- TOAST NOTIFICATION CONTAINER (Pojok Kanan Atas Max 3 Baris) -->
-  <div id="toast-container"></div>
-
-  <!-- ================= MODAL KUSTOM MODERN ================= -->
-
-  <!-- MODAL BELI PASAR DENGAN PILIHAN JUMLAH -->
-  <div class="modal-overlay" id="modal-beli" style="display: none;">
-    <div class="modal-card">
-      <h3 id="modal-beli-title">Beli Barang di Pasar</h3>
-      <p id="modal-beli-info" style="font-size: 13px; color: #64748b; margin-bottom: 8px;"></p>
-      <input type="number" id="input-jumlah-beli" min="1" max="999" value="1" oninput="validasiInputBeli()" />
-      
-      <div class="qty-control-grid">
-        <button onclick="ubahJumlahBeli(-10)">-10</button>
-        <button onclick="ubahJumlahBeli(-1)">-1</button>
-        <button onclick="ubahJumlahBeli(1)">+1</button>
-        <button onclick="ubahJumlahBeli(10)">+10</button>
-        <button class="btn-primary" onclick="setJumlahBeliMaks()">Maks</button>
-      </div>
-
-      <div id="modal-beli-total" style="background: #f1f5f9; padding: 10px; border-radius: 8px; font-weight: bold; color: #2563eb; margin: 12px 0; text-align: center;">
-        Total: Rp 0
-      </div>
-
-      <div class="modal-actions">
-        <button class="btn-primary" onclick="eksekusiBeliItem()">Konfirmasi Beli</button>
-        <button class="btn-secondary" onclick="tutupModalBeli()">Batal</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL JUAL INVENTORY DENGAN PILIHAN JUMLAH -->
-  <div class="modal-overlay" id="modal-jual" style="display: none;">
-    <div class="modal-card">
-      <h3 id="modal-jual-title">Jual Produk Hasil Panen</h3>
-      <p id="modal-jual-info" style="font-size: 13px; color: #64748b; margin-bottom: 8px;"></p>
-      <input type="number" id="input-jumlah-jual" min="1" value="1" oninput="validasiInputJual()" />
-      
-      <div class="qty-control-grid">
-        <button onclick="ubahJumlahJual(-10)">-10</button>
-        <button onclick="ubahJumlahJual(-1)">-1</button>
-        <button onclick="ubahJumlahJual(1)">+1</button>
-        <button onclick="ubahJumlahJual(10)">+10</button>
-        <button class="btn-primary" onclick="setJumlahJualMaks()">Maks</button>
-      </div>
-
-      <div id="modal-jual-total" style="background: #f0fdf4; padding: 10px; border-radius: 8px; font-weight: bold; color: #16a34a; margin: 12px 0; text-align: center;">
-        Total Pendapatan: Rp 0
-      </div>
-
-      <div class="modal-actions">
-        <button class="btn-primary" onclick="eksekusiJualItemModal()">Konfirmasi Jual</button>
-        <button class="btn-secondary" onclick="tutupModalJual()">Batal</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL PILIH PUPUK MASSAL DENGAN COOLDOWN -->
-  <div class="modal-overlay" id="modal-pupuk" style="display: none;">
-    <div class="modal-card">
-      <h3>Pilih Pupuk untuk Lahan</h3>
-      <p style="font-size: 13px; color: #64748b; margin-bottom: 12px;">Pilih pupuk untuk disebar ke semua petak lahan pertanian aktif:</p>
-      <div id="modal-pupuk-list" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px;"></div>
-      <div class="modal-actions">
-        <button class="btn-secondary" onclick="tutupModalPupuk()" style="width: 100%;">Tutup</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL PILIH BIBIT MODERN -->
-  <div class="modal-overlay" id="modal-pilih-bibit" style="display: none;">
-    <div class="modal-card">
-      <h3>Pilih Bibit untuk Ditanam</h3>
-      <p style="font-size: 12px; color: #64748b; margin-bottom: 12px;">Klik bibit di bawah ini:</p>
-      <div id="modal-pilih-bibit-list" style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px;"></div>
-      <div class="modal-actions">
-        <button class="btn-secondary" onclick="tutupModalPilihBibit()" style="width: 100%;">Batal</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL PILIH JUMLAH TANAM -->
-  <div class="modal-overlay" id="modal-tanam" style="display: none;">
-    <div class="modal-card">
-      <h3 id="modal-tanam-title">Tanam Bibit</h3>
-      <p id="modal-tanam-info" style="font-size: 12px; color: #64748b;"></p>
-      <input type="number" id="input-jumlah-tanam" min="1" value="1" oninput="validasiInputTanam()" />
-      
-      <div class="qty-control-grid">
-        <button onclick="ubahJumlahTanam(-10)">-10</button>
-        <button onclick="ubahJumlahTanam(-1)">-1</button>
-        <button onclick="ubahJumlahTanam(1)">+1</button>
-        <button onclick="ubahJumlahTanam(10)">+10</button>
-        <button class="btn-primary" onclick="setJumlahTanamMaks()">Maks</button>
-      </div>
-
-      <div class="modal-actions">
-        <button class="btn-primary" onclick="eksekusiTanamBibit()">Konfirmasi Tanam</button>
-        <button class="btn-secondary" onclick="tutupModalTanam()">Batal</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL GANTI NAMA HEWAN -->
-  <div class="modal-overlay" id="modal-nama-hewan" style="display: none;">
-    <div class="modal-card">
-      <h3>Ubah Nama Hewan</h3>
-      <input type="text" id="input-nama-hewan" placeholder="Masukkan nama baru..." />
-      <div class="modal-actions">
-        <button class="btn-primary" onclick="simpanNamaHewanBaru()">Simpan</button>
-        <button class="btn-secondary" onclick="tutupModalNamaHewan()">Batal</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL PILIH HEWAN UNTUK DIJUAL -->
-  <div class="modal-overlay" id="modal-pilih-hewan-jual" style="display: none;">
-    <div class="modal-card">
-      <h3 style="color: #ef4444;">Pilih Hewan untuk Dijual</h3>
-      <p style="font-size: 13px; color: #64748b; margin-bottom: 12px;">Pilih nama hewan ternak yang ingin kamu jual:</p>
-      <div id="modal-pilih-hewan-jual-list" style="display: flex; flex-direction: column; gap: 8px; max-height: 280px; overflow-y: auto; margin-bottom: 14px;"></div>
-      <div class="modal-actions">
-        <button class="btn-secondary" onclick="tutupModalPilihHewanJual()" style="width: 100%;">Tutup</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL ALERT PERSETUJUAN JUAL HEWAN -->
-  <div class="modal-overlay" id="modal-jual-hewan" style="display: none;">
-    <div class="modal-card">
-      <h3 style="color: #ef4444;">⚠️ Persetujuan Jual Hewan</h3>
-      <p id="modal-jual-hewan-text" style="font-size: 14px; color: #334155; margin: 14px 0; line-height: 1.5;"></p>
-      <div class="modal-actions">
-        <button class="btn-danger" onclick="eksekusiJualHewanModal()">Setujui & Jual</button>
-        <button class="btn-secondary" onclick="tutupModalJualHewan()">Batal</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL NICKNAME -->
-  <div class="modal-overlay" id="modal-nickname" style="display: none;">
-    <div class="modal-card">
-      <h3>Ganti Nama Petani</h3>
-      <input type="text" id="input-nickname" placeholder="Nama panggilan..." />
-      <div class="modal-actions">
-        <button class="btn-primary" onclick="simpanNickname()">Simpan</button>
-        <button class="btn-secondary" onclick="tutupModalNickname()">Batal</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL RESET GAME -->
-  <div class="modal-overlay" id="modal-reset" style="display: none;">
-    <div class="modal-card">
-      <h3 style="color: #ef4444;">Reset Permainan</h3>
-      <p style="font-size: 12px; color: #475569; margin: 10px 0;">Semua progres akan dihapus permanen!</p>
-      <div class="modal-actions">
-        <button class="btn-danger" onclick="eksekusiResetGame()">Ya, Reset</button>
-        <button class="btn-secondary" onclick="tutupModalReset()">Batal</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- KONTEN MODAL / POPUP MODERN -->
-<div id="game-modal" class="modal-overlay" style="display: none;">
-    <div class="modal-box">
-        <h3 id="modal-title">Konfirmasi Aksi</h3>
-        <p id="modal-message">Pesan konfirmasi akan muncul di sini...</p>
-        
-        <div id="modal-input-container" style="margin-bottom: 15px; display: none;">
-            <input type="number" id="modal-input-value" class="modal-input" min="1" max="99" value="1">
-        </div>
-
-        <div class="modal-actions">
-            <button id="modal-btn-cancel" class="btn-secondary" onclick="tutupModal()">Batal</button>
-            <button id="modal-btn-confirm" class="btn-primary">Ya, Lanjutkan</button>
-        </div>
-    </div>
-</div>
-
-  <!-- SCRIPTS - Urutan Pemuatan Modular -->
+    <!-- Script JavaScript modular -->
     <script src="database.js"></script>
     <script src="harga.js"></script>
     <script src="cuaca.js"></script>
+    <script src="inventory.js"></script>
+    <script src="market.js"></script>
+    <script src="pasar.js"></script>
     <script src="pertanian.js"></script>
     <script src="peternakan.js"></script>
-    <script src="accessories.js"></script>
-    <script src="pasar.js"></script>
-    <script src="market.js"></script>
-    <script src="inventory.js"></script>
-    <script src="script.js"></script> <!-- Pengontrol Utama / State Global -->
+    <script src="script.js"></script>
 </body>
 </html>
