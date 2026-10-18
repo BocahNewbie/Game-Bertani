@@ -18,22 +18,17 @@ let transaksiAktif = {
 };
 
 let lahanTargetAktif = null;
-let fluktuasiCache = {}; // Menyimpan persentase fluktuasi per item agar berubah tiap 10 menit in-game
+let fluktuasiCache = {}; 
+let lastMenitFluktuasi = -1; // Pelacak perubahan harga per 10 menit in-game
 
-// Inisialisasi Fluktuasi Pasar Awal
+// Sistem Fluktuasi Harga Pasar Berdasarkan 10 Menit In-Game
 function getFluktuasiItem(idItem) {
     let kunciWaktu = `${gameState.waktuJam}-${Math.floor(gameState.waktuMenit / 10)}`;
     if (!fluktuasiCache[idItem] || fluktuasiCache[idItem].waktu !== kunciWaktu) {
-        // Rentang fluktuasi -20% sampai +30%
-        let persen = Math.floor(Math.random() * 51) - 20;
+        let persen = Math.floor(Math.random() * 51) - 20; // Rentang -20% sampai +30%
         fluktuasiCache[idItem] = { persen: persen, waktu: kunciWaktu };
     }
     return fluktuasiCache[idItem].persen;
-}
-
-function hitungHargaDinamis(hargaBase, jenis = 'beli') {
-    // Bisa digunakan bersama sistem ekonomi atau dihitung langsung
-    return hargaBase;
 }
 
 function getInfoGrafikHarga(hargaAktif, hargaBase) {
@@ -57,6 +52,10 @@ function gantiTab(evt, tabId) {
     document.getElementById(tabId).classList.add("active");
     evt.currentTarget.classList.add("active");
     
+    refreshTabAktif(tabId);
+}
+
+function refreshTabAktif(tabId) {
     if (tabId === 'tab-tas') renderTas();
     if (tabId === 'tab-supermarket') renderSupermarket();
     if (tabId === 'tab-lahan') renderLahan();
@@ -109,7 +108,6 @@ function getTotalMenitInGame(jam, menit) {
     return (jam * 60) + menit;
 }
 
-// Format Durasi Tanpa Tulisan In-Game
 function formatDurasiBersih(totalMenit) {
     if (totalMenit <= 0) return "Siap Panen! ✨";
     let jam = Math.floor(totalMenit / 60);
@@ -303,7 +301,7 @@ function panenHasil(nomorLahan) {
 }
 
 
-// --- TAB SUPERMARKET (DENGAN GRAFIK FLUKTUASI HARGA) ---
+// --- TAB SUPERMARKET ---
 
 function renderSupermarket() {
     const container = document.getElementById("list-supermarket");
@@ -315,7 +313,6 @@ function renderSupermarket() {
     for (let key in daftarTanaman) {
         let item = daftarTanaman[key];
         
-        // Hitung fluktuasi harga beli berdasarkan siklus 10 menit in-game
         let persen = getFluktuasiItem(key);
         let hargaBeliAktif = Math.round(item.hargaBeli * (1 + persen / 100));
         if (hargaBeliAktif < 1) hargaBeliAktif = 1;
@@ -430,7 +427,7 @@ function konfirmasiBeli() {
 }
 
 
-// --- TAB PENGEPUL (DENGAN GRAFIK FLUKTUASI HARGA JUAL) ---
+// --- TAB PENGEPUL ---
 
 function renderPengepul() {
     const container = document.getElementById("list-pengepul");
@@ -448,7 +445,6 @@ function renderPengepul() {
             adaTanamanJual = true;
             let item = daftarTanaman[idItem];
             
-            // Hitung fluktuasi harga jual berdasarkan siklus 10 menit in-game
             let persen = getFluktuasiItem(idItem);
             let hargaJualAktif = Math.round(item.hargaJual * (1 + persen / 100));
             if (hargaJualAktif < 1) hargaJualAktif = 1;
@@ -662,7 +658,7 @@ function renderTas() {
 }
 
 
-// --- SISTEM WAKTU IN-GAME ---
+// --- SISTEM WAKTU IN-GAME & REAL-TIME AUTO REFRESH HARGA ---
 setInterval(() => {
     gameState.waktuMenit += 1;
     if (gameState.waktuMenit >= 60) {
@@ -674,6 +670,20 @@ setInterval(() => {
     }
     updateHeaderUI();
 
+    // Cek apakah sudah berganti blok 10 menit in-game untuk update harga real-time
+    let blokMenitSekarang = Math.floor(gameState.waktuMenit / 10);
+    if (lastMenitFluktuasi !== blokMenitSekarang) {
+        lastMenitFluktuasi = blokMenitSekarang;
+        
+        // Auto-refresh tampilan Supermarket dan Pengepul secara real-time jika sedang dibuka
+        if (document.getElementById("tab-supermarket").classList.contains("active")) {
+            renderSupermarket();
+        }
+        if (document.getElementById("tab-pengepul").classList.contains("active")) {
+            renderPengepul();
+        }
+    }
+
     let adaTanamanAktif = Object.keys(gameState.lahan).length > 0;
     if (adaTanamanAktif && document.getElementById("tab-lahan").classList.contains("active")) {
         renderLahan();
@@ -683,6 +693,7 @@ setInterval(() => {
 
 // Inisialisasi Game
 window.onload = function() {
+    lastMenitFluktuasi = Math.floor(gameState.waktuMenit / 10);
     updateHeaderUI();
     renderLahan();
     renderSupermarket();
