@@ -46,8 +46,9 @@ const GAME_DATABASE = {
         daging_babi_mentah: { id: "daging_babi_mentah", nama: "Daging Babi Mentah", jumlah: 15, hargaJual: 12000, icon: "🥓" }
     },
     alat: {
-        pisau: { id: "pisau", nama: "Pisau Potong", hargaBeli: 15000, icon: "🔪" }
+        pisau: { id: "pisau", nama: "Pisau Potong", hargaBeli: 35000, durabilityMax: 300, biayaAsah: 12000, icon: "🔪" }
     },
+    
     material: {
         kayu: { id: "kayu", nama: "Kayu", hargaBeli: 17, icon: "🪵" }
     }
