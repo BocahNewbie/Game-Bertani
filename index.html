@@ -43,22 +43,20 @@
 
         <!-- 2. Tab Kandang -->
         <div id="tab-kandang" class="tab-content">
-            <h2>Kandang</h2>
+            <h2>Kandang Ternak</h2>
             <p>Rawat hewan ternakmu di sini.</p>
             <div class="grid-container" id="grid-kandang"></div>
         </div>
 
         <!-- 3. Tab Supermarket -->
         <div id="tab-supermarket" class="tab-content">
-            <h2>Supermarket</h2>
-            <p>Tempat beli bibit dan pupuk</p>
+            <h2>Supermarket (Bibit & Pupuk)</h2>
             <div class="shop-grid" id="list-supermarket"></div>
         </div>
 
         <!-- 4. Tab Pasar -->
         <div id="tab-pasar" class="tab-content">
-            <h2>Pasar</h2>
-            <p>Tempat Hewan ternak dan Pakan ternak</p>
+            <h2>Pasar (Hewan Ternak & Pakan)</h2>
             <div class="shop-grid" id="list-pasar"></div>
         </div>
 
@@ -78,13 +76,36 @@
 
         <!-- 7. Tab Tas -->
         <div id="tab-tas" class="tab-content">
-            <h2>Tas</h2>
+            <h2>Tas / Inventaris</h2>
             <div class="inventory-grid" id="grid-tas"></div>
         </div>
     </main>
 
-    <!-- Panggil file database dan script utama -->
+    <!-- Modal / Popup Pembelian Modern -->
+    <div id="modal-beli" class="modal-overlay" style="display: none;">
+        <div class="modal-card">
+            <h3 id="modal-title">Beli Bibit</h3>
+            <p id="modal-info">Harga: Rp. 0 / biji</p>
+            
+            <div class="modal-input-group">
+                <button onclick="ubahJumlahBeli(-1)">-</button>
+                <input type="number" id="input-jumlah-beli" value="1" min="1" max="99" oninput="validasiInputBeli()">
+                <button onclick="ubahJumlahBeli(1)">+</button>
+                <button class="btn-max" onclick="beliMaksimal()">MAX</button>
+            </div>
+
+            <p id="modal-total" style="margin: 15px 0; font-weight: bold;">Total: Rp. 0</p>
+
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="tutupModalBeli()">Batal</button>
+                <button class="btn-confirm" onclick="konfirmasiBeli()">Beli</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Panggil File Script Game -->
     <script src="database.js"></script>
+    <script src="supermarket.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
