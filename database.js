@@ -1,4 +1,3 @@
-// database.js - Pusat Data Game Pertanian & Peternakan
 const GAME_DATABASE = {
     bibit: {
         bibit_padi: { id: "bibit_padi", hasilId: "padi", nama: "Bibit Padi", hargaBeli: 9, durasi: 600, icon: "🌾" },
@@ -23,10 +22,10 @@ const GAME_DATABASE = {
         apel: { id: "apel", nama: "Apel", hargaJual: 71, icon: "🍎" }
     },
     ternak: {
-        ayam: { id: "ayam", nama: "Ayam", hargaBeli: 37000, hasilId: "telur_ayam", durasi: 3600, icon: "🐔" },
-        sapi: { id: "sapi", nama: "Sapi", hargaBeli: 157000, hasilId: "susu_sapi", durasi: 14400, icon: "🐮" },
-        kambing: { id: "kambing", nama: "Kambing", hargaBeli: 77000, hasilId: "susu_kambing", durasi: 10800, icon: "🐐" },
-        babi: { id: "babi", nama: "Babi", hargaBeli: 97000, hasilId: "daging_babi", durasi: 21600, icon: "🐖" }
+        ayam: { id: "ayam", nama: "Ayam", hargaBeli: 37000, hasilId: "telur_ayam", icon: "🐔" },
+        sapi: { id: "sapi", nama: "Sapi", hargaBeli: 157000, hasilId: "susu_sapi", icon: "🐮" },
+        kambing: { id: "kambing", nama: "Kambing", hargaBeli: 77000, hasilId: "susu_kambing", icon: "🐐" },
+        babi: { id: "babi", nama: "Babi", hargaBeli: 97000, hasilId: "daging_babi", icon: "🐖" }
     },
     pakan: {
         pakan_ayam: { id: "pakan_ayam", targetTernak: "ayam", nama: "Pakan Ayam", hargaBeli: 500, icon: "🌾" },
@@ -39,6 +38,15 @@ const GAME_DATABASE = {
         susu_sapi: { id: "susu_sapi", nama: "Susu Sapi", hargaJual: 25000, icon: "🥛" },
         susu_kambing: { id: "susu_kambing", nama: "Susu Kambing", hargaJual: 14000, icon: "🍼" },
         daging_babi: { id: "daging_babi", nama: "Daging Babi", hargaJual: 30000, icon: "🥩" }
+    },
+    jagalHasil: {
+        daging_ayam: { id: "daging_ayam", nama: "Daging Ayam", jumlah: 8, hargaJual: 7000, icon: "🍗" },
+        daging_sapi: { id: "daging_sapi", nama: "Daging Sapi", jumlah: 18, hargaJual: 15000, icon: "🥩" },
+        daging_kambing: { id: "daging_kambing", nama: "Daging Kambing", jumlah: 10, hargaJual: 10000, icon: "🍖" },
+        daging_babi_mentah: { id: "daging_babi_mentah", nama: "Daging Babi Mentah", jumlah: 15, hargaJual: 12000, icon: "🥓" }
+    },
+    alat: {
+        pisau: { id: "pisau", nama: "Pisau Potong", hargaBeli: 15000, icon: "🔪" }
     },
     material: {
         kayu: { id: "kayu", nama: "Kayu", hargaBeli: 17, icon: "🪵" }
