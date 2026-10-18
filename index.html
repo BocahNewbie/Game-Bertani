@@ -3,59 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game Bertani & Peternakan Modular</title>
+    <title>Game Bertani Sederhana</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="game-container">
-        <!-- Header / Informasi Pemain -->
-        <header>
-            <h1>Desa Makmur Game</h1>
-            <div id="stats-bar">
-                <span>Uang: <strong id="player-money">1000</strong> Koin</span>
-                <span>Hari: <strong id="game-day">1</strong></span>
-                <span>Waktu: <strong id="game-time">06:00</strong></span>
-                <span>Cuaca: <strong id="game-cuaca">Cerah</strong></span>
-            </div>
-        </header>
 
-        <!-- Area Navigasi Toko / Lokasi -->
-        <nav id="location-nav">
-            <button onclick="bukaModal('supermarket')">Supermarket (Bibit)</button>
-            <button onclick="bukaModal('pasar')">Pasar (Hewan & Pakan)</button>
-            <button onclick="bukaModal('pengepul')">Pengepul (Jual Hasil)</button>
-            <button onclick="bukaInventory()">Inventory</button>
-        </nav>
+    <!-- Header Informasi Pemain & Game -->
+    <header class="game-header">
+        <div class="player-info">
+            <span id="label-nama" contenteditable="true" title="Klik untuk ubah nama">Pak Tani</span> 
+            <button id="btn-edit-nama" onclick="ubahNama()">✏️</button>
+        </div>
+        <div class="game-stats">
+            <span id="stat-uang">💰 Rp. 500</span>
+            <span id="stat-cuaca">☀️ Cerah</span>
+            <span id="stat-waktu">⏰ 08:00</span>
+        </div>
+    </header>
 
-        <!-- Area Utama Permainan -->
-        <main>
-            <!-- Lahan Pertanian -->
-            <section id="farm-section">
-                <h2>Lahan Pertanian</h2>
-                <div id="lahan-grid" class="grid-container">
-                    <!-- Petak lahan akan dirender otomatis via JavaScript -->
-                </div>
-            </section>
+    <!-- Navigasi Tab Menu -->
+    <nav class="game-tabs">
+        <button class="tab-btn active" onclick="gantiTab(event, 'tab-lahan')">🌾 Lahan</button>
+        <button class="tab-btn" onclick="gantiTab(event, 'tab-kandang')">🐮 Kandang</button>
+        <button class="tab-btn" onclick="gantiTab(event, 'tab-supermarket')">🛒 Supermarket</button>
+        <button class="tab-btn" onclick="gantiTab(event, 'tab-pasar')">🐂 Pasar</button>
+        <button class="tab-btn" onclick="gantiTab(event, 'tab-tukang-kayu')">🪵 Tukang Kayu</button>
+        <button class="tab-btn" onclick="gantiTab(event, 'tab-pengepul')">📦 Pengepul</button>
+        <button class="tab-btn" onclick="gantiTab(event, 'tab-tas')">🎒 Tas</button>
+    </nav>
 
-            <!-- Peternakan -->
-            <section id="farm-animal-section">
-                <h2>Peternakan Hewan</h2>
-                <div id="kandang-container">
-                    <!-- Kandang & hewan akan dirender otomatis via JavaScript -->
-                </div>
-            </section>
-        </main>
-    </div>
+    <!-- Konten Utama Setiap Tab -->
+    <main class="game-content">
+        <!-- 1. Tab Lahan -->
+        <div id="tab-lahan" class="tab-content active">
+            <h2>Lahan Pertanian</h2>
+            <p>Pilih lahan untuk menanam bibit.</p>
+            <div class="grid-container" id="grid-lahan"></div>
+        </div>
 
-    <!-- Script JavaScript modular -->
+        <!-- 2. Tab Kandang -->
+        <div id="tab-kandang" class="tab-content">
+            <h2>Kandang</h2>
+            <p>Rawat hewan ternakmu di sini.</p>
+            <div class="grid-container" id="grid-kandang"></div>
+        </div>
+
+        <!-- 3. Tab Supermarket -->
+        <div id="tab-supermarket" class="tab-content">
+            <h2>Supermarket</h2>
+            <p>Tempat beli bibit dan pupuk</p>
+            <div class="shop-grid" id="list-supermarket"></div>
+        </div>
+
+        <!-- 4. Tab Pasar -->
+        <div id="tab-pasar" class="tab-content">
+            <h2>Pasar</h2>
+            <p>Tempat Hewan ternak dan Pakan ternak</p>
+            <div class="shop-grid" id="list-pasar"></div>
+        </div>
+
+        <!-- 5. Tab Tukang Kayu -->
+        <div id="tab-tukang-kayu" class="tab-content">
+            <h2>Tukang Kayu (Upgrade)</h2>
+            <p>Tingkatkan kapasitas lahan dan kandang.</p>
+            <div class="shop-grid" id="list-tukang-kayu"></div>
+        </div>
+
+        <!-- 6. Tab Pengepul -->
+        <div id="tab-pengepul" class="tab-content">
+            <h2>Pengepul Hasil Panen</h2>
+            <p>Jual hasil panen dan produk ternakmu.</p>
+            <div class="shop-grid" id="list-pengepul"></div>
+        </div>
+
+        <!-- 7. Tab Tas -->
+        <div id="tab-tas" class="tab-content">
+            <h2>Tas</h2>
+            <div class="inventory-grid" id="grid-tas"></div>
+        </div>
+    </main>
+
+    <!-- Panggil file database dan script utama -->
     <script src="database.js"></script>
-    <script src="harga.js"></script>
-    <script src="cuaca.js"></script>
-    <script src="inventory.js"></script>
-    <script src="market.js"></script>
-    <script src="pasar.js"></script>
-    <script src="pertanian.js"></script>
-    <script src="peternakan.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
