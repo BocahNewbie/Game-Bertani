@@ -3,12 +3,12 @@ let gameState = {
     namaPemain: "Pak Tani",
     uang: 500,
     cuaca: "Cerah ☀️",
-    waktuJam: 8, // Format 24 Jam (0 - 23)
+    waktuJam: 8, 
     waktuMenit: 0,
-    jumlahLahanAktif: 3 // Jumlah kotak lahan awal yang bisa ditanami
+    jumlahLahanAktif: 3 
 };
 
-// Variabel Sementara untuk Menyimpan Transaksi Aktif
+// Variabel Transaksi Popup
 let transaksiAktif = {
     idBibit: "",
     namaBibit: "",
@@ -43,7 +43,7 @@ function updateHeaderUI() {
     document.getElementById("stat-waktu").innerText = `⏰ ${jamFormatted}:${menitFormatted}`;
 }
 
-// Konversi Detik ke Format Waktu (Contoh: 600 detik = 10 Menit)
+// Format Durasi Waktu
 function formatDurasi(detik) {
     if (detik < 60) return `${detik} Detik`;
     let menit = Math.floor(detik / 60);
@@ -55,7 +55,7 @@ function formatDurasi(detik) {
     return `${hari} Hari`;
 }
 
-// Render Tab Lahan Pertanian
+// Render Tab Lahan
 function renderLahan() {
     const container = document.getElementById("grid-lahan");
     container.innerHTML = "";
@@ -71,34 +71,34 @@ function renderLahan() {
     }
 }
 
-// Render Tab Supermarket (Tempat Beli Bibit Berdasarkan database.js)
+// Render Supermarket dengan Harga Dinamis Market
 function renderSupermarket() {
     const container = document.getElementById("list-supermarket");
+    if (!container) return;
     container.innerHTML = "";
 
     const daftarTanaman = GAME_DATABASE.tanaman;
 
     for (let key in daftarTanaman) {
         let item = daftarTanaman[key];
+        let hargaDinamis = MarketEconomy ? MarketEconomy.getHargaBeli(item.hargaBeli) : item.hargaBeli;
         let durasiTumbuh = formatDurasi(item.durasi);
 
         container.innerHTML += `
             <div class="card">
                 <div style="font-size: 2.5rem;">${item.icon}</div>
                 <h3>${item.nama}</h3>
-                <p>Beli: <b>Rp. ${item.hargaBeli}</b></p>
+                <p>Beli: <b>Rp. ${hargaDinamis}</b></p>
                 <p>Jual: Rp. ${item.hargaJual}</p>
                 <p>⏱️ ${durasiTumbuh}</p>
                 <p>✨ XP: ${item.xp}</p>
-                <button onclick="bukaModalBeli('${item.id}', '${item.nama}', ${item.hargaBeli})">Beli Bibit</button>
+                <button onclick="bukaModalBeli('${item.id}', '${item.nama}', ${hargaDinamis})">Beli Bibit</button>
             </div>
         `;
     }
 }
 
-// --- LOGIKA POPUP / MODAL PEMBELIAN ---
-
-// Buka Modal Beli Bibit
+// Logika Popup Beli
 function bukaModalBeli(idBibit, namaBibit, harga) {
     transaksiAktif = { idBibit, namaBibit, hargaSatuan: harga };
     
@@ -110,12 +110,10 @@ function bukaModalBeli(idBibit, namaBibit, harga) {
     document.getElementById("modal-beli").style.display = "flex";
 }
 
-// Tutup Modal Beli
 function tutupModalBeli() {
     document.getElementById("modal-beli").style.display = "none";
 }
 
-// Ubah Jumlah dengan Tombol + / -
 function ubahJumlahBeli(delta) {
     let input = document.getElementById("input-jumlah-beli");
     let nilaiBaru = parseInt(input.value || 1) + delta;
@@ -127,7 +125,6 @@ function ubahJumlahBeli(delta) {
     updateTotalHargaModal();
 }
 
-// Validasi saat diketik manual
 function validasiInputBeli() {
     let input = document.getElementById("input-jumlah-beli");
     let val = parseInt(input.value);
@@ -138,7 +135,6 @@ function validasiInputBeli() {
     updateTotalHargaModal();
 }
 
-// Logika Tombol MAX: Menyesuaikan Uang dan Batas 99
 function beliMaksimal() {
     if (transaksiAktif.hargaSatuan <= 0) return;
     
@@ -153,7 +149,6 @@ function beliMaksimal() {
     updateTotalHargaModal();
 }
 
-// Hitung Total Harga di dalam Modal
 function updateTotalHargaModal() {
     let jumlah = parseInt(document.getElementById("input-jumlah-beli").value) || 0;
     let totalHarga = jumlah * transaksiAktif.hargaSatuan;
@@ -161,7 +156,6 @@ function updateTotalHargaModal() {
     document.getElementById("modal-total").innerText = `Total: Rp. ${totalHarga.toLocaleString('id-ID')}`;
 }
 
-// Konfirmasi Transaksi Pembelian
 function konfirmasiBeli() {
     let jumlah = parseInt(document.getElementById("input-jumlah-beli").value) || 0;
     let totalHarga = jumlah * transaksiAktif.hargaSatuan;
@@ -176,14 +170,11 @@ function konfirmasiBeli() {
     }
 }
 
-// --- AKHIR LOGIKA POPUP ---
-
-// Simulasi Aksi Tanam
 function tanamBibit(nomorLahan) {
-    alert(`Memilih menanam di Lahan #${nomorLahan}. Pilih bibit dari tas/supermarket.`);
+    alert(`Memilih menanam di Lahan #${nomorLahan}.`);
 }
 
-// Inisialisasi Awal Saat Halaman Dimuat
+// Inisialisasi Game
 window.onload = function() {
     updateHeaderUI();
     renderLahan();
