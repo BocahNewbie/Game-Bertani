@@ -9,8 +9,7 @@
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: var(--bg-main);
-    margin: 0;
-    padding: 0;
+    margin: 0; padding: 0;
     color: var(--text-main);
 }
 
@@ -18,230 +17,86 @@ body {
     background-color: var(--bg-card);
     border-bottom: 1px solid var(--border-color);
     padding: 15px 25px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 15px;
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 15px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
-.player-info {
-    font-size: 1.2rem;
-    font-weight: bold;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-#label-nama {
-    background: rgba(255, 255, 255, 0.05);
-    padding: 4px 10px;
-    border-radius: 6px;
-    border: 1px solid var(--border-color);
-    color: var(--text-main);
-}
-
-.game-stats {
-    display: flex;
-    gap: 20px;
-    font-size: 1rem;
-    font-weight: 500;
-}
-
-.game-tabs {
-    display: flex;
-    background-color: #161c28;
-    border-bottom: 1px solid var(--border-color);
-    overflow-x: auto;
-    padding: 10px 20px;
-    gap: 8px;
-}
+.player-info { font-size: 1.2rem; font-weight: bold; display: flex; align-items: center; gap: 10px; }
+#label-nama { background: rgba(255, 255, 255, 0.05); padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border-color); }
+.game-stats { display: flex; gap: 20px; font-size: 1rem; font-weight: 500; }
+.game-tabs { display: flex; background-color: #161c28; border-bottom: 1px solid var(--border-color); overflow-x: auto; padding: 10px 20px; gap: 8px; }
 
 .tab-btn {
-    background-color: transparent;
-    color: var(--text-muted);
-    border: 1px solid transparent;
-    padding: 8px 16px;
-    cursor: pointer;
-    border-radius: 6px;
-    white-space: nowrap;
-    font-weight: 500;
-    transition: all 0.2s ease;
+    background-color: transparent; color: var(--text-muted); border: 1px solid transparent;
+    padding: 8px 16px; cursor: pointer; border-radius: 6px; white-space: nowrap; font-weight: 500; transition: all 0.2s ease;
 }
+.tab-btn:hover { color: var(--text-main); background-color: rgba(255, 255, 255, 0.03); }
+.tab-btn.active { background-color: rgba(59, 130, 246, 0.1); color: #60a5fa; border-color: rgba(59, 130, 246, 0.3); box-shadow: 0 0 12px rgba(59, 130, 246, 0.15); }
 
-.tab-btn:hover {
-    color: var(--text-main);
-    background-color: rgba(255, 255, 255, 0.03);
-}
-
-.tab-btn.active {
-    background-color: rgba(59, 130, 246, 0.1);
-    color: #60a5fa;
-    border-color: rgba(59, 130, 246, 0.3);
-    box-shadow: 0 0 12px rgba(59, 130, 246, 0.15);
-}
-
-.game-content {
-    padding: 25px;
-    max-width: 1000px;
-    margin: 0 auto;
-}
-
-.tab-content {
-    display: none;
-}
-
-.tab-content.active {
-    display: block;
-}
+.game-content { padding: 25px; max-width: 1000px; margin: 0 auto; }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
 
 .grid-container, .shop-grid, .inventory-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 20px;
-    margin-top: 20px;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; margin-top: 20px;
 }
 
 .card {
-    background: var(--bg-card);
-    border: 1px solid var(--border-color);
-    padding: 20px;
-    border-radius: 12px;
-    text-align: center;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    transition: transform 0.2s ease, border-color 0.2s ease;
+    background: var(--bg-card); border: 1px solid var(--border-color); padding: 20px; border-radius: 12px; text-align: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); transition: transform 0.2s ease, border-color 0.2s ease;
 }
-
-.card:hover {
-    border-color: rgba(59, 130, 246, 0.4);
-    transform: translateY(-3px);
-}
-
+.card:hover { border-color: rgba(59, 130, 246, 0.4); transform: translateY(-3px); }
 .card button {
-    margin-top: 15px;
-    background-color: #059669;
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: 600;
-    width: 100%;
-    transition: background 0.2s;
+    margin-top: 15px; background-color: #059669; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; width: 100%; transition: background 0.2s;
 }
+.card button:hover { background-color: #047857; }
 
-.card button:hover {
-    background-color: #047857;
-}
-
-/* --- POPUP MODERN DENGAN EFEK HOVER SOROT CAHAYA SESUAI WARNA --- */
+/* --- POPUP ULTRA MODERN DENGAN NEON HOVER GLOW --- */
 .modal-overlay {
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(8, 11, 18, 0.85);
-    backdrop-filter: blur(6px);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-    animation: fadeInOverlay 0.25s ease-out;
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(8, 11, 18, 0.85); backdrop-filter: blur(8px);
+    display: flex; justify-content: center; align-items: center; z-index: 1000;
 }
 
 .modal-card {
-    background: linear-gradient(145deg, #161f30, #101622);
+    background: linear-gradient(145deg, #182235, #101622);
     border: 1px solid rgba(59, 130, 246, 0.4);
-    padding: 28px;
-    border-radius: 18px;
-    width: 340px;
-    text-align: center;
-    box-shadow: 0 0 25px rgba(59, 130, 246, 0.2);
-    transition: box-shadow 0.3s ease, border-color 0.3s ease;
-    animation: scaleUpModal 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    padding: 30px; border-radius: 20px; width: 360px; text-align: center;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    transition: all 0.3s ease;
 }
 
-/* Efek sorot cahaya saat mouse mendekat ke modal */
-.modal-card.neon-blue:hover {
-    border-color: #3b82f6;
-    box-shadow: 0 0 35px rgba(59, 130, 246, 0.6), inset 0 0 15px rgba(59, 130, 246, 0.2);
+.modal-card.neon-blue:hover { border-color: #3b82f6; box-shadow: 0 0 35px rgba(59, 130, 246, 0.6), inset 0 0 15px rgba(59, 130, 246, 0.2); }
+.modal-card.neon-green:hover { border-color: #10b981; box-shadow: 0 0 35px rgba(16, 185, 129, 0.6), inset 0 0 15px rgba(16, 185, 129, 0.2); }
+.modal-card.neon-amber:hover { border-color: #f59e0b; box-shadow: 0 0 35px rgba(245, 158, 11, 0.6), inset 0 0 15px rgba(245, 158, 11, 0.2); }
+
+.modal-card h3 { margin-top: 0; color: #60a5fa; font-size: 1.4rem; }
+
+.modal-input-group {
+    display: flex; justify-content: center; align-items: center; gap: 10px; margin: 20px 0;
+}
+.modal-input-group button {
+    background: #1e293b; color: #fff; border: 1px solid var(--border-color); padding: 8px 14px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 1.1rem; transition: background 0.2s;
+}
+.modal-input-group button:hover { background: #334155; }
+
+.modal-input-group input {
+    width: 80px; text-align: center; font-size: 1.2rem; padding: 8px; background: #0a0e17; border: 1px solid var(--border-color); color: #fff; border-radius: 8px; outline: none;
 }
 
-.modal-card.neon-green:hover {
-    border-color: #10b981;
-    box-shadow: 0 0 35px rgba(16, 185, 129, 0.6), inset 0 0 15px rgba(16, 185, 129, 0.2);
+.btn-max-mod {
+    background-color: rgba(245, 158, 11, 0.15) !important; color: #fbbf24 !important; border-color: rgba(245, 158, 11, 0.4) !important; font-size: 0.9rem !important; padding: 8px 12px !important;
 }
 
-.modal-card.neon-amber:hover {
-    border-color: #f59e0b;
-    box-shadow: 0 0 35px rgba(245, 158, 11, 0.6), inset 0 0 15px rgba(245, 158, 11, 0.2);
-}
+.modal-actions { display: flex; gap: 12px; margin-top: 25px; }
+.modal-actions button { flex: 1; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: 600; border: none; }
 
-@keyframes fadeInOverlay {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
+.btn-cancel { background-color: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.35) !important; }
+.btn-confirm { background-color: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.35) !important; }
 
-@keyframes scaleUpModal {
-    from { transform: scale(0.9); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
-}
-
-.modal-card h3 {
-    margin-top: 0;
-    color: #60a5fa;
-    font-size: 1.3rem;
-    letter-spacing: 0.5px;
-}
-
-.modal-actions {
-    display: flex;
-    justify-content: center;
-    gap: 12px;
-    margin-top: 25px;
-}
-
-.modal-actions button {
-    flex: 1;
-    padding: 10px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: all 0.2s;
-}
-
-.btn-cancel {
-    background-color: rgba(239, 68, 68, 0.15);
-    color: #f87171;
-    border: 1px solid rgba(239, 68, 68, 0.35);
-}
-
-.btn-cancel:hover {
-    background-color: rgba(239, 68, 68, 0.25);
-    box-shadow: 0 0 10px rgba(239, 68, 68, 0.2);
-}
-
-.btn-confirm {
-    background-color: rgba(16, 185, 129, 0.2);
-    color: #34d399;
-    border: 1px solid rgba(16, 185, 129, 0.35);
-}
-
-.btn-confirm:hover {
-    background-color: rgba(16, 185, 129, 0.3);
-    box-shadow: 0 0 12px rgba(16, 185, 129, 0.25);
-}
-
-/* Animasi Kelap-Kelip Credit Wikipedia */
 @keyframes neonBlink {
     0%, 100% { opacity: 1; text-shadow: 0 0 10px #34d399, 0 0 20px #34d399; }
     50% { opacity: 0.4; text-shadow: 0 0 2px #10b981; }
 }
-
-.neon-credit {
-    animation: neonBlink 1.5s infinite;
-    font-size: 1.4rem;
-    font-weight: bold;
-    color: #34d399;
-    text-align: center;
-    margin-bottom: 20px;
-}
+.neon-credit { animation: neonBlink 1.5s infinite; font-size: 1.4rem; font-weight: bold; color: #34d399; text-align: center; margin-bottom: 20px; }
