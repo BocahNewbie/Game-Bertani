@@ -1,4 +1,4 @@
-// State Utama Game & Inventaris Tas
+// State Utama Game & Inventaris Tas (Mulai dari Nol/Kosong)
 let gameState = {
     namaPemain: "Pak Tani",
     uang: 500,
@@ -6,18 +6,10 @@ let gameState = {
     waktuJam: 8, 
     waktuMenit: 0,
     jumlahLahanAktif: 3,
-    // Tas menyimpan item
-    tas: {
-        padi: 10, // Modal awal tes 10 biji padi
-        jagung: 5
-    },
-    // Data Lahan: Menyimpan status tanaman per nomor lahan
-    lahan: {
-        // Format contoh: 1: { idBibit: "padi", jumlah: 5, waktuSelesai: Timestamp }
-    }
+    tas: {},    // Kosong tanpa item awal
+    lahan: {}   // Kosong tanpa tanaman awal
 };
 
-// Variabel Transaksi Popup
 let transaksiAktif = {
     idItem: "",
     namaItem: "",
@@ -43,7 +35,6 @@ function gantiTab(evt, tabId) {
     if (tabId === 'tab-lahan') renderLahan();
 }
 
-// Fungsi Ubah Nama Petani
 function ubahNama() {
     const labelNama = document.getElementById("label-nama");
     labelNama.focus();
@@ -76,7 +67,7 @@ function formatDurasiWaktu(detikSisa) {
 }
 
 
-// --- TAB LAHAN & LOGIKA TANAM MAKSIMAL 99 ---
+// --- TAB LAHAN & VISUAL TANAM ---
 
 function renderLahan() {
     const container = document.getElementById("grid-lahan");
@@ -89,7 +80,6 @@ function renderLahan() {
         let dataLahan = gameState.lahan[i];
 
         if (!dataLahan) {
-            // Lahan Kosong
             container.innerHTML += `
                 <div class="card lahan-card">
                     <h3>Lahan #${i}</h3>
@@ -98,22 +88,21 @@ function renderLahan() {
                 </div>
             `;
         } else {
-            // Lahan Berisi Tanaman
             let infoBibit = GAME_DATABASE.tanaman[dataLahan.idBibit] || { nama: "Tanaman", icon: "🌱" };
             let sisaDetik = Math.max(0, Math.floor((dataLahan.waktuSelesai - waktuSekarang) / 1000));
             let teksWaktu = formatDurasiWaktu(sisaDetik);
 
             let tombolAksi = sisaDetik === 0 
-                ? `<button onclick="panenHasil(${i})" style="background: #e67e22;">Panen (${dataLahan.jumlah})</button>`
-                : `<button disabled style="background: #95a5a6; cursor: not-allowed;">Tumbuh... (${teksWaktu})</button>`;
+                ? `<button onclick="panenHasil(${i})" style="background: #e67e22; color:white; border:none; padding:6px 12px; border-radius:4px; cursor:pointer;">Panen (${dataLahan.jumlah})</button>`
+                : `<button disabled style="background: #95a5a6; color:white; border:none; padding:6px 12px; border-radius:4px; cursor: not-allowed;">Tumbuh... (${teksWaktu})</button>`;
 
             container.innerHTML += `
-                <div class="card lahan-card" style="border: 2px solid #27ae60;">
+                <div class="card lahan-card" style="border: 2px solid #27ae60; background: #e8f8f5;">
                     <h3>Lahan #${i}</h3>
-                    <div style="font-size: 2rem;">${infoBibit.icon}</div>
+                    <div style="font-size: 2.5rem; margin: 5px 0;">${infoBibit.icon}</div>
                     <p><b>${infoBibit.nama}</b></p>
-                    <p>Jumlah: <b>${dataLahan.jumlah}</b></p>
-                    <p style="font-size: 0.9rem; color: #c0392b;">⏱️ ${teksWaktu}</p>
+                    <p>Jumlah: <b>${dataLahan.jumlah} Pcs</b></p>
+                    <p style="font-size: 0.9rem; color: #c0392b; font-weight: bold;">⏱️ ${teksWaktu}</p>
                     ${tombolAksi}
                 </div>
             `;
@@ -121,7 +110,6 @@ function renderLahan() {
     }
 }
 
-// Buka Popup Pilihan Bibit dari Tas saat Klik Tanam
 function bukaModalTanam(nomorLahan) {
     lahanTargetAktif = nomorLahan;
     
@@ -178,7 +166,6 @@ function tutupModalTanam() {
     if (modalTanam) modalTanam.style.display = "none";
 }
 
-// Sub Popup Input Jumlah Tanam (Maks 99 / Sesuai Stok Tas)
 function bukaSubModalJumlahTanam(idBibit, stokTas) {
     let maksBisaTanam = Math.min(stokTas, 99);
     let infoBibit = GAME_DATABASE.tanaman[idBibit];
@@ -219,24 +206,20 @@ function eksekusiTanamBibit(idBibit, stokTas) {
         return;
     }
 
-    // Kurangi stok di tas
     gameState.tas[idBibit] -= jumlahTanam;
     if (gameState.tas[idBibit] <= 0) delete gameState.tas[idBibit];
 
-    // Hitung waktu selesai panen berdasarkan durasi database dikali jumlah
     let durasiSatuan = GAME_DATABASE.tanaman[idBibit].durasi;
-    let totalDurasiDetik = durasiSatuan; // Waktu tumbuh dihitung per batch lahan
-    let waktuSelesai = Date.now() + (totalDurasiDetik * 1000);
+    let waktuSelesai = Date.now() + (durasiSatuan * 1000);
 
-    // Simpan ke data lahan
     gameState.lahan[lahanTargetAktif] = {
         idBibit: idBibit,
         jumlah: jumlahTanam,
         waktuSelesai: waktuSelesai
     };
 
-    alert(`🎉 Berhasil menanam ${jumlahTanam} ${GAME_DATABASE.tanaman[idBibit].nama} di Lahan #${lahanTargetAktif}!`);
     tutupModalTanam();
+    tampilkanPopupNotifikasi(`🌱 Berhasil Menanam!`, `Berhasil menanam ${jumlahTanam} ${GAME_DATABASE.tanaman[idBibit].nama} di Lahan #${lahanTargetAktif}.`);
     renderLahan();
     renderTas();
 }
@@ -245,7 +228,7 @@ function panenHasil(nomorLahan) {
     let dataLahan = gameState.lahan[nomorLahan];
     if (!dataLahan) return;
 
-    let idHasil = dataLahan.idBibit; // Hasil panen sementara masuk kembali ke tas sebagai item
+    let idHasil = dataLahan.idBibit;
     let jumlahPanen = dataLahan.jumlah;
 
     if (!gameState.tas[idHasil]) gameState.tas[idHasil] = 0;
@@ -253,13 +236,13 @@ function panenHasil(nomorLahan) {
 
     delete gameState.lahan[nomorLahan];
 
-    alert(`🌾 Panen Berhasil!\nKamu mendapatkan ${jumlahPanen} hasil panen dan telah dimasukkan ke Tas.`);
+    tampilkanPopupNotifikasi(`🌾 Panen Sukses!`, `Kamu berhasil memanen ${jumlahPanen} item dan menyimpannya ke Tas.`);
     renderLahan();
     renderTas();
 }
 
 
-// --- TAB SUPERMARKET & POPUP PEMBELIAN ---
+// --- TAB SUPERMARKET & POPUP MODERN ---
 
 function renderSupermarket() {
     const container = document.getElementById("list-supermarket");
@@ -354,12 +337,41 @@ function konfirmasiBeli() {
         gameState.tas[transaksiAktif.idItem] += jumlah;
 
         updateHeaderUI();
-        alert(`🎉 Pembelian Berhasil!\nKamu membeli ${jumlah} ${transaksiAktif.namaItem} seharga Rp. ${totalHarga.toLocaleString('id-ID')}. Barang telah dimasukkan ke Tas!`);
         tutupModalBeli();
+        
+        tampilkanPopupNotifikasi(`🎉 Pembelian Berhasil!`, `Kamu membeli ${jumlah} ${transaksiAktif.namaItem} seharga Rp. ${totalHarga.toLocaleString('id-ID')}.`);
         renderTas();
     } else {
         alert("⚠️ Uang kamu tidak cukup untuk melakukan pembelian ini!");
     }
+}
+
+
+// --- POPUP NOTIFIKASI MODERN ESTETIK ---
+
+function tampilkanPopupNotifikasi(judul, pesan) {
+    let modalNotif = document.getElementById("modal-notifikasi-custom");
+    if (!modalNotif) {
+        modalNotif = document.createElement("div");
+        modalNotif.id = "modal-notifikasi-custom";
+        modalNotif.className = "modal-overlay";
+        modalNotif.innerHTML = `
+            <div class="modal-card" style="text-align: center;">
+                <h3 id="notif-judul" style="color: #27ae60; margin-bottom: 10px;"></h3>
+                <p id="notif-pesan" style="margin-bottom: 20px; color: #333; line-height: 1.4;"></p>
+                <button onclick="tutupPopupNotifikasi()" style="background: #27ae60; color: white; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%;">OK</button>
+            </div>
+        `;
+        document.body.appendChild(modalNotif);
+    }
+    document.getElementById("notif-judul").innerText = judul;
+    document.getElementById("notif-pesan").innerText = pesan;
+    modalNotif.style.display = "flex";
+}
+
+function tutupPopupNotifikasi() {
+    let modalNotif = document.getElementById("modal-notifikasi-custom");
+    if (modalNotif) modalNotif.style.display = "none";
 }
 
 
@@ -395,13 +407,26 @@ function renderTas() {
 }
 
 
-// Interval Detik Real-time untuk Update Sisa Waktu Tumbuh di Lahan
+// --- SISTEM WAKTU IN-GAME ---
+// 15 detik real-time = 10 detik in-game (artinya 1.5 detik real = 1 menit in-game)
 setInterval(() => {
+    // Tambah 1 menit in-game setiap 1.5 detik real-time
+    gameState.waktuMenit += 1;
+    if (gameState.waktuMenit >= 60) {
+        gameState.waktuMenit = 0;
+        gameState.waktuJam += 1;
+        if (gameState.waktuJam >= 24) {
+            gameState.waktuJam = 0; // Reset ke jam 00:00 hari baru
+        }
+    }
+    updateHeaderUI();
+
+    // Render ulang hitung mundur lahan jika tab lahan sedang aktif
     let adaTanamanAktif = Object.keys(gameState.lahan).length > 0;
     if (adaTanamanAktif && document.getElementById("tab-lahan").classList.contains("active")) {
         renderLahan();
     }
-}, 1000);
+}, 1500);
 
 
 // Inisialisasi Game
