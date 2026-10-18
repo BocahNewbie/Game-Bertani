@@ -8,6 +8,13 @@ let gameState = {
     jumlahLahanAktif: 3 // Jumlah kotak lahan awal yang bisa ditanami
 };
 
+// Variabel Sementara untuk Menyimpan Transaksi Aktif
+let transaksiAktif = {
+    idBibit: "",
+    namaBibit: "",
+    hargaSatuan: 0
+};
+
 // Fungsi Ganti Tab Menu
 function gantiTab(evt, tabId) {
     let contents = document.querySelectorAll(".tab-content");
@@ -69,7 +76,6 @@ function renderSupermarket() {
     const container = document.getElementById("list-supermarket");
     container.innerHTML = "";
 
-    // Mengambil data tanaman dari GAME_DATABASE.tanaman
     const daftarTanaman = GAME_DATABASE.tanaman;
 
     for (let key in daftarTanaman) {
@@ -84,22 +90,93 @@ function renderSupermarket() {
                 <p>Jual: Rp. ${item.hargaJual}</p>
                 <p>⏱️ ${durasiTumbuh}</p>
                 <p>✨ XP: ${item.xp}</p>
-                <button onclick="beliBibit('${item.id}', ${item.hargaBeli})">Beli Bibit</button>
+                <button onclick="bukaModalBeli('${item.id}', '${item.nama}', ${item.hargaBeli})">Beli Bibit</button>
             </div>
         `;
     }
 }
 
-// Fungsi Beli Bibit
-function beliBibit(idBibit, harga) {
-    if (gameState.uang >= harga) {
-        gameState.uang -= harga;
+// --- LOGIKA POPUP / MODAL PEMBELIAN ---
+
+// Buka Modal Beli Bibit
+function bukaModalBeli(idBibit, namaBibit, harga) {
+    transaksiAktif = { idBibit, namaBibit, hargaSatuan: harga };
+    
+    document.getElementById("modal-title").innerText = `Beli ${namaBibit}`;
+    document.getElementById("modal-info").innerText = `Harga: Rp. ${harga.toLocaleString('id-ID')} / biji`;
+    document.getElementById("input-jumlah-beli").value = 1;
+    
+    updateTotalHargaModal();
+    document.getElementById("modal-beli").style.display = "flex";
+}
+
+// Tutup Modal Beli
+function tutupModalBeli() {
+    document.getElementById("modal-beli").style.display = "none";
+}
+
+// Ubah Jumlah dengan Tombol + / -
+function ubahJumlahBeli(delta) {
+    let input = document.getElementById("input-jumlah-beli");
+    let nilaiBaru = parseInt(input.value || 1) + delta;
+    
+    if (nilaiBaru < 1) nilaiBaru = 1;
+    if (nilaiBaru > 99) nilaiBaru = 99;
+    
+    input.value = nilaiBaru;
+    updateTotalHargaModal();
+}
+
+// Validasi saat diketik manual
+function validasiInputBeli() {
+    let input = document.getElementById("input-jumlah-beli");
+    let val = parseInt(input.value);
+    
+    if (val > 99) input.value = 99;
+    if (val < 1 && input.value !== "") input.value = 1;
+    
+    updateTotalHargaModal();
+}
+
+// Logika Tombol MAX: Menyesuaikan Uang dan Batas 99
+function beliMaksimal() {
+    if (transaksiAktif.hargaSatuan <= 0) return;
+    
+    let maxBerdasarkanUang = Math.floor(gameState.uang / transaksiAktif.hargaSatuan);
+    let jumlahMaks = Math.min(maxBerdasarkanUang, 99);
+    
+    if (jumlahMaks < 1) {
+        jumlahMaks = 1; 
+    }
+    
+    document.getElementById("input-jumlah-beli").value = jumlahMaks;
+    updateTotalHargaModal();
+}
+
+// Hitung Total Harga di dalam Modal
+function updateTotalHargaModal() {
+    let jumlah = parseInt(document.getElementById("input-jumlah-beli").value) || 0;
+    let totalHarga = jumlah * transaksiAktif.hargaSatuan;
+    
+    document.getElementById("modal-total").innerText = `Total: Rp. ${totalHarga.toLocaleString('id-ID')}`;
+}
+
+// Konfirmasi Transaksi Pembelian
+function konfirmasiBeli() {
+    let jumlah = parseInt(document.getElementById("input-jumlah-beli").value) || 0;
+    let totalHarga = jumlah * transaksiAktif.hargaSatuan;
+    
+    if (gameState.uang >= totalHarga) {
+        gameState.uang -= totalHarga;
         updateHeaderUI();
-        alert(`Berhasil membeli bibit ${idBibit}! Cek di menu Tas.`);
+        alert(`Berhasil membeli ${jumlah} ${transaksiAktif.namaBibit}! Total biaya: Rp. ${totalHarga.toLocaleString('id-ID')}.`);
+        tutupModalBeli();
     } else {
-        alert("Uang kamu tidak cukup untuk membeli bibit ini!");
+        alert("Uang kamu tidak cukup untuk jumlah tersebut!");
     }
 }
+
+// --- AKHIR LOGIKA POPUP ---
 
 // Simulasi Aksi Tanam
 function tanamBibit(nomorLahan) {
