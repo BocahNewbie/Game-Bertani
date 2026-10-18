@@ -102,12 +102,12 @@ function resetHeaderNamaUI() {
 }
 
 function simpanGame() {
-    localStorage.setItem("game_bertani_save", JSON.stringify(gameState));
-    tampilkanPopupNotifikasi("💾 Progres Disimpan!", "Data permainan berhasil disimpan ke penyimpanan browser.", "neon-green");
+    localStorage.setItem("game_bertani_save_v2", JSON.stringify(gameState));
+    tampilkanPopupNotifikasi("💾 Progres Disimpan!", "Data permainan baru berhasil disimpan (Save V2).", "neon-green");
 }
 
 function muatGame() {
-    let savedData = localStorage.getItem("game_bertani_save");
+    let savedData = localStorage.getItem("game_bertani_save_v2");
     if (savedData) {
         gameState = JSON.parse(savedData);
         if (gameState.durasiPisau === undefined) gameState.durasiPisau = 300;
@@ -727,15 +727,24 @@ function renderWikipedia() {
 
     let html = `<div class="neon-credit">Created By Bocah Nerbiw</div>`;
     html += `<h2>📚 Panduan & Ensiklopedia Harga Game</h2><table style="width:100%; border-collapse:collapse; margin-top:15px; background:var(--bg-card); border-radius:8px; overflow:hidden;">`;
-    html += `<tr style="background:#1e293b; text-align:left;"><th style="padding:10px;">Item</th><th style="padding:10px;">Harga Normal</th><th style="padding:10px;">Min / Max Estimasi</th></tr>`;
+    html += `<tr style="background:#1e293b; text-align:left;"><th style="padding:10px;">Item</th><th style="padding:10px;">Harga Beli (Normal)</th><th style="padding:10px;">Harga Jual (Normal)</th><th style="padding:10px;">Estimasi Min / Max</th></tr>`;
 
     let allItems = { ...GAME_DATABASE.bibit, ...GAME_DATABASE.hasilPanen, ...GAME_DATABASE.ternak, ...GAME_DATABASE.pakan, ...GAME_DATABASE.ternakHasil, ...GAME_DATABASE.jagalHasil, ...GAME_DATABASE.alat, ...GAME_DATABASE.material };
     for (let id in allItems) {
         let item = allItems[id];
-        let base = item.hargaBeli || item.hargaJual || 0;
-        let minP = Math.round(base * 0.8);
-        let maxP = Math.round(base * 1.3);
-        html += `<tr style="border-bottom:1px solid var(--border-color);"><td style="padding:10px;">${item.icon} ${item.nama}</td><td style="padding:10px;">Rp. ${base.toLocaleString('id-ID')}</td><td style="padding:10px; color:#34d399;">Rp. ${minP.toLocaleString('id-ID')} - Rp. ${maxP.toLocaleString('id-ID')}</td></tr>`;
+        let beli = item.hargaBeli ? `Rp. ${item.hargaBeli.toLocaleString('id-ID')}` : '-';
+        let jual = item.hargaJual ? `Rp. ${item.hargaJual.toLocaleString('id-ID')}` : '-';
+        let baseRef = item.hargaBeli || item.hargaJual || 0;
+        let minP = Math.round(baseRef * 0.8);
+        let maxP = Math.round(baseRef * 1.3);
+        let estimasi = baseRef > 0 ? `Rp. ${minP.toLocaleString('id-ID')} - Rp. ${maxP.toLocaleString('id-ID')}` : '-';
+
+        html += `<tr style="border-bottom:1px solid var(--border-color);">
+            <td style="padding:10px;">${item.icon} ${item.nama}</td>
+            <td style="padding:10px;">${beli}</td>
+            <td style="padding:10px;">${jual}</td>
+            <td style="padding:10px; color:#34d399;">${estimasi}</td>
+        </tr>`;
     }
     html += `</table>`;
     container.innerHTML = html;
