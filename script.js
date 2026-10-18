@@ -84,7 +84,7 @@ function renderLahan() {
             container.innerHTML += `
                 <div class="card lahan-card">
                     <h3>Lahan #${i}</h3>
-                    <p>🌿 Kosong</p>
+                    <p style="color: var(--text-muted);">🌿 Kosong</p>
                     <button onclick="bukaModalTanam(${i})">Tanam Bibit</button>
                 </div>
             `;
@@ -94,16 +94,16 @@ function renderLahan() {
             let teksWaktu = formatDurasiInGame(sisaMenitInGame);
 
             let tombolAksi = sisaMenitInGame === 0 
-                ? `<button onclick="panenHasil(${i})" style="background: #e67e22; color:white; border:none; padding:6px 12px; border-radius:4px; cursor:pointer;">Panen (${dataLahan.jumlah})</button>`
-                : `<button disabled style="background: #95a5a6; color:white; border:none; padding:6px 12px; border-radius:4px; cursor: not-allowed;">Tumbuh... (${teksWaktu})</button>`;
+                ? `<button onclick="panenHasil(${i})" style="background: #d97706; color:white;">Panen (${dataLahan.jumlah})</button>`
+                : `<button disabled style="background: #334155; color: var(--text-muted); cursor: not-allowed;">Tumbuh... (${teksWaktu})</button>`;
 
             container.innerHTML += `
-                <div class="card lahan-card" style="border: 2px solid #27ae60; background: #e8f8f5;">
+                <div class="card lahan-card" style="border: 1px solid rgba(16, 185, 129, 0.4); background: #151f2c;">
                     <h3>Lahan #${i}</h3>
                     <div style="font-size: 2.5rem; margin: 5px 0;">${infoBibit.icon}</div>
                     <p><b>${infoBibit.nama}</b></p>
                     <p>Jumlah: <b>${dataLahan.jumlah} Pcs</b></p>
-                    <p style="font-size: 0.85rem; color: #c0392b; font-weight: bold;">⏱️ ${teksWaktu}</p>
+                    <p style="font-size: 0.85rem; color: #34d399; font-weight: bold;">⏱️ ${teksWaktu}</p>
                     ${tombolAksi}
                 </div>
             `;
@@ -122,7 +122,7 @@ function bukaModalTanam(nomorLahan) {
         modalTanam.innerHTML = `
             <div class="modal-card">
                 <h3>Pilih Bibit untuk Lahan</h3>
-                <p id="info-modal-tanam">Pilih bibit dan tentukan jumlah (Maks 99)</p>
+                <p id="info-modal-tanam" style="color: var(--text-muted); font-size: 0.9rem;">Pilih bibit dan tentukan jumlah (Maks 99)</p>
                 <div id="list-bibit-tas" style="max-height: 220px; overflow-y: auto; margin: 15px 0; display: flex; flex-direction: column; gap: 10px;"></div>
                 <button class="btn-cancel" onclick="tutupModalTanam()" style="width:100%; padding: 8px;">Batal</button>
             </div>
@@ -144,19 +144,19 @@ function bukaModalTanam(nomorLahan) {
             adaBibit = true;
             let infoBibit = daftarTanaman[idBibit];
             containerBibit.innerHTML += `
-                <div style="display: flex; justify-content: space-between; align-items: center; background: #f9f9f9; padding: 10px; border-radius: 6px; border: 1px solid #ddd;">
+                <div style="display: flex; justify-content: space-between; align-items: center; background: #121824; padding: 10px; border-radius: 8px; border: 1px solid var(--border-color);">
                     <div style="text-align: left;">
                         <b>${infoBibit.icon} ${infoBibit.nama}</b><br>
-                        <small style="color:gray;">Stok Tas: ${jumlahDiTas}</small>
+                        <small style="color:var(--text-muted);">Stok Tas: ${jumlahDiTas}</small>
                     </div>
-                    <button onclick="bukaSubModalJumlahTanam('${idBibit}', ${jumlahDiTas})" style="background: #27ae60; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;">Pilih</button>
+                    <button onclick="bukaSubModalJumlahTanam('${idBibit}', ${jumlahDiTas})" style="background: #059669; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; width: auto; margin-top:0;">Pilih</button>
                 </div>
             `;
         }
     }
 
     if (!adaBibit) {
-        containerBibit.innerHTML = `<p style="color: #e74c3c; font-style: italic;">Tas kamu kosong dari bibit! Beli dulu di Supermarket.</p>`;
+        containerBibit.innerHTML = `<p style="color: #f87171; font-style: italic;">Tas kamu kosong dari bibit! Beli dulu di Supermarket.</p>`;
     }
 
     modalTanam.style.display = "flex";
@@ -175,16 +175,16 @@ function bukaSubModalJumlahTanam(idBibit, stokTas) {
     containerBibit.innerHTML = `
         <div style="text-align: center;">
             <h4>Tanam ${infoBibit.nama}</h4>
-            <p>Stok di Tas: <b>${stokTas}</b> (Maks 99 per lahan)</p>
-            <div style="display: flex; justify-content: center; gap: 8px; margin: 15px 0;">
-                <button onclick="ubahJumlahInputTanam(-1)" style="padding: 5px 10px;">-</button>
-                <input type="number" id="input-jml-tanam" value="1" min="1" max="${maksBisaTanam}" style="width: 60px; text-align: center; font-size: 1.1rem;">
-                <button onclick="ubahJumlahInputTanam(1)" style="padding: 5px 10px;">+</button>
-                <button onclick="document.getElementById('input-jml-tanam').value=${maksBisaTanam}" style="background:#e67e22; color:white; border:none; padding:5px 8px; border-radius:4px;">MAX</button>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">Stok di Tas: <b>${stokTas}</b> (Maks 99)</p>
+            <div class="modal-input-group" style="justify-content: center;">
+                <button onclick="ubahJumlahInputTanam(-1)">-</button>
+                <input type="number" id="input-jml-tanam" value="1" min="1" max="${maksBisaTanam}">
+                <button onclick="ubahJumlahInputTanam(1)">+</button>
+                <button class="btn-max" onclick="document.getElementById('input-jml-tanam').value=${maksBisaTanam}">MAX</button>
             </div>
-            <div style="display: flex; gap: 10px;">
-                <button onclick="bukaModalTanam(${lahanTargetAktif})" class="btn-cancel" style="flex:1; padding: 8px;">Kembali</button>
-                <button onclick="eksekusiTanamBibit('${idBibit}', ${stokTas})" class="btn-confirm" style="flex:1; padding: 8px; background:#27ae60; color:white; border:none; border-radius:4px;">Konfirmasi Tanam</button>
+            <div class="modal-actions" style="margin-top: 20px;">
+                <button onclick="bukaModalTanam(${lahanTargetAktif})" class="btn-cancel">Kembali</button>
+                <button onclick="eksekusiTanamBibit('${idBibit}', ${stokTas})" class="btn-confirm">Tanam</button>
             </div>
         </div>
     `;
@@ -246,7 +246,7 @@ function panenHasil(nomorLahan) {
 }
 
 
-// --- TAB SUPERMARKET & POPUP PEMBELIAN ---
+// --- TAB SUPERMARKET ---
 
 function renderSupermarket() {
     const container = document.getElementById("list-supermarket");
@@ -264,9 +264,9 @@ function renderSupermarket() {
             <div class="card">
                 <div style="font-size: 2.5rem;">${item.icon}</div>
                 <h3>${item.nama}</h3>
-                <p>Beli: <b>Rp. ${hargaDinamis}</b></p>
-                <p>Jual: Rp. ${item.hargaJual}</p>
-                <p>⏱️ ${durasiMenit} Menit In-Game</p>
+                <p>Beli: <b style="color: #34d399;">Rp. ${hargaDinamis}</b></p>
+                <p style="color: var(--text-muted); font-size: 0.9rem;">Jual Standar: Rp. ${item.hargaJual}</p>
+                <p style="font-size: 0.85rem; color: #60a5fa;">⏱️ ${durasiMenit} Menit In-Game</p>
                 <button onclick="bukaModalBeli('${item.id}', '${item.nama}', ${hargaDinamis})">Beli Bibit</button>
             </div>
         `;
@@ -276,12 +276,38 @@ function renderSupermarket() {
 function bukaModalBeli(idItem, namaItem, harga) {
     transaksiAktif = { idItem, namaItem, hargaSatuan: harga, tipe: 'beli' };
     
+    let modalBeli = document.getElementById("modal-beli");
+    if (!modalBeli) {
+        // Buat otomatis jika belum ada di HTML
+        modalBeli = document.createElement("div");
+        modalBeli.id = "modal-beli";
+        modalBeli.className = "modal-overlay";
+        modalBeli.innerHTML = `
+            <div class="modal-card">
+                <h3 id="modal-title">Beli Bibit</h3>
+                <p id="modal-info" style="color: var(--text-muted); font-size: 0.9rem;">Harga: Rp. 0</p>
+                <div class="modal-input-group">
+                    <button onclick="ubahJumlahBeli(-1)">-</button>
+                    <input type="number" id="input-jumlah-beli" value="1" min="1" max="99" oninput="validasiInputBeli()">
+                    <button onclick="ubahJumlahBeli(1)">+</button>
+                    <button class="btn-max" onclick="beliMaksimal()">MAX</button>
+                </div>
+                <p id="modal-total" style="margin: 15px 0; font-weight: bold; color: #34d399;">Total: Rp. 0</p>
+                <div class="modal-actions">
+                    <button class="btn-cancel" onclick="tutupModalBeli()">Batal</button>
+                    <button class="btn-confirm" onclick="konfirmasiBeli()">Beli</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modalBeli);
+    }
+
     document.getElementById("modal-title").innerText = `Beli ${namaItem}`;
     document.getElementById("modal-info").innerText = `Harga: Rp. ${harga.toLocaleString('id-ID')} / biji`;
     document.getElementById("input-jumlah-beli").value = 1;
     
     updateTotalHargaModal();
-    document.getElementById("modal-beli").style.display = "flex";
+    modalBeli.style.display = "flex";
 }
 
 function tutupModalBeli() {
@@ -292,10 +318,8 @@ function tutupModalBeli() {
 function ubahJumlahBeli(delta) {
     let input = document.getElementById("input-jumlah-beli");
     let nilaiBaru = parseInt(input.value || 1) + delta;
-    
     if (nilaiBaru < 1) nilaiBaru = 1;
     if (nilaiBaru > 99) nilaiBaru = 99;
-    
     input.value = nilaiBaru;
     updateTotalHargaModal();
 }
@@ -303,21 +327,16 @@ function ubahJumlahBeli(delta) {
 function validasiInputBeli() {
     let input = document.getElementById("input-jumlah-beli");
     let val = parseInt(input.value);
-    
     if (val > 99) input.value = 99;
     if (val < 1 && input.value !== "") input.value = 1;
-    
     updateTotalHargaModal();
 }
 
 function beliMaksimal() {
     if (transaksiAktif.hargaSatuan <= 0) return;
-    
     let maxBerdasarkanUang = Math.floor(gameState.uang / transaksiAktif.hargaSatuan);
     let jumlahMaks = Math.min(maxBerdasarkanUang, 99);
-    
     if (jumlahMaks < 1) jumlahMaks = 1; 
-    
     document.getElementById("input-jumlah-beli").value = jumlahMaks;
     updateTotalHargaModal();
 }
@@ -325,7 +344,6 @@ function beliMaksimal() {
 function updateTotalHargaModal() {
     let jumlah = parseInt(document.getElementById("input-jumlah-beli").value) || 0;
     let totalHarga = jumlah * transaksiAktif.hargaSatuan;
-    
     document.getElementById("modal-total").innerText = `Total: Rp. ${totalHarga.toLocaleString('id-ID')}`;
 }
 
@@ -335,15 +353,11 @@ function konfirmasiBeli() {
     
     if (gameState.uang >= totalHarga) {
         gameState.uang -= totalHarga;
-        
-        if (!gameState.tas[transaksiAktif.idItem]) {
-            gameState.tas[transaksiAktif.idItem] = 0;
-        }
+        if (!gameState.tas[transaksiAktif.idItem]) gameState.tas[transaksiAktif.idItem] = 0;
         gameState.tas[transaksiAktif.idItem] += jumlah;
 
         updateHeaderUI();
         tutupModalBeli();
-        
         tampilkanPopupNotifikasi(`🎉 Pembelian Berhasil!`, `Kamu membeli ${jumlah} ${transaksiAktif.namaItem} seharga Rp. ${totalHarga.toLocaleString('id-ID')}.`);
         renderTas();
     } else {
@@ -352,15 +366,14 @@ function konfirmasiBeli() {
 }
 
 
-// --- TAB PENGEPUL (2 OPSI TERPISAH: HASIL TANAMAN & HASIL TERNAK) ---
+// --- TAB PENGEPUL (HARGA JUAL BERFLUKTUASI SESUAI PASAR) ---
 
 function renderPengepul() {
     const container = document.getElementById("list-pengepul");
     if (!container) return;
     container.innerHTML = "";
 
-    // Header & Section 1: Hasil Tanaman
-    let htmlTanaman = `<div style="grid-column: 1 / -1; margin-top: 10px;"><h3 style="border-bottom: 2px solid #27ae60; padding-bottom: 5px; color: #27ae60;">🌾 Hasil Tanaman</h3></div>`;
+    let htmlTanaman = `<div style="grid-column: 1 / -1; margin-top: 5px;"><h3 style="border-bottom: 1px solid var(--border-color); padding-bottom: 8px; color: #34d399;">🌾 Hasil Tanaman</h3></div>`;
     let adaTanamanJual = false;
     let cardTanamanHTML = "";
 
@@ -370,31 +383,30 @@ function renderPengepul() {
         if (jumlahStok > 0 && daftarTanaman[idItem]) {
             adaTanamanJual = true;
             let item = daftarTanaman[idItem];
+            
+            // Harga jual ikut berfluktuasi menggunakan MarketEconomy.getHargaJual
             let hargaJualDinamis = MarketEconomy ? MarketEconomy.getHargaJual(item.hargaJual) : item.hargaJual;
 
             cardTanamanHTML += `
                 <div class="card">
                     <div style="font-size: 2.5rem;">${item.icon}</div>
                     <h3>${item.nama}</h3>
-                    <p>Stok Tas: <b>${jumlahStok} Pcs</b></p>
-                    <p>Harga Jual: <b>Rp. ${hargaJualDinamis}</b></p>
-                    <button onclick="bukaModalJual('${idItem}', '${item.nama}', ${hargaJualDinamis}, ${jumlahStok})" style="background: #2980b9;">Jual ke Pengepul</button>
+                    <p style="color: var(--text-muted);">Stok: <b>${jumlahStok} Pcs</b></p>
+                    <p>Harga Jual: <b style="color: #60a5fa;">Rp. ${hargaJualDinamis}</b></p>
+                    <button onclick="bukaModalJual('${idItem}', '${item.nama}', ${hargaJualDinamis}, ${jumlahStok})" style="background: #2563eb;">Jual ke Pengepul</button>
                 </div>
             `;
         }
     }
 
     if (!adaTanamanJual) {
-        cardTanamanHTML = `<p style="grid-column: 1 / -1; color: gray; font-style: italic;">Belum ada hasil tanaman di Tas.</p>`;
+        cardTanamanHTML = `<p style="grid-column: 1 / -1; color: var(--text-muted); font-style: italic;">Belum ada hasil tanaman di Tas untuk dijual.</p>`;
     }
 
-
-    // Section 2: Hasil Ternak (Disediakan tempatnya jika nanti database ternak aktif)
-    let htmlTernak = `<div style="grid-column: 1 / -1; margin-top: 20px;"><h3 style="border-bottom: 2px solid #e67e22; padding-bottom: 5px; color: #e67e22;">🐮 Hasil Ternak (Susu, Telur, Daging, dll)</h3></div>`;
+    let htmlTernak = `<div style="grid-column: 1 / -1; margin-top: 20px;"><h3 style="border-bottom: 1px solid var(--border-color); padding-bottom: 8px; color: #fbbf24;">🐮 Hasil Ternak</h3></div>`;
     let adaTernakJual = false;
     let cardTernakHTML = "";
 
-    // Contoh pengecekan item hasil ternak di masa depan (jika ada di database ternak)
     const daftarTernakHasil = (typeof GAME_DATABASE.ternakHasil !== 'undefined') ? GAME_DATABASE.ternakHasil : {};
     for (let idItem in gameState.tas) {
         let jumlahStok = gameState.tas[idItem];
@@ -407,23 +419,21 @@ function renderPengepul() {
                 <div class="card">
                     <div style="font-size: 2.5rem;">${item.icon}</div>
                     <h3>${item.nama}</h3>
-                    <p>Stok Tas: <b>${jumlahStok} Pcs</b></p>
-                    <p>Harga Jual: <b>Rp. ${hargaJualDinamis}</b></p>
-                    <button onclick="bukaModalJual('${idItem}', '${item.nama}', ${hargaJualDinamis}, ${jumlahStok})" style="background: #e67e22;">Jual ke Pengepul</button>
+                    <p style="color: var(--text-muted);">Stok: <b>${jumlahStok} Pcs</b></p>
+                    <p>Harga Jual: <b style="color: #fbbf24;">Rp. ${hargaJualDinamis}</b></p>
+                    <button onclick="bukaModalJual('${idItem}', '${item.nama}', ${hargaJualDinamis}, ${jumlahStok})" style="background: #d97706;">Jual ke Pengepul</button>
                 </div>
             `;
         }
     }
 
     if (!adaTernakJual) {
-        cardTernakHTML = `<p style="grid-column: 1 / -1; color: gray; font-style: italic;">Belum ada hasil ternak di Tas.</p>`;
+        cardTernakHTML = `<p style="grid-column: 1 / -1; color: var(--text-muted); font-style: italic;">Belum ada hasil ternak di Tas.</p>`;
     }
 
-    // Gabungkan ke container pengepul
     container.innerHTML = htmlTanaman + cardTanamanHTML + htmlTernak + cardTernakHTML;
 }
 
-// Buka Modal Jual ke Pengepul
 function bukaModalJual(idItem, namaItem, hargaJualSatuan, stokMaksimal) {
     transaksiAktif = { idItem, namaItem, hargaSatuan: hargaJualSatuan, tipe: 'jual', stokMaksimal };
 
@@ -435,20 +445,17 @@ function bukaModalJual(idItem, namaItem, hargaJualSatuan, stokMaksimal) {
         modalJual.innerHTML = `
             <div class="modal-card">
                 <h3 id="modal-jual-title">Jual Barang</h3>
-                <p id="modal-jual-info">Harga: Rp. 0 / pcs</p>
-                
+                <p id="modal-jual-info" style="color: var(--text-muted); font-size: 0.9rem;">Harga: Rp. 0 / pcs</p>
                 <div class="modal-input-group">
                     <button onclick="ubahJumlahJual(-1)">-</button>
                     <input type="number" id="input-jumlah-jual" value="1" min="1" oninput="validasiInputJual()">
                     <button onclick="ubahJumlahJual(1)">+</button>
                     <button class="btn-max" onclick="jualMaksimal()">MAX</button>
                 </div>
-
-                <p id="modal-jual-total" style="margin: 15px 0; font-weight: bold;">Total Pendapatan: Rp. 0</p>
-
+                <p id="modal-jual-total" style="margin: 15px 0; font-weight: bold; color: #60a5fa;">Total Pendapatan: Rp. 0</p>
                 <div class="modal-actions">
                     <button class="btn-cancel" onclick="tutupModalJual()">Batal</button>
-                    <button class="btn-confirm" onclick="konfirmasiJual()" style="background: #2980b9;">Jual</button>
+                    <button class="btn-confirm" onclick="konfirmasiJual()" style="background: #2563eb; color: #60a5fa;">Jual</button>
                 </div>
             </div>
         `;
@@ -475,10 +482,8 @@ function ubahJumlahJual(delta) {
     let input = document.getElementById("input-jumlah-jual");
     let nilaiBaru = parseInt(input.value || 1) + delta;
     let maks = transaksiAktif.stokMaksimal || 1;
-    
     if (nilaiBaru < 1) nilaiBaru = 1;
     if (nilaiBaru > maks) nilaiBaru = maks;
-    
     input.value = nilaiBaru;
     updateTotalHargaModalJual();
 }
@@ -487,10 +492,8 @@ function validasiInputJual() {
     let input = document.getElementById("input-jumlah-jual");
     let val = parseInt(input.value);
     let maks = transaksiAktif.stokMaksimal || 1;
-    
     if (val > maks) input.value = maks;
     if (val < 1 && input.value !== "") input.value = 1;
-    
     updateTotalHargaModalJual();
 }
 
@@ -502,7 +505,6 @@ function jualMaksimal() {
 function updateTotalHargaModalJual() {
     let jumlah = parseInt(document.getElementById("input-jumlah-jual").value) || 0;
     let totalPendapatan = jumlah * transaksiAktif.hargaSatuan;
-    
     document.getElementById("modal-jual-total").innerText = `Total Pendapatan: Rp. ${totalPendapatan.toLocaleString('id-ID')}`;
 }
 
@@ -512,16 +514,12 @@ function konfirmasiJual() {
 
     if (jumlah > 0 && gameState.tas[transaksiAktif.idItem] >= jumlah) {
         gameState.tas[transaksiAktif.idItem] -= jumlah;
-        if (gameState.tas[transaksiAktif.idItem] <= 0) {
-            delete gameState.tas[transaksiAktif.idItem];
-        }
+        if (gameState.tas[transaksiAktif.idItem] <= 0) delete gameState.tas[transaksiAktif.idItem];
         gameState.uang += totalPendapatan;
 
         updateHeaderUI();
         tutupModalJual();
-
-        tampilkanPopupNotifikasi(`💰 Penjualan Berhasil!`, `Kamu menjual ${jumlah} ${transaksiAktif.namaItem} ke Pengepul dan mendapatkan Rp. ${totalPendapatan.toLocaleString('id-ID')}.`);
-        
+        tampilkanPopupNotifikasi(`💰 Penjualan Berhasil!`, `Kamu menjual ${jumlah} ${transaksiAktif.namaItem} dan mendapatkan Rp. ${totalPendapatan.toLocaleString('id-ID')}.`);
         renderPengepul();
         renderTas();
     } else {
@@ -540,9 +538,9 @@ function tampilkanPopupNotifikasi(judul, pesan) {
         modalNotif.className = "modal-overlay";
         modalNotif.innerHTML = `
             <div class="modal-card" style="text-align: center;">
-                <h3 id="notif-judul" style="color: #27ae60; margin-bottom: 10px;"></h3>
-                <p id="notif-pesan" style="margin-bottom: 20px; color: #333; line-height: 1.4;"></p>
-                <button onclick="tutupPopupNotifikasi()" style="background: #27ae60; color: white; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%;">OK</button>
+                <h3 id="notif-judul" style="color: #34d399; margin-bottom: 10px;"></h3>
+                <p id="notif-pesan" style="margin-bottom: 20px; color: var(--text-muted); line-height: 1.5; font-size: 0.95rem;"></p>
+                <button onclick="tutupPopupNotifikasi()" style="background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); padding: 8px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%;">OK</button>
             </div>
         `;
         document.body.appendChild(modalNotif);
@@ -578,14 +576,14 @@ function renderTas() {
                 <div class="card">
                     <div style="font-size: 2.5rem;">${dataItem.icon}</div>
                     <h3>${dataItem.nama}</h3>
-                    <p>Jumlah: <b>${jumlah} Pcs</b></p>
+                    <p style="color: var(--text-muted);">Jumlah: <b>${jumlah} Pcs</b></p>
                 </div>
             `;
         }
     }
 
     if (!adaIsi) {
-        container.innerHTML = `<p style="grid-column: 1 / -1; text-align: center; color: gray;">Tas kamu masih kosong. Belanja bibit di Supermarket atau dapatkan hasil panen!</p>`;
+        container.innerHTML = `<p style="grid-column: 1 / -1; text-align: center; color: var(--text-muted);">Tas kamu masih kosong. Belanja bibit di Supermarket atau panen tanamanmu!</p>`;
     }
 }
 
