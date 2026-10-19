@@ -577,6 +577,12 @@ function prosesJagal(index, jenis) {
 }
 
 function asahPisau() {
+    // Validasi: Jika durabilitas masih penuh (300 atau lebih), batalkan proses
+    if (gameState.durasiPisau >= 300) {
+        alert("⚠️ Pisau Anda masih tajam! Belum perlu diasah.");
+        return;
+    }
+
     let biaya = GAME_DATABASE.alat.pisau.biayaAsah;
     if (gameState.uang >= biaya) {
         gameState.uang -= biaya;
@@ -588,7 +594,6 @@ function asahPisau() {
         alert("⚠️ Uang tidak cukup untuk mengasah pisau (Butuh Rp. 12.000)!");
     }
 }
-
 
 // --- TAB PASAR & TUKANG KAYU & WIKIPEDIA ---
 function renderPasar() {
