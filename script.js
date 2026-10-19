@@ -362,7 +362,6 @@ function renderKandang() {
                     <div class="card">
                         <h3>Kandang #${i}</h3>
                         <p style="color: var(--text-muted);">🏡 Kosong</p>
-                        <button onclick="bukaModalIsiKandang(${i})" style="background: #2563eb;">Isi Hewan</button>
                     </div>
                 `;
             } else if (dataKandang.status === 'dibangun') {
@@ -465,45 +464,6 @@ function selesaikanPembangunanKandang(nomorKandang) {
     gameState.jumlahKandangAktif = nomorKandang;
     delete gameState.kandang[nomorKandang];
     tampilkanPopupNotifikasi("✨ Selesai!", `Kandang #${nomorKandang} siap digunakan.`, "neon-green");
-    renderKandang();
-}
-
-function bukaModalIsiKandang(nomorKandang) {
-    kandangTargetAktif = nomorKandang;
-    let modal = document.getElementById("modal-isi-kandang");
-    if (!modal) {
-        modal = document.createElement("div");
-        modal.id = "modal-isi-kandang";
-        modal.className = "modal-overlay";
-        modal.innerHTML = `
-            <div class="modal-card neon-amber">
-                <h3>Pilih Hewan Ternak</h3>
-                <p style="color: var(--text-muted); font-size: 0.9rem;">Pilih hewan langsung masuk kandang</p>
-                <div id="list-hewan-tas" style="max-height: 220px; overflow-y: auto; margin: 15px 0; display: flex; flex-direction: column; gap: 10px;"></div>
-                <button class="btn-cancel" onclick="tutupModalIsiKandang()" style="width:100%; padding: 8px;">Kembali</button>
-            </div>
-        `;
-        document.body.appendChild(modal);
-    }
-    let container = document.getElementById("list-hewan-tas");
-    container.innerHTML = "";
-    for (let id in GAME_DATABASE.ternak) {
-        let info = GAME_DATABASE.ternak[id];
-        container.innerHTML += `
-            <div style="display: flex; justify-content: space-between; align-items: center; background: #121824; padding: 10px; border-radius: 8px;">
-                <span>${info.icon} ${info.nama}</span>
-                <button onclick="tempatkanHewanLangsung('${id}')" style="background: #059669; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer;">Tempatkan</button>
-            </div>
-        `;
-    }
-    modal.style.display = "flex";
-}
-
-function tutupModalIsiKandang() { document.getElementById("modal-isi-kandang").style.display = "none"; }
-
-function tempatkanHewanLangsung(idTernak) {
-    gameState.kandang[kandangTargetAktif] = { jenisHewan: idTernak, idTernak: null, targetMenitInGame: 0 };
-    tutupModalIsiKandang();
     renderKandang();
 }
 
@@ -640,7 +600,8 @@ function renderPasar() {
     for (let id in GAME_DATABASE.ternak) {
         let item = GAME_DATABASE.ternak[id];
         let f = getFluktuasiItem(id, item.hargaBeli);
-        html += `<div class="card"><div style="font-size:2.5rem;">${item.icon}</div><h3>${item.nama}</h3><p>Beli: <b>Rp. ${f.harga.toLocaleString('id-ID')}</b></p>${getInfoGrafikHarga(f.harga, item.hargaBeli)}<button onclick="bukaModalBeli('${id}', '${item.nama}', ${f.harga}, 'pasar')">Beli Hewan</button></div>`;
+        // Menggunakan fungsi khusus beliHewanLangsung ke kandang
+        html += `<div class="card"><div style="font-size:2.5rem;">${item.icon}</div><h3>${item.nama}</h3><p>Beli: <b>Rp. ${f.harga.toLocaleString('id-ID')}</b></p>${getInfoGrafikHarga(f.harga, item.hargaBeli)}<button onclick="bukaModalBeliHewan('${id}', '${item.nama}', ${f.harga})">Beli Hewan</button></div>`;
     }
 
     html += `<h3 style="color: #34d399; grid-column:1/-1; margin-top:20px;">🌾 Pakan Ternak</h3>`;
@@ -748,6 +709,76 @@ function renderWikipedia() {
     }
     html += `</table>`;
     container.innerHTML = html;
+}
+
+
+// --- MODAL KHUSUS PEMBELIAN HEWAN LANGSUNG KE KANDANG ---
+function bukaModalBeliHewan(id, nama, harga) {
+    transaksiAktif = { idItem: id, namaItem: nama, hargaSatuan: harga, tipe: 'hewan' };
+    let modal = document.getElementById("modal-beli-hewan");
+    if (!modal) {
+        modal = document.createElement("div");
+        modal.id = "modal-beli-hewan";
+        modal.className = "modal-overlay";
+        modal.innerHTML = `
+            <div class="modal-card neon-amber">
+                <h3 id="modal-hewan-title">Beli Hewan Ternak</h3>
+                <p id="modal-hewan-info" style="color: var(--text-muted);"></p>
+                <p style="font-size: 0.85rem; color: #fbbf24; margin-top: 5px;">⚠️ Hewan akan langsung dimasukkan ke Kandang Kosong.</p>
+                <p id="modal-hewan-total" style="font-weight:bold; color:#34d399; margin: 15px 0;"></p>
+                <div class="modal-actions">
+                    <button class="btn-cancel" onclick="tutupModalBeliHewan()">Kembali</button>
+                    <button class="btn-confirm" onclick="konfirmasiBeliHewan()">Beli & Masukkan Kandang</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+    document.getElementById("modal-hewan-title").innerText = `Beli ${nama}`;
+    document.getElementById("modal-hewan-info").innerText = `Harga: Rp. ${harga.toLocaleString('id-ID')} / ekor`;
+    document.getElementById("modal-hewan-total").innerText = `Total: Rp. ${harga.toLocaleString('id-ID')}`;
+    modal.style.display = "flex";
+}
+
+function tutupModalBeliHewan() { document.getElementById("modal-beli-hewan").style.display = "none"; }
+
+function konfirmasiBeliHewan() {
+    let idHewan = transaksiAktif.idItem;
+    let harga = transaksiAktif.hargaSatuan;
+
+    // Validasi Kandang Kosong
+    let kandangKosongDitemukan = null;
+    for (let i = 1; i <= gameState.jumlahKandangAktif; i++) {
+        let kData = gameState.kandang[i];
+        if (!kData || (kData.status === 'kosong')) {
+            kandangKosongDitemukan = i;
+            break;
+        }
+    }
+
+    if (!kandangKosongDitemukan) {
+        alert("⚠️ Gagal membeli! Semua kandang hewan ternak sudah penuh. Silakan buka kandang baru terlebih dahulu.");
+        return;
+    }
+
+    if (gameState.uang >= harga) {
+        gameState.uang -= harga;
+
+        // Masukkan langsung ke kandang kosong (status butuh pakan)
+        gameState.kandang[kandangKosongDitemukan] = {
+            jenisHewan: idHewan,
+            idTernak: null,
+            targetMenitInGame: 0
+        };
+
+        updateHeaderUI();
+        tutupModalBeliHewan();
+        renderPasar();
+        renderKandang();
+        tampilkanPopupNotifikasi("🎉 Berhasil Membeli!", `${transaksiAktif.namaItem} telah ditempatkan di Kandang #${kandangKosongDitemukan}.`, "neon-green");
+    } else {
+        alert("⚠️ Uang tidak cukup!");
+    }
 }
 
 
