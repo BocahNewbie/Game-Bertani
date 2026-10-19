@@ -642,7 +642,7 @@ function renderTukangKayu() {
             <h3>${itemKayu.nama}</h3>
             <p>Beli: <b>Rp. ${f.harga.toLocaleString('id-ID')}</b></p>
             ${getInfoGrafikHarga(f.harga, itemKayu.hargaBeli)}
-            <button onclick="bukaModalBeli('${itemKayu.id}', '${item.nama}', ${f.harga}, 'tukang_kayu')">Beli Kayu</button>
+            <button onclick="bukaModalBeli('${itemKayu.id}', '${itemKayu.nama}', ${f.harga}, 'tukang_kayu')">Beli Kayu</button>
         </div>
         <div class="card" style="border: 1px solid #60a5fa;">
             <div style="font-size:2.5rem;">🔪</div>
