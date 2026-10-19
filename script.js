@@ -656,8 +656,7 @@ function renderTukangKayu() {
             <div style="font-size:2.5rem;">🔪</div>
             <h3>Asah Pisau Potong</h3>
             <p>Biaya: <b>Rp. 12.000</b></p>
-            <p style="font-size:0.85rem; color:${masihPenuh ? '#34d399' : '#f87171'};">Status: <b>${masihPenuh ? 'Masih Tajam' : 'Perlu Diasah'} (${durability}/300)</b></p>
-            <button onclick="asahPisau()" style="background:${masihPenuh ? '#334155' : '#2563eb'}; ${masihPenuh ? 'cursor:not-allowed;' : ''}">${masihPenuh ? 'Pisau Masih Tajam' : 'Asah Pisau'}</button>
+            <button onclick="asahPisau()" style="background:${masihPenuh ? '#334155' : '#2563eb'}; margin-top: 10px; ${masihPenuh ? 'cursor:not-allowed;' : ''}">${masihPenuh ? 'Pisau Masih Tajam' : 'Asah Pisau'}</button>
         </div>
     `;
 }
