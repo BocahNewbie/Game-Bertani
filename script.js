@@ -686,7 +686,7 @@ function renderWikipedia() {
     const container = document.getElementById("content-wikipedia");
     if (!container) return;
 
-    let html = `<div class="neon-credit">Created By Bocah Nerbiw</div>`;
+    let html = `<div class="neon-credit">Created By Bocah Newbie</div>`;
     html += `<h2>📚 Panduan & Ensiklopedia Harga Game</h2><table style="width:100%; border-collapse:collapse; margin-top:15px; background:var(--bg-card); border-radius:8px; overflow:hidden;">`;
     html += `<tr style="background:#1e293b; text-align:left;"><th style="padding:10px;">Item</th><th style="padding:10px;">Harga Beli (Normal)</th><th style="padding:10px;">Harga Jual (Normal)</th><th style="padding:10px;">Estimasi Min / Max</th></tr>`;
 
