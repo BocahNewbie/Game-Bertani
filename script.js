@@ -636,6 +636,9 @@ function renderTukangKayu() {
     let itemKayu = GAME_DATABASE.material.kayu;
     let f = getFluktuasiItem('kayu', itemKayu.hargaBeli);
 
+    let durability = gameState.durasiPisau;
+    let masihPenuh = durability >= 300;
+
     container.innerHTML = `
         <div class="card">
             <div style="font-size:2.5rem;">${itemKayu.icon}</div>
@@ -648,8 +651,8 @@ function renderTukangKayu() {
             <div style="font-size:2.5rem;">🔪</div>
             <h3>Asah Pisau Potong</h3>
             <p>Biaya: <b>Rp. 12.000</b></p>
-            <p style="font-size:0.85rem; color:var(--text-muted);">Memulihkan durasi pisau menjadi 300x pakai</p>
-            <button onclick="asahPisau()" style="background:#2563eb;">Asah Pisau</button>
+            <p style="font-size:0.85rem; color:${masihPenuh ? '#34d399' : '#f87171'};">Status: <b>${masihPenuh ? 'Masih Tajam' : 'Perlu Diasah'} (${durability}/300)</b></p>
+            <button onclick="asahPisau()" style="background:${masihPenuh ? '#334155' : '#2563eb'}; ${masihPenuh ? 'cursor:not-allowed;' : ''}">${masihPenuh ? 'Pisau Masih Tajam' : 'Asah Pisau'}</button>
         </div>
     `;
 }
