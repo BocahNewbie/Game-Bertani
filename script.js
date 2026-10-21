@@ -1009,25 +1009,3 @@ window.onload = function() {
     muatGame();
     refreshTabAktif('tab-lahan');
 };
-
-// Memodifikasi fungsi render Tas agar setiap item memiliki tombol Jual
-const originalRenderTas = window.renderTas || function() {};
-window.renderTas = function() {
-    originalRenderTas();
-    const gridTas = document.getElementById('grid-tas');
-    if (!gridTas) return;
-    
-    // Pastikan card di tas memiliki tombol Jual jika belum ada
-    const cards = gridTas.querySelectorAll('.card, .inventory-card');
-    cards.forEach(card => {
-        if (!card.querySelector('.btn-jual-item') && card.dataset.itemKey) {
-            const btnJual = document.createElement('button');
-            btnJual.innerText = "💰 Jual";
-            btnJual.className = "btn-jual-item";
-            btnJual.onclick = function() {
-                bukaPopupJual(card.dataset.itemKey);
-            };
-            card.appendChild(btnJual);
-        }
-    });
-};
