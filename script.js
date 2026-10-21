@@ -141,8 +141,7 @@ function formatDurasiBersih(totalMenit) {
     return res;
 }
 
-
-// --- TAB LAHAN ---
+// --- TAB LAHAN (FIXED) ---
 function renderLahan() {
     const container = document.getElementById("grid-lahan");
     if (!container) return;
@@ -150,29 +149,16 @@ function renderLahan() {
     const totalMenitSekarang = getTotalMenitInGame(gameState.waktuHari, gameState.waktuJam, gameState.waktuMenit);
 
     for (let i = 1; i <= 20; i++) {
+        let dataLahan = gameState.lahan[i];
+
+        // 1. Jika lahan sudah dibuka resmi dan aktif
         if (i <= gameState.jumlahLahanAktif) {
-            let dataLahan = gameState.lahan[i];
             if (!dataLahan) {
                 container.innerHTML += `
                     <div class="card lahan-card">
                         <h3>Lahan #${i}</h3>
                         <p style="color: var(--text-muted);">🌿 Kosong</p>
                         <button onclick="bukaModalTanam(${i})">Tanam Bibit</button>
-                    </div>
-                `;
-            } else if (dataLahan.status === 'dibangun') {
-                let sisaKonstruksi = Math.max(0, dataLahan.targetMenitSelesai - totalMenitSekarang);
-                let teksKonstruksi = formatDurasiBersih(sisaKonstruksi);
-                let tombolProses = sisaKonstruksi === 0
-                    ? `<button onclick="selesaikanPembangunanLahan(${i})" style="background: #10b981; color:white;">Ambil Selesai</button>`
-                    : `<button disabled style="background: #334155;">Dikerjakan... (${teksKonstruksi})</button>`;
-
-                container.innerHTML += `
-                    <div class="card lahan-card" style="border: 1px solid #3b82f6;">
-                        <h3>Lahan #${i} ❌</h3>
-                        <p style="color: #60a5fa;">Sedang Dikerjakan</p>
-                        <p style="font-size: 0.85rem;">Sisa: <b>${teksKonstruksi}</b></p>
-                        ${tombolProses}
                     </div>
                 `;
             } else {
@@ -182,7 +168,7 @@ function renderLahan() {
                 let teksWaktu = formatDurasiBersih(sisaWaktu);
                 let tombolAksi = sisaWaktu === 0 
                     ? `<button onclick="panenHasil(${i})" style="background: #d97706; color:white;">Panen (${dataLahan.jumlah})</button>`
-                    : `<button disabled style="background: #334155;">Tumbuh... (${teksWaktu})</button>`;
+                    : `<button disabled style="background: #334155; cursor: not-allowed;">Tumbuh... (${teksWaktu})</button>`;
 
                 container.innerHTML += `
                     <div class="card lahan-card" style="border: 1px solid rgba(16, 185, 129, 0.4);">
@@ -195,22 +181,45 @@ function renderLahan() {
                     </div>
                 `;
             }
-        } else {
+        } 
+        // 2. Jika lahan sedang dalam tahap pembangunan (konstruksi)
+        else if (dataLahan && dataLahan.status === 'dibangun') {
+            let sisaKonstruksi = Math.max(0, dataLahan.targetMenitSelesai - totalMenitSekarang);
+            let teksKonstruksi = formatDurasiBersih(sisaKonstruksi);
+            let tombolProses = sisaKonstruksi === 0
+                ? `<button onclick="selesaikanPembangunanLahan(${i})" style="background: #10b981; color:white;">Ambil Selesai</button>`
+                : `<button disabled style="background: #334155; cursor: not-allowed; opacity: 0.7;">⏳ Sedang Dibuka... (${teksKonstruksi})</button>`;
+
+            container.innerHTML += `
+                <div class="card lahan-card" style="border: 1px solid #3b82f6;">
+                    <h3>Lahan #${i} 🏗️</h3>
+                    <p style="color: #60a5fa;">Masa Pembangunan</p>
+                    <p style="font-size: 0.85rem;">Sisa: <b>${teksKonstruksi}</b></p>
+                    ${tombolProses}
+                </div>
+            `;
+        } 
+        // 3. Jika lahan masih terkunci dan merupakan slot pembukaan berikutnya
+        else if (i === gameState.jumlahLahanAktif + 1) {
             let biaya = hitungBiayaUpgradeLahan(i);
             container.innerHTML += `
-                <div class="card lahan-card" style="opacity: 0.7; border: 1px dashed var(--border-color);">
+                <div class="card lahan-card" style="opacity: 0.9; border: 1px dashed var(--border-color);">
                     <h3>Lahan #${i} 🔒</h3>
                     <p style="font-size: 0.8rem; color: #fbbf24;">🪵 ${biaya.kayu} Kayu<br>💰 Rp. ${biaya.uang.toLocaleString('id-ID')}<br>⏱️ 2 Hari</p>
                     <button onclick="konfirmasiBukaLahan(${i})" style="background: #2563eb;">Buka Lahan</button>
                 </div>
             `;
-            // Contoh pengecekan pada tombol buka lahan baru di file script.js:
-if (lahan.status === 'dibangun') {
-    // Tombol otomatis terblok dan menampilkan progres waktu
-    tombolAksi = `<button disabled style="background: #334155; cursor: not-allowed; opacity: 0.7;">⏳ Sedang Dibuka...</button>`;
-} else {
-    tombolAksi = `<button onclick="konfirmasiBukaLahan(${i})">Buka Lahan</button>`;
-}
+        } 
+        // 4. Lahan terkunci jauh di depan
+        else {
+            let biaya = hitungBiayaUpgradeLahan(i);
+            container.innerHTML += `
+                <div class="card lahan-card" style="opacity: 0.5; border: 1px dashed var(--border-color);">
+                    <h3>Lahan #${i} 🔒</h3>
+                    <p style="font-size: 0.8rem; color: #888;">Urutan Lahan Belum Buka</p>
+                    <button disabled style="background: #334155; cursor: not-allowed;">Terkunci</button>
+                </div>
+            `;
         }
     }
 }
@@ -353,7 +362,6 @@ function panenHasil(nomorLahan) {
     renderTas();
 }
 
-
 // --- TAB KANDANG ---
 function renderKandang() {
     const container = document.getElementById("grid-kandang");
@@ -362,28 +370,13 @@ function renderKandang() {
     const totalMenitSekarang = getTotalMenitInGame(gameState.waktuHari, gameState.waktuJam, gameState.waktuMenit);
 
     for (let i = 1; i <= 35; i++) {
+        let dataKandang = gameState.kandang[i];
         if (i <= gameState.jumlahKandangAktif) {
-            let dataKandang = gameState.kandang[i];
             if (!dataKandang) {
                 container.innerHTML += `
                     <div class="card">
                         <h3>Kandang #${i}</h3>
                         <p style="color: var(--text-muted);">🏡 Kosong</p>
-                    </div>
-                `;
-            } else if (dataKandang.status === 'dibangun') {
-                let sisaKonstruksi = Math.max(0, dataKandang.targetMenitSelesai - totalMenitSekarang);
-                let teksKonstruksi = formatDurasiBersih(sisaKonstruksi);
-                let tombolProses = sisaKonstruksi === 0
-                    ? `<button onclick="selesaikanPembangunanKandang(${i})" style="background: #10b981; color:white;">Ambil Selesai</button>`
-                    : `<button disabled style="background: #334155;">Dikerjakan... (${teksKonstruksi})</button>`;
-
-                container.innerHTML += `
-                    <div class="card" style="border: 1px solid #3b82f6;">
-                        <h3>Kandang #${i} ❌</h3>
-                        <p style="color: #60a5fa;">Sedang Dikerjakan</p>
-                        <p style="font-size: 0.85rem;">Sisa: <b>${teksKonstruksi}</b></p>
-                        ${tombolProses}
                     </div>
                 `;
             } else if (!dataKandang.idTernak) {
@@ -405,7 +398,7 @@ function renderKandang() {
                 let teksWaktu = formatDurasiBersih(sisaWaktu);
                 let tombolAksi = sisaWaktu === 0 
                     ? `<button onclick="panenTernak(${i})" style="background: #d97706; color:white;">Panen Hasil</button>`
-                    : `<button disabled style="background: #334155;">Berproses... (${teksWaktu})</button>`;
+                    : `<button disabled style="background: #334155; cursor: not-allowed;">Berproses... (${teksWaktu})</button>`;
 
                 container.innerHTML += `
                     <div class="card" style="border: 1px solid #10b981;">
@@ -419,13 +412,37 @@ function renderKandang() {
                     </div>
                 `;
             }
-        } else {
+        } else if (dataKandang && dataKandang.status === 'dibangun') {
+            let sisaKonstruksi = Math.max(0, dataKandang.targetMenitSelesai - totalMenitSekarang);
+            let teksKonstruksi = formatDurasiBersih(sisaKonstruksi);
+            let tombolProses = sisaKonstruksi === 0
+                ? `<button onclick="selesaikanPembangunanKandang(${i})" style="background: #10b981; color:white;">Ambil Selesai</button>`
+                : `<button disabled style="background: #334155; cursor: not-allowed; opacity: 0.7;">⏳ Sedang Dibuka... (${teksKonstruksi})</button>`;
+
+            container.innerHTML += `
+                <div class="card" style="border: 1px solid #3b82f6;">
+                    <h3>Kandang #${i} 🏗️</h3>
+                    <p style="color: #60a5fa;">Masa Pembangunan</p>
+                    <p style="font-size: 0.85rem;">Sisa: <b>${teksKonstruksi}</b></p>
+                    ${tombolProses}
+                </div>
+            `;
+        } else if (i === gameState.jumlahKandangAktif + 1) {
             let biaya = hitungBiayaUpgradeKandang(i);
             container.innerHTML += `
-                <div class="card" style="opacity: 0.7; border: 1px dashed var(--border-color);">
+                <div class="card" style="opacity: 0.9; border: 1px dashed var(--border-color);">
                     <h3>Kandang #${i} 🔒</h3>
                     <p style="font-size: 0.8rem; color: #fbbf24;">🪵 ${biaya.kayu} Kayu<br>💰 Rp. ${biaya.uang.toLocaleString('id-ID')}<br>⏱️ 5 Hari</p>
                     <button onclick="konfirmasiBukaKandang(${i})" style="background: #2563eb;">Buka Kandang</button>
+                </div>
+            `;
+        } else {
+            let biaya = hitungBiayaUpgradeKandang(i);
+            container.innerHTML += `
+                <div class="card" style="opacity: 0.5; border: 1px dashed var(--border-color);">
+                    <h3>Kandang #${i} 🔒</h3>
+                    <p style="font-size: 0.8rem; color: #888;">Urutan Kandang Belum Buka</p>
+                    <button disabled style="background: #334155; cursor: not-allowed;">Terkunci</button>
                 </div>
             `;
         }
@@ -522,7 +539,6 @@ function simpanKeJagal(nomorKandang) {
     renderJagal();
 }
 
-
 // --- TAB JAGAL & DURABILITY PISAU ---
 function renderJagal() {
     const container = document.getElementById("grid-jagal");
@@ -584,7 +600,6 @@ function prosesJagal(index, jenis) {
 }
 
 function asahPisau() {
-    // Validasi: Jika durabilitas masih penuh (300 atau lebih), batalkan proses
     if (gameState.durasiPisau >= 300) {
         alert("⚠️ Pisau Anda masih tajam! Belum perlu diasah.");
         return;
@@ -612,7 +627,6 @@ function renderPasar() {
     for (let id in GAME_DATABASE.ternak) {
         let item = GAME_DATABASE.ternak[id];
         let f = getFluktuasiItem(id, item.hargaBeli);
-        // Menggunakan fungsi khusus beliHewanLangsung ke kandang
         html += `<div class="card"><div style="font-size:2.5rem;">${item.icon}</div><h3>${item.nama}</h3><p>Beli: <b>Rp. ${f.harga.toLocaleString('id-ID')}</b></p>${getInfoGrafikHarga(f.harga, item.hargaBeli)}<button onclick="bukaModalBeliHewan('${id}', '${item.nama}', ${f.harga})">Beli Hewan</button></div>`;
     }
 
@@ -725,7 +739,6 @@ function renderWikipedia() {
     container.innerHTML = html;
 }
 
-
 // --- MODAL KHUSUS PEMBELIAN HEWAN LANGSUNG KE KANDANG ---
 function bukaModalBeliHewan(id, nama, harga) {
     transaksiAktif = { idItem: id, namaItem: nama, hargaSatuan: harga, tipe: 'hewan' };
@@ -760,7 +773,6 @@ function konfirmasiBeliHewan() {
     let idHewan = transaksiAktif.idItem;
     let harga = transaksiAktif.hargaSatuan;
 
-    // Validasi Kandang Kosong
     let kandangKosongDitemukan = null;
     for (let i = 1; i <= gameState.jumlahKandangAktif; i++) {
         let kData = gameState.kandang[i];
@@ -778,7 +790,6 @@ function konfirmasiBeliHewan() {
     if (gameState.uang >= harga) {
         gameState.uang -= harga;
 
-        // Masukkan langsung ke kandang kosong (status butuh pakan)
         gameState.kandang[kandangKosongDitemukan] = {
             jenisHewan: idHewan,
             idTernak: null,
@@ -794,7 +805,6 @@ function konfirmasiBeliHewan() {
         alert("⚠️ Uang tidak cukup!");
     }
 }
-
 
 // --- MODAL PEMBELIAN & PENJUALAN MODERN INTERAKTIF ---
 function bukaModalBeli(id, nama, harga, tipe) {
