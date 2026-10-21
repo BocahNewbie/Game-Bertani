@@ -50,6 +50,7 @@
     border-color: rgba(59, 130, 246, 0.4);
 }
 
+/* Perhatikan bagian ini: TANPA SPASI (.tab-btn.active) */
 .konoha-nav .tab-btn.active {
     background: rgba(16, 185, 129, 0.2);
     color: #34d399;
