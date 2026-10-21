@@ -1,5 +1,5 @@
 /* ==========================================================
-   CYBER-KONOHA MODERN THEME (TOP TABS & CLEAN FLOATING MODAL)
+   CYBER-KONOHA MODERN THEME (TOP TABS & STATIC INLINE POPUP)
    ================================================---------- */
 :root {
     --bg-main: #0b0f19;
@@ -178,81 +178,65 @@ body {
 }
 
 /* ==========================================================
-   POPUP MODAL / VERIFIKASI (TATA LETAK RAPI DI TENGAH)
+   FORM / KOTAK VERIFIKASI (MUNCUL RAPI DI BAWAH / INLINE)
    ================================================---------- */
 div[id*="Beli"], div[id*="Jual"], .shop-modal, .popup-belanja, div[class*="modal"] {
-    position: fixed !important;
-    top: 50% !important;
-    left: 50% !important;
-    transform: translate(-50%, -50%) !important;
-    z-index: 2147483647 !important;
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    transform: none !important;
+    z-index: 10 !important;
     
     background: linear-gradient(145deg, #0f172a, #1e1b4b) !important;
     border: 2px solid var(--neon-purple) !important;
-    border-radius: 20px !important;
-    padding: 28px !important;
+    border-radius: 16px !important;
+    padding: 24px !important;
     color: var(--text-main) !important;
-    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9), 0 0 35px rgba(168, 85, 247, 0.5) !important;
-    width: 320px !important;
-    max-width: 90vw !important;
-    margin: 0 !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6) !important;
+    width: 100% !important;
+    max-width: 400px !important;
+    margin: 20px auto !important;
     
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
     text-align: center !important;
     gap: 12px !important;
-    
-    animation: popupPop 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-@keyframes popupPop {
-    from { opacity: 0; transform: translate(-50%, -45%) scale(0.95); }
-    to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-}
-
-/* Backdrop Gelap di Belakang Popup */
+/* Hapus backdrop hitam redup karena sekarang bentuknya kotak panel biasa di halaman */
 div[id*="Beli"]::before, div[id*="Jual"]::before, .shop-modal::before, .popup-belanja::before {
-    content: '';
-    position: fixed;
-    top: 0; left: 0; width: 100vw; height: 100vh;
-    background: rgba(7, 10, 18, 0.85);
-    backdrop-filter: blur(6px);
-    z-index: -1;
-    pointer-events: auto;
+    display: none !important;
 }
 
-/* Merapikan teks judul di dalam popup */
 div[id*="Beli"] h2, div[id*="Beli"] h3, 
 div[id*="Jual"] h2, div[id*="Jual"] h3 {
     color: #c084fc !important;
-    font-size: 1.15rem !important;
+    font-size: 1.1rem !important;
     border-bottom: 1px solid rgba(168, 85, 247, 0.3) !important;
     padding-bottom: 8px !important;
-    margin: 0 0 8px 0 !important;
+    margin: 0 0 6px 0 !important;
     width: 100%;
     text-align: center;
 }
 
-/* Merapikan input angka di tengah */
 div[id*="Beli"] input[type="number"], div[id*="Beli"] input[type="text"],
 div[id*="Jual"] input[type="number"], div[id*="Jual"] input[type="text"] {
     background: #090d16 !important;
     border: 1px solid var(--neon-purple) !important;
     color: #38bdf8 !important;
     border-radius: 10px !important;
-    padding: 10px 14px !important;
+    padding: 8px 12px !important;
     text-align: center !important;
-    font-size: 1.2rem !important;
+    font-size: 1.1rem !important;
     font-weight: bold !important;
     outline: none !important;
     box-shadow: inset 0 2px 6px rgba(0,0,0,0.6) !important;
-    width: 100px !important;
-    margin: 5px auto !important;
+    width: 90px !important;
+    margin: 4px auto !important;
     display: block !important;
 }
 
-/* Merapikan seluruh tombol di dalam popup agar proporsional */
 div[id*="Beli"] button, div[id*="Jual"] button {
     background: linear-gradient(135deg, #10b981, #059669) !important;
     color: white !important;
@@ -260,7 +244,7 @@ div[id*="Beli"] button, div[id*="Jual"] button {
     padding: 8px 16px !important;
     border-radius: 8px !important;
     font-weight: 700 !important;
-    font-size: 0.9rem !important;
+    font-size: 0.85rem !important;
     cursor: pointer !important;
     transition: all 0.2s ease !important;
     box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3) !important;
@@ -270,11 +254,10 @@ div[id*="Beli"] button, div[id*="Jual"] button {
 
 div[id*="Beli"] button:hover, div[id*="Jual"] button:hover {
     background: linear-gradient(135deg, #34d399, #10b981) !important;
-    box-shadow: 0 0 20px rgba(16, 185, 129, 0.6) !important;
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.5) !important;
     transform: translateY(-1px);
 }
 
-/* Tombol Kembali / Batal khusus di dalam Popup */
 div[id*="Beli"] button:nth-last-child(2), 
 div[id*="Jual"] button:nth-last-child(2) {
     background: #1e293b !important;
