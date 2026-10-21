@@ -1,9 +1,8 @@
 /* ==========================================================
-   SIMPLE & CLEAN DARK FARM THEME (NO FLOATING POPUP)
+   ULTRA-SIMPLE & CLEAN FARM THEME (TANPA KONTENER PEMISAH)
    ================================================---------- */
 :root {
     --bg-main: #121620;
-    --bg-card: #182235;
     --border-color: #2a344d;
     --primary-color: #3b82f6;
     --accent-green: #10b981;
@@ -20,33 +19,34 @@ body {
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 20px;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
-/* Header Game */
+/* Header Game Minimalis */
 .game-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: var(--bg-card);
-    padding: 12px 20px;
-    border-radius: 10px;
-    border: 1px solid var(--border-color);
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .player-info {
     font-weight: bold;
-    font-size: 1rem;
+    font-size: 1.1rem;
     color: var(--text-main);
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
 }
 
 .game-stats {
     display: flex;
-    gap: 15px;
-    font-size: 0.9rem;
+    gap: 20px;
+    font-size: 0.95rem;
     font-weight: 600;
 }
 
@@ -54,22 +54,21 @@ body {
     color: #34d399;
 }
 
-/* Navigasi Tab di Atas */
+/* Navigasi Tab (Tanpa Kotak Kontainer) */
 .game-tabs {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
-    background: var(--bg-card);
-    padding: 12px;
-    border-radius: 10px;
-    border: 1px solid var(--border-color);
+    padding: 0;
+    background: transparent;
+    border: none;
 }
 
 .tab-btn {
-    background: #121620;
+    background: #182235;
     border: 1px solid var(--border-color);
     color: var(--text-muted);
-    padding: 8px 14px;
+    padding: 8px 16px;
     border-radius: 6px;
     font-size: 0.85rem;
     font-weight: 600;
@@ -88,12 +87,11 @@ body {
     border-color: #10b981;
 }
 
-/* Area Konten Utama */
+/* Area Konten Utama (Tanpa Background Kotak / Kontainer) */
 .game-content {
-    background: var(--bg-card);
-    padding: 20px;
-    border-radius: 10px;
-    border: 1px solid var(--border-color);
+    background: transparent;
+    padding: 0;
+    border: none;
     min-height: 400px;
 }
 
@@ -111,17 +109,18 @@ body {
     font-size: 1.2rem;
     border-bottom: 1px solid var(--border-color);
     padding-bottom: 10px;
-    margin-bottom: 15px;
+    margin-bottom: 20px;
 }
 
 .grid-container, .shop-grid, .inventory-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 12px;
+    gap: 15px;
 }
 
+/* Kartu Item Bersih */
 .card, .lahan-card {
-    background: #121620;
+    background: #182235;
     border: 1px solid var(--border-color);
     border-radius: 8px;
     padding: 14px;
@@ -163,7 +162,7 @@ body {
 }
 
 /* ==========================================================
-   FORM / KOTAK VERIFIKASI (MUNCUL STABIL DI HALAMAN, TIDAK MELAYANG)
+   KOTAK VERIFIKASI (MUNCUL RAPI LANGSUNG DI HALAMAN, TANPA POPUP)
    ================================================---------- */
 div[id*="Beli"], div[id*="Jual"], .shop-modal, .popup-belanja, div[class*="modal"] {
     position: relative !important;
@@ -172,15 +171,14 @@ div[id*="Beli"], div[id*="Jual"], .shop-modal, .popup-belanja, div[class*="modal
     transform: none !important;
     z-index: 10 !important;
     
-    background: #121620 !important;
-    border: 2px solid var(--primary-color) !important;
-    border-radius: 10px !important;
-    padding: 18px !important;
+    background: #182235 !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 8px !important;
+    padding: 16px !important;
     color: var(--text-main) !important;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4) !important;
     width: 100% !important;
-    max-width: 320px !important;
-    margin: 15px auto !important;
+    max-width: 300px !important;
+    margin: 20px auto !important;
     
     display: flex !important;
     flex-direction: column !important;
@@ -189,7 +187,6 @@ div[id*="Beli"], div[id*="Jual"], .shop-modal, .popup-belanja, div[class*="modal
     gap: 10px !important;
 }
 
-/* Hilangkan backdrop hitam melayang */
 div[id*="Beli"]::before, div[id*="Jual"]::before, .shop-modal::before, .popup-belanja::before {
     display: none !important;
 }
@@ -197,7 +194,7 @@ div[id*="Beli"]::before, div[id*="Jual"]::before, .shop-modal::before, .popup-be
 div[id*="Beli"] h2, div[id*="Beli"] h3, 
 div[id*="Jual"] h2, div[id*="Jual"] h3 {
     color: #60a5fa !important;
-    font-size: 1rem !important;
+    font-size: 0.95rem !important;
     border-bottom: 1px solid var(--border-color) !important;
     padding-bottom: 6px !important;
     margin: 0 0 4px 0 !important;
@@ -206,7 +203,7 @@ div[id*="Jual"] h2, div[id*="Jual"] h3 {
 
 div[id*="Beli"] input[type="number"], div[id*="Beli"] input[type="text"],
 div[id*="Jual"] input[type="number"], div[id*="Jual"] input[type="text"] {
-    background: #182235 !important;
+    background: #121620 !important;
     border: 1px solid var(--border-color) !important;
     color: #38bdf8 !important;
     border-radius: 6px !important;
