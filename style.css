@@ -1,13 +1,60 @@
-/* Styling Menu Navigasi ala Desa Konoha (Dark Mode Compatible) */
+/* Reset & Pengaturan Dasar Game */
+body {
+    background-color: #121620;
+    color: #e2e8f0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 20px;
+}
+
+/* Layout Utama: Ubah jadi 2 Kolom (Sidebar Kiri & Konten Kanan) */
+.game-content, 
+body {
+    box-sizing: border-box;
+}
+
+/* Bungkus halaman utama agar menu dan konten bersisian */
+body {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Header Game di atas */
+.game-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #182235;
+    padding: 12px 20px;
+    border-radius: 12px;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+/* Kontainer utama di bawah header dibagi jadi Sidebar & Area Konten */
+.main-layout {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+@media (max-width: 768px) {
+    .main-layout {
+        flex-direction: column;
+    }
+}
+
+/* Styling Menu Navigasi di Pinggir (Sidebar ala Konoha) */
 .konoha-nav {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 15px;
     background: #182235;
-    padding: 12px;
+    padding: 15px;
     border-radius: 12px;
     border: 1px solid rgba(59, 130, 246, 0.3);
-    margin-bottom: 20px;
+    width: 240px;
+    flex-shrink: 0;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
 }
 
@@ -18,7 +65,7 @@
 }
 
 .group-title {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     font-weight: bold;
     color: #60a5fa;
     text-transform: uppercase;
@@ -29,17 +76,18 @@
 
 .group-buttons {
     display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
+    flex-direction: column; /* Tombol berbaris ke bawah di sidebar */
+    gap: 6px;
 }
 
 .konoha-nav .tab-btn {
     background: #121620;
     border: 1px solid #2a344d;
     color: #94a3b8;
-    padding: 6px 14px;
+    padding: 8px 12px;
     border-radius: 6px;
     font-size: 0.85rem;
+    text-align: left; /* Teks rata kiri ala menu game */
     cursor: pointer;
     transition: all 0.2s ease;
 }
@@ -50,11 +98,28 @@
     border-color: rgba(59, 130, 246, 0.4);
 }
 
-/* Perhatikan bagian ini: TANPA SPASI (.tab-btn.active) */
+/* TANPA SPASI: Memastikan kelas active berfungsi sempurna */
 .konoha-nav .tab-btn.active {
     background: rgba(16, 185, 129, 0.2);
     color: #34d399;
     border-color: rgba(16, 185, 129, 0.4);
     font-weight: bold;
     box-shadow: 0 0 10px rgba(16, 185, 129, 0.2);
+}
+
+/* Area Konten Game di sebelah kanan */
+.game-content {
+    flex-grow: 1;
+    background: #182235;
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
 }
