@@ -20,94 +20,104 @@
         </div>
     </header>
 
-    <!-- Menu Navigasi Tab ala Desa Konoha -->
-    <nav class="game-tabs konoha-nav">
-        <!-- Kelompok 1: Kehidupan Desa -->
-        <div class="nav-group">
-            <span class="group-title">🏡 Kehidupan Desa</span>
-            <div class="group-buttons">
-                <button class="tab-btn active" onclick="gantiTab(event, 'tab-lahan')">🌱 Lahan</button>
-                <button class="tab-btn" onclick="gantiTab(event, 'tab-kandang')">🐮 Kandang</button>
-                <button class="tab-btn" onclick="gantiTab(event, 'tab-supermarket')">🛒 Supermarket</button>
-                <button class="tab-btn" onclick="gantiTab(event, 'tab-wikipedia')">📚 Wikipedia</button>
+    <!-- Tombol Toggle untuk menyembunyikan/menampilkan Sidebar -->
+    <div>
+        <button id="btn-toggle-sidebar" onclick="toggleSidebar()" style="background: #182235; color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">
+            📂 Sembunyikan Menu
+        </button>
+    </div>
+
+    <!-- Pembungkus Utama (Sidebar Kiri & Konten Kanan) -->
+    <div class="main-layout">
+        <!-- Menu Navigasi Sidebar ala Desa Konoha -->
+        <nav class="game-tabs konoha-nav" id="sidebar-menu">
+            <!-- Kelompok 1: Kehidupan Desa -->
+            <div class="nav-group">
+                <span class="group-title">🏡 Kehidupan Desa</span>
+                <div class="group-buttons">
+                    <button class="tab-btn active" onclick="gantiTab(event, 'tab-lahan')">🌱 Lahan</button>
+                    <button class="tab-btn" onclick="gantiTab(event, 'tab-kandang')">🐮 Kandang</button>
+                    <button class="tab-btn" onclick="gantiTab(event, 'tab-supermarket')">🛒 Supermarket</button>
+                    <button class="tab-btn" onclick="gantiTab(event, 'tab-wikipedia')">📚 Wikipedia</button>
+                </div>
             </div>
-        </div>
 
-        <!-- Kelompok 2: Kreasi & Produksi -->
-        <div class="nav-group">
-            <span class="group-title">🛠️ Kreasi & Dapur</span>
-            <div class="group-buttons">
-                <button class="tab-btn" onclick="gantiTab(event, 'tab-jagal')">🔪 Jagal</button>
-                <button class="tab-btn" onclick="gantiTab(event, 'tab-tukang-kayu')">🪵 Tukang Kayu</button>
+            <!-- Kelompok 2: Kreasi & Produksi -->
+            <div class="nav-group">
+                <span class="group-title">🛠️ Kreasi & Dapur</span>
+                <div class="group-buttons">
+                    <button class="tab-btn" onclick="gantiTab(event, 'tab-jagal')">🔪 Jagal</button>
+                    <button class="tab-btn" onclick="gantiTab(event, 'tab-tukang-kayu')">🪵 Tukang Kayu</button>
+                </div>
             </div>
-        </div>
 
-        <!-- Kelompok 3: Ekonomi & Lainnya -->
-        <div class="nav-group">
-            <span class="group-title">🤝 Warga & Ekonomi</span>
-            <div class="group-buttons">
-                <button class="tab-btn" onclick="gantiTab(event, 'tab-pasar')">🏬 Pasar</button>
-                <button class="tab-btn" onclick="gantiTab(event, 'tab-pengepul')">💰 Pengepul</button>
-                <button class="tab-btn" onclick="gantiTab(event, 'tab-tas')">🎒 Tas</button>
+            <!-- Kelompok 3: Ekonomi & Lainnya -->
+            <div class="nav-group">
+                <span class="group-title">🤝 Warga & Ekonomi</span>
+                <div class="group-buttons">
+                    <button class="tab-btn" onclick="gantiTab(event, 'tab-pasar')">🏬 Pasar</button>
+                    <button class="tab-btn" onclick="gantiTab(event, 'tab-pengepul')">💰 Pengepul</button>
+                    <button class="tab-btn" onclick="gantiTab(event, 'tab-tas')">🎒 Tas</button>
+                </div>
             </div>
-        </div>
-    </nav>
+        </nav>
 
-    <!-- Konten Utama Game -->
-    <main class="game-content">
-        <!-- Tab Lahan -->
-        <section id="tab-lahan" class="tab-content active">
-            <h2>Kebun & Lahan Tanam</h2>
-            <div id="grid-lahan" class="grid-container"></div>
-        </section>
+        <!-- Konten Utama Game -->
+        <main class="game-content">
+            <!-- Tab Lahan -->
+            <section id="tab-lahan" class="tab-content active">
+                <h2>Kebun & Lahan Tanam</h2>
+                <div id="grid-lahan" class="grid-container"></div>
+            </section>
 
-        <!-- Tab Kandang -->
-        <section id="tab-kandang" class="tab-content">
-            <h2>Kandang Hewan Ternak</h2>
-            <div id="grid-kandang" class="grid-container"></div>
-        </section>
+            <!-- Tab Kandang -->
+            <section id="tab-kandang" class="tab-content">
+                <h2>Kandang Hewan Ternak</h2>
+                <div id="grid-kandang" class="grid-container"></div>
+            </section>
 
-        <!-- Tab Supermarket (Bibit) -->
-        <section id="tab-supermarket" class="tab-content">
-            <h2>Supermarket (Bibit Tanaman)</h2>
-            <div id="list-supermarket" class="shop-grid"></div>
-        </section>
+            <!-- Tab Supermarket (Bibit) -->
+            <section id="tab-supermarket" class="tab-content">
+                <h2>Supermarket (Bibit Tanaman)</h2>
+                <div id="list-supermarket" class="shop-grid"></div>
+            </section>
 
-        <!-- Tab Pasar (Ternak, Pakan, Alat) -->
-        <section id="tab-pasar" class="tab-content">
-            <h2>Pasar Hewan & Pakan</h2>
-            <div id="list-pasar" class="shop-grid"></div>
-        </section>
+            <!-- Tab Pasar (Ternak, Pakan, Alat) -->
+            <section id="tab-pasar" class="tab-content">
+                <h2>Pasar Hewan & Pakan</h2>
+                <div id="list-pasar" class="shop-grid"></div>
+            </section>
 
-        <!-- Tab Jagal -->
-        <section id="tab-jagal" class="tab-content">
-            <h2>Fasilitas Pemotongan (Jagal)</h2>
-            <div id="grid-jagal" class="grid-container"></div>
-        </section>
+            <!-- Tab Jagal -->
+            <section id="tab-jagal" class="tab-content">
+                <h2>Fasilitas Pemotongan (Jagal)</h2>
+                <div id="grid-jagal" class="grid-container"></div>
+            </section>
 
-        <!-- Tab Tukang Kayu -->
-        <section id="tab-tukang-kayu" class="tab-content">
-            <h2>Tukang Kayu & Perbaikan Alat</h2>
-            <div id="list-tukang-kayu" class="shop-grid"></div>
-        </section>
+            <!-- Tab Tukang Kayu -->
+            <section id="tab-tukang-kayu" class="tab-content">
+                <h2>Tukang Kayu & Perbaikan Alat</h2>
+                <div id="list-tukang-kayu" class="shop-grid"></div>
+            </section>
 
-        <!-- Tab Pengepul -->
-        <section id="tab-pengepul" class="tab-content">
-            <h2>Pengepul Hasil Panen & Ternak</h2>
-            <div id="list-pengepul" class="shop-grid"></div>
-        </section>
+            <!-- Tab Pengepul -->
+            <section id="tab-pengepul" class="tab-content">
+                <h2>Pengepul Hasil Panen & Ternak</h2>
+                <div id="list-pengepul" class="shop-grid"></div>
+            </section>
 
-        <!-- Tab Tas / Inventaris -->
-        <section id="tab-tas" class="tab-content">
-            <h2>Tas Inventaris</h2>
-            <div id="grid-tas" class="inventory-grid"></div>
-        </section>
+            <!-- Tab Tas / Inventaris -->
+            <section id="tab-tas" class="tab-content">
+                <h2>Tas Inventaris</h2>
+                <div id="grid-tas" class="inventory-grid"></div>
+            </section>
 
-        <!-- Tab Wikipedia -->
-        <section id="tab-wikipedia" class="tab-content">
-            <div id="content-wikipedia"></div>
-        </section>
-    </main>
+            <!-- Tab Wikipedia -->
+            <section id="tab-wikipedia" class="tab-content">
+                <div id="content-wikipedia"></div>
+            </section>
+        </main>
+    </div>
 
     <!-- Script Game -->
     <script src="database.js"></script>
