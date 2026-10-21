@@ -10,8 +10,8 @@ let gameState = {
     lahan: {},   
     kandang: {},
     durasiPisau: 300,
-    misiPapan: [],  // Menampung daftar misi di papan desa
-    misiAktif: []   // Menampung misi yang sudah diambil pemain
+    misiPapan: [],
+    misiAktif: []
 };
 
 let transaksiAktif = { idItem: "", namaItem: "", hargaSatuan: 0, stokMaks: 0, tipe: "" };
@@ -21,7 +21,7 @@ let kandangTargetAktif = null;
 let fluktuasiCache = {}; 
 let lastMenitFluktuasi = -1; 
 
-// --- VARIABLE UTAMA MANCING ---
+// Variable Mancing
 let intervalMancing = null;
 let posisiBar = 0;
 let arahBar = 1;
@@ -38,6 +38,7 @@ function getNamaMusim(hari) {
 }
 
 function getFluktuasiItem(idItem, baseHarga) {
+    if (!baseHarga) baseHarga = 100;
     let kunciWaktu = `${gameState.waktuHari}-${gameState.waktuJam}-${Math.floor(gameState.waktuMenit / 10)}`;
     if (!fluktuasiCache[idItem] || fluktuasiCache[idItem].waktu !== kunciWaktu) {
         let persen = Math.floor(Math.random() * 51) - 20; 
@@ -50,6 +51,7 @@ function getFluktuasiItem(idItem, baseHarga) {
 }
 
 function getInfoGrafikHarga(hargaAktif, hargaBase) {
+    if (!hargaBase) return `<span style="color: var(--text-muted);">➖ Stabil</span>`;
     if (hargaAktif > hargaBase) {
         return `<span style="color: #34d399;">📈 Naik (+${hargaAktif - hargaBase})</span>`;
     } else if (hargaAktif < hargaBase) {
@@ -65,8 +67,13 @@ function gantiTab(evt, tabId) {
     let buttons = document.querySelectorAll(".tab-btn");
     buttons.forEach(b => b.classList.remove("active"));
 
-    document.getElementById(tabId).classList.add("active");
-    evt.currentTarget.classList.add("active");
+    let targetTab = document.getElementById(tabId);
+    if (targetTab) {
+        targetTab.classList.add("active");
+    }
+    if (evt && evt.currentTarget) {
+        evt.currentTarget.classList.add("active");
+    }
     refreshTabAktif(tabId);
 }
 
@@ -105,6 +112,7 @@ function batalUbahNama() { resetHeaderNamaUI(); }
 
 function resetHeaderNamaUI() {
     let container = document.querySelector(".player-info");
+    if (!container) return;
     let tombolSaveHTML = `<button onclick="simpanGame()" title="Simpan Progres" style="background: transparent; border: none; cursor: pointer; font-size: 1.1rem; margin-left: 5px;">💾</button>`;
     container.innerHTML = `
         <span id="label-nama">${gameState.namaPemain}</span> 
@@ -115,23 +123,27 @@ function resetHeaderNamaUI() {
 
 function simpanGame() {
     localStorage.setItem("game_bertani_save_v2", JSON.stringify(gameState));
-    tampilkanPopupNotifikasi("💾 Progres Disimpan!", "Data permainan baru berhasil disimpan (Save V2).", "neon-green");
+    tampilkanPopupNotifikasi("💾 Progres Disimpan!", "Data permainan berhasil disimpan.", "neon-green");
 }
 
 function muatGame() {
     let savedData = localStorage.getItem("game_bertani_save_v2");
     if (savedData) {
-        gameState = JSON.parse(savedData);
-        if (gameState.durasiPisau === undefined) gameState.durasiPisau = 300;
-        if (!gameState.misiPapan) gameState.misiPapan = [];
-        if (!gameState.misiAktif) gameState.misiAktif = [];
-        updateHeaderUI();
-        refreshTabAktif('tab-lahan');
+        try {
+            gameState = JSON.parse(savedData);
+            if (gameState.durasiPisau === undefined) gameState.durasiPisau = 300;
+            if (!gameState.misiPapan) gameState.misiPapan = [];
+            if (!gameState.misiAktif) gameState.misiAktif = [];
+        } catch (e) {
+            console.error("Gagal parse save data:", e);
+        }
     }
+    updateHeaderUI();
 }
 
 function updateHeaderUI() {
-    document.getElementById("stat-uang").innerText = `💰 Rp. ${gameState.uang.toLocaleString('id-ID')}`;
+    let elUang = document.getElementById("stat-uang");
+    if (elUang) elUang.innerText = `💰 Rp. ${gameState.uang.toLocaleString('id-ID')}`;
     let jamFormatted = String(gameState.waktuJam).padStart(2, '0');
     let menitFormatted = String(gameState.waktuMenit).padStart(2, '0');
     let musimInfo = getNamaMusim(gameState.waktuHari);
@@ -144,7 +156,7 @@ function getTotalMenitInGame(hari, jam, menit) {
 }
 
 function formatDurasiBersih(totalMenit) {
-    if (totalMenit <= 0) return "Siap Panen / Waktu Habis! ✨";
+    if (totalMenit <= 0) return "Siap Panen / Selesai! ✨";
     let hari = Math.floor(totalMenit / 1440);
     let jam = Math.floor((totalMenit % 1440) / 60);
     let menit = totalMenit % 60;
@@ -175,8 +187,8 @@ function renderLahan() {
                     </div>
                 `;
             } else {
-                let bibitInfo = GAME_DATABASE.bibit[dataLahan.idBibit] || {};
-                let hasilInfo = GAME_DATABASE.hasilPanen[bibitInfo.hasilId] || { nama: "Tanaman", icon: "🌱" };
+                let bibitInfo = (GAME_DATABASE.bibit && GAME_DATABASE.bibit[dataLahan.idBibit]) || {};
+                let hasilInfo = (GAME_DATABASE.hasilPanen && GAME_DATABASE.hasilPanen[bibitInfo.hasilId]) || { nama: "Tanaman", icon: "🌱" };
                 let sisaWaktu = Math.max(0, dataLahan.targetMenitInGame - totalMenitSekarang);
                 let teksWaktu = formatDurasiBersih(sisaWaktu);
                 let tombolAksi = sisaWaktu === 0 
@@ -222,7 +234,6 @@ function renderLahan() {
             `;
         } 
         else {
-            let biaya = hitungBiayaUpgradeLahan(i);
             container.innerHTML += `
                 <div class="card lahan-card" style="opacity: 0.5; border: 1px dashed var(--border-color);">
                     <h3>Lahan #${i} 🔒</h3>
@@ -269,7 +280,10 @@ function konfirmasiBukaLahan(nomorLahan) {
     modal.style.display = "flex";
 }
 
-function tutupModalKonfirmasi() { document.getElementById("modal-konfirmasi-bangun").style.display = "none"; }
+function tutupModalKonfirmasi() { 
+    let modal = document.getElementById("modal-konfirmasi-bangun");
+    if (modal) modal.style.display = "none"; 
+}
 
 function eksekusiBukaBangunan() {
     tutupModalKonfirmasi();
@@ -343,14 +357,17 @@ function bukaModalTanam(nomorLahan) {
     modal.style.display = "flex";
 }
 
-function tutupModalTanam() { document.getElementById("modal-tanam").style.display = "none"; }
+function tutupModalTanam() { 
+    let modal = document.getElementById("modal-tanam");
+    if (modal) modal.style.display = "none"; 
+}
 
 function eksekusiTanamBibit(idBibit, stokTas) {
     let jumlahTanam = Math.min(stokTas, 35);
     gameState.tas[idBibit] -= jumlahTanam;
     if (gameState.tas[idBibit] <= 0) delete gameState.tas[idBibit];
 
-    let durasiMenit = Math.ceil(GAME_DATABASE.bibit[idBibit].durasi / 60);
+    let durasiMenit = Math.ceil((GAME_DATABASE.bibit[idBibit].durasi || 300) / 60);
     let totalMenitSekarang = getTotalMenitInGame(gameState.waktuHari, gameState.waktuJam, gameState.waktuMenit);
 
     gameState.lahan[lahanTargetAktif] = {
@@ -390,7 +407,7 @@ function renderKandang() {
                     </div>
                 `;
             } else if (!dataKandang.idTernak) {
-                let ternakInfo = GAME_DATABASE.ternak[dataKandang.jenisHewan];
+                let ternakInfo = (GAME_DATABASE.ternak && GAME_DATABASE.ternak[dataKandang.jenisHewan]) || { nama: "Hewan", icon: "🐮" };
                 container.innerHTML += `
                     <div class="card" style="border: 1px solid #f59e0b;">
                         <h3>Kandang #${i}</h3>
@@ -402,8 +419,8 @@ function renderKandang() {
                     </div>
                 `;
             } else {
-                let ternakInfo = GAME_DATABASE.ternak[dataKandang.idTernak];
-                let hasilInfo = GAME_DATABASE.ternakHasil[ternakInfo.hasilId];
+                let ternakInfo = (GAME_DATABASE.ternak && GAME_DATABASE.ternak[dataKandang.idTernak]) || { nama: "Hewan", icon: "🐮" };
+                let hasilInfo = (GAME_DATABASE.ternakHasil && GAME_DATABASE.ternakHasil[ternakInfo.hasilId]) || { nama: "Hasil" };
                 let sisaWaktu = Math.max(0, dataKandang.targetMenitInGame - totalMenitSekarang);
                 let teksWaktu = formatDurasiBersih(sisaWaktu);
                 let tombolAksi = sisaWaktu === 0 
@@ -447,7 +464,6 @@ function renderKandang() {
                 </div>
             `;
         } else {
-            let biaya = hitungBiayaUpgradeKandang(i);
             container.innerHTML += `
                 <div class="card" style="opacity: 0.5; border: 1px dashed var(--border-color);">
                     <h3>Kandang #${i} 🔒</h3>
@@ -577,7 +593,7 @@ function renderJagal() {
 
     let htmlHewan = "";
     daftarHewanJagal.forEach((jenis, idx) => {
-        let info = GAME_DATABASE.ternak[jenis];
+        let info = GAME_DATABASE.ternak[jenis] || { nama: "Hewan", icon: "🥩" };
         let bisaJagal = durability > 0;
         htmlHewan += `
             <div class="card">
@@ -600,8 +616,8 @@ function prosesJagal(index, jenis) {
     gameState.durasiPisau -= 1;
     gameState.penyimpananJagal.splice(index, 1);
     let mapHasil = { ayam: 'daging_ayam', sapi: 'daging_sapi', kambing: 'daging_kambing', babi: 'daging_babi_mentah' };
-    let idHasilJagal = mapHasil[jenis];
-    let hasilData = GAME_DATABASE.jagalHasil[idHasilJagal];
+    let idHasilJagal = mapHasil[jenis] || 'daging_ayam';
+    let hasilData = (GAME_DATABASE.jagalHasil && GAME_DATABASE.jagalHasil[idHasilJagal]) || { jumlah: 1, nama: "Daging" };
 
     gameState.tas[idHasilJagal] = (gameState.tas[idHasilJagal] || 0) + hasilData.jumlah;
     tampilkanPopupNotifikasi("🍖 Jagal Berhasil", `Mendapatkan ${hasilData.jumlah} ${hasilData.nama}! Durability pisau sisa ${gameState.durasiPisau}/300.`, "neon-green");
@@ -615,7 +631,7 @@ function asahPisau() {
         return;
     }
 
-    let biaya = GAME_DATABASE.alat.pisau.biayaAsah;
+    let biaya = (GAME_DATABASE.alat && GAME_DATABASE.alat.pisau && GAME_DATABASE.alat.pisau.biayaAsah) || 12000;
     if (gameState.uang >= biaya) {
         gameState.uang -= biaya;
         gameState.durasiPisau = 300;
@@ -623,11 +639,11 @@ function asahPisau() {
         tampilkanPopupNotifikasi("✨ Pisau Tajam Kembali!", "Durability pisau berhasil dipulihkan menjadi 300x pakai.", "neon-green");
         renderTukangKayu();
     } else {
-        alert("⚠️ Uang tidak cukup untuk mengasah pisau (Butuh Rp. 12.000)!");
+        alert("⚠️ Uang tidak cukup untuk mengasah pisau!");
     }
 }
 
-// --- TAB PASAR & TUKANG KAYU & WIKIPEDIA ---
+// --- TAB PASAR, SUPERMARKET, TUKANG KAYU, PENGEPUL, WIKIPEDIA ---
 function renderPasar() {
     const container = document.getElementById("list-pasar");
     if (!container) return;
@@ -636,20 +652,24 @@ function renderPasar() {
     let html = `<h3 style="color: #fbbf24; grid-column:1/-1;">🐮 Hewan Ternak</h3>`;
     for (let id in GAME_DATABASE.ternak) {
         let item = GAME_DATABASE.ternak[id];
-        let f = getFluktuasiItem(id, item.hargaBeli);
-        html += `<div class="card"><div style="font-size:2.5rem;">${item.icon}</div><h3>${item.nama}</h3><p>Beli: <b>Rp. ${f.harga.toLocaleString('id-ID')}</b></p>${getInfoGrafikHarga(f.harga, item.hargaBeli)}<button onclick="bukaModalBeliHewan('${id}', '${item.nama}', ${f.harga})">Beli Hewan</button></div>`;
+        let hBeli = item.hargaBeli || 1000;
+        let f = getFluktuasiItem(id, hBeli);
+        html += `<div class="card"><div style="font-size:2.5rem;">${item.icon}</div><h3>${item.nama}</h3><p>Beli: <b>Rp. ${f.harga.toLocaleString('id-ID')}</b></p>${getInfoGrafikHarga(f.harga, hBeli)}<button onclick="bukaModalBeliHewan('${id}', '${item.nama}', ${f.harga})">Beli Hewan</button></div>`;
     }
 
     html += `<h3 style="color: #34d399; grid-column:1/-1; margin-top:20px;">🌾 Pakan Ternak</h3>`;
     for (let id in GAME_DATABASE.pakan) {
         let item = GAME_DATABASE.pakan[id];
-        let f = getFluktuasiItem(id, item.hargaBeli);
-        html += `<div class="card"><div style="font-size:2.5rem;">${item.icon}</div><h3>${item.nama}</h3><p>Beli: <b>Rp. ${f.harga.toLocaleString('id-ID')}</b></p>${getInfoGrafikHarga(f.harga, item.hargaBeli)}<button onclick="bukaModalBeli('${id}', '${item.nama}', ${f.harga}, 'pasar')">Beli Pakan</button></div>`;
+        let hBeli = item.hargaBeli || 100;
+        let f = getFluktuasiItem(id, hBeli);
+        html += `<div class="card"><div style="font-size:2.5rem;">${item.icon}</div><h3>${item.nama}</h3><p>Beli: <b>Rp. ${f.harga.toLocaleString('id-ID')}</b></p>${getInfoGrafikHarga(f.harga, hBeli)}<button onclick="bukaModalBeli('${id}', '${item.nama}', ${f.harga}, 'pasar')">Beli Pakan</button></div>`;
     }
 
-    let pisau = GAME_DATABASE.alat.pisau;
-    html += `<h3 style="color: #60a5fa; grid-column:1/-1; margin-top:20px;">🔪 Peralatan</h3>`;
-    html += `<div class="card"><div style="font-size:2.5rem;">${pisau.icon}</div><h3>${pisau.nama}</h3><p>Beli: <b>Rp. ${pisau.hargaBeli.toLocaleString('id-ID')}</b></p><button onclick="bukaModalBeli('${pisau.id}', '${pisau.nama}', ${pisau.hargaBeli}, 'pasar')">Beli Pisau</button></div>`;
+    if (GAME_DATABASE.alat && GAME_DATABASE.alat.pisau) {
+        let pisau = GAME_DATABASE.alat.pisau;
+        html += `<h3 style="color: #60a5fa; grid-column:1/-1; margin-top:20px;">🔪 Peralatan</h3>`;
+        html += `<div class="card"><div style="font-size:2.5rem;">${pisau.icon}</div><h3>${pisau.nama}</h3><p>Beli: <b>Rp. ${pisau.hargaBeli.toLocaleString('id-ID')}</b></p><button onclick="bukaModalBeli('${pisau.id}', '${pisau.nama}', ${pisau.hargaBeli}, 'pasar')">Beli Pisau</button></div>`;
+    }
 
     container.innerHTML = html;
 }
@@ -660,8 +680,9 @@ function renderSupermarket() {
     container.innerHTML = "";
     for (let id in GAME_DATABASE.bibit) {
         let item = GAME_DATABASE.bibit[id];
-        let f = getFluktuasiItem(id, item.hargaBeli);
-        container.innerHTML += `<div class="card"><div style="font-size:2.5rem;">${item.icon}</div><h3>${item.nama}</h3><p>Beli: <b>Rp. ${f.harga.toLocaleString('id-ID')}</b></p>${getInfoGrafikHarga(f.harga, item.hargaBeli)}<button onclick="bukaModalBeli('${id}', '${item.nama}', ${f.harga}, 'supermarket')">Beli Bibit</button></div>`;
+        let hBeli = item.hargaBeli || 50;
+        let f = getFluktuasiItem(id, hBeli);
+        container.innerHTML += `<div class="card"><div style="font-size:2.5rem;">${item.icon}</div><h3>${item.nama}</h3><p>Beli: <b>Rp. ${f.harga.toLocaleString('id-ID')}</b></p>${getInfoGrafikHarga(f.harga, hBeli)}<button onclick="bukaModalBeli('${id}', '${item.nama}', ${f.harga}, 'supermarket')">Beli Bibit</button></div>`;
     }
 }
 
@@ -669,7 +690,7 @@ function renderTukangKayu() {
     const container = document.getElementById("list-tukang-kayu");
     if (!container) return;
     container.innerHTML = "";
-    let itemKayu = GAME_DATABASE.material.kayu;
+    let itemKayu = (GAME_DATABASE.material && GAME_DATABASE.material.kayu) || { id: "kayu", nama: "Kayu", icon: "🪵", hargaBeli: 100 };
     let f = getFluktuasiItem('kayu', itemKayu.hargaBeli);
 
     let durability = gameState.durasiPisau;
@@ -710,14 +731,15 @@ function renderPengepul() {
         if (stok > 0 && gabungan[id]) {
             ada = true;
             let item = gabungan[id];
-            let f = getFluktuasiItem(id, item.hargaJual);
+            let hJual = item.hargaJual || 50;
+            let f = getFluktuasiItem(id, hJual);
             html += `
                 <div class="card">
                     <div style="font-size: 2.5rem;">${item.icon}</div>
                     <h3>${item.nama}</h3>
                     <p>Stok: <b>${stok} Pcs</b></p>
                     <p>Jual: <b>Rp. ${f.harga}</b></p>
-                    ${getInfoGrafikHarga(f.harga, item.hargaJual)}
+                    ${getInfoGrafikHarga(f.harga, hJual)}
                     <button onclick="bukaModalJual('${id}', '${item.nama}', ${f.harga}, ${stok})" style="background: #2563eb;">Jual</button>
                 </div>
             `;
@@ -756,7 +778,7 @@ function renderWikipedia() {
         let estimasi = baseRef > 0 ? `Rp. ${minP.toLocaleString('id-ID')} - Rp. ${maxP.toLocaleString('id-ID')}` : '-';
 
         html += `<tr style="border-bottom:1px solid var(--border-color);">
-            <td style="padding:10px;">${item.icon} ${item.nama}</td>
+            <td style="padding:10px;">${item.icon || '📦'} ${item.nama}</td>
             <td style="padding:10px;">${beli}</td>
             <td style="padding:10px;">${jual}</td>
             <td style="padding:10px; color:#34d399;">${estimasi}</td>
@@ -780,8 +802,8 @@ function generasiMisiOtomatis() {
 
         let idRandom = keys[Math.floor(Math.random() * keys.length)];
         let itemData = gabungan[idRandom];
-        let jumlahTarget = Math.floor(Math.random() * 8) + 3; // 3-10 pcs
-        let durasiHari = Math.floor(Math.random() * 4) + 2;   // 2-5 hari
+        let jumlahTarget = Math.floor(Math.random() * 8) + 3;
+        let durasiHari = Math.floor(Math.random() * 4) + 2;
 
         let baseHarga = itemData.hargaJual || 100;
         let bonusWaktu = (6 - durasiHari) * 0.2;
@@ -795,7 +817,7 @@ function generasiMisiOtomatis() {
             npc: npc,
             idItem: idRandom,
             namaItem: itemData.nama,
-            iconItem: itemData.icon,
+            iconItem: itemData.icon || '📦',
             jumlahTarget: jumlahTarget,
             durasiHari: durasiHari,
             targetMenitSelesai: totalMenitSekarang + (durasiHari * 1440),
@@ -813,7 +835,6 @@ function renderPapanMisi() {
 
     const totalMenitSekarang = getTotalMenitInGame(gameState.waktuHari, gameState.waktuJam, gameState.waktuMenit);
 
-    // Hapus Misi Aktif Kadaluarsa
     gameState.misiAktif = gameState.misiAktif.filter(m => m.targetMenitSelesai > totalMenitSekarang);
     gameState.misiPapan = gameState.misiPapan.filter(m => m.targetMenitSelesai > totalMenitSekarang);
 
@@ -841,7 +862,7 @@ function renderPapanMisi() {
 
     html += `<h3 style="color: #fbbf24; grid-column:1/-1; margin-top:20px;">📜 Papan Pesanan Desa</h3>`;
     if (gameState.misiPapan.length === 0) {
-        html += `<p style="grid-column:1/-1; color: var(--text-muted);">Papan pesanan sedang kosong. Tunggu beberapa saat...</p>`;
+        html += `<p style="grid-column:1/-1; color: var(--text-muted);">Papan pesanan sedang kosong...</p>`;
     } else {
         gameState.misiPapan.forEach((misi) => {
             let sisaWaktu = Math.max(0, misi.targetMenitSelesai - totalMenitSekarang);
@@ -890,7 +911,7 @@ function serahkanMisi(indexMisi) {
     }
 }
 
-// --- TAB SUNGAI & MINI-GAME MEMANCING ---
+// --- TAB SUNGAI & MEMANCING ---
 function renderSungai() {
     const container = document.getElementById("area-sungai");
     if (!container) return;
@@ -943,7 +964,8 @@ function mulaiMancing() {
 
 function tarikPancingan() {
     clearInterval(intervalMancing);
-    document.getElementById("modal-mancing").style.display = "none";
+    let modal = document.getElementById("modal-mancing");
+    if (modal) modal.style.display = "none";
 
     if (posisiBar >= zonaHijau.min && posisiBar <= zonaHijau.max) {
         let keysIkan = Object.keys(GAME_DATABASE.ikan || {});
@@ -957,14 +979,14 @@ function tarikPancingan() {
 
         gameState.tas[idIkanDapat] = (gameState.tas[idIkanDapat] || 0) + 1;
         
-        tampilkanPopupNotifikasi("🐟 Strike!", `Selamat! Kamu menangkap 1x ${dataIkan.icon} ${dataIkan.nama}`, "neon-green");
+        tampilkanPopupNotifikasi("🐟 Strike!", `Selamat! Kamu menangkap 1x ${dataIkan.icon || '🐟'} ${dataIkan.nama}`, "neon-green");
         renderTas();
     } else {
         tampilkanPopupNotifikasi("❌ Lepas!", "Sayang sekali, ikannya keburu kabur! Coba lagi.", "neon-amber");
     }
 }
 
-// --- MODAL KHUSUS PEMBELIAN HEWAN LANGSUNG KE KANDANG ---
+// --- MODAL DENGAN HELPER PEMBELIAN & PENJUALAN ---
 function bukaModalBeliHewan(id, nama, harga) {
     transaksiAktif = { idItem: id, namaItem: nama, hargaSatuan: harga, tipe: 'hewan' };
     let modal = document.getElementById("modal-beli-hewan");
@@ -992,7 +1014,10 @@ function bukaModalBeliHewan(id, nama, harga) {
     modal.style.display = "flex";
 }
 
-function tutupModalBeliHewan() { document.getElementById("modal-beli-hewan").style.display = "none"; }
+function tutupModalBeliHewan() { 
+    let modal = document.getElementById("modal-beli-hewan");
+    if (modal) modal.style.display = "none"; 
+}
 
 function konfirmasiBeliHewan() {
     let idHewan = transaksiAktif.idItem;
@@ -1008,13 +1033,12 @@ function konfirmasiBeliHewan() {
     }
 
     if (!kandangKosongDitemukan) {
-        alert("⚠️ Gagal membeli! Semua kandang hewan ternak sudah penuh. Silakan buka kandang baru terlebih dahulu.");
+        alert("⚠️ Gagal membeli! Semua kandang hewan ternak sudah penuh.");
         return;
     }
 
     if (gameState.uang >= harga) {
         gameState.uang -= harga;
-
         gameState.kandang[kandangKosongDitemukan] = {
             jenisHewan: idHewan,
             idTernak: null,
@@ -1031,7 +1055,6 @@ function konfirmasiBeliHewan() {
     }
 }
 
-// --- MODAL PEMBELIAN & PENJUALAN MODERN INTERAKTIF ---
 function bukaModalBeli(id, nama, harga, tipe) {
     transaksiAktif = { idItem: id, namaItem: nama, hargaSatuan: harga, tipe: tipe };
     let modal = document.getElementById("modal-beli");
@@ -1065,7 +1088,10 @@ function bukaModalBeli(id, nama, harga, tipe) {
     modal.style.display = "flex";
 }
 
-function tutupModalBeli() { document.getElementById("modal-beli").style.display = "none"; }
+function tutupModalBeli() { 
+    let modal = document.getElementById("modal-beli");
+    if (modal) modal.style.display = "none"; 
+}
 
 function ubahQtyBeli(delta) {
     let input = document.getElementById("input-jumlah-beli");
@@ -1077,7 +1103,7 @@ function ubahQtyBeli(delta) {
 }
 
 function setBeliMax() {
-    let maxBisa = Math.floor(gameState.uang / transaksiAktif.hargaSatuan);
+    let maxBisa = Math.floor(gameState.uang / (transaksiAktif.hargaSatuan || 1));
     if (maxBisa < 1) maxBisa = 1;
     if (maxBisa > 99) maxBisa = 99;
     document.getElementById("input-jumlah-beli").value = maxBisa;
@@ -1138,7 +1164,10 @@ function bukaModalJual(id, nama, harga, stok) {
     modal.style.display = "flex";
 }
 
-function tutupModalJual() { document.getElementById("modal-jual").style.display = "none"; }
+function tutupModalJual() { 
+    let modal = document.getElementById("modal-jual");
+    if (modal) modal.style.display = "none"; 
+}
 
 function ubahQtyJual(delta) {
     let input = document.getElementById("input-jumlah-jual");
@@ -1199,7 +1228,10 @@ function tampilkanPopupNotifikasi(judul, pesan, neonClass) {
     modal.style.display = "flex";
 }
 
-function tutupPopupNotifikasi() { document.getElementById("modal-notifikasi-custom").style.display = "none"; }
+function tutupPopupNotifikasi() { 
+    let modal = document.getElementById("modal-notifikasi-custom");
+    if (modal) modal.style.display = "none"; 
+}
 
 function renderTas() {
     const container = document.getElementById("grid-tas");
@@ -1223,7 +1255,7 @@ function renderTas() {
         if (jml > 0) {
             ada = true;
             let item = all[id] || { nama: id, icon: "📦" };
-            container.innerHTML += `<div class="card"><div style="font-size:2.5rem;">${item.icon}</div><h3>${item.nama}</h3><p>Jumlah: <b>${jml} Pcs</b></p></div>`;
+            container.innerHTML += `<div class="card"><div style="font-size:2.5rem;">${item.icon || '📦'}</div><h3>${item.nama}</h3><p>Jumlah: <b>${jml} Pcs</b></p></div>`;
         }
     }
     if (!ada) container.innerHTML = `<p style="grid-column:1/-1; text-align:center; color:var(--text-muted);">Tas kosong.</p>`;
@@ -1239,30 +1271,23 @@ setInterval(() => {
         if (gameState.waktuJam >= 24) {
             gameState.waktuJam = 0;
             gameState.waktuHari += 1;
-            // Generate misi baru setiap hari pergantian waktu
             generasiMisiOtomatis();
         }
     }
     updateHeaderUI();
 
-    let blokMenit = Math.floor(gameState.waktuMenit / 10);
-    if (lastMenitFluktuasi !== blokMenit) {
-        lastMenitFluktuasi = blokMenit;
-        if (document.getElementById("tab-supermarket") && document.getElementById("tab-supermarket").classList.contains("active")) renderSupermarket();
-        if (document.getElementById("tab-pasar") && document.getElementById("tab-pasar").classList.contains("active")) renderPasar();
-        if (document.getElementById("tab-pengepul") && document.getElementById("tab-pengepul").classList.contains("active")) renderPengepul();
-        if (document.getElementById("tab-tukang-kayu") && document.getElementById("tab-tukang-kayu").classList.contains("active")) renderTukangKayu();
+    let tabAktif = document.querySelector(".tab-content.active");
+    if (tabAktif) {
+        let idTab = tabAktif.id;
+        if (idTab === 'tab-lahan') renderLahan();
+        if (idTab === 'tab-kandang') renderKandang();
+        if (idTab === 'tab-papan-misi') renderPapanMisi();
     }
-
-    if (document.getElementById("tab-lahan") && document.getElementById("tab-lahan").classList.contains("active")) renderLahan();
-    if (document.getElementById("tab-kandang") && document.getElementById("tab-kandang").classList.contains("active")) renderKandang();
-    if (document.getElementById("tab-papan-misi") && document.getElementById("tab-papan-misi").classList.contains("active")) renderPapanMisi();
 }, 1500);
 
 window.onload = function() {
     resetHeaderNamaUI();
     muatGame();
-    // Buat stok awal misi papan pengumuman jika masih kosong
     if (gameState.misiPapan.length === 0) {
         generasiMisiOtomatis();
         generasiMisiOtomatis();
