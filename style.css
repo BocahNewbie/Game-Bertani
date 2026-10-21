@@ -1,5 +1,5 @@
 /* ==========================================================
-   CYBER-KONOHA MODERN THEME (TOP TABS & FLOATING MODAL)
+   CYBER-KONOHA MODERN THEME (TOP TABS & TRUE FLOATING MODAL)
    ================================================---------- */
 :root {
     --bg-main: #0b0f19;
@@ -58,8 +58,8 @@ body {
     color: #34d399;
 }
 
-/* Navigasi Tab Horizontal di Atas (Menyatu) */
-.konoha-nav, .game-tabs {
+/* Navigasi Tab Horizontal di Atas */
+.game-tabs {
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
@@ -152,7 +152,7 @@ body {
     color: #e2e8f0;
 }
 
-.card button, .lahan-card button, .shop-grid button {
+.card button, .lahan-card button, .shop-grid button, .btn-jual-item {
     background: #2563eb;
     color: white;
     border: none;
@@ -166,14 +166,22 @@ body {
     margin-top: 6px;
 }
 
-.card button:hover, .lahan-card button:hover, .shop-grid button:hover {
+.card button:hover, .lahan-card button:hover, .shop-grid button:hover, .btn-jual-item:hover {
     background: #1d4ed8;
 }
 
+.btn-jual-item {
+    background: #059669 !important;
+}
+.btn-jual-item:hover {
+    background: #10b981 !important;
+}
+
+
 /* ==========================================================
-   POPUP MODAL / VERIFIKASI BELANJA (MELAYANG DI TENGAH)
+   POPUP MODAL / VERIFIKASI (MUTLAK MELAYANG DI TENGAH & BACKDROP)
    ================================================---------- */
-div[id*="Beli"], div[id*="Jual"], .shop-modal, .popup-belanja {
+div[id*="Beli"], div[id*="Jual"], .shop-modal, .popup-belanja, div[class*="modal"] {
     position: fixed !important;
     top: 50% !important;
     left: 50% !important;
@@ -198,8 +206,8 @@ div[id*="Beli"], div[id*="Jual"], .shop-modal, .popup-belanja {
     to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
 }
 
-/* Latar belakang redup (backdrop) di belakang popup */
-div[id*="Beli"]::before, div[id*="Jual"]::before {
+/* Backdrop Gelap di Belakang Popup */
+div[id*="Beli"]::before, div[id*="Jual"]::before, .shop-modal::before, .popup-belanja::before {
     content: '';
     position: fixed;
     top: 0; left: 0; width: 100vw; height: 100vh;
