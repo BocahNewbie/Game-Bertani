@@ -112,7 +112,7 @@ body {
     border-color: rgba(59, 130, 246, 0.4);
 }
 
-/* Perhatikan: TANPA SPASI agar warna aktif menyala hijau */
+/* PERBAIKAN UTAMA: TANPA SPASI (.tab-btn.active) */
 .konoha-nav .tab-btn.active {
     background: rgba(16, 185, 129, 0.2);
     color: #34d399;
@@ -206,21 +206,21 @@ body {
 }
 
 /* =========================================
-   5. MODAL / POPUP BELANJA MODERN
+   5. MODAL / POPUP TRANSAKSI & BELANJA MODERN
    ========================================= */
-/* Sesuaikan elemen kontainer popup belanja agar senada dengan panel game */
-div[id*="Beli"], .shop-modal, .popup-belanja {
-    background: #182235 !important;
+div[id*="Beli"], div[id*="Jual"], .shop-modal, .popup-belanja {
+    background: #121620 !important;
     border: 1px solid rgba(59, 130, 246, 0.4) !important;
     border-radius: 12px !important;
     padding: 20px !important;
     color: #e2e8f0 !important;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5) !important;
-    max-width: 320px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6) !important;
+    max-width: 340px;
+    margin-top: 15px;
 }
 
-/* Styling teks judul di dalam popup */
-div[id*="Beli"] h2, div[id*="Beli"] h3 {
+div[id*="Beli"] h2, div[id*="Beli"] h3, 
+div[id*="Jual"] h2, div[id*="Jual"] h3 {
     color: #60a5fa !important;
     font-size: 1.1rem !important;
     border-bottom: 1px dashed rgba(255, 255, 255, 0.1) !important;
@@ -228,39 +228,41 @@ div[id*="Beli"] h2, div[id*="Beli"] h3 {
     margin-bottom: 12px !important;
 }
 
-/* Kotak input angka dan tombol pengatur jumlah ([-] [1] [+]) */
-div[id*="Beli"] input[type="number"], 
-div[id*="Beli"] input[type="text"] {
-    background: #121620 !important;
+div[id*="Beli"] input[type="number"], div[id*="Beli"] input[type="text"],
+div[id*="Jual"] input[type="number"], div[id*="Jual"] input[type="text"] {
+    background: #182235 !important;
     border: 1px solid #2a344d !important;
     color: #e2e8f0 !important;
     border-radius: 6px !important;
-    padding: 6px 10px !important;
+    padding: 8px 12px !important;
     text-align: center;
+    font-weight: bold;
 }
 
-/* Tombol-tombol aksi di dalam popup ([-] [+] [MAX] [Beli] [Kembali]) */
-div[id*="Beli"] button {
+div[id*="Beli"] button, div[id*="Jual"] button {
     background: #2563eb !important;
     color: white !important;
     border: none !important;
-    padding: 6px 12px !important;
+    padding: 7px 14px !important;
     border-radius: 6px !important;
     font-weight: 600 !important;
     cursor: pointer !important;
     transition: background 0.2s ease !important;
 }
 
-div[id*="Beli"] button:hover {
+div[id*="Beli"] button:hover, div[id*="Jual"] button:hover {
     background: #1d4ed8 !important;
 }
 
-/* Tombol Kembali / Batal */
-div[id*="Beli"] button:nth-last-child(2) {
+/* Tombol Kembali / Batal di dalam Popup */
+div[id*="Beli"] button:nth-last-child(2), 
+div[id*="Jual"] button:nth-last-child(2) {
     background: #334155 !important;
     color: #94a3b8 !important;
 }
-div[id*="Beli"] button:nth-last-child(2):hover {
+
+div[id*="Beli"] button:nth-last-child(2):hover, 
+div[id*="Jual"] button:nth-last-child(2):hover {
     background: #475569 !important;
     color: #fff !important;
 }
