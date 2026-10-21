@@ -1,5 +1,5 @@
 /* ==========================================================
-   CYBER-KONOHA CLEAN THEME (TOP TABS & FLOATING MODAL)
+   CYBER-KONOHA MODERN THEME (TOP TABS & FLOATING MODAL)
    ================================================---------- */
 :root {
     --bg-main: #0b0f19;
@@ -58,11 +58,11 @@ body {
     color: #34d399;
 }
 
-/* Navigasi Tab Horizontal di Atas */
+/* Navigasi Tab Horizontal di Atas (Menyatu) */
 .konoha-nav, .game-tabs {
     display: flex;
     flex-wrap: wrap;
-    gap: 12px;
+    gap: 10px;
     background: var(--bg-card);
     padding: 16px;
     border-radius: 16px;
@@ -70,29 +70,13 @@ body {
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
 }
 
-.nav-group {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-}
-
-.group-title {
-    display: none; /* Sembunyikan judul kategori jika memenuhi baris atas */
-}
-
-.group-buttons {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-}
-
 .tab-btn {
     background: rgba(23, 34, 59, 0.6);
     border: 1px solid #1e293b;
     color: var(--text-muted);
-    padding: 8px 14px;
-    border-radius: 8px;
-    font-size: 0.85rem;
+    padding: 9px 16px;
+    border-radius: 10px;
+    font-size: 0.9rem;
     cursor: pointer;
     transition: all 0.2s ease;
 }
@@ -112,10 +96,6 @@ body {
 }
 
 /* Area Konten Utama */
-.main-layout {
-    display: block; /* Mengembalikan layout ke satu kolom utama */
-}
-
 .game-content {
     background: var(--bg-card);
     padding: 28px;
