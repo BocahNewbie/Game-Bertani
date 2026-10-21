@@ -1,16 +1,16 @@
 /* ==========================================================
-   CLASSIC COZY FARM THEME (HANGAT, KLASIK, & NYAMAN DI MATA)
+   COZY DARK FARM THEME (GELAP NYAMAN DI MATA & POPUP MELAYANG)
    ================================================---------- */
 :root {
-    --bg-main: #f4efe6;          /* Krem kertas / warna latar santai */
-    --bg-card: #ffffff;          /* Putih bersih untuk kartu */
-    --bg-panel: #e2d9c8;         /* Kayu muda / panel lembut */
-    --border-color: #d1c7b7;     /* Garis batas natural */
-    --primary-wood: #8c6239;     /* Kayu klasik */
-    --accent-green: #4f772d;     /* Hijau daun / tanaman */
-    --accent-green-hover: #3d5e22;
-    --text-main: #2b2b2b;        /* Teks gelap nyaman dibaca */
-    --text-muted: #6b7280;
+    --bg-main: #121824;          /* Latar belakang utama (Dark Blue lembut) */
+    --bg-card: #1e2638;          /* Warna kartu/konten */
+    --bg-panel: #171f2d;         /* Warna panel/header */
+    --border-color: #2f3b52;     /* Garis batas natural gelap */
+    --primary-wood: #a47551;     /* Kayu klasik hangat */
+    --accent-green: #3e7b43;     /* Hijau daun pas untuk mata */
+    --accent-green-hover: #316235;
+    --text-main: #e2e8f0;        /* Teks utama terang dan jelas */
+    --text-muted: #94a3b8;       /* Teks sekunder redup */
 }
 
 body {
@@ -25,16 +25,16 @@ body {
     gap: 20px;
 }
 
-/* Header Game (Gaya Papan Kayu Klasik) */
+/* Header Game */
 .game-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: #ffffff;
+    background: var(--bg-panel);
     padding: 16px 24px;
     border-radius: 12px;
     border: 2px solid var(--border-color);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
 }
 
 .player-info {
@@ -51,15 +51,15 @@ body {
     gap: 20px;
     font-size: 0.95rem;
     font-weight: 600;
-    color: #4b5563;
+    color: var(--text-muted);
 }
 
 #stat-uang {
-    color: #047857;
-    background: #ecfdf5;
+    color: #34d399;
+    background: rgba(16, 185, 129, 0.15);
     padding: 4px 10px;
     border-radius: 6px;
-    border: 1px solid #a7f3d0;
+    border: 1px solid rgba(16, 185, 129, 0.3);
 }
 
 /* Navigasi Tab Horizontal di Atas */
@@ -67,17 +67,17 @@ body {
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
-    background: #ffffff;
+    background: var(--bg-panel);
     padding: 16px;
     border-radius: 12px;
     border: 2px solid var(--border-color);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
 }
 
 .tab-btn {
-    background: #f9f8f6;
+    background: var(--bg-card);
     border: 1px solid var(--border-color);
-    color: #4b5563;
+    color: var(--text-muted);
     padding: 10px 16px;
     border-radius: 8px;
     font-size: 0.9rem;
@@ -87,8 +87,8 @@ body {
 }
 
 .tab-btn:hover {
-    background: #f3f0e6;
-    color: var(--primary-wood);
+    background: #253047;
+    color: var(--text-main);
     border-color: var(--primary-wood);
 }
 
@@ -96,17 +96,17 @@ body {
     background: var(--accent-green);
     color: white;
     border-color: var(--accent-green);
-    box-shadow: 0 2px 8px rgba(79, 119, 45, 0.3);
+    box-shadow: 0 2px 10px rgba(62, 123, 67, 0.4);
 }
 
 /* Area Konten Utama */
 .game-content {
-    background: #ffffff;
+    background: var(--bg-card);
     padding: 28px;
     border-radius: 12px;
     border: 2px solid var(--border-color);
     min-height: 450px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
 }
 
 .tab-content {
@@ -133,7 +133,7 @@ body {
 }
 
 .card, .lahan-card {
-    background: #faf8f5;
+    background: #171f2d;
     border: 1px solid var(--border-color);
     border-radius: 10px;
     padding: 16px;
@@ -147,7 +147,7 @@ body {
 
 .card:hover, .lahan-card:hover {
     border-color: var(--primary-wood);
-    box-shadow: 0 4px 12px rgba(140, 98, 57, 0.1);
+    box-shadow: 0 4px 15px rgba(164, 117, 81, 0.15);
     transform: translateY(-2px);
 }
 
@@ -172,7 +172,7 @@ body {
 }
 
 .card button:hover, .lahan-card button:hover, .shop-grid button:hover, .btn-jual-item:hover {
-    background: #6d4b29;
+    background: #b8865f;
 }
 
 .btn-jual-item {
@@ -183,34 +183,48 @@ body {
 }
 
 /* ==========================================================
-   FORM / KOTAK POPUP (MUNCUL STABIL DI HALAMAN, TIDAK MENUMPUK)
+   POPUP MODAL / VERIFIKASI (BENAR-BENAR MELAYANG DI TENGAH)
    ================================================---------- */
 div[id*="Beli"], div[id*="Jual"], .shop-modal, .popup-belanja, div[class*="modal"] {
-    position: relative !important;
-    top: auto !important;
-    left: auto !important;
-    transform: none !important;
-    z-index: 10 !important;
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    z-index: 2147483647 !important;
     
-    background: #faf8f5 !important;
+    background: #1a2333 !important;
     border: 2px solid var(--primary-wood) !important;
-    border-radius: 12px !important;
-    padding: 24px !important;
+    border-radius: 16px !important;
+    padding: 28px !important;
     color: var(--text-main) !important;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08) !important;
-    width: 100% !important;
-    max-width: 400px !important;
-    margin: 20px auto !important;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9), 0 0 35px rgba(164, 117, 81, 0.25) !important;
+    width: 320px !important;
+    max-width: 90vw !important;
+    margin: 0 !important;
     
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
     text-align: center !important;
     gap: 12px !important;
+    
+    animation: popupPop 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+@keyframes popupPop {
+    from { opacity: 0; transform: translate(-50%, -45%) scale(0.95); }
+    to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+
+/* Latar belakang redup (backdrop) di belakang popup */
 div[id*="Beli"]::before, div[id*="Jual"]::before, .shop-modal::before, .popup-belanja::before {
-    display: none !important;
+    content: '';
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(11, 15, 22, 0.8);
+    backdrop-filter: blur(5px);
+    z-index: -1;
+    pointer-events: auto;
 }
 
 div[id*="Beli"] h2, div[id*="Beli"] h3, 
@@ -226,9 +240,9 @@ div[id*="Jual"] h2, div[id*="Jual"] h3 {
 
 div[id*="Beli"] input[type="number"], div[id*="Beli"] input[type="text"],
 div[id*="Jual"] input[type="number"], div[id*="Jual"] input[type="text"] {
-    background: #ffffff !important;
+    background: #121824 !important;
     border: 1px solid var(--border-color) !important;
-    color: var(--text-main) !important;
+    color: #38bdf8 !important;
     border-radius: 8px !important;
     padding: 8px 12px !important;
     text-align: center !important;
@@ -252,23 +266,21 @@ div[id*="Beli"] button, div[id*="Jual"] button {
     transition: background 0.2s ease !important;
     width: 100% !important;
     margin-top: 4px !important;
-    box-shadow: none !important;
 }
 
 div[id*="Beli"] button:hover, div[id*="Jual"] button:hover {
     background: var(--accent-green-hover) !important;
-    transform: none !important;
 }
 
 div[id*="Beli"] button:nth-last-child(2), 
 div[id*="Jual"] button:nth-last-child(2) {
-    background: #e5e7eb !important;
-    color: #4b5563 !important;
-    border: 1px solid var(--border-color) !important;
+    background: #2f3b52 !important;
+    color: var(--text-muted) !important;
+    border: 1px solid #475569 !important;
 }
 
 div[id*="Beli"] button:nth-last-child(2):hover, 
 div[id*="Jual"] button:nth-last-child(2):hover {
-    background: #d1d5db !important;
-    color: #1f2937 !important;
+    background: #3d4f6d !important;
+    color: #ffffff !important;
 }
