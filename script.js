@@ -25,7 +25,7 @@ let lastMenitFluktuasi = -1;
 let intervalMancing = null;
 let posisiBar = 0;
 let arahBar = 1;
-let zonaHijau = { min: 40, max: 60 };
+let zonaHijau = { min: 20, max: 45 };
 
 const DAFTAR_NAMA_NPC = ["Pak RT", "Chef Jaka", "Ibu Ros", "Paman Sam", "Mbak Maya", "Pak Dokter"];
 
@@ -1247,7 +1247,7 @@ function renderTas() {
         ...GAME_DATABASE.jagalHasil, 
         ...GAME_DATABASE.alat, 
         ...GAME_DATABASE.material,
-        ...(GAME_DATABASE.ikan || {})
+        ...GAME_DATABASE.ikan,
     };
 
     for (let id in gameState.tas) {
