@@ -1,5 +1,5 @@
 /* ==========================================================
-   SIMPLE & CLEAN DARK FARM THEME
+   SIMPLE & CLEAN DARK FARM THEME (NO FLOATING POPUP)
    ================================================---------- */
 :root {
     --bg-main: #121620;
@@ -158,48 +158,46 @@ body {
 .btn-jual-item {
     background: var(--accent-green) !important;
 }
+.btn-jual-item:hover {
+    opacity: 0.9 !important;
+}
 
 /* ==========================================================
-   POPUP VERIFIKASI (MELAYANG DI TENGAH DENGAN RAPI)
+   FORM / KOTAK VERIFIKASI (MUNCUL STABIL DI HALAMAN, TIDAK MELAYANG)
    ================================================---------- */
 div[id*="Beli"], div[id*="Jual"], .shop-modal, .popup-belanja, div[class*="modal"] {
-    position: fixed !important;
-    top: 50% !important;
-    left: 50% !important;
-    transform: translate(-50%, -50%) !important;
-    z-index: 999999 !important;
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    transform: none !important;
+    z-index: 10 !important;
     
-    background: #182235 !important;
+    background: #121620 !important;
     border: 2px solid var(--primary-color) !important;
-    border-radius: 12px !important;
-    padding: 24px !important;
+    border-radius: 10px !important;
+    padding: 18px !important;
     color: var(--text-main) !important;
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8) !important;
-    width: 300px !important;
-    max-width: 90vw !important;
-    margin: 0 !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4) !important;
+    width: 100% !important;
+    max-width: 320px !important;
+    margin: 15px auto !important;
     
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
     text-align: center !important;
-    gap: 12px !important;
+    gap: 10px !important;
 }
 
-/* Latar belakang redup di belakang popup */
+/* Hilangkan backdrop hitam melayang */
 div[id*="Beli"]::before, div[id*="Jual"]::before, .shop-modal::before, .popup-belanja::before {
-    content: '';
-    position: fixed;
-    top: 0; left: 0; width: 100vw; height: 100vh;
-    background: rgba(0, 0, 0, 0.7);
-    z-index: -1;
-    pointer-events: auto;
+    display: none !important;
 }
 
 div[id*="Beli"] h2, div[id*="Beli"] h3, 
 div[id*="Jual"] h2, div[id*="Jual"] h3 {
     color: #60a5fa !important;
-    font-size: 1.1rem !important;
+    font-size: 1rem !important;
     border-bottom: 1px solid var(--border-color) !important;
     padding-bottom: 6px !important;
     margin: 0 0 4px 0 !important;
@@ -208,15 +206,15 @@ div[id*="Jual"] h2, div[id*="Jual"] h3 {
 
 div[id*="Beli"] input[type="number"], div[id*="Beli"] input[type="text"],
 div[id*="Jual"] input[type="number"], div[id*="Jual"] input[type="text"] {
-    background: #121620 !important;
+    background: #182235 !important;
     border: 1px solid var(--border-color) !important;
     color: #38bdf8 !important;
     border-radius: 6px !important;
-    padding: 8px !important;
+    padding: 6px 10px !important;
     text-align: center !important;
-    font-size: 1.1rem !important;
+    font-size: 1rem !important;
     font-weight: bold !important;
-    width: 80px !important;
+    width: 70px !important;
     outline: none !important;
 }
 
@@ -224,12 +222,13 @@ div[id*="Beli"] button, div[id*="Jual"] button {
     background: var(--accent-green) !important;
     color: white !important;
     border: none !important;
-    padding: 8px 14px !important;
+    padding: 6px 12px !important;
     border-radius: 6px !important;
     font-weight: 600 !important;
-    font-size: 0.85rem !important;
+    font-size: 0.8rem !important;
     cursor: pointer !important;
     width: 100% !important;
+    margin-top: 2px !important;
 }
 
 div[id*="Beli"] button:hover, div[id*="Jual"] button:hover {
