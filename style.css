@@ -53,7 +53,7 @@ body {
     border-color: rgba(59, 130, 246, 0.6);
 }
 
-/* Styling Menu Sidebar Konoha */
+/* Styling Menu Sidebar */
 .konoha-nav {
     display: flex;
     flex-direction: column;
@@ -112,7 +112,7 @@ body {
     border-color: rgba(59, 130, 246, 0.4);
 }
 
-/* Tombol Aktif (Hijau Chakra/Modern) */
+/* Perhatikan: TANPA SPASI agar warna aktif menyala hijau */
 .konoha-nav .tab-btn.active {
     background: rgba(16, 185, 129, 0.2);
     color: #34d399;
@@ -122,7 +122,7 @@ body {
 }
 
 /* =========================================
-   4. AREA KONTEN UTAMA & KARTU (MODERN STYLE)
+   4. AREA KONTEN UTAMA & KARTU
    ========================================= */
 .game-content {
     flex-grow: 1;
@@ -142,7 +142,6 @@ body {
     display: block;
 }
 
-/* Styling Judul di dalam Konten */
 .game-content h2 {
     margin-top: 0;
     color: #f8fafc;
@@ -152,14 +151,12 @@ body {
     margin-bottom: 20px;
 }
 
-/* Grid Container untuk Kartu (Lahan, Kandang, dll) */
 .grid-container, .shop-grid, .inventory-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: 15px;
 }
 
-/* Desain Kartu (Card) yang Modern & Estetik */
 .card, .lahan-card {
     background: #121620;
     border: 1px solid #2a344d;
@@ -184,7 +181,6 @@ body {
     color: #cbd5e1;
 }
 
-/* Desain Tombol di dalam Kartu Game */
 .card button, .lahan-card button, .shop-grid button {
     background: #2563eb;
     color: white;
