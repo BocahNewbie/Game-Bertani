@@ -62,7 +62,7 @@ body {
     border: 1px solid #a7f3d0;
 }
 
-/* Navigasi Tab Horizontal di Atas (Gaya Tombol Kayu/Daun) */
+/* Navigasi Tab Horizontal di Atas */
 .game-tabs {
     display: flex;
     flex-wrap: wrap;
@@ -183,7 +183,7 @@ body {
 }
 
 /* ==========================================================
-   FORM / KOTAK POPUP (MUNCUL STABIL DI BAWAH / INLINE RAPI)
+   FORM / KOTAK POPUP (MUNCUL STABIL DI HALAMAN, TIDAK MENUMPUK)
    ================================================---------- */
 div[id*="Beli"], div[id*="Jual"], .shop-modal, .popup-belanja, div[class*="modal"] {
     position: relative !important;
@@ -197,7 +197,7 @@ div[id*="Beli"], div[id*="Jual"], .shop-modal, .popup-belanja, div[class*="modal
     border-radius: 12px !important;
     padding: 24px !important;
     color: var(--text-main) !important;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1) !important;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08) !important;
     width: 100% !important;
     max-width: 400px !important;
     margin: 20px auto !important;
