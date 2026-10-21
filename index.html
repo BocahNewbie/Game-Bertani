@@ -22,48 +22,62 @@
 
     <!-- Tombol Toggle untuk menyembunyikan/menampilkan Sidebar -->
     <div>
-        <button id="btn-toggle-sidebar" onclick="toggleSidebar()" style="background: #182235; color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">
+        <button id="btn-toggle-sidebar" onclick="toggleSidebar()">
             📂 Sembunyikan Menu
         </button>
     </div>
 
     <!-- Pembungkus Utama (Sidebar Kiri & Konten Kanan) -->
-    <div class="main-layout">
-        <!-- Menu Navigasi Sidebar ala Desa Konoha -->
+    <main class="main-layout">
+        <!-- Menu Navigasi Sidebar Sesuai Kategori Baru -->
         <nav class="game-tabs konoha-nav" id="sidebar-menu">
-            <!-- Kelompok 1: Kehidupan Desa -->
+            <!-- Kategori 1: Kebun -->
             <div class="nav-group">
-                <span class="group-title">🏡 Kehidupan Desa</span>
+                <span class="group-title">🌱 Kebun</span>
                 <div class="group-buttons">
                     <button class="tab-btn active" onclick="gantiTab(event, 'tab-lahan')">🌱 Lahan</button>
                     <button class="tab-btn" onclick="gantiTab(event, 'tab-kandang')">🐮 Kandang</button>
-                    <button class="tab-btn" onclick="gantiTab(event, 'tab-supermarket')">🛒 Supermarket</button>
-                    <button class="tab-btn" onclick="gantiTab(event, 'tab-wikipedia')">📚 Wikipedia</button>
+                    <button class="tab-btn" onclick="gantiTab(event, 'tab-tas')">🎒 Tas</button>
                 </div>
             </div>
 
-            <!-- Kelompok 2: Kreasi & Produksi -->
+            <!-- Kategori 2: Bengkel -->
             <div class="nav-group">
-                <span class="group-title">🛠️ Kreasi & Dapur</span>
+                <span class="group-title">🔪 Bengkel</span>
                 <div class="group-buttons">
                     <button class="tab-btn" onclick="gantiTab(event, 'tab-jagal')">🔪 Jagal</button>
+                </div>
+            </div>
+
+            <!-- Kategori 3: Ekonomi -->
+            <div class="nav-group">
+                <span class="group-title">💰 Ekonomi</span>
+                <div class="group-buttons">
+                    <button class="tab-btn" onclick="gantiTab(event, 'tab-supermarket')">🛒 Supermarket</button>
+                    <button class="tab-btn" onclick="gantiTab(event, 'tab-pasar')">🏬 Pasar</button>
+                    <button class="tab-btn" onclick="gantiTab(event, 'tab-pengepul')">💰 Pengepul</button>
+                </div>
+            </div>
+
+            <!-- Kategori 4: Pembangunan -->
+            <div class="nav-group">
+                <span class="group-title">🪵 Pembangunan</span>
+                <div class="group-buttons">
                     <button class="tab-btn" onclick="gantiTab(event, 'tab-tukang-kayu')">🪵 Tukang Kayu</button>
                 </div>
             </div>
 
-            <!-- Kelompok 3: Ekonomi & Lainnya -->
+            <!-- Menu Tambahan (Wikipedia) -->
             <div class="nav-group">
-                <span class="group-title">🤝 Warga & Ekonomi</span>
+                <span class="group-title">📚 Informasi</span>
                 <div class="group-buttons">
-                    <button class="tab-btn" onclick="gantiTab(event, 'tab-pasar')">🏬 Pasar</button>
-                    <button class="tab-btn" onclick="gantiTab(event, 'tab-pengepul')">💰 Pengepul</button>
-                    <button class="tab-btn" onclick="gantiTab(event, 'tab-tas')">🎒 Tas</button>
+                    <button class="tab-btn" onclick="gantiTab(event, 'tab-wikipedia')">📚 Wikipedia</button>
                 </div>
             </div>
         </nav>
 
         <!-- Konten Utama Game -->
-        <main class="game-content">
+        <div class="game-content">
             <!-- Tab Lahan -->
             <section id="tab-lahan" class="tab-content active">
                 <h2>Kebun & Lahan Tanam</h2>
@@ -116,8 +130,8 @@
             <section id="tab-wikipedia" class="tab-content">
                 <div id="content-wikipedia"></div>
             </section>
-        </main>
-    </div>
+        </div>
+    </main>
 
     <!-- Script Game -->
     <script src="database.js"></script>
