@@ -87,8 +87,8 @@ function refreshTabAktif(tabId) {
     if (tabId === 'tab-pengepul') renderPengepul();
     if (tabId === 'tab-tukang-kayu') renderTukangKayu();
     if (tabId === 'tab-wikipedia') renderWikipedia();
-    if (tabId === 'tab-papan-misi') renderPapanMisi();
-    if (tabId === 'tab-sungai') renderSungai();
+    if (tabId === 'tab-memancing') renderMemancing();
+    if (tabId === 'tab-misi') renderPapanMisi();
 }
 
 function ubahNama() {
