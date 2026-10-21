@@ -1009,3 +1009,17 @@ window.onload = function() {
     muatGame();
     refreshTabAktif('tab-lahan');
 };
+
+// Fungsi untuk menyembunyikan atau menampilkan sidebar
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar-menu');
+    const btnToggle = document.getElementById('btn-toggle-sidebar');
+    
+    sidebar.classList.toggle('hidden');
+    
+    if (sidebar.classList.contains('hidden')) {
+        btnToggle.innerHTML = "📂 Tampilkan Menu";
+    } else {
+        btnToggle.innerHTML = "📂 Sembunyikan Menu";
+    }
+}
