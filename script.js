@@ -1,33 +1,25 @@
 let gameState = {
     namaPemain: "Pak Tani",
     uang: 1500,
-    waktuHari: 1, 
-    waktuJam: 8, 
+    waktuHari: 1,
+    waktuJam: 8,
     waktuMenit: 0,
-    jumlahLahanAktif: 1, 
+    jumlahLahanAktif: 1,
     jumlahKandangAktif: 1,
-    tas: {},    
-    lahan: {},   
+    tas: {},
+    lahan: {},
     kandang: {},
     durasiPisau: 300,
-    misiPapan: [],
-    misiAktif: []
+    misiAktif: {},
+    misiPapan: []
 };
 
 let transaksiAktif = { idItem: "", namaItem: "", hargaSatuan: 0, stokMaks: 0, tipe: "" };
 let targetKonfirmasi = { jenis: "", nomor: 0, biayaKayu: 0, biayaUang: 0 };
 let lahanTargetAktif = null;
 let kandangTargetAktif = null;
-let fluktuasiCache = {}; 
-let lastMenitFluktuasi = -1; 
-
-// Variable Mancing
-let intervalMancing = null;
-let posisiBar = 0;
-let arahBar = 1;
-let zonaHijau = { min: 40, max: 60 };
-
-const DAFTAR_NAMA_NPC = ["Pak RT", "Chef Jaka", "Ibu Ros", "Paman Sam", "Mbak Maya", "Pak Dokter"];
+let fluktuasiCache = {};
+let lastMenitFluktuasi = -1;
 
 function getNamaMusim(hari) {
     let siklusHari = ((hari - 1) % 128) + 1;
@@ -41,7 +33,7 @@ function getFluktuasiItem(idItem, baseHarga) {
     if (!baseHarga) baseHarga = 100;
     let kunciWaktu = `${gameState.waktuHari}-${gameState.waktuJam}-${Math.floor(gameState.waktuMenit / 10)}`;
     if (!fluktuasiCache[idItem] || fluktuasiCache[idItem].waktu !== kunciWaktu) {
-        let persen = Math.floor(Math.random() * 51) - 20; 
+        let persen = Math.floor(Math.random() * 51) - 20;
         fluktuasiCache[idItem] = { persen: persen, waktu: kunciWaktu };
     }
     let persenVal = fluktuasiCache[idItem].persen;
@@ -66,14 +58,11 @@ function gantiTab(evt, tabId) {
     contents.forEach(c => c.classList.remove("active"));
     let buttons = document.querySelectorAll(".tab-btn");
     buttons.forEach(b => b.classList.remove("active"));
-
-    let targetTab = document.getElementById(tabId);
-    if (targetTab) {
-        targetTab.classList.add("active");
-    }
-    if (evt && evt.currentTarget) {
-        evt.currentTarget.classList.add("active");
-    }
+    
+    let targetContent = document.getElementById(tabId);
+    if (targetContent) targetContent.classList.add("active");
+    if (evt && evt.currentTarget) evt.currentTarget.classList.add("active");
+    
     refreshTabAktif(tabId);
 }
 
@@ -87,12 +76,13 @@ function refreshTabAktif(tabId) {
     if (tabId === 'tab-pengepul') renderPengepul();
     if (tabId === 'tab-tukang-kayu') renderTukangKayu();
     if (tabId === 'tab-wikipedia') renderWikipedia();
-    if (tabId === 'tab-papan-misi') renderPapanMisi();
-    if (tabId === 'tab-sungai') renderSungai();
+    if (tabId === 'tab-memancing') renderMemancing();
+    if (tabId === 'tab-misi') renderPapanMisi();
 }
 
 function ubahNama() {
     let container = document.querySelector(".player-info");
+    if (!container) return;
     container.innerHTML = `
         <input type="text" id="input-nama-baru" value="${gameState.namaPemain}" style="background: #101622; border: 1px solid var(--border-color); color: var(--text-main); padding: 4px 8px; border-radius: 4px; font-size: 1rem;">
         <button onclick="acceptUbahNama()" style="background: #059669; color: white; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-weight: bold;">✔</button>
@@ -115,7 +105,7 @@ function resetHeaderNamaUI() {
     if (!container) return;
     let tombolSaveHTML = `<button onclick="simpanGame()" title="Simpan Progres" style="background: transparent; border: none; cursor: pointer; font-size: 1.1rem; margin-left: 5px;">💾</button>`;
     container.innerHTML = `
-        <span id="label-nama">${gameState.namaPemain}</span> 
+        <span id="label-nama">${gameState.namaPemain}</span>
         <button id="btn-edit-nama" onclick="ubahNama()" style="background: transparent; border: none; cursor: pointer; font-size: 1rem;">✏️</button>
         ${tombolSaveHTML}
     `;
@@ -129,16 +119,13 @@ function simpanGame() {
 function muatGame() {
     let savedData = localStorage.getItem("game_bertani_save_v2");
     if (savedData) {
-        try {
-            gameState = JSON.parse(savedData);
-            if (gameState.durasiPisau === undefined) gameState.durasiPisau = 300;
-            if (!gameState.misiPapan) gameState.misiPapan = [];
-            if (!gameState.misiAktif) gameState.misiAktif = [];
-        } catch (e) {
-            console.error("Gagal parse save data:", e);
-        }
+        gameState = JSON.parse(savedData);
+        if (gameState.durasiPisau === undefined) gameState.durasiPisau = 300;
+        if (!gameState.misiAktif) gameState.misiAktif = {};
+        if (!gameState.misiPapan) gameState.misiPapan = [];
+        updateHeaderUI();
+        refreshTabAktif('tab-lahan');
     }
-    updateHeaderUI();
 }
 
 function updateHeaderUI() {
@@ -156,7 +143,7 @@ function getTotalMenitInGame(hari, jam, menit) {
 }
 
 function formatDurasiBersih(totalMenit) {
-    if (totalMenit <= 0) return "Siap Panen / Selesai! ✨";
+    if (totalMenit <= 0) return "Siap Panen! ✨";
     let hari = Math.floor(totalMenit / 1440);
     let jam = Math.floor((totalMenit % 1440) / 60);
     let menit = totalMenit % 60;
@@ -167,17 +154,16 @@ function formatDurasiBersih(totalMenit) {
     return res;
 }
 
-// --- TAB LAHAN ---
+// --- TAB LAHAN --- 
 function renderLahan() {
     const container = document.getElementById("grid-lahan");
     if (!container) return;
     container.innerHTML = "";
     const totalMenitSekarang = getTotalMenitInGame(gameState.waktuHari, gameState.waktuJam, gameState.waktuMenit);
-
+    
     for (let i = 1; i <= 20; i++) {
-        let dataLahan = gameState.lahan[i];
-
         if (i <= gameState.jumlahLahanAktif) {
+            let dataLahan = gameState.lahan[i];
             if (!dataLahan) {
                 container.innerHTML += `
                     <div class="card lahan-card">
@@ -186,15 +172,30 @@ function renderLahan() {
                         <button onclick="bukaModalTanam(${i})">Tanam Bibit</button>
                     </div>
                 `;
+            } else if (dataLahan.status === 'dibangun') {
+                let sisaKonstruksi = Math.max(0, dataLahan.targetMenitSelesai - totalMenitSekarang);
+                let teksKonstruksi = formatDurasiBersih(sisaKonstruksi);
+                let tombolProses = sisaKonstruksi === 0 
+                    ? `<button onclick="selesaikanPembangunanLahan(${i})" style="background: #10b981; color:white;">Ambil Selesai</button>` 
+                    : `<button disabled style="background: #334155; cursor: not-allowed; opacity: 0.7;">⏳ Sedang Dibuka... (${teksKonstruksi})</button>`;
+                
+                container.innerHTML += `
+                    <div class="card lahan-card" style="border: 1px solid #3b82f6;">
+                        <h3>Lahan #${i} ⏳</h3>
+                        <p style="color: #60a5fa;">Sedang Dikerjakan</p>
+                        <p style="font-size: 0.85rem;">Sisa: <b>${teksKonstruksi}</b></p>
+                        ${tombolProses}
+                    </div>
+                `;
             } else {
-                let bibitInfo = (GAME_DATABASE.bibit && GAME_DATABASE.bibit[dataLahan.idBibit]) || {};
-                let hasilInfo = (GAME_DATABASE.hasilPanen && GAME_DATABASE.hasilPanen[bibitInfo.hasilId]) || { nama: "Tanaman", icon: "🌱" };
+                let bibitInfo = GAME_DATABASE.bibit[dataLahan.idBibit] || {};
+                let hasilInfo = GAME_DATABASE.hasilPanen[bibitInfo.hasilId] || { nama: "Tanaman", icon: "🌱" };
                 let sisaWaktu = Math.max(0, dataLahan.targetMenitInGame - totalMenitSekarang);
                 let teksWaktu = formatDurasiBersih(sisaWaktu);
                 let tombolAksi = sisaWaktu === 0 
-                    ? `<button onclick="panenHasil(${i})" style="background: #d97706; color:white;">Panen (${dataLahan.jumlah})</button>`
-                    : `<button disabled style="background: #334155; cursor: not-allowed;">Tumbuh... (${teksWaktu})</button>`;
-
+                    ? `<button onclick="panenHasil(${i})" style="background: #d97706; color:white;">Panen (${dataLahan.jumlah})</button>` 
+                    : `<button disabled style="background: #334155;">Tumbuh... (${teksWaktu})</button>`;
+                
                 container.innerHTML += `
                     <div class="card lahan-card" style="border: 1px solid rgba(16, 185, 129, 0.4);">
                         <h3>Lahan #${i}</h3>
@@ -206,39 +207,13 @@ function renderLahan() {
                     </div>
                 `;
             }
-        } 
-        else if (dataLahan && dataLahan.status === 'dibangun') {
-            let sisaKonstruksi = Math.max(0, dataLahan.targetMenitSelesai - totalMenitSekarang);
-            let teksKonstruksi = formatDurasiBersih(sisaKonstruksi);
-            let tombolProses = sisaKonstruksi === 0
-                ? `<button onclick="selesaikanPembangunanLahan(${i})" style="background: #10b981; color:white;">Ambil Selesai</button>`
-                : `<button disabled style="background: #334155; cursor: not-allowed; opacity: 0.7;">⏳ Sedang Dibuka... (${teksKonstruksi})</button>`;
-
-            container.innerHTML += `
-                <div class="card lahan-card" style="border: 1px solid #3b82f6;">
-                    <h3>Lahan #${i} 🏗️</h3>
-                    <p style="color: #60a5fa;">Masa Pembangunan</p>
-                    <p style="font-size: 0.85rem;">Sisa: <b>${teksKonstruksi}</b></p>
-                    ${tombolProses}
-                </div>
-            `;
-        } 
-        else if (i === gameState.jumlahLahanAktif + 1) {
+        } else {
             let biaya = hitungBiayaUpgradeLahan(i);
             container.innerHTML += `
-                <div class="card lahan-card" style="opacity: 0.9; border: 1px dashed var(--border-color);">
+                <div class="card lahan-card" style="opacity: 0.7; border: 1px dashed var(--border-color);">
                     <h3>Lahan #${i} 🔒</h3>
                     <p style="font-size: 0.8rem; color: #fbbf24;">🪵 ${biaya.kayu} Kayu<br>💰 Rp. ${biaya.uang.toLocaleString('id-ID')}<br>⏱️ 2 Hari</p>
                     <button onclick="konfirmasiBukaLahan(${i})" style="background: #2563eb;">Buka Lahan</button>
-                </div>
-            `;
-        } 
-        else {
-            container.innerHTML += `
-                <div class="card lahan-card" style="opacity: 0.5; border: 1px dashed var(--border-color);">
-                    <h3>Lahan #${i} 🔒</h3>
-                    <p style="font-size: 0.8rem; color: #888;">Urutan Lahan Belum Buka</p>
-                    <button disabled style="background: #334155; cursor: not-allowed;">Terkunci</button>
                 </div>
             `;
         }
@@ -258,7 +233,6 @@ function konfirmasiBukaLahan(nomorLahan) {
     if (nomorLahan !== gameState.jumlahLahanAktif + 1) return;
     let biaya = hitungBiayaUpgradeLahan(nomorLahan);
     targetKonfirmasi = { jenis: 'lahan', nomor: nomorLahan, biayaKayu: biaya.kayu, biayaUang: biaya.uang };
-
     let modal = document.getElementById("modal-konfirmasi-bangun");
     if (!modal) {
         modal = document.createElement("div");
@@ -280,42 +254,56 @@ function konfirmasiBukaLahan(nomorLahan) {
     modal.style.display = "flex";
 }
 
-function tutupModalKonfirmasi() { 
+function tutupModalKonfirmasi() {
     let modal = document.getElementById("modal-konfirmasi-bangun");
-    if (modal) modal.style.display = "none"; 
+    if (modal) modal.style.display = "none";
 }
 
 function eksekusiBukaBangunan() {
     tutupModalKonfirmasi();
     let { jenis, nomor, biayaKayu, biayaUang } = targetKonfirmasi;
     let stokKayu = gameState.tas['kayu'] || 0;
-
+    
     if (stokKayu >= biayaKayu && gameState.uang >= biayaUang) {
         gameState.tas['kayu'] -= biayaKayu;
         if (gameState.tas['kayu'] <= 0) delete gameState.tas['kayu'];
         gameState.uang -= biayaUang;
-
+        
         let totalMenitSekarang = getTotalMenitInGame(gameState.waktuHari, gameState.waktuJam, gameState.waktuMenit);
         let durasiHari = jenis === 'lahan' ? 2 : 5;
-
+        
         if (jenis === 'lahan') {
-            gameState.lahan[nomor] = { status: 'dibangun', targetMenitSelesai: totalMenitSekarang + (durasiHari * 1440) };
+            if (nomor > gameState.jumlahLahanAktif) {
+                gameState.jumlahLahanAktif = nomor;
+            }
+            gameState.lahan[nomor] = { 
+                status: 'dibangun', 
+                targetMenitSelesai: totalMenitSekarang + (durasiHari * 1440) 
+            };
             renderLahan();
         } else {
-            gameState.kandang[nomor] = { status: 'dibangun', targetMenitSelesai: totalMenitSekarang + (durasiHari * 1440) };
+            if (nomor > gameState.jumlahKandangAktif) {
+                gameState.jumlahKandangAktif = nomor;
+            }
+            gameState.kandang[nomor] = { 
+                status: 'dibangun', 
+                targetMenitSelesai: totalMenitSekarang + (durasiHari * 1440) 
+            };
             renderKandang();
         }
         updateHeaderUI();
         tampilkanPopupNotifikasi("🏗️ Konstruksi Dimulai!", `Pembangunan sedang dikerjakan (${durasiHari} Hari).`, "neon-blue");
-        renderTas();
+        if (typeof renderTas === 'function') renderTas();
     } else {
         alert("⚠️ Sumber daya tidak cukup!");
     }
 }
 
 function selesaikanPembangunanLahan(nomorLahan) {
-    gameState.jumlahLahanAktif = nomorLahan;
-    delete gameState.lahan[nomorLahan];
+    if (gameState.lahan[nomorLahan]) {
+        delete gameState.lahan[nomorLahan].status;
+        delete gameState.lahan[nomorLahan].targetMenitSelesai;
+    }
     tampilkanPopupNotifikasi("✨ Selesai!", `Lahan #${nomorLahan} siap digunakan.`, "neon-green");
     renderLahan();
 }
@@ -357,19 +345,17 @@ function bukaModalTanam(nomorLahan) {
     modal.style.display = "flex";
 }
 
-function tutupModalTanam() { 
+function tutupModalTanam() {
     let modal = document.getElementById("modal-tanam");
-    if (modal) modal.style.display = "none"; 
+    if (modal) modal.style.display = "none";
 }
 
 function eksekusiTanamBibit(idBibit, stokTas) {
     let jumlahTanam = Math.min(stokTas, 35);
     gameState.tas[idBibit] -= jumlahTanam;
     if (gameState.tas[idBibit] <= 0) delete gameState.tas[idBibit];
-
-    let durasiMenit = Math.ceil((GAME_DATABASE.bibit[idBibit].durasi || 300) / 60);
+    let durasiMenit = Math.ceil(GAME_DATABASE.bibit[idBibit].durasi / 60);
     let totalMenitSekarang = getTotalMenitInGame(gameState.waktuHari, gameState.waktuJam, gameState.waktuMenit);
-
     gameState.lahan[lahanTargetAktif] = {
         idBibit: idBibit,
         jumlah: jumlahTanam,
@@ -377,7 +363,7 @@ function eksekusiTanamBibit(idBibit, stokTas) {
     };
     tutupModalTanam();
     renderLahan();
-    renderTas();
+    if (typeof renderTas === 'function') renderTas();
 }
 
 function panenHasil(nomorLahan) {
@@ -386,19 +372,18 @@ function panenHasil(nomorLahan) {
     gameState.tas[idHasil] = (gameState.tas[idHasil] || 0) + dataLahan.jumlah;
     delete gameState.lahan[nomorLahan];
     renderLahan();
-    renderTas();
+    if (typeof renderTas === 'function') renderTas();
 }
 
-// --- TAB KANDANG ---
+// --- TAB KANDANG --- 
 function renderKandang() {
     const container = document.getElementById("grid-kandang");
     if (!container) return;
     container.innerHTML = "";
     const totalMenitSekarang = getTotalMenitInGame(gameState.waktuHari, gameState.waktuJam, gameState.waktuMenit);
-
     for (let i = 1; i <= 35; i++) {
-        let dataKandang = gameState.kandang[i];
         if (i <= gameState.jumlahKandangAktif) {
+            let dataKandang = gameState.kandang[i];
             if (!dataKandang) {
                 container.innerHTML += `
                     <div class="card">
@@ -406,891 +391,195 @@ function renderKandang() {
                         <p style="color: var(--text-muted);">🏡 Kosong</p>
                     </div>
                 `;
-            } else if (!dataKandang.idTernak) {
-                let ternakInfo = (GAME_DATABASE.ternak && GAME_DATABASE.ternak[dataKandang.jenisHewan]) || { nama: "Hewan", icon: "🐮" };
+            } else if (dataKandang.status === 'dibangun') {
+                let sisaKonstruksi = Math.max(0, dataKandang.targetMenitSelesai - totalMenitSekarang);
+                let teksKonstruksi = formatDurasiBersih(sisaKonstruksi);
+                let tombolProses = sisaKonstruksi === 0 
+                    ? `<button onclick="selesaikanPembangunanKandang(${i})" style="background: #10b981; color:white;">Ambil Selesai</button>` 
+                    : `<button disabled style="background: #334155;">Dikerjakan... (${teksKonstruksi})</button>`;
+                
                 container.innerHTML += `
-                    <div class="card" style="border: 1px solid #f59e0b;">
-                        <h3>Kandang #${i}</h3>
-                        <div style="font-size: 2.5rem;">${ternakInfo.icon}</div>
-                        <p><b>${ternakInfo.nama}</b></p>
-                        <p style="font-size: 0.85rem; color: #f87171;">Butuh Pakan!</p>
-                        <button onclick="beriPakanKandang(${i})" style="background: #d97706; color:white;">Beri Pakan</button>
-                        <button onclick="simpanKeJagal(${i})" style="background: #dc2626; color:white; font-size:0.8rem; padding:4px; margin-top:5px;">Simpan ke Jagal</button>
-                    </div>
-                `;
-            } else {
-                let ternakInfo = (GAME_DATABASE.ternak && GAME_DATABASE.ternak[dataKandang.idTernak]) || { nama: "Hewan", icon: "🐮" };
-                let hasilInfo = (GAME_DATABASE.ternakHasil && GAME_DATABASE.ternakHasil[ternakInfo.hasilId]) || { nama: "Hasil" };
-                let sisaWaktu = Math.max(0, dataKandang.targetMenitInGame - totalMenitSekarang);
-                let teksWaktu = formatDurasiBersih(sisaWaktu);
-                let tombolAksi = sisaWaktu === 0 
-                    ? `<button onclick="panenTernak(${i})" style="background: #d97706; color:white;">Panen Hasil</button>`
-                    : `<button disabled style="background: #334155; cursor: not-allowed;">Berproses... (${teksWaktu})</button>`;
-
-                container.innerHTML += `
-                    <div class="card" style="border: 1px solid #10b981;">
-                        <h3>Kandang #${i}</h3>
-                        <div style="font-size: 2.5rem;">${ternakInfo.icon}</div>
-                        <p><b>${ternakInfo.nama}</b></p>
-                        <p style="font-size: 0.85rem; color: #fbbf24;">Hasil: ${hasilInfo.nama}</p>
-                        <p style="font-size: 0.85rem; color: #34d399;">⏱️ ${teksWaktu}</p>
-                        ${tombolAksi}
-                        <button onclick="simpanKeJagal(${i})" style="background: #dc2626; color:white; font-size:0.8rem; padding:4px; margin-top:5px;">Simpan ke Jagal</button>
+                    <div class="card" style="border: 1px solid #3b82f6;">
+                        <h3>Kandang #${i} ⏳</h3>
+                        <p style="color: #60a5fa;">Sedang Dikerjakan</p>
+                        <p style="font-size: 0.85rem;">Sisa: <b>${teksKonstruksi}</b></p>
+                        ${tombolProses}
                     </div>
                 `;
             }
-        } else if (dataKandang && dataKandang.status === 'dibangun') {
-            let sisaKonstruksi = Math.max(0, dataKandang.targetMenitSelesai - totalMenitSekarang);
-            let teksKonstruksi = formatDurasiBersih(sisaKonstruksi);
-            let tombolProses = sisaKonstruksi === 0
-                ? `<button onclick="selesaikanPembangunanKandang(${i})" style="background: #10b981; color:white;">Ambil Selesai</button>`
-                : `<button disabled style="background: #334155; cursor: not-allowed; opacity: 0.7;">⏳ Sedang Dibuka... (${teksKonstruksi})</button>`;
-
-            container.innerHTML += `
-                <div class="card" style="border: 1px solid #3b82f6;">
-                    <h3>Kandang #${i} 🏗️</h3>
-                    <p style="color: #60a5fa;">Masa Pembangunan</p>
-                    <p style="font-size: 0.85rem;">Sisa: <b>${teksKonstruksi}</b></p>
-                    ${tombolProses}
-                </div>
-            `;
-        } else if (i === gameState.jumlahKandangAktif + 1) {
-            let biaya = hitungBiayaUpgradeKandang(i);
-            container.innerHTML += `
-                <div class="card" style="opacity: 0.9; border: 1px dashed var(--border-color);">
-                    <h3>Kandang #${i} 🔒</h3>
-                    <p style="font-size: 0.8rem; color: #fbbf24;">🪵 ${biaya.kayu} Kayu<br>💰 Rp. ${biaya.uang.toLocaleString('id-ID')}<br>⏱️ 5 Hari</p>
-                    <button onclick="konfirmasiBukaKandang(${i})" style="background: #2563eb;">Buka Kandang</button>
-                </div>
-            `;
-        } else {
-            container.innerHTML += `
-                <div class="card" style="opacity: 0.5; border: 1px dashed var(--border-color);">
-                    <h3>Kandang #${i} 🔒</h3>
-                    <p style="font-size: 0.8rem; color: #888;">Urutan Kandang Belum Buka</p>
-                    <button disabled style="background: #334155; cursor: not-allowed;">Terkunci</button>
-                </div>
-            `;
         }
     }
 }
 
-function hitungBiayaUpgradeKandang(targetKandang) {
-    let kayu = 100, uang = 2500;
-    for (let k = 3; k <= targetKandang; k++) {
-        kayu = Math.round(kayu * 2.37);
-        uang = Math.round(uang * 2.37);
-    }
-    return { kayu, uang };
-}
-
-function konfirmasiBukaKandang(nomorKandang) {
-    if (nomorKandang !== gameState.jumlahKandangAktif + 1) return;
-    let biaya = hitungBiayaUpgradeKandang(nomorKandang);
-    targetKonfirmasi = { jenis: 'kandang', nomor: nomorKandang, biayaKayu: biaya.kayu, biayaUang: biaya.uang };
-
-    let modal = document.getElementById("modal-konfirmasi-bangun");
-    if (!modal) {
-        modal = document.createElement("div");
-        modal.id = "modal-konfirmasi-bangun";
-        modal.className = "modal-overlay";
-        modal.innerHTML = `
-            <div class="modal-card neon-blue">
-                <h3>Konfirmasi Pembangunan</h3>
-                <p id="konf-teks" style="color: var(--text-muted); margin: 15px 0;"></p>
-                <div class="modal-actions">
-                    <button class="btn-cancel" onclick="tutupModalKonfirmasi()">Kembali</button>
-                    <button class="btn-confirm" onclick="eksekusiBukaBangunan()">Bangun</button>
-                </div>
-            </div>
-        `;
-        document.body.appendChild(modal);
-    }
-    document.getElementById("konf-teks").innerHTML = `Ingin membangun <b>Kandang #${nomorKandang}</b>?<br>Biaya: 🪵 ${biaya.kayu} Kayu & 💰 Rp. ${biaya.uang.toLocaleString('id-ID')}<br>⏱️ 5 Hari In-Game`;
-    modal.style.display = "flex";
-}
-
 function selesaikanPembangunanKandang(nomorKandang) {
-    gameState.jumlahKandangAktif = nomorKandang;
-    delete gameState.kandang[nomorKandang];
+    if (gameState.kandang[nomorKandang]) {
+        delete gameState.kandang[nomorKandang].status;
+        delete gameState.kandang[nomorKandang].targetMenitSelesai;
+    }
     tampilkanPopupNotifikasi("✨ Selesai!", `Kandang #${nomorKandang} siap digunakan.`, "neon-green");
     renderKandang();
 }
 
-function beriPakanKandang(nomorKandang) {
-    let dataKandang = gameState.kandang[nomorKandang];
-    let idHewan = dataKandang.jenisHewan;
-    let idPakan = "";
-    for (let p in GAME_DATABASE.pakan) {
-        if (GAME_DATABASE.pakan[p].targetTernak === idHewan) { idPakan = p; break; }
-    }
-
-    let stokPakan = gameState.tas[idPakan] || 0;
-    if (stokPakan > 0) {
-        gameState.tas[idPakan] -= 1;
-        if (gameState.tas[idPakan] <= 0) delete gameState.tas[idPakan];
-        dataKandang.idTernak = idHewan;
-
-        let hariIniMenit = getTotalMenitInGame(gameState.waktuHari, gameState.waktuJam, gameState.waktuMenit);
-        let sisaMenitHariIni = 1440 - ((gameState.waktuJam * 60) + gameState.waktuMenit);
-        let menitMenujuBesokJam9 = sisaMenitHariIni + 1440 + (9 * 60);
-
-        dataKandang.targetMenitInGame = hariIniMenit + menitMenujuBesokJam9;
-        tampilkanPopupNotifikasi("🌾 Diberi Pakan!", "Panen akan siap besok pukul 09.00 pagi.", "neon-green");
-        renderKandang();
-        renderTas();
-    } else {
-        alert("⚠️ Pakan tidak cukup! Beli pakan di Pasar.");
-    }
-}
-
-function panenTernak(nomorKandang) {
-    let dataKandang = gameState.kandang[nomorKandang];
-    let idHasil = GAME_DATABASE.ternak[dataKandang.idTernak].hasilId;
-    gameState.tas[idHasil] = (gameState.tas[idHasil] || 0) + 1;
-    dataKandang.idTernak = null;
-    dataKandang.targetMenitInGame = 0;
-    renderKandang();
-    renderTas();
-}
-
-function simpanKeJagal(nomorKandang) {
-    let dataKandang = gameState.kandang[nomorKandang];
-    let jenisHewan = dataKandang.jenisHewan;
-    if (!gameState.penyimpananJagal) gameState.penyimpananJagal = [];
-    gameState.penyimpananJagal.push(jenisHewan);
-    delete gameState.kandang[nomorKandang];
-    tampilkanPopupNotifikasi("🔪 Disimpan ke Jagal", "Hewan telah dikirim ke fasilitas jagal.", "neon-blue");
-    renderKandang();
-    renderJagal();
-}
-
-// --- TAB JAGAL & DURABILITY PISAU ---
-function renderJagal() {
-    const container = document.getElementById("grid-jagal");
+// --- TAB MEMANCING ---
+function renderMemancing() {
+    let container = document.getElementById("tab-memancing");
     if (!container) return;
-    container.innerHTML = "";
-
-    let punyaPisau = gameState.tas['pisau'] || 0;
-    let durability = gameState.durasiPisau;
-
-    let infoDurabilityHTML = `<div style="grid-column: 1/-1; background: var(--bg-card); padding: 15px; border-radius: 10px; margin-bottom: 15px; border:1px solid var(--border-color);">
-        <h3>🔪 Status Pisau Potong</h3>
-        <p>Durability: <b style="color: ${durability > 50 ? '#34d399' : '#f87171'}">${durability} / 300 x pakai</b></p>
-        ${durability <= 0 ? '<p style="color:#f87171; font-weight:bold;">Pisau tumpul! Asah di Tukang Kayu.</p>' : ''}
-    </div>`;
-
-    if (punyaPisau <= 0) {
-        container.innerHTML = infoDurabilityHTML + `<div style="grid-column: 1/-1; text-align: center; color: #f87171;"><h3>Membutuhkan Pisau Potong</h3><p>Beli Pisau terlebih dahulu di Pasar.</p></div>`;
-        return;
-    }
-
-    let daftarHewanJagal = gameState.penyimpananJagal || [];
-    if (daftarHewanJagal.length === 0) {
-        container.innerHTML = infoDurabilityHTML + `<p style="grid-column: 1/-1; text-align: center; color: var(--text-muted);">Belum ada hewan di tempat jagal.</p>`;
-        return;
-    }
-
-    let htmlHewan = "";
-    daftarHewanJagal.forEach((jenis, idx) => {
-        let info = GAME_DATABASE.ternak[jenis] || { nama: "Hewan", icon: "🥩" };
-        let bisaJagal = durability > 0;
-        htmlHewan += `
-            <div class="card">
-                <div style="font-size: 2.5rem;">${info.icon}</div>
-                <h3>${info.nama}</h3>
-                <p style="color: var(--text-muted);">Siap Dipotong</p>
-                <button onclick="prosesJagal(${idx}, '${jenis}')" style="background: #dc2626; color: white;" ${!bisaJagal ? 'disabled style="background:#334155; cursor:not-allowed;"' : ''}>${bisaJagal ? 'Jagal Hewan' : 'Pisau Tumpul'}</button>
-            </div>
-        `;
-    });
-    container.innerHTML = infoDurabilityHTML + htmlHewan;
-}
-
-function prosesJagal(index, jenis) {
-    if (gameState.durasiPisau <= 0) {
-        alert("⚠️ Pisau kamu sudah tumpul (durability 0)! Silakan asah di Tukang Kayu.");
-        return;
-    }
-
-    gameState.durasiPisau -= 1;
-    gameState.penyimpananJagal.splice(index, 1);
-    let mapHasil = { ayam: 'daging_ayam', sapi: 'daging_sapi', kambing: 'daging_kambing', babi: 'daging_babi_mentah' };
-    let idHasilJagal = mapHasil[jenis] || 'daging_ayam';
-    let hasilData = (GAME_DATABASE.jagalHasil && GAME_DATABASE.jagalHasil[idHasilJagal]) || { jumlah: 1, nama: "Daging" };
-
-    gameState.tas[idHasilJagal] = (gameState.tas[idHasilJagal] || 0) + hasilData.jumlah;
-    tampilkanPopupNotifikasi("🍖 Jagal Berhasil", `Mendapatkan ${hasilData.jumlah} ${hasilData.nama}! Durability pisau sisa ${gameState.durasiPisau}/300.`, "neon-green");
-    renderJagal();
-    renderTas();
-}
-
-function asahPisau() {
-    if (gameState.durasiPisau >= 300) {
-        alert("⚠️ Pisau Anda masih tajam! Belum perlu diasah.");
-        return;
-    }
-
-    let biaya = (GAME_DATABASE.alat && GAME_DATABASE.alat.pisau && GAME_DATABASE.alat.pisau.biayaAsah) || 12000;
-    if (gameState.uang >= biaya) {
-        gameState.uang -= biaya;
-        gameState.durasiPisau = 300;
-        updateHeaderUI();
-        tampilkanPopupNotifikasi("✨ Pisau Tajam Kembali!", "Durability pisau berhasil dipulihkan menjadi 300x pakai.", "neon-green");
-        renderTukangKayu();
-    } else {
-        alert("⚠️ Uang tidak cukup untuk mengasah pisau!");
-    }
-}
-
-// --- TAB PASAR, SUPERMARKET, TUKANG KAYU, PENGEPUL, WIKIPEDIA ---
-function renderPasar() {
-    const container = document.getElementById("list-pasar");
-    if (!container) return;
-    container.innerHTML = "";
-
-    let html = `<h3 style="color: #fbbf24; grid-column:1/-1;">🐮 Hewan Ternak</h3>`;
-    for (let id in GAME_DATABASE.ternak) {
-        let item = GAME_DATABASE.ternak[id];
-        let hBeli = item.hargaBeli || 1000;
-        let f = getFluktuasiItem(id, hBeli);
-        html += `<div class="card"><div style="font-size:2.5rem;">${item.icon}</div><h3>${item.nama}</h3><p>Beli: <b>Rp. ${f.harga.toLocaleString('id-ID')}</b></p>${getInfoGrafikHarga(f.harga, hBeli)}<button onclick="bukaModalBeliHewan('${id}', '${item.nama}', ${f.harga})">Beli Hewan</button></div>`;
-    }
-
-    html += `<h3 style="color: #34d399; grid-column:1/-1; margin-top:20px;">🌾 Pakan Ternak</h3>`;
-    for (let id in GAME_DATABASE.pakan) {
-        let item = GAME_DATABASE.pakan[id];
-        let hBeli = item.hargaBeli || 100;
-        let f = getFluktuasiItem(id, hBeli);
-        html += `<div class="card"><div style="font-size:2.5rem;">${item.icon}</div><h3>${item.nama}</h3><p>Beli: <b>Rp. ${f.harga.toLocaleString('id-ID')}</b></p>${getInfoGrafikHarga(f.harga, hBeli)}<button onclick="bukaModalBeli('${id}', '${item.nama}', ${f.harga}, 'pasar')">Beli Pakan</button></div>`;
-    }
-
-    if (GAME_DATABASE.alat && GAME_DATABASE.alat.pisau) {
-        let pisau = GAME_DATABASE.alat.pisau;
-        html += `<h3 style="color: #60a5fa; grid-column:1/-1; margin-top:20px;">🔪 Peralatan</h3>`;
-        html += `<div class="card"><div style="font-size:2.5rem;">${pisau.icon}</div><h3>${pisau.nama}</h3><p>Beli: <b>Rp. ${pisau.hargaBeli.toLocaleString('id-ID')}</b></p><button onclick="bukaModalBeli('${pisau.id}', '${pisau.nama}', ${pisau.hargaBeli}, 'pasar')">Beli Pisau</button></div>`;
-    }
-
-    container.innerHTML = html;
-}
-
-function renderSupermarket() {
-    const container = document.getElementById("list-supermarket");
-    if (!container) return;
-    container.innerHTML = "";
-    for (let id in GAME_DATABASE.bibit) {
-        let item = GAME_DATABASE.bibit[id];
-        let hBeli = item.hargaBeli || 50;
-        let f = getFluktuasiItem(id, hBeli);
-        container.innerHTML += `<div class="card"><div style="font-size:2.5rem;">${item.icon}</div><h3>${item.nama}</h3><p>Beli: <b>Rp. ${f.harga.toLocaleString('id-ID')}</b></p>${getInfoGrafikHarga(f.harga, hBeli)}<button onclick="bukaModalBeli('${id}', '${item.nama}', ${f.harga}, 'supermarket')">Beli Bibit</button></div>`;
-    }
-}
-
-function renderTukangKayu() {
-    const container = document.getElementById("list-tukang-kayu");
-    if (!container) return;
-    container.innerHTML = "";
-    let itemKayu = (GAME_DATABASE.material && GAME_DATABASE.material.kayu) || { id: "kayu", nama: "Kayu", icon: "🪵", hargaBeli: 100 };
-    let f = getFluktuasiItem('kayu', itemKayu.hargaBeli);
-
-    let durability = gameState.durasiPisau;
-    let masihPenuh = durability >= 300;
-
     container.innerHTML = `
-        <div class="card">
-            <div style="font-size:2.5rem;">${itemKayu.icon}</div>
-            <h3>${itemKayu.nama}</h3>
-            <p>Beli: <b>Rp. ${f.harga.toLocaleString('id-ID')}</b></p>
-            ${getInfoGrafikHarga(f.harga, itemKayu.hargaBeli)}
-            <button onclick="bukaModalBeli('${itemKayu.id}', '${itemKayu.nama}', ${f.harga}, 'tukang_kayu')">Beli Kayu</button>
-        </div>
-        <div class="card" style="border: 1px solid #60a5fa;">
-            <div style="font-size:2.5rem;">🔪</div>
-            <h3>Asah Pisau Potong</h3>
-            <p>Biaya: <b>Rp. 12.000</b></p>
-            <button onclick="asahPisau()" style="background:${masihPenuh ? '#334155' : '#2563eb'}; margin-top: 10px; ${masihPenuh ? 'cursor:not-allowed;' : ''}">${masihPenuh ? 'Pisau Masih Tajam' : 'Asah Pisau'}</button>
+        <div class="card" style="text-align: center; max-width: 400px; margin: 20px auto; border: 1px solid #3b82f6;">
+            <h3>🎣 Kolam Pancing Desa</h3>
+            <p style="color: var(--text-muted);">Uji kesabaranmu untuk mendapatkan ikan segar!</p>
+            <div id="area-pancing" style="font-size: 4rem; margin: 20px 0;">🌊</div>
+            <button onclick="mulaiMemancing()" id="btn-lempar-pancing" style="background: #2563eb; color: white; padding: 10px 20px; border-radius: 8px; border:none; cursor:pointer;">Lempar Pancing</button>
         </div>
     `;
 }
 
-function renderPengepul() {
-    const container = document.getElementById("list-pengepul");
-    if (!container) return;
-    container.innerHTML = "";
-    let ada = false, html = "";
+function mulaiMemancing() {
+    let area = document.getElementById("area-pancing");
+    let btn = document.getElementById("btn-lempar-pancing");
+    if (!area || !btn) return;
+    
+    area.innerHTML = "🎣 Menunggu ikan menyambar...";
+    btn.disabled = true;
+    btn.style.opacity = "0.5";
 
-    let gabungan = { 
-        ...GAME_DATABASE.hasilPanen, 
-        ...GAME_DATABASE.ternakHasil, 
-        ...GAME_DATABASE.jagalHasil,
-        ...(GAME_DATABASE.ikan || {})
-    };
+    let waktuTunggu = Math.floor(Math.random() * 2000) + 2000;
+    setTimeout(() => {
+        area.innerHTML = "❗ Ada Ikan Menyambar! CEPAT KLIK!";
+        btn.innerText = "TARIK SEKARANG!";
+        btn.disabled = false;
+        btn.style.opacity = "1";
+        btn.style.background = "#dc2626";
+        btn.onclick = () => suksesTarikIkan();
 
-    for (let id in gameState.tas) {
-        let stok = gameState.tas[id];
-        if (stok > 0 && gabungan[id]) {
-            ada = true;
-            let item = gabungan[id];
-            let hJual = item.hargaJual || 50;
-            let f = getFluktuasiItem(id, hJual);
-            html += `
-                <div class="card">
-                    <div style="font-size: 2.5rem;">${item.icon}</div>
-                    <h3>${item.nama}</h3>
-                    <p>Stok: <b>${stok} Pcs</b></p>
-                    <p>Jual: <b>Rp. ${f.harga}</b></p>
-                    ${getInfoGrafikHarga(f.harga, hJual)}
-                    <button onclick="bukaModalJual('${id}', '${item.nama}', ${f.harga}, ${stok})" style="background: #2563eb;">Jual</button>
-                </div>
-            `;
-        }
-    }
-    container.innerHTML = ada ? html : `<p style="grid-column:1/-1; text-align:center; color:var(--text-muted);">Tidak ada barang untuk dijual.</p>`;
+        window.timeoutGagalPancing = setTimeout(() => {
+            area.innerHTML = "💨 Ikan lepas dan kabur!";
+            btn.innerText = "Lempar Pancing";
+            btn.style.background = "#2563eb";
+            btn.onclick = () => mulaiMemancing();
+        }, 3000);
+    }, waktuTunggu);
 }
 
-function renderWikipedia() {
-    const container = document.getElementById("content-wikipedia");
-    if (!container) return;
+function suksesTarikIkan() {
+    clearTimeout(window.timeoutGagalPancing);
+    let listIkan = GAME_DATABASE.hasilPanen ? Object.keys(GAME_DATABASE.hasilPanen) : ['kayu'];
+    let hasilId = listIkan[Math.floor(Math.random() * listIkan.length)];
+    let itemInfo = GAME_DATABASE.hasilPanen[hasilId] || { nama: "Tangkapan", icon: "🐟" };
 
-    let html = `<div class="neon-credit">Created By Bocah Newbie</div>`;
-    html += `<h2>📚 Panduan & Ensiklopedia Harga Game</h2><table style="width:100%; border-collapse:collapse; margin-top:15px; background:var(--bg-card); border-radius:8px; overflow:hidden;">`;
-    html += `<tr style="background:#1e293b; text-align:left;"><th style="padding:10px;">Item</th><th style="padding:10px;">Harga Beli (Normal)</th><th style="padding:10px;">Harga Jual (Normal)</th><th style="padding:10px;">Estimasi Min / Max</th></tr>`;
+    gameState.tas[hasilId] = (gameState.tas[hasilId] || 0) + 1;
 
-    let allItems = { 
-        ...GAME_DATABASE.bibit, 
-        ...GAME_DATABASE.hasilPanen, 
-        ...GAME_DATABASE.ternak, 
-        ...GAME_DATABASE.pakan, 
-        ...GAME_DATABASE.ternakHasil, 
-        ...GAME_DATABASE.jagalHasil, 
-        ...GAME_DATABASE.alat, 
-        ...GAME_DATABASE.material,
-        ...(GAME_DATABASE.ikan || {})
-    };
-
-    for (let id in allItems) {
-        let item = allItems[id];
-        let beli = item.hargaBeli ? `Rp. ${item.hargaBeli.toLocaleString('id-ID')}` : '-';
-        let jual = item.hargaJual ? `Rp. ${item.hargaJual.toLocaleString('id-ID')}` : '-';
-        let baseRef = item.hargaBeli || item.hargaJual || 0;
-        let minP = Math.round(baseRef * 0.8);
-        let maxP = Math.round(baseRef * 1.3);
-        let estimasi = baseRef > 0 ? `Rp. ${minP.toLocaleString('id-ID')} - Rp. ${maxP.toLocaleString('id-ID')}` : '-';
-
-        html += `<tr style="border-bottom:1px solid var(--border-color);">
-            <td style="padding:10px;">${item.icon || '📦'} ${item.nama}</td>
-            <td style="padding:10px;">${beli}</td>
-            <td style="padding:10px;">${jual}</td>
-            <td style="padding:10px; color:#34d399;">${estimasi}</td>
-        </tr>`;
+    let area = document.getElementById("area-pancing");
+    let btn = document.getElementById("btn-lempar-pancing");
+    if (area && btn) {
+        area.innerHTML = `🎉 Berhasil Dapat ${itemInfo.icon || '🐟'} <b>${itemInfo.nama || 'Item'}</b>!`;
+        btn.innerText = "Lempar Pancing";
+        btn.style.background = "#2563eb";
+        btn.onclick = () => mulaiMemancing();
     }
-    html += `</table>`;
-    container.innerHTML = html;
+    if (typeof renderTas === 'function') renderTas();
+    tampilkanPopupNotifikasi("🎣 Tangkapan Baru!", `Mendapatkan ${itemInfo.nama}`, "neon-green");
 }
 
-// --- SYSTEM MISI PAPAN PENGUMUMAN ---
-function generasiMisiOtomatis() {
-    if (gameState.misiPapan.length < 4) {
-        let gabungan = {
-            ...GAME_DATABASE.hasilPanen,
-            ...GAME_DATABASE.ternakHasil,
-            ...GAME_DATABASE.jagalHasil,
-            ...(GAME_DATABASE.ikan || {})
-        };
-        let keys = Object.keys(gabungan);
-        if (keys.length === 0) return;
+// --- SISTEM PAPAN MISI (RANDOM & BERBATAS WAKTU) ---
+function generateMisiRandom() {
+    if (gameState.misiPapan.length > 0) return; // Misi sudah ada
+    
+    let daftarItemKey = GAME_DATABASE.hasilPanen ? Object.keys(GAME_DATABASE.hasilPanen) : [];
+    if (daftarItemKey.length === 0) return;
 
-        let idRandom = keys[Math.floor(Math.random() * keys.length)];
-        let itemData = gabungan[idRandom];
-        let jumlahTarget = Math.floor(Math.random() * 8) + 3;
-        let durasiHari = Math.floor(Math.random() * 4) + 2;
+    for (let i = 1; i <= 3; i++) {
+        let randomKey = daftarItemKey[Math.floor(Math.random() * daftarItemKey.length)];
+        let infoItem = GAME_DATABASE.hasilPanen[randomKey];
+        let jumlahTarget = Math.floor(Math.random() * 5) + 3; // Target 3 - 7 pcs
+        let hadiahUang = jumlahTarget * 250;
 
-        let baseHarga = itemData.hargaJual || 100;
-        let bonusWaktu = (6 - durasiHari) * 0.2;
-        let totalHadiah = Math.round((baseHarga * jumlahTarget) * (1.4 + bonusWaktu));
-
-        let npc = DAFTAR_NAMA_NPC[Math.floor(Math.random() * DAFTAR_NAMA_NPC.length)];
-        let totalMenitSekarang = getTotalMenitInGame(gameState.waktuHari, gameState.waktuJam, gameState.waktuMenit);
-
-        let misiBaru = {
-            idMisi: `misi_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
-            npc: npc,
-            idItem: idRandom,
-            namaItem: itemData.nama,
-            iconItem: itemData.icon || '📦',
-            jumlahTarget: jumlahTarget,
-            durasiHari: durasiHari,
-            targetMenitSelesai: totalMenitSekarang + (durasiHari * 1440),
-            hadiahUang: totalHadiah
-        };
-
-        gameState.misiPapan.push(misiBaru);
+        gameState.misiPapan.push({
+            id: `misi_auto_${i}_${gameState.waktuHari}`,
+            judul: `Permintaan ${infoItem.nama}`,
+            deskripsi: `Kirimkan ${jumlahTarget} ${infoItem.icon} ${infoItem.nama} sebelum batas waktu habis!`,
+            syarat: { item: randomKey, jumlah: jumlahTarget },
+            hadiah: { uang: hadiahUang },
+            targetHariSelesai: gameState.waktuHari + 2 // Batas 2 hari in-game
+        });
     }
 }
 
 function renderPapanMisi() {
-    const container = document.getElementById("list-misi");
+    let container = document.getElementById("container-misi") || document.getElementById("tab-misi");
     if (!container) return;
-    container.innerHTML = "";
 
-    const totalMenitSekarang = getTotalMenitInGame(gameState.waktuHari, gameState.waktuJam, gameState.waktuMenit);
+    generateMisiRandom();
+    container.innerHTML = "<h3>📜 Papan Misi Desa</h3><p style='color:var(--text-muted); font-size:0.9rem;'>Selesaikan pesanan warga sebelum waktunya habis!</p>";
 
-    gameState.misiAktif = gameState.misiAktif.filter(m => m.targetMenitSelesai > totalMenitSekarang);
-    gameState.misiPapan = gameState.misiPapan.filter(m => m.targetMenitSelesai > totalMenitSekarang);
-
-    let html = `<h3 style="color: #60a5fa; grid-column:1/-1;">📌 Misi Aktif Kamu</h3>`;
-    if (gameState.misiAktif.length === 0) {
-        html += `<p style="grid-column:1/-1; color: var(--text-muted);">Belum ada misi yang diambil.</p>`;
-    } else {
-        gameState.misiAktif.forEach((misi, idx) => {
-            let sisaWaktu = Math.max(0, misi.targetMenitSelesai - totalMenitSekarang);
-            let stokPemain = gameState.tas[misi.idItem] || 0;
-            let cukup = stokPemain >= misi.jumlahTarget;
-
-            html += `
-                <div class="card" style="border: 1px solid ${cukup ? '#34d399' : '#f59e0b'};">
-                    <h3>${misi.npc}</h3>
-                    <p>${misi.iconItem} <b>${misi.namaItem}</b></p>
-                    <p>Butuh: <b>${stokPemain} / ${misi.jumlahTarget} Pcs</b></p>
-                    <p>Hadiah: <b style="color:#34d399;">Rp. ${misi.hadiahUang.toLocaleString('id-ID')}</b></p>
-                    <p style="font-size:0.85rem; color:#f87171;">⏱️ Sisa Waktu: ${formatDurasiBersih(sisaWaktu)}</p>
-                    <button onclick="serahkanMisi(${idx})" style="background:${cukup ? '#10b981' : '#334155'}; margin-top:5px;" ${!cukup ? 'disabled' : ''}>${cukup ? 'Kirim Pesanan' : 'Stok Belum Cukup'}</button>
-                </div>
-            `;
-        });
-    }
-
-    html += `<h3 style="color: #fbbf24; grid-column:1/-1; margin-top:20px;">📜 Papan Pesanan Desa</h3>`;
     if (gameState.misiPapan.length === 0) {
-        html += `<p style="grid-column:1/-1; color: var(--text-muted);">Papan pesanan sedang kosong...</p>`;
-    } else {
-        gameState.misiPapan.forEach((misi) => {
-            let sisaWaktu = Math.max(0, misi.targetMenitSelesai - totalMenitSekarang);
-            html += `
-                <div class="card">
-                    <h3>${misi.npc}</h3>
-                    <p>${misi.iconItem} <b>${misi.namaItem}</b> (${misi.jumlahTarget} Pcs)</p>
-                    <p>Hadiah: <b style="color:#34d399;">Rp. ${misi.hadiahUang.toLocaleString('id-ID')}</b></p>
-                    <p style="font-size:0.85rem; color:#3b82f6;">⏱️ Tenggat: ${misi.durasiHari} Hari (${formatDurasiBersih(sisaWaktu)})</p>
-                    <button onclick="ambilMisi('${misi.idMisi}')" style="background:#2563eb; margin-top:5px;">Ambil Misi</button>
-                </div>
-            `;
-        });
-    }
-
-    container.innerHTML = html;
-}
-
-function ambilMisi(idMisi) {
-    let index = gameState.misiPapan.findIndex(m => m.idMisi === idMisi);
-    if (index !== -1) {
-        let misi = gameState.misiPapan.splice(index, 1)[0];
-        gameState.misiAktif.push(misi);
-        tampilkanPopupNotifikasi("📜 Misi Diambil!", `Pesanan dari ${misi.npc} telah ditambahkan ke Misi Aktif.`, "neon-blue");
-        renderPapanMisi();
-    }
-}
-
-function serahkanMisi(indexMisi) {
-    let misi = gameState.misiAktif[indexMisi];
-    let stokPemain = gameState.tas[misi.idItem] || 0;
-
-    if (stokPemain >= misi.jumlahTarget) {
-        gameState.tas[misi.idItem] -= misi.jumlahTarget;
-        if (gameState.tas[misi.idItem] <= 0) delete gameState.tas[misi.idItem];
-
-        gameState.uang += misi.hadiahUang;
-        gameState.misiAktif.splice(indexMisi, 1);
-
-        updateHeaderUI();
-        renderTas();
-        renderPapanMisi();
-        tampilkanPopupNotifikasi("🎉 Misi Selesai!", `Pesanan diserahkan! Kamu mendapat Rp. ${misi.hadiahUang.toLocaleString('id-ID')}`, "neon-green");
-    } else {
-        alert("⚠️ Stok barangmu belum mencukupi!");
-    }
-}
-
-// --- TAB SUNGAI & MEMANCING ---
-function renderSungai() {
-    const container = document.getElementById("area-sungai");
-    if (!container) return;
-
-    container.innerHTML = `
-        <div class="card" style="grid-column: 1/-1; text-align: center; padding: 30px;">
-            <div style="font-size: 4rem; margin-bottom: 10px;">🌊</div>
-            <h2>Area Memancing Desa</h2>
-            <p style="color: var(--text-muted); margin-bottom: 20px;">Lemparkan pancingan untuk mendapatkan berbagai jenis ikan segar!</p>
-            <button onclick="mulaiMancing()" style="background: #2563eb; font-size: 1.1rem; padding: 12px 25px;">🎣 Lempar Pancingan</button>
-        </div>
-    `;
-}
-
-function mulaiMancing() {
-    let modal = document.getElementById("modal-mancing");
-    if (!modal) {
-        modal = document.createElement("div");
-        modal.id = "modal-mancing";
-        modal.className = "modal-overlay";
-        modal.innerHTML = `
-            <div class="modal-card neon-blue" style="text-align: center;">
-                <h3>🎣 Memancing...</h3>
-                <p style="color: var(--text-muted); font-size:0.85rem; margin-bottom:15px;">Tekan TARIK saat jarum tepat di area HIJAU!</p>
-                
-                <div style="position: relative; width: 100%; height: 26px; background: #1e293b; border-radius: 13px; overflow: hidden; border: 2px solid var(--border-color); margin: 15px 0;">
-                    <div id="zona-sukses" style="position: absolute; left: 40%; width: 20%; height: 100%; background: #10b981; opacity: 0.6;"></div>
-                    <div id="jarum-mancing" style="position: absolute; left: 0%; width: 6px; height: 100%; background: #ef4444; border-radius: 3px;"></div>
-                </div>
-
-                <button onclick="tarikPancingan()" style="background: #059669; color: white; padding: 10px 20px; font-weight: bold; width: 100%; font-size:1.1rem;">🎣 TARIK!</button>
-            </div>
-        `;
-        document.body.appendChild(modal);
-    }
-
-    posisiBar = 0;
-    arahBar = 1;
-    modal.style.display = "flex";
-
-    clearInterval(intervalMancing);
-    intervalMancing = setInterval(() => {
-        posisiBar += arahBar * 3.5; 
-        if (posisiBar >= 96 || posisiBar <= 0) arahBar *= -1;
-        
-        let elJarum = document.getElementById("jarum-mancing");
-        if (elJarum) elJarum.style.left = `${posisiBar}%`;
-    }, 30);
-}
-
-function tarikPancingan() {
-    clearInterval(intervalMancing);
-    let modal = document.getElementById("modal-mancing");
-    if (modal) modal.style.display = "none";
-
-    if (posisiBar >= zonaHijau.min && posisiBar <= zonaHijau.max) {
-        let keysIkan = Object.keys(GAME_DATABASE.ikan || {});
-        if (keysIkan.length === 0) {
-            alert("⚠️ Database ikan belum terisi di GAME_DATABASE.ikan!");
-            return;
-        }
-
-        let idIkanDapat = keysIkan[Math.floor(Math.random() * keysIkan.length)];
-        let dataIkan = GAME_DATABASE.ikan[idIkanDapat];
-
-        gameState.tas[idIkanDapat] = (gameState.tas[idIkanDapat] || 0) + 1;
-        
-        tampilkanPopupNotifikasi("🐟 Strike!", `Selamat! Kamu menangkap 1x ${dataIkan.icon || '🐟'} ${dataIkan.nama}`, "neon-green");
-        renderTas();
-    } else {
-        tampilkanPopupNotifikasi("❌ Lepas!", "Sayang sekali, ikannya keburu kabur! Coba lagi.", "neon-amber");
-    }
-}
-
-// --- MODAL DENGAN HELPER PEMBELIAN & PENJUALAN ---
-function bukaModalBeliHewan(id, nama, harga) {
-    transaksiAktif = { idItem: id, namaItem: nama, hargaSatuan: harga, tipe: 'hewan' };
-    let modal = document.getElementById("modal-beli-hewan");
-    if (!modal) {
-        modal = document.createElement("div");
-        modal.id = "modal-beli-hewan";
-        modal.className = "modal-overlay";
-        modal.innerHTML = `
-            <div class="modal-card neon-amber">
-                <h3 id="modal-hewan-title">Beli Hewan Ternak</h3>
-                <p id="modal-hewan-info" style="color: var(--text-muted);"></p>
-                <p style="font-size: 0.85rem; color: #fbbf24; margin-top: 5px;">⚠️ Hewan akan langsung dimasukkan ke Kandang Kosong.</p>
-                <p id="modal-hewan-total" style="font-weight:bold; color:#34d399; margin: 15px 0;"></p>
-                <div class="modal-actions">
-                    <button class="btn-cancel" onclick="tutupModalBeliHewan()">Kembali</button>
-                    <button class="btn-confirm" onclick="konfirmasiBeliHewan()">Beli & Masukkan Kandang</button>
-                </div>
-            </div>
-        `;
-        document.body.appendChild(modal);
-    }
-    document.getElementById("modal-hewan-title").innerText = `Beli ${nama}`;
-    document.getElementById("modal-hewan-info").innerText = `Harga: Rp. ${harga.toLocaleString('id-ID')} / ekor`;
-    document.getElementById("modal-hewan-total").innerText = `Total: Rp. ${harga.toLocaleString('id-ID')}`;
-    modal.style.display = "flex";
-}
-
-function tutupModalBeliHewan() { 
-    let modal = document.getElementById("modal-beli-hewan");
-    if (modal) modal.style.display = "none"; 
-}
-
-function konfirmasiBeliHewan() {
-    let idHewan = transaksiAktif.idItem;
-    let harga = transaksiAktif.hargaSatuan;
-
-    let kandangKosongDitemukan = null;
-    for (let i = 1; i <= gameState.jumlahKandangAktif; i++) {
-        let kData = gameState.kandang[i];
-        if (!kData || (kData.status === 'kosong')) {
-            kandangKosongDitemukan = i;
-            break;
-        }
-    }
-
-    if (!kandangKosongDitemukan) {
-        alert("⚠️ Gagal membeli! Semua kandang hewan ternak sudah penuh.");
+        container.innerHTML += "<p>Tidak ada misi saat ini.</p>";
         return;
     }
 
-    if (gameState.uang >= harga) {
-        gameState.uang -= harga;
-        gameState.kandang[kandangKosongDitemukan] = {
-            jenisHewan: idHewan,
-            idTernak: null,
-            targetMenitInGame: 0
-        };
+    gameState.misiPapan.forEach((misi, index) => {
+        let statusAktif = gameState.misiAktif[misi.id];
+        let tombolAksi = "";
+        let infoWaktu = `<p style="color: #fbbf24; font-size:0.85rem;">⏳ Tenggat: ${misi.targetHariSelesai - gameState.waktuHari} Hari lagi</p>`;
 
-        updateHeaderUI();
-        tutupModalBeliHewan();
-        renderPasar();
-        renderKandang();
-        tampilkanPopupNotifikasi("🎉 Berhasil Membeli!", `${transaksiAktif.namaItem} telah ditempatkan di Kandang #${kandangKosongDitemukan}.`, "neon-green");
-    } else {
-        alert("⚠️ Uang tidak cukup!");
-    }
-}
-
-function bukaModalBeli(id, nama, harga, tipe) {
-    transaksiAktif = { idItem: id, namaItem: nama, hargaSatuan: harga, tipe: tipe };
-    let modal = document.getElementById("modal-beli");
-    if (!modal) {
-        modal = document.createElement("div");
-        modal.id = "modal-beli";
-        modal.className = "modal-overlay";
-        modal.innerHTML = `
-            <div class="modal-card neon-green">
-                <h3 id="modal-title">Beli Item</h3>
-                <p id="modal-info" style="color: var(--text-muted);"></p>
-                <div class="modal-input-group">
-                    <button onclick="ubahQtyBeli(-1)">-</button>
-                    <input type="number" id="input-jumlah-beli" value="1" min="1" max="99" oninput="updateTotalBeli()">
-                    <button onclick="ubahQtyBeli(1)">+</button>
-                    <button class="btn-max-mod" onclick="setBeliMax()">MAX</button>
-                </div>
-                <p id="modal-total" style="font-weight:bold; color:#34d399;"></p>
-                <div class="modal-actions">
-                    <button class="btn-cancel" onclick="tutupModalBeli()">Kembali</button>
-                    <button class="btn-confirm" onclick="konfirmasiBeli()">Beli</button>
-                </div>
-            </div>
-        `;
-        document.body.appendChild(modal);
-    }
-    document.getElementById("modal-title").innerText = `Beli ${nama}`;
-    document.getElementById("modal-info").innerText = `Harga: Rp. ${harga.toLocaleString('id-ID')} / pcs`;
-    document.getElementById("input-jumlah-beli").value = 1;
-    updateTotalBeli();
-    modal.style.display = "flex";
-}
-
-function tutupModalBeli() { 
-    let modal = document.getElementById("modal-beli");
-    if (modal) modal.style.display = "none"; 
-}
-
-function ubahQtyBeli(delta) {
-    let input = document.getElementById("input-jumlah-beli");
-    let val = parseInt(input.value || 1) + delta;
-    if (val < 1) val = 1;
-    if (val > 99) val = 99;
-    input.value = val;
-    updateTotalBeli();
-}
-
-function setBeliMax() {
-    let maxBisa = Math.floor(gameState.uang / (transaksiAktif.hargaSatuan || 1));
-    if (maxBisa < 1) maxBisa = 1;
-    if (maxBisa > 99) maxBisa = 99;
-    document.getElementById("input-jumlah-beli").value = maxBisa;
-    updateTotalBeli();
-}
-
-function updateTotalBeli() {
-    let jml = parseInt(document.getElementById("input-jumlah-beli").value) || 1;
-    document.getElementById("modal-total").innerText = `Total: Rp. ${(jml * transaksiAktif.hargaSatuan).toLocaleString('id-ID')}`;
-}
-
-function konfirmasiBeli() {
-    let jml = parseInt(document.getElementById("input-jumlah-beli").value) || 1;
-    let total = jml * transaksiAktif.hargaSatuan;
-    if (gameState.uang >= total) {
-        gameState.uang -= total;
-        gameState.tas[transaksiAktif.idItem] = (gameState.tas[transaksiAktif.idItem] || 0) + jml;
-        updateHeaderUI();
-        tutupModalBeli();
-        renderTas();
-    } else {
-        alert("⚠️ Uang tidak cukup!");
-    }
-}
-
-function bukaModalJual(id, nama, harga, stok) {
-    transaksiAktif = { idItem: id, namaItem: nama, hargaSatuan: harga, stokMaks: stok };
-    let modal = document.getElementById("modal-jual");
-    if (!modal) {
-        modal = document.createElement("div");
-        modal.id = "modal-jual";
-        modal.className = "modal-overlay";
-        modal.innerHTML = `
-            <div class="modal-card neon-blue">
-                <h3 id="modal-jual-title">Jual Barang</h3>
-                <p id="modal-jual-info" style="color: var(--text-muted);"></p>
-                <div class="modal-input-group">
-                    <button onclick="ubahQtyJual(-1)">-</button>
-                    <input type="number" id="input-jumlah-jual" value="1" min="1" oninput="updateTotalJual()">
-                    <button onclick="ubahQtyJual(1)">+</button>
-                    <button class="btn-max-mod" onclick="setJualMax()">MAX</button>
-                </div>
-                <p id="modal-jual-total" style="font-weight:bold; color:#60a5fa;"></p>
-                <div class="modal-actions">
-                    <button class="btn-cancel" onclick="tutupModalJual()">Kembali</button>
-                    <button class="btn-confirm" onclick="konfirmasiJual()">Jual</button>
-                </div>
-            </div>
-        `;
-        document.body.appendChild(modal);
-    }
-    document.getElementById("modal-jual-title").innerText = `Jual ${nama}`;
-    document.getElementById("modal-jual-info").innerText = `Harga: Rp. ${harga.toLocaleString('id-ID')} / pcs (Stok: ${stok})`;
-    let inputJual = document.getElementById("input-jumlah-jual");
-    inputJual.value = 1;
-    inputJual.max = stok;
-    updateTotalJual();
-    modal.style.display = "flex";
-}
-
-function tutupModalJual() { 
-    let modal = document.getElementById("modal-jual");
-    if (modal) modal.style.display = "none"; 
-}
-
-function ubahQtyJual(delta) {
-    let input = document.getElementById("input-jumlah-jual");
-    let val = parseInt(input.value || 1) + delta;
-    let maks = transaksiAktif.stokMaks;
-    if (val < 1) val = 1;
-    if (val > maks) val = maks;
-    input.value = val;
-    updateTotalJual();
-}
-
-function setJualMax() {
-    document.getElementById("input-jumlah-jual").value = transaksiAktif.stokMaks;
-    updateTotalJual();
-}
-
-function updateTotalJual() {
-    let jml = parseInt(document.getElementById("input-jumlah-jual").value) || 1;
-    let maks = transaksiAktif.stokMaks;
-    if (jml > maks) document.getElementById("input-jumlah-jual").value = maks;
-    document.getElementById("modal-jual-total").innerText = `Total Pendapatan: Rp. ${(Math.min(jml, maks) * transaksiAktif.hargaSatuan).toLocaleString('id-ID')}`;
-}
-
-function konfirmasiJual() {
-    let jml = parseInt(document.getElementById("input-jumlah-jual").value) || 1;
-    if (gameState.tas[transaksiAktif.idItem] >= jml) {
-        gameState.tas[transaksiAktif.idItem] -= jml;
-        if (gameState.tas[transaksiAktif.idItem] <= 0) delete gameState.tas[transaksiAktif.idItem];
-        gameState.uang += jml * transaksiAktif.hargaSatuan;
-        updateHeaderUI();
-        tutupModalJual();
-        renderPengepul();
-        renderTas();
-    } else {
-        alert("⚠️ Stok tidak cukup!");
-    }
-}
-
-function tampilkanPopupNotifikasi(judul, pesan, neonClass) {
-    let modal = document.getElementById("modal-notifikasi-custom");
-    if (!modal) {
-        modal = document.createElement("div");
-        modal.id = "modal-notifikasi-custom";
-        modal.className = "modal-overlay";
-        modal.innerHTML = `
-            <div class="modal-card ${neonClass || 'neon-green'}">
-                <h3 id="notif-judul"></h3>
-                <p id="notif-pesan" style="color: var(--text-muted); margin: 15px 0;"></p>
-                <button onclick="tutupPopupNotifikasi()" class="btn-confirm" style="width:100%;">OK</button>
-            </div>
-        `;
-        document.body.appendChild(modal);
-    } else {
-        modal.querySelector('.modal-card').className = `modal-card ${neonClass || 'neon-green'}`;
-    }
-    document.getElementById("notif-judul").innerText = judul;
-    document.getElementById("notif-pesan").innerText = pesan;
-    modal.style.display = "flex";
-}
-
-function tutupPopupNotifikasi() { 
-    let modal = document.getElementById("modal-notifikasi-custom");
-    if (modal) modal.style.display = "none"; 
-}
-
-function renderTas() {
-    const container = document.getElementById("grid-tas");
-    if (!container) return;
-    container.innerHTML = "";
-    let ada = false;
-    let all = { 
-        ...GAME_DATABASE.bibit, 
-        ...GAME_DATABASE.hasilPanen, 
-        ...GAME_DATABASE.ternak, 
-        ...GAME_DATABASE.pakan, 
-        ...GAME_DATABASE.ternakHasil, 
-        ...GAME_DATABASE.jagalHasil, 
-        ...GAME_DATABASE.alat, 
-        ...GAME_DATABASE.material,
-        ...(GAME_DATABASE.ikan || {})
-    };
-
-    for (let id in gameState.tas) {
-        let jml = gameState.tas[id];
-        if (jml > 0) {
-            ada = true;
-            let item = all[id] || { nama: id, icon: "📦" };
-            container.innerHTML += `<div class="card"><div style="font-size:2.5rem;">${item.icon || '📦'}</div><h3>${item.nama}</h3><p>Jumlah: <b>${jml} Pcs</b></p></div>`;
+        if (!statusAktif) {
+            tombolAksi = `<button onclick="ambilMisiPapan('${misi.id}')" style="background: #2563eb; color:white; padding:6px 12px; border-radius:6px; border:none; cursor:pointer;">Ambil Misi</button>`;
+        } else if (statusAktif.status === 'berjalan') {
+            let punyaItem = gameState.tas[misi.syarat.item] || 0;
+            if (punyaItem >= misi.syarat.jumlah) {
+                tombolAksi = `<button onclick="klaimHadiahMisiPapan('${misi.id}')" style="background: #10b981; color:white; padding:6px 12px; border-radius:6px; border:none; cursor:pointer;">Klaim Hadiah 🎁</button>`;
+            } else {
+                tombolAksi = `<p style="font-size:0.85rem;">Progres: ${punyaItem}/${misi.syarat.jumlah}</p><button disabled style="background: #334155; padding:6px 12px; border-radius:6px; border:none;">Belum Cukup</button>`;
+            }
         }
-    }
-    if (!ada) container.innerHTML = `<p style="grid-column:1/-1; text-align:center; color:var(--text-muted);">Tas kosong.</p>`;
+
+        container.innerHTML += `
+            <div class="card" style="margin-bottom: 10px; border: 1px solid var(--border-color); padding: 12px; border-radius: 8px;">
+                <h4>${misi.judul}</h4>
+                <p style="font-size: 0.9rem; color: var(--text-muted);">${misi.deskripsi}</p>
+                <p style="font-size: 0.85rem; color: #34d399;">Hadiah: Rp ${misi.hadiah.uang.toLocaleString('id-ID')}</p>
+                ${infoWaktu}
+                <div style="margin-top: 8px;">${tombolAksi}</div>
+            </div>
+        `;
+    });
 }
 
-// --- WAKTU IN-GAME ---
-setInterval(() => {
-    gameState.waktuMenit += 1;
-    if (gameState.waktuMenit >= 60) {
-        gameState.waktuMenit = 0;
-        gameState.waktuJam += 1;
-        if (gameState.waktuJam === 1) gameState.waktuJam = 6;
-        if (gameState.waktuJam >= 24) {
-            gameState.waktuJam = 0;
-            gameState.waktuHari += 1;
-            generasiMisiOtomatis();
-        }
-    }
-    updateHeaderUI();
+function ambilMisiPapan(idMisi) {
+    let misi = gameState.misiPapan.find(m => m.id === idMisi);
+    if (!misi) return;
 
-    let tabAktif = document.querySelector(".tab-content.active");
-    if (tabAktif) {
-        let idTab = tabAktif.id;
-        if (idTab === 'tab-lahan') renderLahan();
-        if (idTab === 'tab-kandang') renderKandang();
-        if (idTab === 'tab-papan-misi') renderPapanMisi();
-    }
-}, 1500);
+    gameState.misiAktif[idMisi] = { status: 'berjalan' };
+    tampilkanPopupNotifikasi("📜 Misi Diterima!", misi.judul, "neon-blue");
+    renderPapanMisi();
+}
 
-window.onload = function() {
-    resetHeaderNamaUI();
-    muatGame();
-    if (gameState.misiPapan.length === 0) {
-        generasiMisiOtomatis();
-        generasiMisiOtomatis();
+function klaimHadiahMisiPapan(idMisi) {
+    let misi = gameState.misiPapan.find(m => m.id === idMisi);
+    if (!misi) return;
+
+    let stokPunya = gameState.tas[misi.syarat.item] || 0;
+    if (stokPunya >= misi.syarat.jumlah) {
+        gameState.tas[misi.syarat.item] -= misi.syarat.jumlah;
+        if (gameState.tas[misi.syarat.item] <= 0) delete gameState.tas[misi.syarat.item];
+
+        gameState.uang += misi.hadiah.uang;
+        
+        // Hapus dari papan dan misi aktif
+        gameState.misiPapan = gameState.misiPapan.filter(m => m.id !== idMisi);
+        delete gameState.misiAktif[idMisi];
+
+        tampilkanPopupNotifikasi("🎁 Misi Selesai!", `Hadiah Rp ${misi.hadiah.uang.toLocaleString('id-ID')} diterima!`, "neon-green");
+        updateHeaderUI();
+        renderPapanMisi();
+        if (typeof renderTas === 'function') renderTas();
     }
-    refreshTabAktif('tab-lahan');
-};
+}
+
+function tampilkanPopupNotifikasi(judul, pesan, warna) {
+    let popup = document.createElement("div");
+    popup.className = `popup-notif ${warna}`;
+    popup.innerHTML = `<strong>${judul}</strong><p>${pesan}</p>`;
+    document.body.appendChild(popup);
+    setTimeout(() => popup.remove(), 3000);
+}
