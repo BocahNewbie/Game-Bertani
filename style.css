@@ -1,17 +1,16 @@
 /* ==========================================================
-   CYBER-KONOHA MODERN THEME (TOP TABS & STATIC INLINE POPUP)
+   CLASSIC COZY FARM THEME (HANGAT, KLASIK, & NYAMAN DI MATA)
    ================================================---------- */
 :root {
-    --bg-main: #0b0f19;
-    --bg-card: #131c2e;
-    --bg-panel: #17223b;
-    --border-glow: rgba(139, 92, 246, 0.4);
-    --neon-green: #10b981;
-    --neon-green-glow: rgba(16, 185, 129, 0.3);
-    --neon-purple: #a855f7;
-    --neon-blue: #3b82f6;
-    --text-main: #f1f5f9;
-    --text-muted: #94a3b8;
+    --bg-main: #f4efe6;          /* Krem kertas / warna latar santai */
+    --bg-card: #ffffff;          /* Putih bersih untuk kartu */
+    --bg-panel: #e2d9c8;         /* Kayu muda / panel lembut */
+    --border-color: #d1c7b7;     /* Garis batas natural */
+    --primary-wood: #8c6239;     /* Kayu klasik */
+    --accent-green: #4f772d;     /* Hijau daun / tanaman */
+    --accent-green-hover: #3d5e22;
+    --text-main: #2b2b2b;        /* Teks gelap nyaman dibaca */
+    --text-muted: #6b7280;
 }
 
 body {
@@ -26,22 +25,22 @@ body {
     gap: 20px;
 }
 
-/* Header Game */
+/* Header Game (Gaya Papan Kayu Klasik) */
 .game-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-panel) 100%);
+    background: #ffffff;
     padding: 16px 24px;
-    border-radius: 16px;
-    border: 1px solid var(--border-glow);
-    box-shadow: 0 8px 30px rgba(11, 15, 25, 0.8);
+    border-radius: 12px;
+    border: 2px solid var(--border-color);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .player-info {
     font-weight: bold;
     font-size: 1.1rem;
-    color: var(--text-main);
+    color: var(--primary-wood);
     display: flex;
     align-items: center;
     gap: 8px;
@@ -52,57 +51,62 @@ body {
     gap: 20px;
     font-size: 0.95rem;
     font-weight: 600;
+    color: #4b5563;
 }
 
 #stat-uang {
-    color: #34d399;
+    color: #047857;
+    background: #ecfdf5;
+    padding: 4px 10px;
+    border-radius: 6px;
+    border: 1px solid #a7f3d0;
 }
 
-/* Navigasi Tab Horizontal di Atas */
+/* Navigasi Tab Horizontal di Atas (Gaya Tombol Kayu/Daun) */
 .game-tabs {
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
-    background: var(--bg-card);
+    background: #ffffff;
     padding: 16px;
-    border-radius: 16px;
-    border: 1px solid var(--border-glow);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+    border-radius: 12px;
+    border: 2px solid var(--border-color);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .tab-btn {
-    background: rgba(23, 34, 59, 0.6);
-    border: 1px solid #1e293b;
-    color: var(--text-muted);
-    padding: 9px 16px;
-    border-radius: 10px;
+    background: #f9f8f6;
+    border: 1px solid var(--border-color);
+    color: #4b5563;
+    padding: 10px 16px;
+    border-radius: 8px;
     font-size: 0.9rem;
+    font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
 }
 
 .tab-btn:hover {
-    color: var(--text-main);
-    background: rgba(59, 130, 246, 0.15);
-    border-color: var(--neon-blue);
+    background: #f3f0e6;
+    color: var(--primary-wood);
+    border-color: var(--primary-wood);
 }
 
 .tab-btn.active {
-    background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(139, 92, 246, 0.2));
-    color: #34d399;
-    border-color: var(--neon-green);
-    font-weight: bold;
-    box-shadow: 0 0 12px var(--neon-green-glow);
+    background: var(--accent-green);
+    color: white;
+    border-color: var(--accent-green);
+    box-shadow: 0 2px 8px rgba(79, 119, 45, 0.3);
 }
 
 /* Area Konten Utama */
 .game-content {
-    background: var(--bg-card);
+    background: #ffffff;
     padding: 28px;
-    border-radius: 16px;
-    border: 1px solid var(--border-glow);
+    border-radius: 12px;
+    border: 2px solid var(--border-color);
     min-height: 450px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .tab-content {
@@ -115,9 +119,9 @@ body {
 
 .game-content h2 {
     margin-top: 0;
-    color: var(--text-main);
+    color: var(--primary-wood);
     font-size: 1.3rem;
-    border-bottom: 2px solid rgba(139, 92, 246, 0.2);
+    border-bottom: 2px dashed var(--border-color);
     padding-bottom: 12px;
     margin-bottom: 20px;
 }
@@ -129,9 +133,9 @@ body {
 }
 
 .card, .lahan-card {
-    background: linear-gradient(145deg, #101726, #162036);
-    border: 1px solid #1e293b;
-    border-radius: 12px;
+    background: #faf8f5;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
     padding: 16px;
     display: flex;
     flex-direction: column;
@@ -142,43 +146,44 @@ body {
 }
 
 .card:hover, .lahan-card:hover {
-    border-color: var(--neon-purple);
+    border-color: var(--primary-wood);
+    box-shadow: 0 4px 12px rgba(140, 98, 57, 0.1);
     transform: translateY(-2px);
 }
 
 .card h3, .lahan-card h3 {
     margin: 0;
     font-size: 1rem;
-    color: #e2e8f0;
+    color: var(--text-main);
 }
 
 .card button, .lahan-card button, .shop-grid button, .btn-jual-item {
-    background: #2563eb;
+    background: var(--primary-wood);
     color: white;
     border: none;
-    padding: 7px 14px;
+    padding: 8px 14px;
     border-radius: 6px;
     font-size: 0.85rem;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: background 0.2s ease;
     width: 100%;
     margin-top: 6px;
 }
 
 .card button:hover, .lahan-card button:hover, .shop-grid button:hover, .btn-jual-item:hover {
-    background: #1d4ed8;
+    background: #6d4b29;
 }
 
 .btn-jual-item {
-    background: #059669 !important;
+    background: var(--accent-green) !important;
 }
 .btn-jual-item:hover {
-    background: #10b981 !important;
+    background: var(--accent-green-hover) !important;
 }
 
 /* ==========================================================
-   FORM / KOTAK VERIFIKASI (MUNCUL RAPI DI BAWAH / INLINE)
+   FORM / KOTAK POPUP (MUNCUL STABIL DI BAWAH / INLINE RAPI)
    ================================================---------- */
 div[id*="Beli"], div[id*="Jual"], .shop-modal, .popup-belanja, div[class*="modal"] {
     position: relative !important;
@@ -187,12 +192,12 @@ div[id*="Beli"], div[id*="Jual"], .shop-modal, .popup-belanja, div[class*="modal
     transform: none !important;
     z-index: 10 !important;
     
-    background: linear-gradient(145deg, #0f172a, #1e1b4b) !important;
-    border: 2px solid var(--neon-purple) !important;
-    border-radius: 16px !important;
+    background: #faf8f5 !important;
+    border: 2px solid var(--primary-wood) !important;
+    border-radius: 12px !important;
     padding: 24px !important;
     color: var(--text-main) !important;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6) !important;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1) !important;
     width: 100% !important;
     max-width: 400px !important;
     margin: 20px auto !important;
@@ -204,16 +209,15 @@ div[id*="Beli"], div[id*="Jual"], .shop-modal, .popup-belanja, div[class*="modal
     gap: 12px !important;
 }
 
-/* Hapus backdrop hitam redup karena sekarang bentuknya kotak panel biasa di halaman */
 div[id*="Beli"]::before, div[id*="Jual"]::before, .shop-modal::before, .popup-belanja::before {
     display: none !important;
 }
 
 div[id*="Beli"] h2, div[id*="Beli"] h3, 
 div[id*="Jual"] h2, div[id*="Jual"] h3 {
-    color: #c084fc !important;
-    font-size: 1.1rem !important;
-    border-bottom: 1px solid rgba(168, 85, 247, 0.3) !important;
+    color: var(--primary-wood) !important;
+    font-size: 1.15rem !important;
+    border-bottom: 1px dashed var(--border-color) !important;
     padding-bottom: 8px !important;
     margin: 0 0 6px 0 !important;
     width: 100%;
@@ -222,54 +226,49 @@ div[id*="Jual"] h2, div[id*="Jual"] h3 {
 
 div[id*="Beli"] input[type="number"], div[id*="Beli"] input[type="text"],
 div[id*="Jual"] input[type="number"], div[id*="Jual"] input[type="text"] {
-    background: #090d16 !important;
-    border: 1px solid var(--neon-purple) !important;
-    color: #38bdf8 !important;
-    border-radius: 10px !important;
+    background: #ffffff !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-main) !important;
+    border-radius: 8px !important;
     padding: 8px 12px !important;
     text-align: center !important;
     font-size: 1.1rem !important;
     font-weight: bold !important;
     outline: none !important;
-    box-shadow: inset 0 2px 6px rgba(0,0,0,0.6) !important;
     width: 90px !important;
     margin: 4px auto !important;
     display: block !important;
 }
 
 div[id*="Beli"] button, div[id*="Jual"] button {
-    background: linear-gradient(135deg, #10b981, #059669) !important;
+    background: var(--accent-green) !important;
     color: white !important;
     border: none !important;
     padding: 8px 16px !important;
-    border-radius: 8px !important;
+    border-radius: 6px !important;
     font-weight: 700 !important;
     font-size: 0.85rem !important;
     cursor: pointer !important;
-    transition: all 0.2s ease !important;
-    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3) !important;
+    transition: background 0.2s ease !important;
     width: 100% !important;
     margin-top: 4px !important;
+    box-shadow: none !important;
 }
 
 div[id*="Beli"] button:hover, div[id*="Jual"] button:hover {
-    background: linear-gradient(135deg, #34d399, #10b981) !important;
-    box-shadow: 0 0 15px rgba(16, 185, 129, 0.5) !important;
-    transform: translateY(-1px);
+    background: var(--accent-green-hover) !important;
+    transform: none !important;
 }
 
 div[id*="Beli"] button:nth-last-child(2), 
 div[id*="Jual"] button:nth-last-child(2) {
-    background: #1e293b !important;
-    color: var(--text-muted) !important;
-    border: 1px solid #334155 !important;
-    box-shadow: none !important;
+    background: #e5e7eb !important;
+    color: #4b5563 !important;
+    border: 1px solid var(--border-color) !important;
 }
 
 div[id*="Beli"] button:nth-last-child(2):hover, 
 div[id*="Jual"] button:nth-last-child(2):hover {
-    background: #334155 !important;
-    color: #fff !important;
-    border-color: #64748b !important;
-    box-shadow: none !important;
+    background: #d1d5db !important;
+    color: #1f2937 !important;
 }
