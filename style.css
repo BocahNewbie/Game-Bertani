@@ -1,5 +1,5 @@
 /* ==========================================================
-   CYBER-KONOHA MODERN THEME (DARK BLUE, PURPLE, NEON GREEN)
+   CYBER-KONOHA CLEAN THEME (TOP TABS & FLOATING MODAL)
    ================================================---------- */
 :root {
     --bg-main: #0b0f19;
@@ -26,9 +26,7 @@ body {
     gap: 20px;
 }
 
-/* ==========================================================
-   HEADER GAME
-   ================================================---------- */
+/* Header Game */
 .game-header {
     display: flex;
     justify-content: space-between;
@@ -37,7 +35,7 @@ body {
     padding: 16px 24px;
     border-radius: 16px;
     border: 1px solid var(--border-glow);
-    box-shadow: 0 8px 30px rgba(11, 15, 25, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 30px rgba(11, 15, 25, 0.8);
 }
 
 .player-info {
@@ -60,195 +58,136 @@ body {
     color: #34d399;
 }
 
-/* ==========================================================
-   LAYOUT UTAMA & SIDEBAR
-   ================================================---------- */
-.main-layout {
+/* Navigasi Tab Horizontal di Atas */
+.konoha-nav, .game-tabs {
     display: flex;
-    gap: 24px;
-    align-items: flex-start;
-}
-
-#btn-toggle-sidebar {
-    background: linear-gradient(135deg, #1e1b4b, var(--bg-panel));
-    color: #c084fc;
-    border: 1px solid var(--neon-purple);
-    padding: 10px 18px;
-    border-radius: 10px;
-    cursor: pointer;
-    font-size: 0.85rem;
-    font-weight: 600;
-    box-shadow: 0 4px 15px rgba(168, 85, 247, 0.2);
-    transition: all 0.25s ease;
-}
-
-#btn-toggle-sidebar:hover {
-    background: rgba(168, 85, 247, 0.2);
-    box-shadow: 0 0 15px rgba(168, 85, 247, 0.4);
-    transform: translateY(-1px);
-}
-
-.konoha-nav {
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
+    flex-wrap: wrap;
+    gap: 12px;
     background: var(--bg-card);
-    padding: 18px;
+    padding: 16px;
     border-radius: 16px;
     border: 1px solid var(--border-glow);
-    width: 250px;
-    flex-shrink: 0;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-    transition: all 0.3s ease;
-}
-
-.konoha-nav.hidden {
-    display: none;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
 }
 
 .nav-group {
     display: flex;
-    flex-direction: column;
     gap: 8px;
+    align-items: center;
 }
 
 .group-title {
-    font-size: 0.75rem;
-    font-weight: 800;
-    color: var(--neon-purple);
-    text-transform: uppercase;
-    letter-spacing: 1.2px;
-    border-bottom: 1px dashed rgba(168, 85, 247, 0.3);
-    padding-bottom: 6px;
+    display: none; /* Sembunyikan judul kategori jika memenuhi baris atas */
 }
 
 .group-buttons {
     display: flex;
-    flex-direction: column;
-    gap: 6px;
+    gap: 8px;
+    flex-wrap: wrap;
 }
 
-.konoha-nav .tab-btn {
-    background: rgba(23, 34, 59, 0.5);
+.tab-btn {
+    background: rgba(23, 34, 59, 0.6);
     border: 1px solid #1e293b;
     color: var(--text-muted);
-    padding: 10px 14px;
-    border-radius: 10px;
-    font-size: 0.9rem;
-    text-align: left;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 0.85rem;
     cursor: pointer;
     transition: all 0.2s ease;
 }
 
-.konoha-nav .tab-btn:hover {
+.tab-btn:hover {
     color: var(--text-main);
     background: rgba(59, 130, 246, 0.15);
     border-color: var(--neon-blue);
-    transform: translateX(3px);
 }
 
-.konoha-nav .tab-btn.active {
+.tab-btn.active {
     background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(139, 92, 246, 0.2));
     color: #34d399;
     border-color: var(--neon-green);
     font-weight: bold;
-    box-shadow: 0 0 15px var(--neon-green-glow), inset 0 0 10px rgba(16, 185, 129, 0.1);
+    box-shadow: 0 0 12px var(--neon-green-glow);
 }
 
-/* ==========================================================
-   AREA KONTEN UTAMA & KARTU ITEM
-   ================================================---------- */
+/* Area Konten Utama */
+.main-layout {
+    display: block; /* Mengembalikan layout ke satu kolom utama */
+}
+
 .game-content {
-    flex-grow: 1;
     background: var(--bg-card);
     padding: 28px;
     border-radius: 16px;
     border: 1px solid var(--border-glow);
-    min-height: 500px;
+    min-height: 450px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
 
 .tab-content {
     display: none;
-    animation: fadeInContent 0.3s ease-in-out;
 }
 
 .tab-content.active {
     display: block;
 }
 
-@keyframes fadeInContent {
-    from { opacity: 0; transform: translateY(6px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
 .game-content h2 {
     margin-top: 0;
     color: var(--text-main);
-    font-size: 1.4rem;
+    font-size: 1.3rem;
     border-bottom: 2px solid rgba(139, 92, 246, 0.2);
-    padding-bottom: 14px;
-    margin-bottom: 24px;
+    padding-bottom: 12px;
+    margin-bottom: 20px;
 }
 
 .grid-container, .shop-grid, .inventory-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
-    gap: 18px;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
 }
 
 .card, .lahan-card {
     background: linear-gradient(145deg, #101726, #162036);
     border: 1px solid #1e293b;
     border-radius: 12px;
-    padding: 20px;
+    padding: 16px;
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
-    gap: 10px;
-    transition: all 0.25s ease;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    gap: 8px;
+    transition: all 0.2s ease;
 }
 
 .card:hover, .lahan-card:hover {
     border-color: var(--neon-purple);
-    transform: translateY(-4px);
-    box-shadow: 0 8px 25px rgba(168, 85, 247, 0.25);
+    transform: translateY(-2px);
 }
 
 .card h3, .lahan-card h3 {
     margin: 0;
-    font-size: 1.05rem;
+    font-size: 1rem;
     color: #e2e8f0;
 }
 
 .card button, .lahan-card button, .shop-grid button {
-    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    background: #2563eb;
     color: white;
     border: none;
-    padding: 8px 16px;
-    border-radius: 8px;
+    padding: 7px 14px;
+    border-radius: 6px;
     font-size: 0.85rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
-    margin-top: 8px;
     width: 100%;
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    margin-top: 6px;
 }
 
 .card button:hover, .lahan-card button:hover, .shop-grid button:hover {
-    background: linear-gradient(135deg, #3b82f6, #2563eb);
-    box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
-    transform: translateY(-1px);
-}
-
-.card button:disabled, .lahan-card button:disabled {
-    background: #1e293b;
-    color: #64748b;
-    cursor: not-allowed;
-    box-shadow: none;
+    background: #1d4ed8;
 }
 
 /* ==========================================================
@@ -279,7 +218,7 @@ div[id*="Beli"], div[id*="Jual"], .shop-modal, .popup-belanja {
     to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
 }
 
-/* Lapisan latar belakang redup (backdrop) di belakang popup */
+/* Latar belakang redup (backdrop) di belakang popup */
 div[id*="Beli"]::before, div[id*="Jual"]::before {
     content: '';
     position: fixed;
