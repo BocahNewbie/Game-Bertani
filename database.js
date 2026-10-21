@@ -11,15 +11,15 @@ const GAME_DATABASE = {
         bibit_apel: { id: "bibit_apel", hasilId: "apel", nama: "Bibit Apel", hargaBeli: 54, durasi: 259200, icon: "🍎" }
     },
     hasilPanen: {
-        padi: { id: "padi", nama: "Padi", hargaJual: 13, icon: "🌾" },
-        jagung: { id: "jagung", nama: "Jagung", hargaJual: 23, icon: "🌽" },
-        cabai: { id: "cabai", nama: "Cabai", hargaJual: 32, icon: "🌶️" },
-        tomat: { id: "tomat", nama: "Tomat", hargaJual: 34, icon: "🍅" },
-        kol: { id: "kol", nama: "Kol", hargaJual: 25, icon: "🥬" },
-        kacang: { id: "kacang", nama: "Kacang", hargaJual: 34, icon: "🥜" },
-        bawang_merah: { id: "bawang_merah", nama: "Bawang Merah", hargaJual: 42, icon: "🧅" },
-        wortel: { id: "wortel", nama: "Wortel", hargaJual: 45, icon: "🥕" },
-        apel: { id: "apel", nama: "Apel", hargaJual: 71, icon: "🍎" }
+        padi: { id: "padi", nama: "Padi", hargaJual: 15, icon: "🌾" },
+        jagung: { id: "jagung", nama: "Jagung", hargaJual: 28, icon: "🌽" },
+        cabai: { id: "cabai", nama: "Cabai", hargaJual: 36, icon: "🌶️" },
+        tomat: { id: "tomat", nama: "Tomat", hargaJual: 39, icon: "🍅" },
+        kol: { id: "kol", nama: "Kol", hargaJual: 27, icon: "🥬" },
+        kacang: { id: "kacang", nama: "Kacang", hargaJual: 43, icon: "🥜" },
+        bawang_merah: { id: "bawang_merah", nama: "Bawang Merah", hargaJual: 55, icon: "🧅" },
+        wortel: { id: "wortel", nama: "Wortel", hargaJual: 57, icon: "🥕" },
+        apel: { id: "apel", nama: "Apel", hargaJual: 81, icon: "🍎" }
     },
     ternak: {
         ayam: { id: "ayam", nama: "Ayam", hargaBeli: 37000, hasilId: "telur_ayam", icon: "🐔" },
@@ -34,22 +34,22 @@ const GAME_DATABASE = {
         pakan_babi: { id: "pakan_babi", targetTernak: "babi", nama: "Pakan Babi", hargaBeli: 1500, icon: "🌽" }
     },
     ternakHasil: {
-        telur_ayam: { id: "telur_ayam", nama: "Telur Ayam", hargaJual: 5000, icon: "🥚" },
+        telur_ayam: { id: "telur_ayam", nama: "Telur Ayam", hargaJual: 2000, icon: "🥚" },
         susu_sapi: { id: "susu_sapi", nama: "Susu Sapi", hargaJual: 25000, icon: "🥛" },
         susu_kambing: { id: "susu_kambing", nama: "Susu Kambing", hargaJual: 14000, icon: "🍼" },
-        daging_babi: { id: "daging_babi", nama: "Daging Babi", hargaJual: 30000, icon: "🥩" }
+        daging_babi: { id: "daging_babi", nama: "Daging Babi", hargaJual: 50000, icon: "🥩" }
     },
     jagalHasil: {
         daging_ayam: { id: "daging_ayam", nama: "Daging Ayam", jumlah: 8, hargaJual: 7000, icon: "🍗" },
         daging_sapi: { id: "daging_sapi", nama: "Daging Sapi", jumlah: 18, hargaJual: 15000, icon: "🥩" },
         daging_kambing: { id: "daging_kambing", nama: "Daging Kambing", jumlah: 10, hargaJual: 10000, icon: "🍖" },
-        daging_babi_mentah: { id: "daging_babi_mentah", nama: "Daging Babi Mentah", jumlah: 15, hargaJual: 12000, icon: "🥓" }
+        daging_babi_mentah: { id: "daging_babi_olahan", nama: "Daging Babi Olahan", jumlah: 15, hargaJual: 12000, icon: "🥓" }
     },
     alat: {
-        pisau: { id: "pisau", nama: "Pisau Potong", hargaBeli: 35000, durabilityMax: 300, biayaAsah: 12000, icon: "🔪" }
+        pisau: { id: "pisau", nama: "Pisau Potong", hargaBeli: 35000, durabilityMax: 300, biayaAsah: 17000, icon: "🔪" }
     },
     
     material: {
-        kayu: { id: "kayu", nama: "Kayu", hargaBeli: 17, icon: "🪵" }
+        kayu: { id: "kayu", nama: "Kayu", hargaBeli: 24, icon: "🪵" }
     }
 };
