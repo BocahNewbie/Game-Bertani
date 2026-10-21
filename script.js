@@ -1281,7 +1281,7 @@ setInterval(() => {
         let idTab = tabAktif.id;
         if (idTab === 'tab-lahan') renderLahan();
         if (idTab === 'tab-kandang') renderKandang();
-        if (idTab === 'tab-papan-misi') renderPapanMisi();
+        if (idTab === 'tab-misi') renderPapanMisi();
     }
 }, 1500);
 
