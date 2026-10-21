@@ -51,5 +51,10 @@ const GAME_DATABASE = {
     
     material: {
         kayu: { id: "kayu", nama: "Kayu", hargaBeli: 24, icon: "🪵" }
-    }
+    },
+    
+    ikan: {
+    ikan_lele: { nama: "Ikan Lele", icon: "🐟", hargaJual: 175, tingkatKesan: "Mudah" },
+    ikan_gurame: { nama: "Ikan Gurame", icon: "🐠", hargaJual: 520, tingkatKesan: "Sedang" },
+    ikan_mas: { nama: "Ikan Mas Emas", icon: "🐡", hargaJual: 900, tingkatKesan: "Sangat Sulit" }
 };
