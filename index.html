@@ -26,6 +26,8 @@
         <button class="tab-btn" onclick="gantiTab(event, 'tab-kandang')">🐮 Kandang</button>
         <button class="tab-btn" onclick="gantiTab(event, 'tab-supermarket')">🛒 Supermarket</button>
         <button class="tab-btn" onclick="gantiTab(event, 'tab-pasar')">🏬 Pasar</button>
+        <button class="tab-btn" onclick="gantiTab(event, 'tab-papan-misi')">📜 Papan Misi</button>
+        <button class="tab-btn" onclick="gantiTab(event, 'tab-sungai')">🌊 Sungai</button>
         <button class="tab-btn" onclick="gantiTab(event, 'tab-jagal')">🔪 Jagal</button>
         <button class="tab-btn" onclick="gantiTab(event, 'tab-tukang-kayu')">🪵 Tukang Kayu</button>
         <button class="tab-btn" onclick="gantiTab(event, 'tab-pengepul')">💰 Pengepul</button>
@@ -58,6 +60,18 @@
         <section id="tab-pasar" class="tab-content">
             <h2>Pasar Hewan & Pakan</h2>
             <div id="list-pasar" class="shop-grid"></div>
+        </section>
+
+        <!-- Tab Papan Misi -->
+        <section id="tab-papan-misi" class="tab-content">
+            <h2>Papan Pengumuman & Pesanan Desa</h2>
+            <div id="list-misi" class="grid-container"></div>
+        </section>
+
+        <!-- Tab Sungai (Memancing) -->
+        <section id="tab-sungai" class="tab-content">
+            <h2>Area Sungai Desa</h2>
+            <div id="area-sungai"></div>
         </section>
 
         <!-- Tab Jagal -->
