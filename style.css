@@ -5,7 +5,7 @@
     --bg-main: #0b0f19;
     --bg-card: #131c2e;
     --bg-panel: #17223b;
-    --border-glow: rgba(139, 92, 246, 0.4); /* Aksen Ungu */
+    --border-glow: rgba(139, 92, 246, 0.4);
     --neon-green: #10b981;
     --neon-green-glow: rgba(16, 185, 129, 0.3);
     --neon-purple: #a855f7;
@@ -27,7 +27,7 @@ body {
 }
 
 /* ==========================================================
-   HEADER GAME (FUTURISTIC PANEL)
+   HEADER GAME
    ================================================---------- */
 .game-header {
     display: flex;
@@ -61,7 +61,7 @@ body {
 }
 
 /* ==========================================================
-   LAYOUT UTAMA & SIDEBAR MODERN
+   LAYOUT UTAMA & SIDEBAR
    ================================================---------- */
 .main-layout {
     display: flex;
@@ -88,7 +88,6 @@ body {
     transform: translateY(-1px);
 }
 
-/* Sidebar Menu */
 .konoha-nav {
     display: flex;
     flex-direction: column;
@@ -148,7 +147,6 @@ body {
     transform: translateX(3px);
 }
 
-/* Tombol Aktif (Neon Green + Ungu Glow) */
 .konoha-nav .tab-btn.active {
     background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(139, 92, 246, 0.2));
     color: #34d399;
@@ -191,7 +189,6 @@ body {
     border-bottom: 2px solid rgba(139, 92, 246, 0.2);
     padding-bottom: 14px;
     margin-bottom: 24px;
-    letter-spacing: 0.5px;
 }
 
 .grid-container, .shop-grid, .inventory-grid {
@@ -255,22 +252,22 @@ body {
 }
 
 /* ==========================================================
-   POPUP MODAL FULL SCREEN OVERLAY & FLOATING DIALOG
+   POPUP MODAL / VERIFIKASI BELANJA (MELAYANG DI TENGAH)
    ================================================---------- */
 div[id*="Beli"], div[id*="Jual"], .shop-modal, .popup-belanja {
     position: fixed !important;
     top: 50% !important;
     left: 50% !important;
     transform: translate(-50%, -50%) !important;
-    z-index: 2147483647 !important; /* Nilai maksimum z-index agar di atas segalanya */
+    z-index: 2147483647 !important;
     
     background: linear-gradient(145deg, #0f172a, #1e1b4b) !important;
     border: 2px solid var(--neon-purple) !important;
     border-radius: 20px !important;
     padding: 32px !important;
     color: var(--text-main) !important;
-    box-shadow: 0 0 0 100vw rgba(11, 15, 25, 0.8), 0 25px 60px rgba(0, 0, 0, 0.9), 0 0 35px rgba(168, 85, 247, 0.5) !important;
-    width: 340px !important;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9), 0 0 35px rgba(168, 85, 247, 0.5) !important;
+    width: 360px !important;
     max-width: 90vw !important;
     margin: 0 !important;
     
@@ -278,8 +275,19 @@ div[id*="Beli"], div[id*="Jual"], .shop-modal, .popup-belanja {
 }
 
 @keyframes popupPop {
-    from { opacity: 0; transform: translate(-50%, -45%) scale(0.9); }
+    from { opacity: 0; transform: translate(-50%, -45%) scale(0.95); }
     to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+
+/* Lapisan latar belakang redup (backdrop) di belakang popup */
+div[id*="Beli"]::before, div[id*="Jual"]::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(7, 10, 18, 0.85);
+    backdrop-filter: blur(6px);
+    z-index: -1;
+    pointer-events: auto;
 }
 
 div[id*="Beli"] h2, div[id*="Beli"] h3, 
@@ -304,7 +312,7 @@ div[id*="Jual"] input[type="number"], div[id*="Jual"] input[type="text"] {
     font-weight: bold;
     outline: none;
     box-shadow: inset 0 2px 6px rgba(0,0,0,0.6);
-    width: 80px;
+    width: 100px;
     margin: 10px auto;
     display: block;
 }
