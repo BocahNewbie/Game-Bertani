@@ -204,6 +204,13 @@ function renderLahan() {
                     <button onclick="konfirmasiBukaLahan(${i})" style="background: #2563eb;">Buka Lahan</button>
                 </div>
             `;
+            // Contoh pengecekan pada tombol buka lahan baru di file script.js:
+if (lahan.status === 'dibangun') {
+    // Tombol otomatis terblok dan menampilkan progres waktu
+    tombolAksi = `<button disabled style="background: #334155; cursor: not-allowed; opacity: 0.7;">⏳ Sedang Dibuka...</button>`;
+} else {
+    tombolAksi = `<button onclick="konfirmasiBukaLahan(${i})">Buka Lahan</button>`;
+}
         }
     }
 }
