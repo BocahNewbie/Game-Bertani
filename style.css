@@ -5,19 +5,10 @@ body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin: 0;
     padding: 20px;
-}
-
-/* Layout Utama: Ubah jadi 2 Kolom (Sidebar Kiri & Konten Kanan) */
-.game-content, 
-body {
     box-sizing: border-box;
-}
-
-/* Bungkus halaman utama agar menu dan konten bersisian */
-body {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 15px;
 }
 
 /* Header Game di atas */
@@ -31,20 +22,14 @@ body {
     border: 1px solid rgba(59, 130, 246, 0.3);
 }
 
-/* Kontainer utama di bawah header dibagi jadi Sidebar & Area Konten */
+/* Layout Utama: Menyusun Sidebar dan Konten Sejajar */
 .main-layout {
     display: flex;
     gap: 20px;
     align-items: flex-start;
 }
 
-@media (max-width: 768px) {
-    .main-layout {
-        flex-direction: column;
-    }
-}
-
-/* Styling Menu Navigasi di Pinggir (Sidebar ala Konoha) */
+/* Styling Menu Navigasi Sidebar */
 .konoha-nav {
     display: flex;
     flex-direction: column;
@@ -56,6 +41,12 @@ body {
     width: 240px;
     flex-shrink: 0;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+}
+
+/* Kelas untuk menyembunyikan Sidebar */
+.konoha-nav.hidden {
+    display: none;
 }
 
 .nav-group {
@@ -76,7 +67,7 @@ body {
 
 .group-buttons {
     display: flex;
-    flex-direction: column; /* Tombol berbaris ke bawah di sidebar */
+    flex-direction: column;
     gap: 6px;
 }
 
@@ -87,7 +78,7 @@ body {
     padding: 8px 12px;
     border-radius: 6px;
     font-size: 0.85rem;
-    text-align: left; /* Teks rata kiri ala menu game */
+    text-align: left;
     cursor: pointer;
     transition: all 0.2s ease;
 }
@@ -98,7 +89,7 @@ body {
     border-color: rgba(59, 130, 246, 0.4);
 }
 
-/* TANPA SPASI: Memastikan kelas active berfungsi sempurna */
+/* DIPERBAIKI: Tanpa spasi agar kelas active langsung merespons dengan warna hijau */
 .konoha-nav .tab-btn.active {
     background: rgba(16, 185, 129, 0.2);
     color: #34d399;
@@ -114,6 +105,7 @@ body {
     padding: 20px;
     border-radius: 12px;
     border: 1px solid rgba(59, 130, 246, 0.3);
+    min-height: 400px;
 }
 
 .tab-content {
