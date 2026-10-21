@@ -1010,16 +1010,24 @@ window.onload = function() {
     refreshTabAktif('tab-lahan');
 };
 
-// Fungsi untuk menyembunyikan atau menampilkan sidebar
-function toggleSidebar() {
-    const sidebar = document.getElementById('sidebar-menu');
-    const btnToggle = document.getElementById('btn-toggle-sidebar');
+// Memodifikasi fungsi render Tas agar setiap item memiliki tombol Jual
+const originalRenderTas = window.renderTas || function() {};
+window.renderTas = function() {
+    originalRenderTas();
+    const gridTas = document.getElementById('grid-tas');
+    if (!gridTas) return;
     
-    sidebar.classList.toggle('hidden');
-    
-    if (sidebar.classList.contains('hidden')) {
-        btnToggle.innerHTML = "📂 Tampilkan Menu";
-    } else {
-        btnToggle.innerHTML = "📂 Sembunyikan Menu";
-    }
-}
+    // Pastikan card di tas memiliki tombol Jual jika belum ada
+    const cards = gridTas.querySelectorAll('.card, .inventory-card');
+    cards.forEach(card => {
+        if (!card.querySelector('.btn-jual-item') && card.dataset.itemKey) {
+            const btnJual = document.createElement('button');
+            btnJual.innerText = "💰 Jual";
+            btnJual.className = "btn-jual-item";
+            btnJual.onclick = function() {
+                bukaPopupJual(card.dataset.itemKey);
+            };
+            card.appendChild(btnJual);
+        }
+    });
+};
