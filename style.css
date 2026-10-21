@@ -1,8 +1,9 @@
 /* ==========================================================
-   ULTRA-SIMPLE & CLEAN FARM THEME (TANPA KONTENER PEMISAH)
+   GAME-BERTANI STABLE THEME (CLEAN LAYOUT & PROPER FLOATING MODAL)
    ================================================---------- */
 :root {
     --bg-main: #121620;
+    --bg-card: #182235;
     --border-color: #2a344d;
     --primary-color: #3b82f6;
     --accent-green: #10b981;
@@ -54,7 +55,7 @@ body {
     color: #34d399;
 }
 
-/* Navigasi Tab (Tanpa Kotak Kontainer) */
+/* Navigasi Tab */
 .game-tabs {
     display: flex;
     flex-wrap: wrap;
@@ -87,7 +88,7 @@ body {
     border-color: #10b981;
 }
 
-/* Area Konten Utama (Tanpa Background Kotak / Kontainer) */
+/* Area Konten Utama */
 .game-content {
     background: transparent;
     padding: 0;
@@ -118,7 +119,7 @@ body {
     gap: 15px;
 }
 
-/* Kartu Item Bersih */
+/* Kartu Item */
 .card, .lahan-card {
     background: #182235;
     border: 1px solid var(--border-color);
@@ -162,42 +163,49 @@ body {
 }
 
 /* ==========================================================
-   KOTAK VERIFIKASI (MUNCUL RAPI LANGSUNG DI HALAMAN, TANPA POPUP)
+   POPUP MODAL / VERIFIKASI (MELAYANG DI TENGAH DENGAN RAPI)
    ================================================---------- */
 div[id*="Beli"], div[id*="Jual"], .shop-modal, .popup-belanja, div[class*="modal"] {
-    position: relative !important;
-    top: auto !important;
-    left: auto !important;
-    transform: none !important;
-    z-index: 10 !important;
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    z-index: 2147483647 !important;
     
     background: #182235 !important;
-    border: 1px solid var(--border-color) !important;
-    border-radius: 8px !important;
-    padding: 16px !important;
+    border: 2px solid var(--primary-color) !important;
+    border-radius: 12px !important;
+    padding: 24px !important;
     color: var(--text-main) !important;
-    width: 100% !important;
-    max-width: 300px !important;
-    margin: 20px auto !important;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8), 0 0 20px rgba(59, 130, 246, 0.3) !important;
+    width: 320px !important;
+    max-width: 90vw !important;
+    margin: 0 !important;
     
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
     text-align: center !important;
-    gap: 10px !important;
+    gap: 12px !important;
 }
 
+/* Latar belakang gelap transparan di belakang popup */
 div[id*="Beli"]::before, div[id*="Jual"]::before, .shop-modal::before, .popup-belanja::before {
-    display: none !important;
+    content: '';
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(11, 15, 25, 0.75);
+    z-index: -1;
+    pointer-events: auto;
 }
 
 div[id*="Beli"] h2, div[id*="Beli"] h3, 
 div[id*="Jual"] h2, div[id*="Jual"] h3 {
     color: #60a5fa !important;
-    font-size: 0.95rem !important;
+    font-size: 1.1rem !important;
     border-bottom: 1px solid var(--border-color) !important;
-    padding-bottom: 6px !important;
-    margin: 0 0 4px 0 !important;
+    padding-bottom: 8px !important;
+    margin: 0 0 6px 0 !important;
     width: 100%;
 }
 
@@ -207,11 +215,11 @@ div[id*="Jual"] input[type="number"], div[id*="Jual"] input[type="text"] {
     border: 1px solid var(--border-color) !important;
     color: #38bdf8 !important;
     border-radius: 6px !important;
-    padding: 6px 10px !important;
+    padding: 8px 12px !important;
     text-align: center !important;
-    font-size: 1rem !important;
+    font-size: 1.1rem !important;
     font-weight: bold !important;
-    width: 70px !important;
+    width: 90px !important;
     outline: none !important;
 }
 
@@ -219,13 +227,13 @@ div[id*="Beli"] button, div[id*="Jual"] button {
     background: var(--accent-green) !important;
     color: white !important;
     border: none !important;
-    padding: 6px 12px !important;
+    padding: 8px 14px !important;
     border-radius: 6px !important;
     font-weight: 600 !important;
-    font-size: 0.8rem !important;
+    font-size: 0.85rem !important;
     cursor: pointer !important;
     width: 100% !important;
-    margin-top: 2px !important;
+    margin-top: 4px !important;
 }
 
 div[id*="Beli"] button:hover, div[id*="Jual"] button:hover {
