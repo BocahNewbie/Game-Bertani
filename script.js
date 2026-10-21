@@ -9,7 +9,9 @@ let gameState = {
     tas: {},    
     lahan: {},   
     kandang: {},
-    durasiPisau: 300
+    durasiPisau: 300,
+    misiPapan: [],  // Menampung daftar misi di papan desa
+    misiAktif: []   // Menampung misi yang sudah diambil pemain
 };
 
 let transaksiAktif = { idItem: "", namaItem: "", hargaSatuan: 0, stokMaks: 0, tipe: "" };
@@ -18,6 +20,14 @@ let lahanTargetAktif = null;
 let kandangTargetAktif = null;
 let fluktuasiCache = {}; 
 let lastMenitFluktuasi = -1; 
+
+// --- VARIABLE UTAMA MANCING ---
+let intervalMancing = null;
+let posisiBar = 0;
+let arahBar = 1;
+let zonaHijau = { min: 40, max: 60 };
+
+const DAFTAR_NAMA_NPC = ["Pak RT", "Chef Jaka", "Ibu Ros", "Paman Sam", "Mbak Maya", "Pak Dokter"];
 
 function getNamaMusim(hari) {
     let siklusHari = ((hari - 1) % 128) + 1;
@@ -70,6 +80,8 @@ function refreshTabAktif(tabId) {
     if (tabId === 'tab-pengepul') renderPengepul();
     if (tabId === 'tab-tukang-kayu') renderTukangKayu();
     if (tabId === 'tab-wikipedia') renderWikipedia();
+    if (tabId === 'tab-papan-misi') renderPapanMisi();
+    if (tabId === 'tab-sungai') renderSungai();
 }
 
 function ubahNama() {
@@ -111,6 +123,8 @@ function muatGame() {
     if (savedData) {
         gameState = JSON.parse(savedData);
         if (gameState.durasiPisau === undefined) gameState.durasiPisau = 300;
+        if (!gameState.misiPapan) gameState.misiPapan = [];
+        if (!gameState.misiAktif) gameState.misiAktif = [];
         updateHeaderUI();
         refreshTabAktif('tab-lahan');
     }
@@ -130,7 +144,7 @@ function getTotalMenitInGame(hari, jam, menit) {
 }
 
 function formatDurasiBersih(totalMenit) {
-    if (totalMenit <= 0) return "Siap Panen! ✨";
+    if (totalMenit <= 0) return "Siap Panen / Waktu Habis! ✨";
     let hari = Math.floor(totalMenit / 1440);
     let jam = Math.floor((totalMenit % 1440) / 60);
     let menit = totalMenit % 60;
@@ -141,7 +155,7 @@ function formatDurasiBersih(totalMenit) {
     return res;
 }
 
-// --- TAB LAHAN (FIXED) ---
+// --- TAB LAHAN ---
 function renderLahan() {
     const container = document.getElementById("grid-lahan");
     if (!container) return;
@@ -151,7 +165,6 @@ function renderLahan() {
     for (let i = 1; i <= 20; i++) {
         let dataLahan = gameState.lahan[i];
 
-        // 1. Jika lahan sudah dibuka resmi dan aktif
         if (i <= gameState.jumlahLahanAktif) {
             if (!dataLahan) {
                 container.innerHTML += `
@@ -182,7 +195,6 @@ function renderLahan() {
                 `;
             }
         } 
-        // 2. Jika lahan sedang dalam tahap pembangunan (konstruksi)
         else if (dataLahan && dataLahan.status === 'dibangun') {
             let sisaKonstruksi = Math.max(0, dataLahan.targetMenitSelesai - totalMenitSekarang);
             let teksKonstruksi = formatDurasiBersih(sisaKonstruksi);
@@ -199,7 +211,6 @@ function renderLahan() {
                 </div>
             `;
         } 
-        // 3. Jika lahan masih terkunci dan merupakan slot pembukaan berikutnya
         else if (i === gameState.jumlahLahanAktif + 1) {
             let biaya = hitungBiayaUpgradeLahan(i);
             container.innerHTML += `
@@ -210,7 +221,6 @@ function renderLahan() {
                 </div>
             `;
         } 
-        // 4. Lahan terkunci jauh di depan
         else {
             let biaya = hitungBiayaUpgradeLahan(i);
             container.innerHTML += `
@@ -688,7 +698,13 @@ function renderPengepul() {
     container.innerHTML = "";
     let ada = false, html = "";
 
-    let gabungan = { ...GAME_DATABASE.hasilPanen, ...GAME_DATABASE.ternakHasil, ...GAME_DATABASE.jagalHasil };
+    let gabungan = { 
+        ...GAME_DATABASE.hasilPanen, 
+        ...GAME_DATABASE.ternakHasil, 
+        ...GAME_DATABASE.jagalHasil,
+        ...(GAME_DATABASE.ikan || {})
+    };
+
     for (let id in gameState.tas) {
         let stok = gameState.tas[id];
         if (stok > 0 && gabungan[id]) {
@@ -718,7 +734,18 @@ function renderWikipedia() {
     html += `<h2>📚 Panduan & Ensiklopedia Harga Game</h2><table style="width:100%; border-collapse:collapse; margin-top:15px; background:var(--bg-card); border-radius:8px; overflow:hidden;">`;
     html += `<tr style="background:#1e293b; text-align:left;"><th style="padding:10px;">Item</th><th style="padding:10px;">Harga Beli (Normal)</th><th style="padding:10px;">Harga Jual (Normal)</th><th style="padding:10px;">Estimasi Min / Max</th></tr>`;
 
-    let allItems = { ...GAME_DATABASE.bibit, ...GAME_DATABASE.hasilPanen, ...GAME_DATABASE.ternak, ...GAME_DATABASE.pakan, ...GAME_DATABASE.ternakHasil, ...GAME_DATABASE.jagalHasil, ...GAME_DATABASE.alat, ...GAME_DATABASE.material };
+    let allItems = { 
+        ...GAME_DATABASE.bibit, 
+        ...GAME_DATABASE.hasilPanen, 
+        ...GAME_DATABASE.ternak, 
+        ...GAME_DATABASE.pakan, 
+        ...GAME_DATABASE.ternakHasil, 
+        ...GAME_DATABASE.jagalHasil, 
+        ...GAME_DATABASE.alat, 
+        ...GAME_DATABASE.material,
+        ...(GAME_DATABASE.ikan || {})
+    };
+
     for (let id in allItems) {
         let item = allItems[id];
         let beli = item.hargaBeli ? `Rp. ${item.hargaBeli.toLocaleString('id-ID')}` : '-';
@@ -737,6 +764,204 @@ function renderWikipedia() {
     }
     html += `</table>`;
     container.innerHTML = html;
+}
+
+// --- SYSTEM MISI PAPAN PENGUMUMAN ---
+function generasiMisiOtomatis() {
+    if (gameState.misiPapan.length < 4) {
+        let gabungan = {
+            ...GAME_DATABASE.hasilPanen,
+            ...GAME_DATABASE.ternakHasil,
+            ...GAME_DATABASE.jagalHasil,
+            ...(GAME_DATABASE.ikan || {})
+        };
+        let keys = Object.keys(gabungan);
+        if (keys.length === 0) return;
+
+        let idRandom = keys[Math.floor(Math.random() * keys.length)];
+        let itemData = gabungan[idRandom];
+        let jumlahTarget = Math.floor(Math.random() * 8) + 3; // 3-10 pcs
+        let durasiHari = Math.floor(Math.random() * 4) + 2;   // 2-5 hari
+
+        let baseHarga = itemData.hargaJual || 100;
+        let bonusWaktu = (6 - durasiHari) * 0.2;
+        let totalHadiah = Math.round((baseHarga * jumlahTarget) * (1.4 + bonusWaktu));
+
+        let npc = DAFTAR_NAMA_NPC[Math.floor(Math.random() * DAFTAR_NAMA_NPC.length)];
+        let totalMenitSekarang = getTotalMenitInGame(gameState.waktuHari, gameState.waktuJam, gameState.waktuMenit);
+
+        let misiBaru = {
+            idMisi: `misi_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
+            npc: npc,
+            idItem: idRandom,
+            namaItem: itemData.nama,
+            iconItem: itemData.icon,
+            jumlahTarget: jumlahTarget,
+            durasiHari: durasiHari,
+            targetMenitSelesai: totalMenitSekarang + (durasiHari * 1440),
+            hadiahUang: totalHadiah
+        };
+
+        gameState.misiPapan.push(misiBaru);
+    }
+}
+
+function renderPapanMisi() {
+    const container = document.getElementById("list-misi");
+    if (!container) return;
+    container.innerHTML = "";
+
+    const totalMenitSekarang = getTotalMenitInGame(gameState.waktuHari, gameState.waktuJam, gameState.waktuMenit);
+
+    // Hapus Misi Aktif Kadaluarsa
+    gameState.misiAktif = gameState.misiAktif.filter(m => m.targetMenitSelesai > totalMenitSekarang);
+    gameState.misiPapan = gameState.misiPapan.filter(m => m.targetMenitSelesai > totalMenitSekarang);
+
+    let html = `<h3 style="color: #60a5fa; grid-column:1/-1;">📌 Misi Aktif Kamu</h3>`;
+    if (gameState.misiAktif.length === 0) {
+        html += `<p style="grid-column:1/-1; color: var(--text-muted);">Belum ada misi yang diambil.</p>`;
+    } else {
+        gameState.misiAktif.forEach((misi, idx) => {
+            let sisaWaktu = Math.max(0, misi.targetMenitSelesai - totalMenitSekarang);
+            let stokPemain = gameState.tas[misi.idItem] || 0;
+            let cukup = stokPemain >= misi.jumlahTarget;
+
+            html += `
+                <div class="card" style="border: 1px solid ${cukup ? '#34d399' : '#f59e0b'};">
+                    <h3>${misi.npc}</h3>
+                    <p>${misi.iconItem} <b>${misi.namaItem}</b></p>
+                    <p>Butuh: <b>${stokPemain} / ${misi.jumlahTarget} Pcs</b></p>
+                    <p>Hadiah: <b style="color:#34d399;">Rp. ${misi.hadiahUang.toLocaleString('id-ID')}</b></p>
+                    <p style="font-size:0.85rem; color:#f87171;">⏱️ Sisa Waktu: ${formatDurasiBersih(sisaWaktu)}</p>
+                    <button onclick="serahkanMisi(${idx})" style="background:${cukup ? '#10b981' : '#334155'}; margin-top:5px;" ${!cukup ? 'disabled' : ''}>${cukup ? 'Kirim Pesanan' : 'Stok Belum Cukup'}</button>
+                </div>
+            `;
+        });
+    }
+
+    html += `<h3 style="color: #fbbf24; grid-column:1/-1; margin-top:20px;">📜 Papan Pesanan Desa</h3>`;
+    if (gameState.misiPapan.length === 0) {
+        html += `<p style="grid-column:1/-1; color: var(--text-muted);">Papan pesanan sedang kosong. Tunggu beberapa saat...</p>`;
+    } else {
+        gameState.misiPapan.forEach((misi) => {
+            let sisaWaktu = Math.max(0, misi.targetMenitSelesai - totalMenitSekarang);
+            html += `
+                <div class="card">
+                    <h3>${misi.npc}</h3>
+                    <p>${misi.iconItem} <b>${misi.namaItem}</b> (${misi.jumlahTarget} Pcs)</p>
+                    <p>Hadiah: <b style="color:#34d399;">Rp. ${misi.hadiahUang.toLocaleString('id-ID')}</b></p>
+                    <p style="font-size:0.85rem; color:#3b82f6;">⏱️ Tenggat: ${misi.durasiHari} Hari (${formatDurasiBersih(sisaWaktu)})</p>
+                    <button onclick="ambilMisi('${misi.idMisi}')" style="background:#2563eb; margin-top:5px;">Ambil Misi</button>
+                </div>
+            `;
+        });
+    }
+
+    container.innerHTML = html;
+}
+
+function ambilMisi(idMisi) {
+    let index = gameState.misiPapan.findIndex(m => m.idMisi === idMisi);
+    if (index !== -1) {
+        let misi = gameState.misiPapan.splice(index, 1)[0];
+        gameState.misiAktif.push(misi);
+        tampilkanPopupNotifikasi("📜 Misi Diambil!", `Pesanan dari ${misi.npc} telah ditambahkan ke Misi Aktif.`, "neon-blue");
+        renderPapanMisi();
+    }
+}
+
+function serahkanMisi(indexMisi) {
+    let misi = gameState.misiAktif[indexMisi];
+    let stokPemain = gameState.tas[misi.idItem] || 0;
+
+    if (stokPemain >= misi.jumlahTarget) {
+        gameState.tas[misi.idItem] -= misi.jumlahTarget;
+        if (gameState.tas[misi.idItem] <= 0) delete gameState.tas[misi.idItem];
+
+        gameState.uang += misi.hadiahUang;
+        gameState.misiAktif.splice(indexMisi, 1);
+
+        updateHeaderUI();
+        renderTas();
+        renderPapanMisi();
+        tampilkanPopupNotifikasi("🎉 Misi Selesai!", `Pesanan diserahkan! Kamu mendapat Rp. ${misi.hadiahUang.toLocaleString('id-ID')}`, "neon-green");
+    } else {
+        alert("⚠️ Stok barangmu belum mencukupi!");
+    }
+}
+
+// --- TAB SUNGAI & MINI-GAME MEMANCING ---
+function renderSungai() {
+    const container = document.getElementById("area-sungai");
+    if (!container) return;
+
+    container.innerHTML = `
+        <div class="card" style="grid-column: 1/-1; text-align: center; padding: 30px;">
+            <div style="font-size: 4rem; margin-bottom: 10px;">🌊</div>
+            <h2>Area Memancing Desa</h2>
+            <p style="color: var(--text-muted); margin-bottom: 20px;">Lemparkan pancingan untuk mendapatkan berbagai jenis ikan segar!</p>
+            <button onclick="mulaiMancing()" style="background: #2563eb; font-size: 1.1rem; padding: 12px 25px;">🎣 Lempar Pancingan</button>
+        </div>
+    `;
+}
+
+function mulaiMancing() {
+    let modal = document.getElementById("modal-mancing");
+    if (!modal) {
+        modal = document.createElement("div");
+        modal.id = "modal-mancing";
+        modal.className = "modal-overlay";
+        modal.innerHTML = `
+            <div class="modal-card neon-blue" style="text-align: center;">
+                <h3>🎣 Memancing...</h3>
+                <p style="color: var(--text-muted); font-size:0.85rem; margin-bottom:15px;">Tekan TARIK saat jarum tepat di area HIJAU!</p>
+                
+                <div style="position: relative; width: 100%; height: 26px; background: #1e293b; border-radius: 13px; overflow: hidden; border: 2px solid var(--border-color); margin: 15px 0;">
+                    <div id="zona-sukses" style="position: absolute; left: 40%; width: 20%; height: 100%; background: #10b981; opacity: 0.6;"></div>
+                    <div id="jarum-mancing" style="position: absolute; left: 0%; width: 6px; height: 100%; background: #ef4444; border-radius: 3px;"></div>
+                </div>
+
+                <button onclick="tarikPancingan()" style="background: #059669; color: white; padding: 10px 20px; font-weight: bold; width: 100%; font-size:1.1rem;">🎣 TARIK!</button>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+
+    posisiBar = 0;
+    arahBar = 1;
+    modal.style.display = "flex";
+
+    clearInterval(intervalMancing);
+    intervalMancing = setInterval(() => {
+        posisiBar += arahBar * 3.5; 
+        if (posisiBar >= 96 || posisiBar <= 0) arahBar *= -1;
+        
+        let elJarum = document.getElementById("jarum-mancing");
+        if (elJarum) elJarum.style.left = `${posisiBar}%`;
+    }, 30);
+}
+
+function tarikPancingan() {
+    clearInterval(intervalMancing);
+    document.getElementById("modal-mancing").style.display = "none";
+
+    if (posisiBar >= zonaHijau.min && posisiBar <= zonaHijau.max) {
+        let keysIkan = Object.keys(GAME_DATABASE.ikan || {});
+        if (keysIkan.length === 0) {
+            alert("⚠️ Database ikan belum terisi di GAME_DATABASE.ikan!");
+            return;
+        }
+
+        let idIkanDapat = keysIkan[Math.floor(Math.random() * keysIkan.length)];
+        let dataIkan = GAME_DATABASE.ikan[idIkanDapat];
+
+        gameState.tas[idIkanDapat] = (gameState.tas[idIkanDapat] || 0) + 1;
+        
+        tampilkanPopupNotifikasi("🐟 Strike!", `Selamat! Kamu menangkap 1x ${dataIkan.icon} ${dataIkan.nama}`, "neon-green");
+        renderTas();
+    } else {
+        tampilkanPopupNotifikasi("❌ Lepas!", "Sayang sekali, ikannya keburu kabur! Coba lagi.", "neon-amber");
+    }
 }
 
 // --- MODAL KHUSUS PEMBELIAN HEWAN LANGSUNG KE KANDANG ---
@@ -981,7 +1206,17 @@ function renderTas() {
     if (!container) return;
     container.innerHTML = "";
     let ada = false;
-    let all = { ...GAME_DATABASE.bibit, ...GAME_DATABASE.hasilPanen, ...GAME_DATABASE.ternak, ...GAME_DATABASE.pakan, ...GAME_DATABASE.ternakHasil, ...GAME_DATABASE.jagalHasil, ...GAME_DATABASE.alat, ...GAME_DATABASE.material };
+    let all = { 
+        ...GAME_DATABASE.bibit, 
+        ...GAME_DATABASE.hasilPanen, 
+        ...GAME_DATABASE.ternak, 
+        ...GAME_DATABASE.pakan, 
+        ...GAME_DATABASE.ternakHasil, 
+        ...GAME_DATABASE.jagalHasil, 
+        ...GAME_DATABASE.alat, 
+        ...GAME_DATABASE.material,
+        ...(GAME_DATABASE.ikan || {})
+    };
 
     for (let id in gameState.tas) {
         let jml = gameState.tas[id];
@@ -1004,6 +1239,8 @@ setInterval(() => {
         if (gameState.waktuJam >= 24) {
             gameState.waktuJam = 0;
             gameState.waktuHari += 1;
+            // Generate misi baru setiap hari pergantian waktu
+            generasiMisiOtomatis();
         }
     }
     updateHeaderUI();
@@ -1011,18 +1248,24 @@ setInterval(() => {
     let blokMenit = Math.floor(gameState.waktuMenit / 10);
     if (lastMenitFluktuasi !== blokMenit) {
         lastMenitFluktuasi = blokMenit;
-        if (document.getElementById("tab-supermarket").classList.contains("active")) renderSupermarket();
-        if (document.getElementById("tab-pasar").classList.contains("active")) renderPasar();
-        if (document.getElementById("tab-pengepul").classList.contains("active")) renderPengepul();
-        if (document.getElementById("tab-tukang-kayu").classList.contains("active")) renderTukangKayu();
+        if (document.getElementById("tab-supermarket") && document.getElementById("tab-supermarket").classList.contains("active")) renderSupermarket();
+        if (document.getElementById("tab-pasar") && document.getElementById("tab-pasar").classList.contains("active")) renderPasar();
+        if (document.getElementById("tab-pengepul") && document.getElementById("tab-pengepul").classList.contains("active")) renderPengepul();
+        if (document.getElementById("tab-tukang-kayu") && document.getElementById("tab-tukang-kayu").classList.contains("active")) renderTukangKayu();
     }
 
-    if (document.getElementById("tab-lahan").classList.contains("active")) renderLahan();
-    if (document.getElementById("tab-kandang").classList.contains("active")) renderKandang();
+    if (document.getElementById("tab-lahan") && document.getElementById("tab-lahan").classList.contains("active")) renderLahan();
+    if (document.getElementById("tab-kandang") && document.getElementById("tab-kandang").classList.contains("active")) renderKandang();
+    if (document.getElementById("tab-papan-misi") && document.getElementById("tab-papan-misi").classList.contains("active")) renderPapanMisi();
 }, 1500);
 
 window.onload = function() {
     resetHeaderNamaUI();
     muatGame();
+    // Buat stok awal misi papan pengumuman jika masih kosong
+    if (gameState.misiPapan.length === 0) {
+        generasiMisiOtomatis();
+        generasiMisiOtomatis();
+    }
     refreshTabAktif('tab-lahan');
 };
