@@ -46,7 +46,8 @@ const GAME_DATABASE = {
         daging_babi_mentah: { id: "daging_babi_olahan", nama: "Daging Babi Olahan", jumlah: 15, hargaJual: 12000, icon: "🥓" }
     },
     alat: {
-        pisau: { id: "pisau", nama: "Pisau Potong", hargaBeli: 35000, durabilityMax: 300, biayaAsah: 17000, icon: "🔪" }
+        pisau: { id: "pisau", nama: "Pisau Potong", hargaBeli: 35000, durabilityMax: 300, biayaAsah: 17000, icon: "🔪" },
+        kompor: { id: "kompor", nama: "Kompor Dapur", hargaBeli: 50000, durabilityMax: 300, biayaServis: 25000, icon: "🍳" }
     },
     material: {
         kayu: { id: "kayu", nama: "Kayu", hargaBeli: 24, icon: "🪵" }
