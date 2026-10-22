@@ -13,7 +13,8 @@ let gameState = {
     misiPapan: [],
     misiAktif: [],
     mancingHari: 1,
-    mancingCount: 0 // Sekarang ini melacak JUMLAH BERHASIL MEMANCING
+    mancingCount: 0,
+    prosesMasak: []
 };
 
 let transaksiAktif = { idItem: "", namaItem: "", hargaSatuan: 0, stokMaks: 0, tipe: "" };
@@ -89,8 +90,10 @@ function refreshTabAktif(tabId) {
     if (tabId === 'tab-pengepul') renderPengepul();
     if (tabId === 'tab-tukang-kayu') renderTukangKayu();
     if (tabId === 'tab-wikipedia') renderWikipedia();
-    if (tabId === 'tab-memancing') renderMemancing();
+    if (tabId === 'tab-memancing') renderSungai();
     if (tabId === 'tab-misi') renderPapanMisi();
+    if (tabId === 'tab-toko-bumbu') renderTokoBumbu();
+    if (tabId === 'tab-dapur') renderDapur();
 }
 
 function ubahNama() {
@@ -108,7 +111,7 @@ function acceptUbahNama() {
     let namaBaru = inputBaru.value.trim();
     if (namaBaru !== "") {
         gameState.namaPemain = namaBaru;
-        simpanGame(); // Langsung simpan ke localStorage agar permanen
+        simpanGame();
     }
     resetHeaderNamaUI();
 }
@@ -141,6 +144,7 @@ function muatGame() {
             if (!gameState.misiAktif) gameState.misiAktif = [];
             if (gameState.mancingCount === undefined) gameState.mancingCount = 0;
             if (gameState.mancingHari === undefined) gameState.mancingHari = gameState.waktuHari;
+            if (!gameState.prosesMasak) gameState.prosesMasak = [];
         } catch (e) {
             console.error("Gagal parse save data:", e);
         }
@@ -650,7 +654,7 @@ function asahPisau() {
     }
 }
 
-// --- TAB PASAR, SUPERMARKET, TUKANG KAYU, PENGEPUL, WIKIPEDIA ---
+// --- TAB PASAR, SUPERMARKET, TOKO BUMBU, TUKANG KAYU, PENGEPUL, WIKIPEDIA ---
 function renderPasar() {
     const container = document.getElementById("list-pasar");
     if (!container) return;
@@ -693,6 +697,30 @@ function renderSupermarket() {
     }
 }
 
+function renderTokoBumbu() {
+    const container = document.getElementById("list-toko-bumbu");
+    if (!container) return;
+    container.innerHTML = "";
+
+    let html = `<h3 style="color: #fbbf24; grid-column:1/-1;">🌶️ Toko Kelontong & Bumbu Dapur</h3>`;
+    for (let id in GAME_DATABASE.bumbu) {
+        let item = GAME_DATABASE.bumbu[id];
+        let hBeli = item.hargaBeli || 200;
+        let f = getFluktuasiItem(id, hBeli);
+        
+        html += `
+            <div class="card">
+                <div style="font-size:2.5rem;">${item.icon}</div>
+                <h3>${item.nama}</h3>
+                <p>Harga: <b>Rp. ${f.harga.toLocaleString('id-ID')}</b></p>
+                ${getInfoGrafikHarga(f.harga, hBeli)}
+                <button onclick="bukaModalBeli('${id}', '${item.nama}', ${f.harga}, 'toko_bumbu')" style="background: #059669; margin-top: 10px;">Beli Bumbu</button>
+            </div>
+        `;
+    }
+    container.innerHTML = html;
+}
+
 function renderTukangKayu() {
     const container = document.getElementById("list-tukang-kayu");
     if (!container) return;
@@ -730,7 +758,8 @@ function renderPengepul() {
         ...GAME_DATABASE.hasilPanen, 
         ...GAME_DATABASE.ternakHasil, 
         ...GAME_DATABASE.jagalHasil,
-        ...(GAME_DATABASE.ikan || {})
+        ...(GAME_DATABASE.ikan || {}),
+        ...(GAME_DATABASE.masakan || {})
     };
 
     for (let id in gameState.tas) {
@@ -745,7 +774,7 @@ function renderPengepul() {
                     <div style="font-size: 2.5rem;">${item.icon}</div>
                     <h3>${item.nama}</h3>
                     <p>Stok: <b>${stok} Pcs</b></p>
-                    <p>Jual: <b>Rp. ${f.harga}</b></p>
+                    <p>Jual: <b>Rp. ${f.harga.toLocaleString('id-ID')}</b></p>
                     ${getInfoGrafikHarga(f.harga, hJual)}
                     <button onclick="bukaModalJual('${id}', '${item.nama}', ${f.harga}, ${stok})" style="background: #2563eb;">Jual</button>
                 </div>
@@ -760,7 +789,7 @@ function renderWikipedia() {
     if (!container) return;
 
     let html = `<div class="neon-credit">Created By Bocah Newbie</div>`;
-    html += `2📚 Panduan & Ensiklopedia Harga Game</h2><table style="width:100%; border-collapse:collapse; margin-top:15px; background:var(--bg-card); border-radius:8px; overflow:hidden;">`;
+    html += `<h2>📚 Panduan & Ensiklopedia Harga Game</h2><table style="width:100%; border-collapse:collapse; margin-top:15px; background:var(--bg-card); border-radius:8px; overflow:hidden;">`;
     html += `<tr style="background:#1e293b; text-align:left;"><th style="padding:10px;">Item</th><th style="padding:10px;">Harga Beli (Normal)</th><th style="padding:10px;">Harga Jual (Normal)</th><th style="padding:10px;">Estimasi Min / Max</th></tr>`;
 
     let allItems = { 
@@ -772,7 +801,9 @@ function renderWikipedia() {
         ...GAME_DATABASE.jagalHasil, 
         ...GAME_DATABASE.alat, 
         ...GAME_DATABASE.material,
-        ...(GAME_DATABASE.ikan || {})
+        ...(GAME_DATABASE.ikan || {}),
+        ...(GAME_DATABASE.bumbu || {}),
+        ...(GAME_DATABASE.masakan || {})
     };
 
     for (let id in allItems) {
@@ -795,6 +826,118 @@ function renderWikipedia() {
     container.innerHTML = html;
 }
 
+// --- TAB DAPUR OLAHAN & SYSTEM MEMASAK ---
+function renderDapur() {
+    const container = document.getElementById("area-dapur");
+    if (!container) return;
+    container.innerHTML = "";
+
+    const totalMenitSekarang = getTotalMenitInGame(gameState.waktuHari, gameState.waktuJam, gameState.waktuMenit);
+
+    let html = `<h3 style="color: #f59e0b; grid-column:1/-1;">🍳 Kompor Dapur (Proses Memasak)</h3>`;
+    if (!gameState.prosesMasak) gameState.prosesMasak = [];
+
+    if (gameState.prosesMasak.length === 0) {
+        html += `<p style="grid-column:1/-1; color: var(--text-muted);">Tidak ada masakan yang sedang diolah.</p>`;
+    } else {
+        gameState.prosesMasak.forEach((masak, idx) => {
+            let sisaWaktu = Math.max(0, masak.targetMenitSelesai - totalMenitSekarang);
+            let resepInfo = GAME_DATABASE.resep[masak.idResep] || {};
+
+            let tombolAksi = sisaWaktu === 0
+                ? `<button onclick="ambilHasilMasakan(${idx})" style="background: #10b981; color:white;">Sajikan / Ambil (${masak.jumlah}x)</button>`
+                : `<button disabled style="background: #334155; cursor: not-allowed;">Memasak... (${formatDurasiBersih(sisaWaktu)})</button>`;
+
+            html += `
+                <div class="card" style="border: 1px solid #f59e0b;">
+                    <div style="font-size:2.5rem;">${resepInfo.icon || '🍲'}</div>
+                    <h3>${resepInfo.nama}</h3>
+                    <p style="font-size:0.85rem; color:#34d399;">⏱️ ${formatDurasiBersih(sisaWaktu)}</p>
+                    ${tombolAksi}
+                </div>
+            `;
+        });
+    }
+
+    html += `<h3 style="color: #3b82f6; grid-column:1/-1; margin-top:25px;">📖 Buku Resep Dapur</h3>`;
+    
+    for (let idResep in GAME_DATABASE.resep) {
+        let resep = GAME_DATABASE.resep[idResep];
+        let cukupBahan = true;
+        let teksBahan = "";
+
+        for (let idBahan in resep.bahan) {
+            let butuh = resep.bahan[idBahan];
+            let punya = gameState.tas[idBahan] || 0;
+            
+            let itemData = (GAME_DATABASE.bibit && GAME_DATABASE.bibit[idBahan]) || 
+                             (GAME_DATABASE.hasilPanen && GAME_DATABASE.hasilPanen[idBahan]) || 
+                             (GAME_DATABASE.ternakHasil && GAME_DATABASE.ternakHasil[idBahan]) || 
+                             (GAME_DATABASE.jagalHasil && GAME_DATABASE.jagalHasil[idBahan]) || 
+                             (GAME_DATABASE.bumbu && GAME_DATABASE.bumbu[idBahan]) || 
+                             (GAME_DATABASE.ikan && GAME_DATABASE.ikan[idBahan]) || { nama: idBahan, icon: '📦' };
+
+            let warnaStatus = punya >= butuh ? "#34d399" : "#f87171";
+            if (punya < butuh) cukupBahan = false;
+
+            teksBahan += `<span style="color:${warnaStatus}; font-size:0.8rem;">${itemData.icon} ${itemData.nama}: ${punya}/${butuh}</span><br>`;
+        }
+
+        html += `
+            <div class="card" style="border: 1px solid ${cukupBahan ? '#10b981' : 'var(--border-color)'};">
+                <div style="font-size:2.5rem;">${resep.icon}</div>
+                <h3>${resep.nama}</h3>
+                <p style="font-size:0.85rem; color:#fbbf24; margin-bottom:5px;">Harga Jual: <b>Rp. ${resep.hargaJual.toLocaleString('id-ID')}</b></p>
+                <div style="background:#101622; padding:8px; border-radius:6px; text-align:left; margin:8px 0;">
+                    <small style="color:var(--text-muted); font-weight:bold;">Bahan Dibutuhkan:</small><br>
+                    ${teksBahan}
+                </div>
+                <button onclick="mulaiMemasak('${idResep}')" style="background:${cukupBahan ? '#059669' : '#334155'}; width:100%;" ${!cukupBahan ? 'disabled' : ''}>
+                    ${cukupBahan ? '🍳 Masak Sekarang' : 'Bahan Belum Cukup'}
+                </button>
+            </div>
+        `;
+    }
+
+    container.innerHTML = html;
+}
+
+function mulaiMemasak(idResep) {
+    let resep = GAME_DATABASE.resep[idResep];
+    if (!resep) return;
+
+    for (let idBahan in resep.bahan) {
+        let butuh = resep.bahan[idBahan];
+        gameState.tas[idBahan] -= butuh;
+        if (gameState.tas[idBahan] <= 0) delete gameState.tas[idBahan];
+    }
+
+    let totalMenitSekarang = getTotalMenitInGame(gameState.waktuHari, gameState.waktuJam, gameState.waktuMenit);
+    
+    if (!gameState.prosesMasak) gameState.prosesMasak = [];
+    gameState.prosesMasak.push({
+        idResep: idResep,
+        jumlah: 1,
+        targetMenitSelesai: totalMenitSekarang + resep.durasiMenit
+    });
+
+    tampilkanPopupNotifikasi("🍳 Mulai Memasak!", `${resep.nama} sedang dimasak di dapur.`, "neon-amber");
+    renderDapur();
+    renderTas();
+}
+
+function ambilHasilMasakan(index) {
+    let dataMasak = gameState.prosesMasak[index];
+    let resepInfo = GAME_DATABASE.resep[dataMasak.idResep];
+
+    gameState.tas[dataMasak.idResep] = (gameState.tas[dataMasak.idResep] || 0) + dataMasak.jumlah;
+    gameState.prosesMasak.splice(index, 1);
+
+    tampilkanPopupNotifikasi("🍽️ Masakan Matang!", `Kamu mendapatkan ${dataMasak.jumlah}x ${resepInfo.nama}!`, "neon-green");
+    renderDapur();
+    renderTas();
+}
+
 // --- SYSTEM MISI PAPAN PENGUMUMAN ---
 function generasiMisiOtomatis() {
     if (gameState.misiPapan.length < 4) {
@@ -802,7 +945,8 @@ function generasiMisiOtomatis() {
             ...GAME_DATABASE.hasilPanen,
             ...GAME_DATABASE.ternakHasil,
             ...GAME_DATABASE.jagalHasil,
-            ...(GAME_DATABASE.ikan || {})
+            ...(GAME_DATABASE.ikan || {}),
+            ...(GAME_DATABASE.masakan || {})
         };
         let keys = Object.keys(gabungan);
         if (keys.length === 0) return;
@@ -923,7 +1067,6 @@ function renderSungai() {
     const container = document.getElementById("area-sungai");
     if (!container) return;
 
-    // Reset hitungan berhasil memancing jika pergantian hari in-game
     if (gameState.mancingHari !== gameState.waktuHari) {
         gameState.mancingHari = gameState.waktuHari;
         gameState.mancingCount = 0;
@@ -941,20 +1084,15 @@ function renderSungai() {
 }
 
 function mulaiMancing() {
-    // 1. Cek pergantian hari in-game, jika hari berganti maka reset hitungan berhasil mancing
     if (gameState.mancingHari !== gameState.waktuHari) {
         gameState.mancingHari = gameState.waktuHari;
         gameState.mancingCount = 0;
     }
 
-    // 2. HITUNG LEBAR ZONA HIJAU BERDASARKAN JUMLAH BERHASIL (gameState.mancingCount)
-    // Berhasil 0x: lebar ~30%
-    // Berhasil ke-1 s/d 30: mengecil secara bertahap hingga ~2.5%
     let tingkatBerhasil = Math.min(gameState.mancingCount, 30);
-    let progresSebab = tingkatBerhasil / 30; // Nilai 0.0 di awal, bergerak ke 1.0 di keberhasilan ke-30
+    let progresSebab = tingkatBerhasil / 30; 
     let lebarZona = Math.max(2.5, 30 - (27.5 * progresSebab));
 
-    // Posisi acak zona hijau di bar (max 95%)
     let maxPosisiAwal = Math.max(5, 95 - lebarZona);
     let minPosisi = Math.floor(Math.random() * (maxPosisiAwal - 5 + 1)) + 5;
 
@@ -985,7 +1123,6 @@ function mulaiMancing() {
         document.body.appendChild(modal);
     }
 
-    // Update posisi visual Zona Hijau & Teks Informasi Kesulitan
     let elZona = document.getElementById("zona-sukses");
     if (elZona) {
         elZona.style.left = `${zonaHijau.min}%`;
@@ -1016,17 +1153,14 @@ function tarikPancingan() {
     let modal = document.getElementById("modal-mancing");
     if (modal) modal.style.display = "none";
 
-    // CEK APAKAH STRIKE / BERHASIL (JARUM DI ZONA HIJAU)
     if (posisiBar >= zonaHijau.min && posisiBar <= zonaHijau.max) {
         if (!GAME_DATABASE.ikan) {
             alert("⚠️ Database ikan belum terisi!");
             return;
         }
 
-        // TAMBAHKAN HITUNGAN KEBERHASILAN KARENA BERHASIL! (Membuat lemparan berikutnya lebih sulit)
         gameState.mancingCount += 1;
 
-        // Tentukan Tingkat Kesulitan Berdasarkan Persentase (1 - 100)
         let roll = Math.floor(Math.random() * 100) + 1;
         let targetTingkat = "Mudah";
 
@@ -1057,7 +1191,7 @@ function tarikPancingan() {
         gameState.tas[idIkanDapat] = (gameState.tas[idIkanDapat] || 0) + 1;
         
         let warnaNotif = "neon-green";
-        if (targetTingkat === "Mudah") warnaNotif = "neon-yellow";
+        if (targetTingkat === "Mudah") warnaNotif = "neon-green";
         if (targetTingkat === "Sedang") warnaNotif = "neon-blue";
         if (targetTingkat === "Sulit") warnaNotif = "neon-amber";
         if (targetTingkat === "Sangat Sulit") warnaNotif = "neon-purple";
@@ -1070,12 +1204,11 @@ function tarikPancingan() {
 
         renderTas();
     } else {
-        // JIKA GAGAL: gameState.mancingCount TIDAK bertambah, tingkat kesulitan tetap sama
         tampilkanPopupNotifikasi("❌ Lepas!", "HA~ HA~ HA~, ikannya kabur! Coba lagi.", "neon-amber");
     }
 }
 
-// --- MODAL DENGAN HELPER PEMBELIAN & PENJUALAN ---
+// --- MODAL & PEMBELIAN ---
 function bukaModalBeliHewan(id, nama, harga) {
     transaksiAktif = { idItem: id, namaItem: nama, hargaSatuan: harga, tipe: 'hewan' };
     let modal = document.getElementById("modal-beli-hewan");
@@ -1336,7 +1469,9 @@ function renderTas() {
         ...GAME_DATABASE.jagalHasil, 
         ...GAME_DATABASE.alat, 
         ...GAME_DATABASE.material,
-        ...GAME_DATABASE.ikan,
+        ...(GAME_DATABASE.ikan || {}),
+        ...(GAME_DATABASE.bumbu || {}),
+        ...(GAME_DATABASE.masakan || {})
     };
 
     for (let id in gameState.tas) {
@@ -1371,14 +1506,15 @@ setInterval(() => {
         if (idTab === 'tab-lahan') renderLahan();
         if (idTab === 'tab-kandang') renderKandang();
         if (idTab === 'tab-misi') renderPapanMisi();
+        if (idTab === 'tab-dapur') renderDapur();
     }
 }, 1500);
 
+// --- STARTUP LOGIC ---
 window.onload = function() {
     muatGame();
     resetHeaderNamaUI();
 
-    // Tampilkan pesan selamat datang interaktif saat login/masuk game
     tampilkanPopupNotifikasi(
         `Hallo ${gameState.namaPemain}! 👋`, 
         `Selamat Datang Kembali ke dalam Game. Have Fun! 🎮🌾✨`, 
@@ -1390,16 +1526,17 @@ window.onload = function() {
         generasiMisiOtomatis();
     }
     
-    // Render semua komponen tab agar data siap di latar belakang
     renderLahan();
     renderKandang();
     renderSupermarket();
     renderPasar();
+    renderTokoBumbu();
     renderJagal();
     renderTukangKayu();
     renderPengepul();
     renderTas();
     renderWikipedia();
     renderSungai();
+    renderDapur();
     renderPapanMisi();
 };
