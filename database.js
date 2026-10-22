@@ -80,3 +80,57 @@ const GAME_DATABASE = {
         ikan_pirarucu: { id: "ikan_pirarucu", nama: "Ikan Arapaima", icon: "🐳", hargaJual: 8000, tingkatKesan: "Sangat Sulit" }
     }
 };
+
+// Tambahkan / Lengkapi GAME_DATABASE kamu
+GAME_DATABASE.bumbu = {
+    garam: { id: "garam", nama: "Garam Dapur", icon: "🧂", hargaBeli: 200 },
+    gula: { id: "gula", nama: "Gula Pasir", icon: "🍬", hargaBeli: 300 },
+    bawang_merah: { id: "bawang_merah", nama: "Bawang Merah", icon: "🧅", hargaBeli: 500 },
+    bawang_putih: { id: "bawang_putih", nama: "Bawang Putih", icon: "🧄", hargaBeli: 500 },
+    cabai: { id: "cabai", nama: "Cabai Rawit", icon: "🌶️", hargaBeli: 600 },
+    minyak_goreng: { id: "minyak_goreng", nama: "Minyak Goreng", icon: "🍾", hargaBeli: 1200 },
+    kecap: { id: "kecap", nama: "Kecap Manis", icon: "🍶", hargaBeli: 800 }
+};
+
+GAME_DATABASE.resep = {
+    sup_sayur: {
+        id: "sup_sayur",
+        nama: "Sup Sayur Segar",
+        icon: "🥣",
+        durasiMenit: 30, // 30 Menit In-Game
+        bahan: { wortel: 2, kentang: 2, garam: 1, bawang_putih: 1 },
+        hargaJual: 4500
+    },
+    ayam_goreng_bumbu: {
+        id: "ayam_goreng_bumbu",
+        nama: "Ayam Goreng Lengkap",
+        icon: "🍗",
+        durasiMenit: 60,
+        bahan: { daging_ayam: 1, minyak_goreng: 1, garam: 1, bawang_putih: 1 },
+        hargaJual: 12000
+    },
+    sambal_goreng_kambing: {
+        id: "sambal_goreng_kambing",
+        nama: "Sambal Goreng Kambing",
+        icon: "🥘",
+        durasiMenit: 90,
+        bahan: { daging_kambing: 1, cabai: 2, bawang_merah: 1, kecap: 1, minyak_goreng: 1 },
+        hargaJual: 22000
+    },
+    ikan_bakar_ricarica: {
+        id: "ikan_bakar_ricarica",
+        nama: "Ikan Bakar Rica-Rica",
+        icon: "🐟",
+        durasiMenit: 45,
+        bahan: { ikan_gurame: 1, cabai: 3, garam: 1, kecap: 1 },
+        hargaJual: 18000
+    }
+};
+
+// Tambahkan masakan ke database barang agar bisa dijual di pengepul & disimpan di tas
+GAME_DATABASE.masakan = {
+    sup_sayur: { id: "sup_sayur", nama: "Sup Sayur Segar", icon: "🥣", hargaJual: 4500 },
+    ayam_goreng_bumbu: { id: "ayam_goreng_bumbu", nama: "Ayam Goreng Lengkap", icon: "🍗", hargaJual: 12000 },
+    sambal_goreng_kambing: { id: "sambal_goreng_kambing", nama: "Sambal Goreng Kambing", icon: "🥘", hargaJual: 22000 },
+    ikan_bakar_ricarica: { id: "ikan_bakar_ricarica", nama: "Ikan Bakar Rica-Rica", icon: "🐟", hargaJual: 18000 }
+};
