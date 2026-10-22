@@ -1292,5 +1292,20 @@ window.onload = function() {
         generasiMisiOtomatis();
         generasiMisiOtomatis();
     }
+    
+    // Render semua komponen tab agar data siap di latar belakang
+    renderLahan();
+    renderKandang();
+    renderSupermarket();
+    renderPasar();
+    renderJagal();
+    renderTukangKayu();
+    renderPengepul();
+    renderTas();
+    renderWikipedia();
+    renderSungai();
+    renderPapanMisi();
+
+    // Set tab aktif awal ke Lahan
     refreshTabAktif('tab-lahan');
 };
