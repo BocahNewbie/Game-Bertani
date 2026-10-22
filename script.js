@@ -11,7 +11,10 @@ let gameState = {
     kandang: {},
     durasiPisau: 300,
     misiPapan: [],
-    misiAktif: []
+    misiAktif: [],
+    // TRICK: Tambahkan ini untuk melacak batas mancing harian
+    mancingHari: 1,
+    mancingCount: 0
 };
 
 let transaksiAktif = { idItem: "", namaItem: "", hargaSatuan: 0, stokMaks: 0, tipe: "" };
@@ -134,6 +137,9 @@ function muatGame() {
             if (gameState.durasiPisau === undefined) gameState.durasiPisau = 300;
             if (!gameState.misiPapan) gameState.misiPapan = [];
             if (!gameState.misiAktif) gameState.misiAktif = [];
+            // Inisialisasi jika data simpanan lama belum ada fitur ini
+            if (gameState.mancingCount === undefined) gameState.mancingCount = 0;
+            if (gameState.mancingHari === undefined) gameState.mancingHari = gameState.waktuHari;
         } catch (e) {
             console.error("Gagal parse save data:", e);
         }
@@ -916,17 +922,48 @@ function renderSungai() {
     const container = document.getElementById("area-sungai");
     if (!container) return;
 
+    if (gameState.mancingHari !== gameState.waktuHari) {
+        gameState.mancingHari = gameState.waktuHari;
+        gameState.mancingCount = 0;
+    }
+
+    let sisaKuota = Math.max(0, 25 - (gameState.mancingCount || 0));
+
     container.innerHTML = `
         <div class="card" style="grid-column: 1/-1; text-align: center; padding: 30px;">
             <div style="font-size: 4rem; margin-bottom: 10px;">🌊</div>
             <h2>Area Memancing Desa</h2>
-            <p style="color: var(--text-muted); margin-bottom: 20px;">Lemparkan pancingan untuk mendapatkan berbagai jenis ikan segar!</p>
-            <button onclick="mulaiMancing()" style="background: #2563eb; font-size: 1.1rem; padding: 12px 25px;">🎣 Lempar Pancingan</button>
+            <p style="color: var(--text-muted); margin-bottom: 10px;">Lemparkan pancingan untuk mendapatkan berbagai jenis ikan segar!</p>
+            <p style="color: #fbbf24; font-weight: bold; margin-bottom: 20px;">Sisa Kesempatan Hari Ini: ${sisaKuota} / 25 Kali</p>
+            <button onclick="mulaiMancing()" style="background: #2563eb; font-size: 1.1rem; padding: 12px 25px; cursor: pointer;">🎣 Lempar Pancingan</button>
         </div>
     `;
 }
 
 function mulaiMancing() {
+    // 1. Cek pergantian hari in-game, jika hari berganti maka reset hitungan mancing
+    if (gameState.mancingHari !== gameState.waktuHari) {
+        gameState.mancingHari = gameState.waktuHari;
+        gameState.mancingCount = 0;
+    }
+
+    // 2. Cek apakah sudah melebihi batas 25 kali
+    if (gameState.mancingCount >= 25) {
+        tampilkanPopupNotifikasi("⚠️ Kuota Habis!", "Kamu sudah memancing 25 kali hari ini. Istirahatlah dan kembali besok!", "neon-amber");
+        return;
+    }
+
+    // 3. ACAK ZONA HIJAU (Lebar zona 15% - 25%, posisi acak di rentang bar 5% s/d 75%)
+    let lebarZona = Math.floor(Math.random() * 11) + 15; // Lebar antara 15 sampai 25
+    let minPosisi = Math.floor(Math.random() * (75 - 5 + 1)) + 5; // Posisi min acak
+    zonaHijau = {
+        min: minPosisi,
+        max: Math.min(minPosisi + lebarZona, 95)
+    };
+
+    // 4. Tambah jumlah penggunaan mancing harian
+    gameState.mancingCount += 1;
+
     let modal = document.getElementById("modal-mancing");
     if (!modal) {
         modal = document.createElement("div");
@@ -935,17 +972,30 @@ function mulaiMancing() {
         modal.innerHTML = `
             <div class="modal-card neon-blue" style="text-align: center;">
                 <h3>🎣 Memancing...</h3>
+                <p id="info-kuota-mancing" style="color: #fbbf24; font-size:0.85rem; margin-bottom:5px;"></p>
                 <p style="color: var(--text-muted); font-size:0.85rem; margin-bottom:15px;">Tekan TARIK saat jarum tepat di area HIJAU!</p>
                 
                 <div style="position: relative; width: 100%; height: 26px; background: #1e293b; border-radius: 13px; overflow: hidden; border: 2px solid var(--border-color); margin: 15px 0;">
-                    <div id="zona-sukses" style="position: absolute; left: 40%; width: 20%; height: 100%; background: #10b981; opacity: 0.6;"></div>
+                    <div id="zona-sukses" style="position: absolute; height: 100%; background: #10b981; opacity: 0.6;"></div>
                     <div id="jarum-mancing" style="position: absolute; left: 0%; width: 6px; height: 100%; background: #ef4444; border-radius: 3px;"></div>
                 </div>
 
-                <button onclick="tarikPancingan()" style="background: #059669; color: white; padding: 10px 20px; font-weight: bold; width: 100%; font-size:1.1rem;">🎣 TARIK!</button>
+                <button onclick="tarikPancingan()" style="background: #059669; color: white; padding: 10px 20px; font-weight: bold; width: 100%; font-size:1.1rem; cursor:pointer;">🎣 TARIK!</button>
             </div>
         `;
         document.body.appendChild(modal);
+    }
+
+    // Update posisi visual Zona Hijau & Teks Sisa Kuota
+    let elZona = document.getElementById("zona-sukses");
+    if (elZona) {
+        elZona.style.left = `${zonaHijau.min}%`;
+        elZona.style.width = `${zonaHijau.max - zonaHijau.min}%`;
+    }
+
+    let elKuota = document.getElementById("info-kuota-mancing");
+    if (elKuota) {
+        elKuota.innerText = `Sisa Kuota Hari Ini: ${25 - gameState.mancingCount} / 25 kali`;
     }
 
     posisiBar = 0;
