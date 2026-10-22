@@ -10,6 +10,7 @@ let gameState = {
     lahan: {},   
     kandang: {},
     durasiPisau: 300,
+    durasiKompor: 300,
     misiPapan: [],
     misiAktif: [],
     mancingHari: 1,
@@ -140,6 +141,7 @@ function muatGame() {
         try {
             gameState = JSON.parse(savedData);
             if (gameState.durasiPisau === undefined) gameState.durasiPisau = 300;
+            if (gameState.durasiKompor === undefined) gameState.durasiKompor = 300;
             if (!gameState.misiPapan) gameState.misiPapan = [];
             if (!gameState.misiAktif) gameState.misiAktif = [];
             if (gameState.mancingCount === undefined) gameState.mancingCount = 0;
@@ -637,12 +639,16 @@ function prosesJagal(index, jenis) {
 }
 
 function asahPisau() {
+    if ((gameState.tas['pisau'] || 0) <= 0) {
+        alert("⚠️ Kamu belum memiliki Pisau Potong! Beli Pisau terlebih dahulu di Pasar.");
+        return;
+    }
     if (gameState.durasiPisau >= 300) {
         alert("⚠️ Pisau Anda masih tajam! Belum perlu diasah.");
         return;
     }
 
-    let biaya = (GAME_DATABASE.alat && GAME_DATABASE.alat.pisau && GAME_DATABASE.alat.pisau.biayaAsah) || 12000;
+    let biaya = (GAME_DATABASE.alat && GAME_DATABASE.alat.pisau && GAME_DATABASE.alat.pisau.biayaAsah) || 17000;
     if (gameState.uang >= biaya) {
         gameState.uang -= biaya;
         gameState.durasiPisau = 300;
@@ -676,10 +682,27 @@ function renderPasar() {
         html += `<div class="card"><div style="font-size:2.5rem;">${item.icon}</div><h3>${item.nama}</h3><p>Beli: <b>Rp. ${f.harga.toLocaleString('id-ID')}</b></p>${getInfoGrafikHarga(f.harga, hBeli)}<button onclick="bukaModalBeli('${id}', '${item.nama}', ${f.harga}, 'pasar')">Beli Pakan</button></div>`;
     }
 
-    if (GAME_DATABASE.alat && GAME_DATABASE.alat.pisau) {
-        let pisau = GAME_DATABASE.alat.pisau;
-        html += `<h3 style="color: #60a5fa; grid-column:1/-1; margin-top:20px;">🔪 Peralatan</h3>`;
-        html += `<div class="card"><div style="font-size:2.5rem;">${pisau.icon}</div><h3>${pisau.nama}</h3><p>Beli: <b>Rp. ${pisau.hargaBeli.toLocaleString('id-ID')}</b></p><button onclick="bukaModalBeli('${pisau.id}', '${pisau.nama}', ${pisau.hargaBeli}, 'pasar')">Beli Pisau</button></div>`;
+    // --- PERALATAN (ANTI DUPLIKAT BELI) ---
+    if (GAME_DATABASE.alat) {
+        html += `<h3 style="color: #60a5fa; grid-column:1/-1; margin-top:20px;">⚙️ Peralatan Kerja</h3>`;
+        for (let idAlat in GAME_DATABASE.alat) {
+            let alat = GAME_DATABASE.alat[idAlat];
+            let punya = (gameState.tas[idAlat] || 0) > 0;
+
+            let tombolHTML = punya
+                ? `<button disabled style="background:#334155; cursor:not-allowed; margin-top:10px;">✅ Sudah Dimiliki</button>`
+                : `<button onclick="bukaModalBeli('${alat.id}', '${alat.nama}', ${alat.hargaBeli}, 'pasar')" style="margin-top:10px;">Beli ${alat.nama}</button>`;
+
+            html += `
+                <div class="card">
+                    <div style="font-size:2.5rem;">${alat.icon}</div>
+                    <h3>${alat.nama}</h3>
+                    <p>Beli: <b>Rp. ${alat.hargaBeli.toLocaleString('id-ID')}</b></p>
+                    <p style="font-size:0.8rem; color:var(--text-muted);">Durability: 300x Pakai</p>
+                    ${tombolHTML}
+                </div>
+            `;
+        }
     }
 
     container.innerHTML = html;
@@ -728,8 +751,13 @@ function renderTukangKayu() {
     let itemKayu = (GAME_DATABASE.material && GAME_DATABASE.material.kayu) || { id: "kayu", nama: "Kayu", icon: "🪵", hargaBeli: 100 };
     let f = getFluktuasiItem('kayu', itemKayu.hargaBeli);
 
-    let durability = gameState.durasiPisau;
-    let masihPenuh = durability >= 300;
+    let durPisau = gameState.durasiPisau;
+    let pisauPenuh = durPisau >= 300;
+    let punyaPisau = (gameState.tas['pisau'] || 0) > 0;
+
+    let durKompor = gameState.durasiKompor;
+    let komporPenuh = durKompor >= 300;
+    let punyaKompor = (gameState.tas['kompor'] || 0) > 0;
 
     container.innerHTML = `
         <div class="card">
@@ -739,13 +767,49 @@ function renderTukangKayu() {
             ${getInfoGrafikHarga(f.harga, itemKayu.hargaBeli)}
             <button onclick="bukaModalBeli('${itemKayu.id}', '${itemKayu.nama}', ${f.harga}, 'tukang_kayu')">Beli Kayu</button>
         </div>
+
         <div class="card" style="border: 1px solid #60a5fa;">
             <div style="font-size:2.5rem;">🔪</div>
             <h3>Asah Pisau Potong</h3>
-            <p>Biaya: <b>Rp. 12.000</b></p>
-            <button onclick="asahPisau()" style="background:${masihPenuh ? '#334155' : '#2563eb'}; margin-top: 10px; ${masihPenuh ? 'cursor:not-allowed;' : ''}">${masihPenuh ? 'Pisau Masih Tajam' : 'Asah Pisau'}</button>
+            <p>Durability: <b>${durPisau}/300</b></p>
+            <p>Biaya: <b>Rp. 17.000</b></p>
+            <button onclick="asahPisau()" style="background:${(!punyaPisau || pisauPenuh) ? '#334155' : '#2563eb'}; margin-top: 10px; ${(!punyaPisau || pisauPenuh) ? 'cursor:not-allowed;' : ''}">
+                ${!punyaPisau ? 'Belum Punya Pisau' : (pisauPenuh ? 'Pisau Masih Tajam' : 'Asah Pisau')}
+            </button>
+        </div>
+
+        <div class="card" style="border: 1px solid #f59e0b;">
+            <div style="font-size:2.5rem;">🍳</div>
+            <h3>Servis Kompor Dapur</h3>
+            <p>Durability: <b>${durKompor}/300</b></p>
+            <p>Biaya: <b>Rp. 25.000</b></p>
+            <button onclick="servisKompor()" style="background:${(!punyaKompor || komporPenuh) ? '#334155' : '#d97706'}; margin-top: 10px; ${(!punyaKompor || komporPenuh) ? 'cursor:not-allowed;' : ''}">
+                ${!punyaKompor ? 'Belum Punya Kompor' : (komporPenuh ? 'Kompor Masih Bagus' : 'Servis Kompor')}
+            </button>
         </div>
     `;
+}
+
+function servisKompor() {
+    if ((gameState.tas['kompor'] || 0) <= 0) {
+        alert("⚠️ Kamu belum memiliki Kompor! Beli Kompor terlebih dahulu di Pasar.");
+        return;
+    }
+    if (gameState.durasiKompor >= 300) {
+        alert("⚠️ Kompor masih dalam kondisi prima!");
+        return;
+    }
+
+    let biaya = (GAME_DATABASE.alat && GAME_DATABASE.alat.kompor && GAME_DATABASE.alat.kompor.biayaServis) || 25000;
+    if (gameState.uang >= biaya) {
+        gameState.uang -= biaya;
+        gameState.durasiKompor = 300;
+        updateHeaderUI();
+        tampilkanPopupNotifikasi("🔥 Kompor Diperbaiki!", "Durability kompor berhasil dipulihkan menjadi 300x pakai.", "neon-green");
+        renderTukangKayu();
+    } else {
+        alert("⚠️ Uang tidak cukup untuk servis kompor!");
+    }
 }
 
 function renderPengepul() {
@@ -833,8 +897,21 @@ function renderDapur() {
     container.innerHTML = "";
 
     const totalMenitSekarang = getTotalMenitInGame(gameState.waktuHari, gameState.waktuJam, gameState.waktuMenit);
+    let punyaKompor = (gameState.tas['kompor'] || 0) > 0;
+    let durability = gameState.durasiKompor;
 
-    let html = `<h3 style="color: #f59e0b; grid-column:1/-1;">🍳 Kompor Dapur (Proses Memasak)</h3>`;
+    let infoKomporHTML = `
+        <div style="grid-column: 1/-1; background: var(--bg-card); padding: 15px; border-radius: 10px; margin-bottom: 15px; border:1px solid var(--border-color);">
+            <h3>🍳 Status Peralatan Dapur</h3>
+            ${!punyaKompor 
+                ? `<p style="color:#f87171; font-weight:bold;">⚠️ Belum Memiliki Kompor! Beli Kompor di Pasar terlebih dahulu untuk memasak.</p>`
+                : `<p>Durability Kompor: <b style="color: ${durability > 50 ? '#34d399' : '#f87171'}">${durability} / 300 x pakai</b></p>
+                   ${durability <= 0 ? '<p style="color:#f87171; font-weight:bold;">Kompor Rusak! Servis di Tukang Kayu.</p>' : ''}`
+            }
+        </div>
+    `;
+
+    let html = infoKomporHTML + `<h3 style="color: #f59e0b; grid-column:1/-1;">🍳 Kompor Dapur (Proses Memasak)</h3>`;
     if (!gameState.prosesMasak) gameState.prosesMasak = [];
 
     if (gameState.prosesMasak.length === 0) {
@@ -883,8 +960,13 @@ function renderDapur() {
             teksBahan += `<span style="color:${warnaStatus}; font-size:0.8rem;">${itemData.icon} ${itemData.nama}: ${punya}/${butuh}</span><br>`;
         }
 
+        let bisaMasak = punyaKompor && durability > 0 && cukupBahan;
+        let teksTombol = !punyaKompor 
+            ? 'Butuh Kompor' 
+            : (durability <= 0 ? 'Kompor Rusak' : (cukupBahan ? '🍳 Masak Sekarang' : 'Bahan Belum Cukup'));
+
         html += `
-            <div class="card" style="border: 1px solid ${cukupBahan ? '#10b981' : 'var(--border-color)'};">
+            <div class="card" style="border: 1px solid ${bisaMasak ? '#10b981' : 'var(--border-color)'};">
                 <div style="font-size:2.5rem;">${resep.icon}</div>
                 <h3>${resep.nama}</h3>
                 <p style="font-size:0.85rem; color:#fbbf24; margin-bottom:5px;">Harga Jual: <b>Rp. ${resep.hargaJual.toLocaleString('id-ID')}</b></p>
@@ -892,8 +974,8 @@ function renderDapur() {
                     <small style="color:var(--text-muted); font-weight:bold;">Bahan Dibutuhkan:</small><br>
                     ${teksBahan}
                 </div>
-                <button onclick="mulaiMemasak('${idResep}')" style="background:${cukupBahan ? '#059669' : '#334155'}; width:100%;" ${!cukupBahan ? 'disabled' : ''}>
-                    ${cukupBahan ? '🍳 Masak Sekarang' : 'Bahan Belum Cukup'}
+                <button onclick="mulaiMemasak('${idResep}')" style="background:${bisaMasak ? '#059669' : '#334155'}; width:100%;" ${!bisaMasak ? 'disabled' : ''}>
+                    ${teksTombol}
                 </button>
             </div>
         `;
@@ -903,6 +985,15 @@ function renderDapur() {
 }
 
 function mulaiMemasak(idResep) {
+    if ((gameState.tas['kompor'] || 0) <= 0) {
+        alert("⚠️ Kamu belum memiliki Kompor! Beli Kompor di Pasar terlebih dahulu.");
+        return;
+    }
+    if (gameState.durasiKompor <= 0) {
+        alert("⚠️ Kompor kamu rusak (durability 0)! Silakan servis di Tukang Kayu.");
+        return;
+    }
+
     let resep = GAME_DATABASE.resep[idResep];
     if (!resep) return;
 
@@ -911,6 +1002,9 @@ function mulaiMemasak(idResep) {
         gameState.tas[idBahan] -= butuh;
         if (gameState.tas[idBahan] <= 0) delete gameState.tas[idBahan];
     }
+
+    // Kurangi durability kompor
+    gameState.durasiKompor -= 1;
 
     let totalMenitSekarang = getTotalMenitInGame(gameState.waktuHari, gameState.waktuJam, gameState.waktuMenit);
     
@@ -921,7 +1015,7 @@ function mulaiMemasak(idResep) {
         targetMenitSelesai: totalMenitSekarang + resep.durasiMenit
     });
 
-    tampilkanPopupNotifikasi("🍳 Mulai Memasak!", `${resep.nama} sedang dimasak di dapur.`, "neon-amber");
+    tampilkanPopupNotifikasi("🍳 Mulai Memasak!", `${resep.nama} sedang dimasak. Durability kompor sisa ${gameState.durasiKompor}/300.`, "neon-amber");
     renderDapur();
     renderTas();
 }
@@ -1340,12 +1434,25 @@ function updateTotalBeli() {
 function konfirmasiBeli() {
     let jml = parseInt(document.getElementById("input-jumlah-beli").value) || 1;
     let total = jml * transaksiAktif.hargaSatuan;
+
+    // Proteksi Pembelian Equipment Ganda
+    if (GAME_DATABASE.alat && GAME_DATABASE.alat[transaksiAktif.idItem]) {
+        if ((gameState.tas[transaksiAktif.idItem] || 0) > 0) {
+            alert(`⚠️ Kamu sudah memiliki ${transaksiAktif.namaItem}!`);
+            tutupModalBeli();
+            return;
+        }
+        jml = 1; 
+        total = transaksiAktif.hargaSatuan;
+    }
+
     if (gameState.uang >= total) {
         gameState.uang -= total;
         gameState.tas[transaksiAktif.idItem] = (gameState.tas[transaksiAktif.idItem] || 0) + jml;
         updateHeaderUI();
         tutupModalBeli();
         renderTas();
+        renderPasar();
     } else {
         alert("⚠️ Uang tidak cukup!");
     }
