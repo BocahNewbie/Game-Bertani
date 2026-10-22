@@ -953,12 +953,21 @@ function mulaiMancing() {
         return;
     }
 
-    // 3. ACAK ZONA HIJAU (Lebar zona 15% - 25%, posisi acak di rentang bar 5% s/d 75%)
-    let lebarZona = Math.floor(Math.random() * 11) + 15; // Lebar antara 15 sampai 25
-    let minPosisi = Math.floor(Math.random() * (75 - 5 + 1)) + 5; // Posisi min acak
+    // --------------------------------------------------------------------------
+    // 3. LOGIKA ZONA HIJAU MAKIN KECIL (MAKIN SUSAH)
+    // --------------------------------------------------------------------------
+    // Lemparan ke-1: lebar zona sekitar 28% (mudah)
+    // Lemparan ke-25: lebar zona mengecil hingga 6% (sangat sulit / butuh presisi)
+    let sisaProgres = (25 - gameState.mancingCount) / 25; // bernilai 1.0 di awal, mengecil mendekati 0.04
+    let lebarZona = Math.floor(6 + (22 * sisaProgres));   // Lebar mengecil dari ~28% turun ke ~6%
+
+    // Tentukan posisi awal acak agar zona tidak melebihi batas bar (max 95%)
+    let maxPosisiAwal = Math.max(5, 95 - lebarZona);
+    let minPosisi = Math.floor(Math.random() * (maxPosisiAwal - 5 + 1)) + 5;
+
     zonaHijau = {
         min: minPosisi,
-        max: Math.min(minPosisi + lebarZona, 95)
+        max: minPosisi + lebarZona
     };
 
     // 4. Tambah jumlah penggunaan mancing harian
@@ -976,7 +985,7 @@ function mulaiMancing() {
                 <p style="color: var(--text-muted); font-size:0.85rem; margin-bottom:15px;">Tekan TARIK saat jarum tepat di area HIJAU!</p>
                 
                 <div style="position: relative; width: 100%; height: 26px; background: #1e293b; border-radius: 13px; overflow: hidden; border: 2px solid var(--border-color); margin: 15px 0;">
-                    <div id="zona-sukses" style="position: absolute; height: 100%; background: #10b981; opacity: 0.6;"></div>
+                    <div id="zona-sukses" style="position: absolute; height: 100%; background: #10b981; opacity: 0.6; transition: all 0.3s ease;"></div>
                     <div id="jarum-mancing" style="position: absolute; left: 0%; width: 6px; height: 100%; background: #ef4444; border-radius: 3px;"></div>
                 </div>
 
@@ -995,7 +1004,7 @@ function mulaiMancing() {
 
     let elKuota = document.getElementById("info-kuota-mancing");
     if (elKuota) {
-        elKuota.innerText = `Sisa Kuota Hari Ini: ${25 - gameState.mancingCount} / 25 kali`;
+        elKuota.innerHTML = `Sisa Kuota Hari Ini: <b>${25 - gameState.mancingCount + 1} / 25 kali</b><br><small style="color:#f87171;">(Tingkat Kesulitan: ${gameState.mancingCount}/25 🔥)</small>`;
     }
 
     posisiBar = 0;
@@ -1032,7 +1041,7 @@ function tarikPancingan() {
         tampilkanPopupNotifikasi("🐟 Strike!", `Selamat! Kamu menangkap 1x ${dataIkan.icon || '🐟'} ${dataIkan.nama}`, "neon-green");
         renderTas();
     } else {
-        tampilkanPopupNotifikasi("❌ Lepas!", "Sayang sekali, ikannya keburu kabur! Coba lagi.", "neon-amber");
+        tampilkanPopupNotifikasi("❌ Lepas!", "Sayang sekali, ikannya kabur! Coba lagi.", "neon-amber");
     }
 }
 
