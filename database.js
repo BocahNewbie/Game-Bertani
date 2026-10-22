@@ -54,8 +54,29 @@ const GAME_DATABASE = {
     },
     
     ikan: {
-    ikan_lele: { nama: "Ikan Lele", icon: "🐟", hargaJual: 175, tingkatKesan: "Mudah" },
-    ikan_gurame: { nama: "Ikan Gurame", icon: "🐠", hargaJual: 520, tingkatKesan: "Sedang" },
-    ikan_mas: { nama: "Ikan Mas Emas", icon: "🐡", hargaJual: 900, tingkatKesan: "Sangat Sulit" }
+        // --- Mudah (62%) ---
+        ikan_lele: { id: "ikan_lele", nama: "Ikan Lele", icon: "🐟", hargaJual: 175, tingkatKesan: "Mudah" },
+        ikan_nila: { id: "ikan_nila", nama: "Ikan Nila", icon: "🐟", hargaJual: 195, tingkatKesan: "Mudah" },
+        ikan_mujaer: { id: "ikan_mujaer", nama: "Ikan Mujaer", icon: "🐟", hargaJual: 180, tingkatKesan: "Mudah" },
+        ikan_sepat: { id: "ikan_sepat", nama: "Ikan Sepat", icon: "🐟", hargaJual: 150, tingkatKesan: "Mudah" },
+        ikan_cetul: { id: "ikan_cetul", nama: "Ikan Cetul", icon: "🐟", hargaJual: 110, tingkatKesan: "Mudah" },
+
+        // --- Sedang (27%) ---
+        ikan_gurame: { id: "ikan_gurame", nama: "Ikan Gurame", icon: "🐠", hargaJual: 480, tingkatKesan: "Sedang" },
+        ikan_patin: { id: "ikan_patin", nama: "Ikan Patin", icon: "🐠", hargaJual: 360, tingkatKesan: "Sedang" },
+        ikan_bawal: { id: "ikan_bawal", nama: "Ikan Bawal", icon: "🐠", hargaJual: 520, tingkatKesan: "Sedang" },
+        ikan_tawes: { id: "ikan_tawes", nama: "Ikan Tawes", icon: "🐠", hargaJual: 320, tingkatKesan: "Sedang" },
+        ikan_wader: { id: "ikan_wader", nama: "Ikan Wader Super", icon: "🐠", hargaJual: 280, tingkatKesan: "Sedang" },
+
+        // --- Sulit (10%) ---
+        ikan_gabus: { id: "ikan_gabus", nama: "Ikan Gabus", icon: "🦈", hargaJual: 700, tingkatKesan: "Sulit" },
+        ikan_sidat: { id: "ikan_sidat", nama: "Ikan Sidat (Unagi)", icon: "🐍", hargaJual: 900, tingkatKesan: "Sulit" },
+        ikan_toman: { id: "ikan_toman", nama: "Ikan Toman", icon: "🐊", hargaJual: 1200, tingkatKesan: "Sulit" },
+        ikan_belida: { id: "ikan_belida", nama: "Ikan Belida", icon: "🐬", hargaJual: 1800, tingkatKesan: "Sulit" },
+
+        // --- Sangat Sulit (1%) ---
+        ikan_mas: { id: "ikan_mas", nama: "Ikan Mas Emas", icon: "🐡", hargaJual: 4500, tingkatKesan: "Sangat Sulit" },
+        ikan_arwana: { id: "ikan_arwana", nama: "Ikan Arwana Merah", icon: "🐉", hargaJual: 6500, tingkatKesan: "Sangat Sulit" },
+        ikan_pirarucu: { id: "ikan_pirarucu", nama: "Ikan Arapaima", icon: "🐳", hargaJual: 8000, tingkatKesan: "Sangat Sulit" }
     }
 };
