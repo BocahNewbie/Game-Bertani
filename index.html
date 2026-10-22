@@ -25,8 +25,10 @@
         <button class="tab-btn" onclick="gantiTab(event, 'tab-tas')">🎒 Tas</button>
         <button class="tab-btn" onclick="gantiTab(event, 'tab-lahan')">🌱 Lahan</button>
         <button class="tab-btn" onclick="gantiTab(event, 'tab-kandang')">🐮 Kandang</button>
+        <button class="tab-btn" onclick="gantiTab(event, 'tab-dapur')">🍳 Dapur Olahan</button>
         <button class="tab-btn" onclick="gantiTab(event, 'tab-supermarket')">🛒 Supermarket</button>
         <button class="tab-btn" onclick="gantiTab(event, 'tab-pasar')">🏬 Pasar</button>
+        <button class="tab-btn" onclick="gantiTab(event, 'tab-toko-bumbu')">🧂 Toko Bumbu</button>
         <button class="tab-btn" onclick="gantiTab(event, 'tab-jagal')">🔪 Jagal</button>
         <button class="tab-btn" onclick="gantiTab(event, 'tab-tukang-kayu')">🪵 Tukang Kayu</button>
         <button class="tab-btn" onclick="gantiTab(event, 'tab-pengepul')">💰 Pengepul</button>
@@ -48,6 +50,15 @@
             <h2>Kandang Hewan Ternak</h2>
             <div id="grid-kandang" class="grid-container"></div>
         </section>
+        
+        <!-- TAB DAPUR OLAHAN -->
+        <div id="tab-dapur" class="tab-content">
+            <div id="area-dapur" class="grid-container"></div>
+        </div>
+        <section id="tab-dapur" class="tab-content">
+            <h2>Dapur</h2>
+            <div id="list-dapur" class="grid-container"></div>
+        </section>
 
         <!-- Tab Supermarket (Bibit) -->
         <section id="tab-supermarket" class="tab-content">
@@ -59,6 +70,12 @@
         <section id="tab-pasar" class="tab-content">
             <h2>Pasar Hewan & Pakan</h2>
             <div id="list-pasar" class="shop-grid"></div>
+        </section>
+        
+        <!-- TAB TOKO BUMBU -->
+        <section id="tab-toko_bumbu" class="tab-content">
+            <h2>Toko Bumbu</h2>
+            <div id="list-toko-bumbu" class="grid-container"></div>
         </section>
 
         <!-- Tab Papan Misi -->
