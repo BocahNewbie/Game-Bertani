@@ -13,7 +13,7 @@ let gameState = {
     misiPapan: [],
     misiAktif: [],
     mancingHari: 1,
-    mancingCount: 0
+    mancingCount: 0 // Sekarang ini melacak JUMLAH BERHASIL MEMANCING
 };
 
 let transaksiAktif = { idItem: "", namaItem: "", hargaSatuan: 0, stokMaks: 0, tipe: "" };
@@ -760,7 +760,7 @@ function renderWikipedia() {
     if (!container) return;
 
     let html = `<div class="neon-credit">Created By Bocah Newbie</div>`;
-    html += `<h2>📚 Panduan & Ensiklopedia Harga Game</h2><table style="width:100%; border-collapse:collapse; margin-top:15px; background:var(--bg-card); border-radius:8px; overflow:hidden;">`;
+    html += `2📚 Panduan & Ensiklopedia Harga Game</h2><table style="width:100%; border-collapse:collapse; margin-top:15px; background:var(--bg-card); border-radius:8px; overflow:hidden;">`;
     html += `<tr style="background:#1e293b; text-align:left;"><th style="padding:10px;">Item</th><th style="padding:10px;">Harga Beli (Normal)</th><th style="padding:10px;">Harga Jual (Normal)</th><th style="padding:10px;">Estimasi Min / Max</th></tr>`;
 
     let allItems = { 
@@ -923,7 +923,7 @@ function renderSungai() {
     const container = document.getElementById("area-sungai");
     if (!container) return;
 
-    // Cek pergantian hari in-game untuk mereset counter memancing
+    // Reset hitungan berhasil memancing jika pergantian hari in-game
     if (gameState.mancingHari !== gameState.waktuHari) {
         gameState.mancingHari = gameState.waktuHari;
         gameState.mancingCount = 0;
@@ -941,21 +941,17 @@ function renderSungai() {
 }
 
 function mulaiMancing() {
-    // 1. Cek pergantian hari in-game, jika hari berganti maka reset hitungan mancing
+    // 1. Cek pergantian hari in-game, jika hari berganti maka reset hitungan berhasil mancing
     if (gameState.mancingHari !== gameState.waktuHari) {
         gameState.mancingHari = gameState.waktuHari;
         gameState.mancingCount = 0;
     }
 
-    // 2. Tambahkan hitungan percobaannya
-    gameState.mancingCount += 1;
-    let percobaan = gameState.mancingCount;
-
-    // 3. LOGIKA ZONA HIJAU MAKIN KECIL & SUSAH (PERCOBAAN 1 SAMPAI 30)
-    // Percobaan 1: lebar sekitar 30%
-    // Percobaan 30+: lebar menyempit ke 2.5% (sangat mustahil/presisi tinggi)
-    let tingkat = Math.min(percobaan, 30);
-    let progresSebab = (tingkat - 1) / 29; // Nilai 0.0 di percobaan 1, menyebar ke 1.0 di percobaan 30
+    // 2. HITUNG LEBAR ZONA HIJAU BERDASARKAN JUMLAH BERHASIL (gameState.mancingCount)
+    // Berhasil 0x: lebar ~30%
+    // Berhasil ke-1 s/d 30: mengecil secara bertahap hingga ~2.5%
+    let tingkatBerhasil = Math.min(gameState.mancingCount, 30);
+    let progresSebab = tingkatBerhasil / 30; // Nilai 0.0 di awal, bergerak ke 1.0 di keberhasilan ke-30
     let lebarZona = Math.max(2.5, 30 - (27.5 * progresSebab));
 
     // Posisi acak zona hijau di bar (max 95%)
@@ -998,7 +994,7 @@ function mulaiMancing() {
 
     let elKuota = document.getElementById("info-kuota-mancing");
     if (elKuota) {
-        elKuota.innerHTML = `Semoga Beruntung 🍀✨<br><small style="color:#f87171;">Percobaan Hari Ini: Ke-${percobaan} (Tingkat Kesulitan: ${tingkat}/30 🔥)</small>`;
+        elKuota.innerHTML = `Semoga Beruntung 🍀✨<br><small style="color:#f87171;">Berhasil Hari Ini: ${gameState.mancingCount} Kali (Tingkat Kesulitan: ${tingkatBerhasil}/30 🔥)</small>`;
     }
 
     posisiBar = 0;
@@ -1020,11 +1016,15 @@ function tarikPancingan() {
     let modal = document.getElementById("modal-mancing");
     if (modal) modal.style.display = "none";
 
+    // CEK APAKAH STRIKE / BERHASIL (JARUM DI ZONA HIJAU)
     if (posisiBar >= zonaHijau.min && posisiBar <= zonaHijau.max) {
         if (!GAME_DATABASE.ikan) {
             alert("⚠️ Database ikan belum terisi!");
             return;
         }
+
+        // TAMBAHKAN HITUNGAN KEBERHASILAN KARENA BERHASIL! (Membuat lemparan berikutnya lebih sulit)
+        gameState.mancingCount += 1;
 
         // Tentukan Tingkat Kesulitan Berdasarkan Persentase (1 - 100)
         let roll = Math.floor(Math.random() * 100) + 1;
@@ -1057,7 +1057,7 @@ function tarikPancingan() {
         gameState.tas[idIkanDapat] = (gameState.tas[idIkanDapat] || 0) + 1;
         
         let warnaNotif = "neon-green";
-        if (targetTingkat === "Mudah") warnaNotif = "neon-green";
+        if (targetTingkat === "Mudah") warnaNotif = "neon-yellow";
         if (targetTingkat === "Sedang") warnaNotif = "neon-blue";
         if (targetTingkat === "Sulit") warnaNotif = "neon-amber";
         if (targetTingkat === "Sangat Sulit") warnaNotif = "neon-purple";
@@ -1070,6 +1070,7 @@ function tarikPancingan() {
 
         renderTas();
     } else {
+        // JIKA GAGAL: gameState.mancingCount TIDAK bertambah, tingkat kesulitan tetap sama
         tampilkanPopupNotifikasi("❌ Lepas!", "HA~ HA~ HA~, ikannya kabur! Coba lagi.", "neon-amber");
     }
 }
@@ -1401,6 +1402,4 @@ window.onload = function() {
     renderWikipedia();
     renderSungai();
     renderPapanMisi();
-
-    // Biarkan halaman awal tanpa tab aktif (sesuai kondisi awal Anda)
 };
