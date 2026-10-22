@@ -1027,21 +1027,61 @@ function tarikPancingan() {
     if (modal) modal.style.display = "none";
 
     if (posisiBar >= zonaHijau.min && posisiBar <= zonaHijau.max) {
-        let keysIkan = Object.keys(GAME_DATABASE.ikan || {});
-        if (keysIkan.length === 0) {
-            alert("⚠️ Database ikan belum terisi di GAME_DATABASE.ikan!");
+        if (!GAME_DATABASE.ikan) {
+            alert("⚠️ Database ikan belum terisi!");
             return;
         }
 
-        let idIkanDapat = keysIkan[Math.floor(Math.random() * keysIkan.length)];
+        // 1. Tentukan Tingkat Kesulitan Berdasarkan Persentase (1 - 100)
+        let roll = Math.floor(Math.random() * 100) + 1; // Angka acak 1 sampai 100
+        let targetTingkat = "Mudah";
+
+        if (roll <= 62) {
+            targetTingkat = "Mudah";        // 62% Peluang (Angka 1 - 62)
+        } else if (roll <= 89) {
+            targetTingkat = "Sedang";       // 27% Peluang (Angka 63 - 89)
+        } else if (roll <= 99) {
+            targetTingkat = "Sulit";        // 10% Peluang (Angka 90 - 99)
+        } else {
+            targetTingkat = "Sangat Sulit"; // 1% Peluang (Angka 100)
+        }
+
+        // 2. Filter Ikan Sesuai Tingkat Kesulitan yang Terpilih
+        let daftarIkanKategori = [];
+        for (let key in GAME_DATABASE.ikan) {
+            if (GAME_DATABASE.ikan[key].tingkatKesan === targetTingkat) {
+                daftarIkanKategori.push(key);
+            }
+        }
+
+        // Fallback jika kategori kosong
+        if (daftarIkanKategori.length === 0) {
+            daftarIkanKategori = Object.keys(GAME_DATABASE.ikan);
+        }
+
+        // 3. Pilih Satu Ikan Secara Acak dari Kategori Tersebut
+        let idIkanDapat = daftarIkanKategori[Math.floor(Math.random() * daftarIkanKategori.length)];
         let dataIkan = GAME_DATABASE.ikan[idIkanDapat];
 
+        // 4. Simpan ke Tas
         gameState.tas[idIkanDapat] = (gameState.tas[idIkanDapat] || 0) + 1;
         
-        tampilkanPopupNotifikasi("🐟 Strike!", `Selamat! Kamu menangkap 1x ${dataIkan.icon || '🐟'} ${dataIkan.nama}`, "neon-green");
+        // Atur warna notifikasi berdasarkan kelangkaan
+        let warnaNotif = "neon-green";
+        if (targetTingkat === "Mudah") warnaNotif = "neon-green";
+        if (targetTingkat === "Sedang") warnaNotif = "neon-blue";
+        if (targetTingkat === "Sulit") warnaNotif = "neon-amber";
+        if (targetTingkat === "Sangat Sulit") warnaNotif = "neon-purple";
+
+        tampilkanPopupNotifikasi(
+            `🐟 STRIKE! (${dataIkan.tingkatKesan})`, 
+            `Selamat! Kamu menangkap 1x ${dataIkan.icon || '🐟'} ${dataIkan.nama} (Harga Jual: Rp. ${dataIkan.hargaJual.toLocaleString('id-ID')})`, 
+            warnaNotif
+        );
+
         renderTas();
     } else {
-        tampilkanPopupNotifikasi("❌ Lepas!", "Sayang sekali, ikannya kabur! Coba lagi.", "neon-amber");
+        tampilkanPopupNotifikasi("❌ Lepas!", "HA~ HA~ HA~, ikannya kabur! Coba lagi.", "neon-amber");
     }
 }
 
