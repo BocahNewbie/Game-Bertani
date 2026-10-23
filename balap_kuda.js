@@ -3,31 +3,60 @@
 // ==========================================
 
 let balapKudaState = {
-    kelasAktif: "D", // D, C, B, A, S, SS
-    kudaPemain: null, // Data kuda milik pemain yang dibeli
+    kelasAktif: "D",
+    kudaPemain: null,
     daftarPasarKuda: [],
-    musimBalapHari: -1,
-    pesertaNPC: {}
+    musimBalapHari: -1
 };
 
-// Konfigurasi Kelas & Syarat Minimal Overall Point (OVR)
+// Konfigurasi Kelas, Syarat OVR, Biaya, dan Hadiah Juara 1, 2, 3
 const KONFIG_KELAS = {
-    "D":  { nama: "Kelas D (Pemula)",   ovrMin: 100, ovrMax: 200, hadiah: 20000,   biayaDaftar: 3000,  biayaBeli: 9000 },
-    "C":  { nama: "Kelas C (Amatir)",   ovrMin: 201, ovrMax: 350, hadiah: 50000,  biayaDaftar: 15000, biayaBeli: 7500 },
-    "B":  { nama: "Kelas B (Pro)",      ovrMin: 351, ovrMax: 500, hadiah: 800000,  biayaDaftar: 35000, biayaBeli: 18000 },
-    "A":  { nama: "Kelas A (Elite)",    ovrMin: 501, ovrMax: 700, hadiah: 125000,  biayaDaftar: 70000, biayaBeli: 40000 },
-    "S":  { nama: "Kelas S (Master)",   ovrMin: 701, ovrMax: 900, hadiah: 500000, biayaDaftar: 150000, biayaBeli: 100000 },
-    "SS": { nama: "Kelas SS (Legend)",  ovrMin: 901, ovrMax: 1200,hadiah: 1500000, biayaDaftar: 650000, biayaBeli: 950000 }
+    "D": { 
+        nama: "Kelas D (Pemula)",   
+        ovrMin: 100, ovrMax: 200, 
+        biayaDaftar: 3000,
+        hadiah: { j1: 20000, j2: 10000, j3: 5000 }
+    },
+    "C": { 
+        nama: "Kelas C (Amatir)",   
+        ovrMin: 201, ovrMax: 350, 
+        biayaDaftar: 10000,
+        hadiah: { j1: 50000, j2: 30000, j3: 15000 }
+    },
+    "B": { 
+        nama: "Kelas B (Pro)",      
+        ovrMin: 351, ovrMax: 500, 
+        biayaDaftar: 27000,
+        hadiah: { j1: 150000, j2: 75000, j3: 35000 }
+    },
+    "A": { 
+        nama: "Kelas A (Elite)",    
+        ovrMin: 501, ovrMax: 700, 
+        biayaDaftar: 70000,
+        hadiah: { j1: 350000, j2: 175000, j3: 85000 }
+    },
+    "S": { 
+        nama: "Kelas S (Master)",   
+        ovrMin: 701, ovrMax: 900, 
+        biayaDaftar: 150000,
+        hadiah: { j1: 800000, j2: 400000, j3: 200000 }
+    },
+    "SS": { 
+        nama: "Kelas SS (Legend)",  
+        ovrMin: 901, ovrMax: 1200,
+        biayaDaftar: 450000,
+        hadiah: { j1: 2500000, j2: 1250000, j3: 600000 }
+    }
 };
 
-const NAMA_KUDA_NPC = ["Baron", "Zeus", "Shadow", "Pegasus", "Bintang", "Thunder", "Blaze", "Tornado", "Valkyrie", "Titan", "Phantom", "Eclipse"];
+const NAMA_KUDA_NPC = ["Baron", "Zeus", "Shadow", "Pegasus", "Bintang", "Thunder", "Blaze", "Tornado", "Valkyrie", "Titan", "Phantom", "Eclipse", "Byakko", "Dandan", "Kelp"];
 
 // --- FUNGSI UTAMA / RENDER TAB ---
 function renderBalapKuda() {
     const container = document.getElementById("area-balap-kuda");
     if (!container) return;
 
-    // Pastikan pasar kuda selalu terisi jika masih kosong atau hari berganti
+    // Paksa buat pasar kuda jika belum ada data sama sekali
     if (!balapKudaState.daftarPasarKuda || balapKudaState.daftarPasarKuda.length === 0 || balapKudaState.musimBalapHari !== gameState.waktuHari) {
         balapKudaState.musimBalapHari = gameState.waktuHari;
         generasiPasarKuda();
@@ -87,7 +116,11 @@ function renderBalapKuda() {
                 <h3>🏆 Kelas ${kls}</h3>
                 <p style="font-size:0.8rem; color:var(--text-muted);">${cfg.nama}</p>
                 <p style="font-size:0.85rem;">Rata-rata OVR: <b>${cfg.ovrMin} - ${cfg.ovrMax}</b></p>
-                <p style="font-size:0.85rem; color:#34d399;">Hadiah Juara 1: 💰 Rp. ${cfg.hadiah.toLocaleString('id-ID')}</p>
+                <p style="font-size:0.8rem; color:#fbbf24; margin-top:5px;">
+                    🥇 J1: Rp. ${cfg.hadiah.j1.toLocaleString('id-ID')}<br>
+                    🥈 J2: Rp. ${cfg.hadiah.j2.toLocaleString('id-ID')}<br>
+                    🥉 J3: Rp. ${cfg.hadiah.j3.toLocaleString('id-ID')}
+                </p>
                 <button onclick="mulaiBalapanKelas('${kls}')" style="background:${bisaIkut ? '#059669' : '#334155'}; width:100%; margin-top:10px;" ${!bisaIkut ? 'disabled' : ''}>
                     ${!balapKudaState.kudaPemain ? 'Butuh Kuda' : (!dapatAksesKelas(kls) ? 'Terkunci (Juarai Kelas Sebelum)' : 'Ikut Tanding')}
                 </button>
@@ -97,18 +130,22 @@ function renderBalapKuda() {
 
     // 3. PASAR KUDA
     html += `<h3 style="grid-column: 1/-1; color: #60a5fa; margin-top: 20px;">🛒 Pasar Kuda Hari Ini</h3>`;
-    balapKudaState.daftarPasarKuda.forEach((kudaPasar, idx) => {
-        let ovr = hitungOverallKuda(kudaPasar.stats);
-        html += `
-            <div class="card">
-                <div style="font-size: 2.5rem;">🐎</div>
-                <h3>${kudaPasar.nama}</h3>
-                <p>Est. OVR: <b style="color:#fbbf24;">${ovr} Pts</b></p>
-                <p>Harga: <b>Rp. ${kudaPasar.harga.toLocaleString('id-ID')}</b></p>
-                <button onclick="beliKudaPasar(${idx})" style="background:#2563eb; width:100%; margin-top:5px;">Beli Kuda</button>
-            </div>
-        `;
-    });
+    if (balapKudaState.daftarPasarKuda.length === 0) {
+        html += `<p style="grid-column:1/-1; text-align:center; color:var(--text-muted);">Stok kuda hari ini habis. Kembali lagi besok!</p>`;
+    } else {
+        balapKudaState.daftarPasarKuda.forEach((kudaPasar, idx) => {
+            let ovr = hitungOverallKuda(kudaPasar.stats);
+            html += `
+                <div class="card">
+                    <div style="font-size: 2.5rem;">🐎</div>
+                    <h3>${kudaPasar.nama}</h3>
+                    <p>Est. OVR: <b style="color:#fbbf24;">${ovr} Pts</b></p>
+                    <p>Harga: <b>Rp. ${kudaPasar.harga.toLocaleString('id-ID')}</b></p>
+                    <button onclick="beliKudaPasar(${idx})" style="background:#2563eb; width:100%; margin-top:5px;">Beli Kuda</button>
+                </div>
+            `;
+        });
+    }
 
     container.innerHTML = html;
 }
@@ -137,7 +174,7 @@ function generasiPasarKuda() {
     for (let i = 0; i < 3; i++) {
         let nama = "Kuda " + NAMA_KUDA_NPC[Math.floor(Math.random() * NAMA_KUDA_NPC.length)];
         let stats = buatStatRandom(80, 180);
-        let harga = 25000 + Math.round(hitungOverallKuda(stats) * 150);
+        let harga = 15000 + Math.round(hitungOverallKuda(stats) * 80);
         balapKudaState.daftarPasarKuda.push({ nama, stats, harga });
     }
 }
@@ -265,12 +302,13 @@ function mulaiBalapanKelas(kelas) {
 
     let posisiPemain = peserta.findIndex(p => p.isPemain) + 1;
     let juara1 = peserta[0];
-
     let urutanKelas = ["D", "C", "B", "A", "S", "SS"];
     let idxSekarang = urutanKelas.indexOf(kelas);
 
+    // SISTEM HADIAH JUARA 1, 2, DAN 3
     if (posisiPemain === 1) {
-        gameState.uang += cfg.hadiah;
+        let hadiahUang = cfg.hadiah.j1;
+        gameState.uang += hadiahUang;
         updateHeaderUI();
 
         // Buka akses kelas berikutnya jika menjuarai kelas tertinggi saat ini
@@ -280,8 +318,28 @@ function mulaiBalapanKelas(kelas) {
 
         tampilkanPopupNotifikasi(
             "🥇 JUARA 1 BALAPAN!", 
-            `Selamat! Kudamu meraih Juara 1 di Kelas ${kelas}! Hadiah: Rp. ${cfg.hadiah.toLocaleString('id-ID')}`, 
+            `Selamat! Kudamu meraih Juara 1 di Kelas ${kelas}! Hadiah: Rp. ${hadiahUang.toLocaleString('id-ID')}`, 
             "neon-green"
+        );
+    } else if (posisiPemain === 2) {
+        let hadiahUang = cfg.hadiah.j2;
+        gameState.uang += hadiahUang;
+        updateHeaderUI();
+
+        tampilkanPopupNotifikasi(
+            "🥈 JUARA 2 BALAPAN!", 
+            `Luar biasa! Kudamu finish di posisi 2 di Kelas ${kelas}! Hadiah: Rp. ${hadiahUang.toLocaleString('id-ID')}`, 
+            "neon-blue"
+        );
+    } else if (posisiPemain === 3) {
+        let hadiahUang = cfg.hadiah.j3;
+        gameState.uang += hadiahUang;
+        updateHeaderUI();
+
+        tampilkanPopupNotifikasi(
+            "🥉 JUARA 3 BALAPAN!", 
+            `Bagus! Kudamu finish di posisi 3 di Kelas ${kelas}! Hadiah: Rp. ${hadiahUang.toLocaleString('id-ID')}`, 
+            "neon-amber"
         );
     } else {
         tampilkanPopupNotifikasi(
