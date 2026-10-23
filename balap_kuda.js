@@ -857,7 +857,7 @@ function mulaiBalapanKelas(kelas, idxKuda) {
         stres: k.stres,
         isPemain: true,
         refObject: k
-    }));
+    });
 
     // Inisialisasi Kinerja Peserta
     peserta.forEach(p => {
