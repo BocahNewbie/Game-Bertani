@@ -34,6 +34,7 @@
         <button class="tab-btn" onclick="gantiTab(event, 'tab-pengepul')">💰 Pengepul</button>
         <button class="tab-btn" onclick="gantiTab(event, 'tab-misi')">📜 Papan Misi</button>
         <button class="tab-btn" onclick="gantiTab(event, 'tab-mancing')">🌊 Sungai</button>
+        <button class="tab-btn" onclick="gantiTab(event, 'tab-balap-kuda')">🏇 Balap Kuda</button>
         <button class="tab-btn" onclick="gantiTab(event, 'tab-wikipedia')">📚 Wikipedia</button>
     </nav>
 
@@ -107,8 +108,14 @@
 
         <!-- Tab Tas / Inventaris -->
         <section id="tab-tas" class="tab-content">
-            <h2>Tas Inventaris</h2>
+            <h2>Tas</h2>
             <div id="grid-tas" class="inventory-grid"></div>
+        </section>
+
+        <!-- Tab Balap Kuda -->
+        <section id="tab-balap-kuda" class="tab-content">
+            <h2>Balap Kuda</h2>
+            <div id="area-balap-kuda" class="shop-grid"></div>
         </section>
 
         <!-- Tab Wikipedia -->
@@ -126,6 +133,7 @@
     <script src="peternakan.js"></script>
     <script src="supermarket.js"></script>
     <script src="pasar.js"></script>
+    <script src="balap_kuda.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
