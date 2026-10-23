@@ -211,7 +211,7 @@ function simpanGame() {
         if (data.status === "success") {
             tampilkanPopupNotifikasi(
                 "☁️ Tersimpan!", 
-                `Data milik [${playerId}] berhasil diperbarui!`, 
+                `Data milik kamu berhasil diperbarui!`, 
                 "neon-green"
             );
         } else {
@@ -254,7 +254,7 @@ function muatGame() {
             renderSemuaTabUtama();
             tampilkanPopupNotifikasi(
                 "✨ Data Dimuat!", 
-                `Selamat datang kembali, ${gameState.namaPemain}! [${playerId}]`, 
+                `Selamat datang kembali, ${gameState.namaPemain}!`, 
                 "neon-green"
             );
         } else {
