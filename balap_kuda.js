@@ -11,11 +11,10 @@ let balapKudaState = {
     // State sementara untuk fitur Breeding
     indukJantanIdx: null,
     indukBetinaIdx: null,
-    cooldownInterval: null
+    pemulihanInterval: null
 };
 
 const MAX_KAPASITAS_KUDA = 5;
-const COOLDOWN_ISTIRAHAT_JAM = 5; // Cooldown istirahat 5 jam in-game
 const COOLDOWN_BREEDING_HARI = 10; // Cooldown breeding 10 hari in-game
 const MIN_USIA_BREEDING_HARI = 25; // Anakan bisa breeding setelah 25 hari in-game
 
@@ -108,44 +107,43 @@ function dialogKonfirmasiCustom(judul, pesan, callbackYa) {
     };
 }
 
-// --- FUNGSI CEK JAM ARENA BUKA (10.00 - 19.00) ---
+// --- FUNGSI CEK JAM ARENA BUKA (24 JAM BUKA MURNI) ---
 function isArenaBuka() {
-    let valJam = gameState.jam;
-    let jamSekarang = 0;
-
-    if (typeof valJam === 'string') {
-        jamSekarang = parseInt(valJam.split(':')[0].split('.')[0], 10);
-    } else {
-        jamSekarang = parseInt(valJam, 10);
-    }
-
-    if (isNaN(jamSekarang)) jamSekarang = 0;
-
-    // Arena buka mulai jam 10 (10:00) hingga sebelum jam 19 (18:59)
-    return jamSekarang >= 10 && jamSekarang < 19;
+    return true; // Dibuat selalu BUKA tanpa batasan waktu in-game
 }
 
-// --- HELPER HITUNG SISA WAKTU COOLDOWN ISTIRAHAT ---
-function getSisaCooldownInGame(k) {
-    if (k.terakhirIstirahatHari === undefined || k.terakhirIstirahatHari === null) return 0;
+// --- HELPER PROSES PEMULIHAN STAMINA PASIF (+5 per 45 Menit In-Game) ---
+function prosesPemulihanStaminaPasif(kuda) {
+    if (!kuda) return;
 
     let hariSekarang = Number(gameState.waktuHari) || 0;
     let jamSekarang = parseInt(gameState.jam, 10) || 0;
     let menitSekarang = Number(gameState.menit) || 0;
 
     let totalMenitSekarang = (hariSekarang * 24 * 60) + (jamSekarang * 60) + menitSekarang;
-    let totalMenitTerakhir = (k.terakhirIstirahatHari * 24 * 60) + ((k.terakhirIstirahatJam || 0) * 60) + (k.terakhirIstirahatMenit || 0);
 
-    let selisihMenit = totalMenitSekarang - totalMenitTerakhir;
-    let maxCooldownMenit = COOLDOWN_ISTIRAHAT_JAM * 60; // 300 menit in-game
+    if (kuda.terakhirUpdateMenit === undefined || kuda.terakhirUpdateMenit === null) {
+        kuda.terakhirUpdateMenit = totalMenitSekarang;
+        return;
+    }
 
-    if (selisihMenit >= maxCooldownMenit) return 0;
+    let selisihMenit = totalMenitSekarang - kuda.terakhirUpdateMenit;
 
-    let sisaMenitTotal = maxCooldownMenit - selisihMenit;
-    let sisaJam = Math.floor(sisaMenitTotal / 60);
-    let sisaMenit = Math.floor(sisaMenitTotal % 60);
+    if (selisihMenit >= 45) {
+        let jumlahSiklus = Math.floor(selisihMenit / 45);
+        let penambahanStamina = jumlahSiklus * 5;
+        let penguranganStres = jumlahSiklus * 5;
 
-    return { totalMenit: sisaMenitTotal, jam: sisaJam, menit: sisaMenit };
+        if (kuda.stamina < kuda.staminaMax) {
+            kuda.stamina = Math.min(kuda.staminaMax, kuda.stamina + penambahanStamina);
+        }
+
+        if (kuda.stres > 0) {
+            kuda.stres = Math.max(0, kuda.stres - penguranganStres);
+        }
+
+        kuda.terakhirUpdateMenit += (jumlahSiklus * 45);
+    }
 }
 
 // --- HELPER HARGA JUAL KUDA ---
@@ -172,10 +170,10 @@ function renderBalapKuda() {
         }
     });
 
-    // Bersihkan interval timer countdown lama jika ada
-    if (balapKudaState.cooldownInterval) {
-        clearInterval(balapKudaState.cooldownInterval);
-        balapKudaState.cooldownInterval = null;
+    // Bersihkan interval pemulihan pasif lama jika ada
+    if (balapKudaState.pemulihanInterval) {
+        clearInterval(balapKudaState.pemulihanInterval);
+        balapKudaState.pemulihanInterval = null;
     }
 
     // Inisialisasi struktur kandang jika belum ada
@@ -186,6 +184,9 @@ function renderBalapKuda() {
         balapKudaState.kandangKuda.push(kAwal);
     }
 
+    // Jalankan kalkulasi pemulihan stamina pasif untuk seluruh kuda di kandang
+    balapKudaState.kandangKuda.forEach(k => prosesPemulihanStaminaPasif(k));
+
     // Paksa buat pasar kuda & lawan NPC baru jika belum ada data sama sekali atau hari berganti
     if (!balapKudaState.daftarPasarKuda || balapKudaState.daftarPasarKuda.length === 0 || balapKudaState.musimBalapHari !== gameState.waktuHari) {
         balapKudaState.musimBalapHari = gameState.waktuHari;
@@ -193,12 +194,10 @@ function renderBalapKuda() {
         generasiLawanPerKelas();
     }
 
-    let arenaBuka = isArenaBuka();
-
     let html = `<div class="card" style="grid-column: 1/-1; padding: 20px; text-align: center;">
         <h2>🏇 Arena Balap Kuda Desa</h2>
-        <p style="color: var(--text-muted);">Latih kudamu, atur stamina & stres, kawinkan kuda unggulan, dan jadilah juara!</p>
-        <p style="font-size:0.9rem; margin-top:5px;">🕒 Jam Operasional Balap: <b>10.00 - 19.00</b> | Status Saat Ini: <b style="color:${arenaBuka ? '#34d399' : '#f87171'}">${arenaBuka ? 'BUKA' : 'TUTUP'}</b></p>
+        <p style="color: var(--text-muted);">Latih kudamu, kelola stamina & stres, kawinkan kuda unggulan, dan jadilah juara!</p>
+        <p style="font-size:0.9rem; margin-top:5px;">🕒 Status Arena: <b style="color:#34d399">BUKA 24 JAM</b> | Pemulihan Stamina: <b>+5 / 45 Menit in-game</b></p>
     </div>`;
 
     // 1. TAMPILAN KANDANG & KUDA PEMAIN
@@ -237,13 +236,6 @@ function renderBalapKuda() {
         let statE = hitungStatEfektif(k);
         let ovrEfektif = hitungOverallKuda(statE);
 
-        // Cek Cooldown Istirahat
-        let cdData = getSisaCooldownInGame(k);
-        let sedangCooldown = cdData !== 0 && cdData.totalMenit > 0;
-
-        let butuhIstirahat = k.stamina < k.staminaMax || k.stres > 0;
-        let bisaIstirahat = !sedangCooldown && butuhIstirahat;
-
         let statusPenaltiTeks = statE.penaltiPersen > 0 
             ? `<span style="color:#f87171; font-size:0.85rem;">(📉 Penurunan Performa -${statE.penaltiPersen}% karena lelah/stres)</span>` 
             : `<span style="color:#34d399; font-size:0.85rem;">(✨ Performa Optimal 100%)</span>`;
@@ -262,16 +254,13 @@ function renderBalapKuda() {
                         ${k.isJuaraSS ? '<span style="background:#eab308; color:#000; font-size:0.75rem; padding:2px 6px; border-radius:4px; font-weight:bold; margin-left:5px;">🏆 Legend SS</span>' : ''}
                     </h3>
                     <p>Usia: <b>${usiaHari} Hari in-game</b> | OVR Asli: <b>${ovrAsli} Pts</b> | OVR Efektif: <b style="color:${statE.penaltiPersen > 0 ? '#f87171' : '#34d399'}; font-size:1.2rem;">${ovrEfektif} Pts</b> ${statusPenaltiTeks}</p>
-                    <p>⚡ Stamina: <b>${k.stamina} / ${k.staminaMax}</b> | 🪨 Stres: <b style="color:${k.stres >= 80 ? '#f87171' : '#34d399'}">${k.stres} / 100</b></p>
+                    <p>⚡ Stamina: <b id="display-stamina-kuda">${k.stamina} / ${k.staminaMax}</b> | 🪨 Stres: <b style="color:${k.stres >= 80 ? '#f87171' : '#34d399'}">${k.stres} / 100</b></p>
                 </div>
                 <div style="display:flex; flex-wrap:wrap; gap:4px;">
                     <button onclick="latihKuda('kecepatan')" style="background:#2563eb; margin:2px;">🏃 Kecepatan</button>
                     <button onclick="latihKuda('dayaTahan')" style="background:#2563eb; margin:2px;">🛡️ Daya Tahan</button>
                     <button onclick="latihKuda('akselerasi')" style="background:#2563eb; margin:2px;">🚀 Akselerasi</button>
                     <button onclick="latihKuda('kelincahan')" style="background:#2563eb; margin:2px;">🌀 Kelincahan</button>
-                    <button id="btn-istirahat-kuda" onclick="istirahatKuda()" style="background:${bisaIstirahat ? '#059669' : '#334155'}; margin:2px;" ${!bisaIstirahat ? 'disabled' : ''}>
-                        ${sedangCooldown ? `⏳ CD (${cdData.jam}j ${cdData.menit}m)` : (!butuhIstirahat ? '✨ Prima (100%)' : '💤 Istirahat')}
-                    </button>
                     <button onclick="konfirmasiJualKuda(${balapKudaState.indexKudaAktif})" style="background:#dc2626; margin:2px;">💰 Jual (Rp.${hargaJualEst.toLocaleString('id-ID')})</button>
                 </div>
             </div>
@@ -305,12 +294,11 @@ function renderBalapKuda() {
     urutanKelas.forEach(kls => {
         let cfg = KONFIG_KELAS[kls];
         let adaKudaBisaIkut = balapKudaState.kandangKuda.some(k => dapatAksesKelasKuda(k, kls));
-        let bisaIkut = adaKudaBisaIkut && arenaBuka;
         let daftarLawan = balapKudaState.lawanPerKelas ? balapKudaState.lawanPerKelas[kls] || [] : [];
         let isOpen = detailsOpenState[kls] ? "open" : "";
         
         html += `
-            <div class="card" style="border: 1px solid ${bisaIkut ? '#10b981' : 'var(--border-color)'}; opacity: ${adaKudaBisaIkut ? '1' : '0.6'}">
+            <div class="card" style="border: 1px solid ${adaKudaBisaIkut ? '#10b981' : 'var(--border-color)'}; opacity: ${adaKudaBisaIkut ? '1' : '0.6'}">
                 <h3>🏆 Kelas ${kls}</h3>
                 <p style="font-size:0.8rem; color:var(--text-muted);">${cfg.nama}</p>
                 <p style="font-size:0.85rem;">Rata-rata OVR: <b>${cfg.ovrMin} - ${cfg.ovrMax}</b></p>
@@ -327,8 +315,8 @@ function renderBalapKuda() {
                     </ul>
                 </details>
 
-                <button onclick="pilihKudaSebelumBalapan('${kls}')" style="background:${bisaIkut ? '#059669' : '#334155'}; width:100%; margin-top:10px;" ${!bisaIkut ? 'disabled' : ''}>
-                    ${!adaKudaBisaIkut ? 'Tidak ada Kuda Layak' : (!arenaBuka ? 'Tutup (10.00-19.00)' : 'Ikut Tanding')}
+                <button onclick="pilihKudaSebelumBalapan('${kls}')" style="background:${adaKudaBisaIkut ? '#059669' : '#334155'}; width:100%; margin-top:10px;" ${!adaKudaBisaIkut ? 'disabled' : ''}>
+                    ${!adaKudaBisaIkut ? 'Tidak ada Kuda Layak' : 'Ikut Tanding'}
                 </button>
             </div>
         `;
@@ -357,32 +345,19 @@ function renderBalapKuda() {
 
     container.innerHTML = html;
 
-    // Timer Countdown HANYA memperbarui isi teks tombol tanpa re-render seluruh halaman
-    if (kudaAktif) {
-        balapKudaState.cooldownInterval = setInterval(() => {
-            let btn = document.getElementById("btn-istirahat-kuda");
-            if (!btn) return;
-
-            let cd = getSisaCooldownInGame(kudaAktif);
-            let butuh = kudaAktif.stamina < kudaAktif.staminaMax || kudaAktif.stres > 0;
-
-            if (cd !== 0 && cd.totalMenit > 0) {
-                btn.disabled = true;
-                btn.style.background = "#334155";
-                btn.innerText = `⏳ CD (${cd.jam}j ${cd.menit}m)`;
-            } else {
-                if (butuh) {
-                    btn.disabled = false;
-                    btn.style.background = "#059669";
-                    btn.innerText = "💤 Istirahat";
-                } else {
-                    btn.disabled = true;
-                    btn.style.background = "#334155";
-                    btn.innerText = "✨ Prima (100%)";
-                }
+    // Timer Interval Realtime untuk Cek Pemulihan Stamina Pasif Berkelanjutan
+    balapKudaState.pemulihanInterval = setInterval(() => {
+        if (!balapKudaState.kandangKuda) return;
+        balapKudaState.kandangKuda.forEach(k => prosesPemulihanStaminaPasif(k));
+        
+        let kAktif = balapKudaState.kandangKuda[balapKudaState.indexKudaAktif];
+        if (kAktif) {
+            let elStamina = document.getElementById("display-stamina-kuda");
+            if (elStamina) {
+                elStamina.innerText = `${kAktif.stamina} / ${kAktif.staminaMax}`;
             }
-        }, 1000);
-    }
+        }
+    }, 2000);
 }
 
 // --- FUNGSI MANAJEMEN KANDANG & KUDA ---
@@ -513,6 +488,10 @@ function beliKudaPasar(index) {
         `Beli <b>${item.nama}</b> (${item.gender === "Jantan" ? "🩵 Jantan" : "🩷 Betina"}) seharga <b>Rp. ${item.harga.toLocaleString('id-ID')}</b>?`,
         () => {
             gameState.uang -= item.harga;
+            let hariSekarang = gameState.waktuHari || 0;
+            let jamSekarang = parseInt(gameState.jam, 10) || 0;
+            let menitSekarang = Number(gameState.menit) || 0;
+
             let kudaBaru = {
                 nama: item.nama,
                 stats: item.stats,
@@ -520,11 +499,9 @@ function beliKudaPasar(index) {
                 stamina: 100,
                 staminaMax: 100,
                 stres: 0,
-                terakhirIstirahatJam: null,
-                terakhirIstirahatHari: null,
-                terakhirIstirahatMenit: null,
+                terakhirUpdateMenit: (hariSekarang * 24 * 60) + (jamSekarang * 60) + menitSekarang,
                 terakhirBreedingHari: null,
-                lahirHari: gameState.waktuHari || 0,
+                lahirHari: hariSekarang,
                 kelasMaks: "D",
                 isPemain: true,
                 isJuaraSS: false
@@ -659,6 +636,8 @@ function eksekusiBreeding() {
         () => {
             gameState.uang -= biayaKawin;
             let hariSekarang = gameState.waktuHari || 0;
+            let jamSekarang = parseInt(gameState.jam, 10) || 0;
+            let menitSekarang = Number(gameState.menit) || 0;
 
             // Atur CD 10 Hari untuk kedua Indukan
             jantan.terakhirBreedingHari = hariSekarang;
@@ -690,11 +669,9 @@ function eksekusiBreeding() {
                 stamina: 100,
                 staminaMax: 100,
                 stres: 0,
-                terakhirIstirahatJam: null,
-                terakhirIstirahatHari: null,
-                terakhirIstirahatMenit: null,
+                terakhirUpdateMenit: (hariSekarang * 24 * 60) + (jamSekarang * 60) + menitSekarang,
                 terakhirBreedingHari: null,
-                lahirHari: hariSekarang, // Tersimpan hari kelahiran
+                lahirHari: hariSekarang,
                 kelasMaks: kelasMaksAnak,
                 isPemain: true,
                 isJuaraSS: false
@@ -762,16 +739,16 @@ function latihKuda(statKey) {
     if (!k) return;
 
     if (k.stamina < 20) {
-        bukaModalCustom("⚠️ Kuda Kelelahan", "<p>Stamina kuda kurang dari 20! Istirahatkan kudamu terlebih dahulu.</p>");
+        bukaModalCustom("⚠️ Kuda Kelelahan", "<p>Stamina kuda kurang dari 20! Tunggu stamina pulih secara pasif (+5 / 45m in-game).</p>");
         return;
     }
 
     if (k.stres >= 100) {
-        bukaModalCustom("⚠️ Stres Maksimal", "<p>Kuda mencapai batas maksimal stres (100)! Segera istirahatkan kudamu.</p>");
+        bukaModalCustom("⚠️ Stres Maksimal", "<p>Kuda mencapai batas maksimal stres (100)! Biarkan kudamu tenang terlebih dahulu.</p>");
         return;
     }
 
-    k.stamina -= 20; // Latihan sekarang hanya menghabiskan 20 stamina
+    k.stamina -= 20;
     let penambahanStres = 20; 
     k.stres = Math.min(100, k.stres + penambahanStres);
 
@@ -794,31 +771,6 @@ function latihKuda(statKey) {
     renderBalapKuda();
 }
 
-function istirahatKuda() {
-    let k = balapKudaState.kandangKuda[balapKudaState.indexKudaAktif];
-    if (!k) return;
-
-    let cdData = getSisaCooldownInGame(k);
-
-    if (cdData !== 0 && cdData.totalMenit > 0) {
-        bukaModalCustom("⏳ Masih Cooldown", `<p>Kuda belum bisa istirahat! Masih dalam cooldown (Sisa: <b>${cdData.jam} jam ${cdData.menit} menit</b> in-game).</p>`);
-        return;
-    }
-
-    let hariSekarang = Number(gameState.waktuHari) || 0;
-    let jamSekarang = parseInt(gameState.jam, 10) || 0;
-    let menitSekarang = Number(gameState.menit) || 0;
-
-    k.stamina = k.staminaMax;
-    k.stres = 0;
-    k.terakhirIstirahatHari = hariSekarang;
-    k.terakhirIstirahatJam = jamSekarang;
-    k.terakhirIstirahatMenit = menitSekarang;
-
-    bukaModalCustom("💤 Kuda Beristirahat", `<p>Stamina <b>${k.nama}</b> pulih penuh dan tingkat stres kembali ke 0!</p>`);
-    renderBalapKuda();
-}
-
 // --- MEKANIK SIMULASI BALAPAN & PEMILIHAN KUDA SEBELUM LOMBA ---
 function dapatAksesKelasKuda(kuda, kelas) {
     if (!kuda) return false;
@@ -828,11 +780,6 @@ function dapatAksesKelasKuda(kuda, kelas) {
 
 function pilihKudaSebelumBalapan(kelas) {
     let cfg = KONFIG_KELAS[kelas];
-
-    if (!isArenaBuka()) {
-        bukaModalCustom("🕒 Arena Tutup", "<p>Arena Balap Kuda hanya buka dari jam 10.00 hingga 19.00!</p>");
-        return;
-    }
 
     let listKudaBisa = [];
     balapKudaState.kandangKuda.forEach((k, idx) => {
@@ -857,7 +804,7 @@ function pilihKudaSebelumBalapan(kelas) {
                 let ovrE = hitungOverallKuda(statE);
                 let cukupStamina = k.stamina >= 30;
                 return `
-                    <div style="background:#1e293b; border:1px solid ${cukupStamina ? '#334155' : '#7f1d1d'}; padding:10px; border-radius:8px; display:flex; justify-content:space-between; align-align:center;">
+                    <div style="background:#1e293b; border:1px solid ${cukupStamina ? '#334155' : '#7f1d1d'}; padding:10px; border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
                         <div>
                             <b>${k.nama}</b> (${k.gender === 'Jantan' ? '🩵' : '🩷'})
                             <div style="font-size:0.8rem; color:#94a3b8;">OVR Efektif: <b style="color:#34d399;">${ovrE} Pts</b> | Stamina: ${k.stamina}/${k.staminaMax}</div>
@@ -880,11 +827,6 @@ function mulaiBalapanKelas(kelas, idxKuda) {
 
     let k = balapKudaState.kandangKuda[idxKuda];
     let cfg = KONFIG_KELAS[kelas];
-
-    if (!isArenaBuka()) {
-        bukaModalCustom("🕒 Arena Tutup", "<p>Arena Balap Kuda hanya buka dari jam 10.00 hingga 19.00!</p>");
-        return;
-    }
 
     if (k.stamina < 30) {
         bukaModalCustom("⚠️ Stamina Kurang", "<p>Stamina kuda kurang untuk mengikuti balapan (Minimal 30)!</p>");
