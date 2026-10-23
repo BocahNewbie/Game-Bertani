@@ -1864,7 +1864,7 @@ function renderTas() {
     if (!ada) container.innerHTML = `<p style="grid-column:1/-1; text-align:center; color:var(--text-muted);">Tas kosong.</p>`;
 }
 
-// --- WAKTU IN-GAME ---
+// --- WAKTU IN-GAME (SUDAH DIPERBAIKI SUPAYA TIDAK BENTROK DI HP) ---
 setInterval(() => {
     gameState.waktuMenit += 1;
     if (gameState.waktuMenit >= 60) {
@@ -1879,6 +1879,7 @@ setInterval(() => {
     }
     updateHeaderUI();
 
+    // PERBAIKAN HP: Hanya render tab biasa, hindari memanggil renderBalapKuda konstan di interval game
     let tabAktif = document.querySelector(".tab-content.active");
     if (tabAktif) {
         let idTab = tabAktif.id;
@@ -1886,9 +1887,6 @@ setInterval(() => {
         if (idTab === 'tab-kandang') renderKandang();
         if (idTab === 'tab-misi') renderPapanMisi();
         if (idTab === 'tab-dapur') renderDapur();        
-        if (idTab === 'tab-balap-kuda' && typeof renderBalapKuda === 'function') {
-            renderBalapKuda();
-        }
     }
 }, 1500);
 
@@ -1897,10 +1895,13 @@ window.onload = function() {
     muatGame();
     resetHeaderNamaUI();
 
-    if (gameState.misiPapan.length === 0) {
+    if (!gameState.misiPapan || gameState.misiPapan.length === 0) {
         generasiMisiOtomatis();
         generasiMisiOtomatis();
     }
     
-    renderSemuaTabUtama();
+    // Pastikan semua tab siap dimuat
+    setTimeout(() => {
+        renderSemuaTabUtama();
+    }, 200);
 };
