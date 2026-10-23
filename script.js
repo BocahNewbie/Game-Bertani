@@ -11,6 +11,7 @@ let gameState = {
     kandang: {},
     durasiPisau: 300,
     durasiKompor: 300,
+    durasiPancingan: 750,
     misiPapan: [],
     misiAktif: [],
     mancingHari: 1,
@@ -91,7 +92,7 @@ function refreshTabAktif(tabId) {
     if (tabId === 'tab-pengepul') renderPengepul();
     if (tabId === 'tab-tukang-kayu') renderTukangKayu();
     if (tabId === 'tab-wikipedia') renderWikipedia();
-    if (tabId === 'tab-memancing') renderSungai();
+    if (tabId === 'tab-mancing') renderSungai();
     if (tabId === 'tab-misi') renderPapanMisi();
     if (tabId === 'tab-toko-bumbu') renderTokoBumbu();
     if (tabId === 'tab-dapur') renderDapur();
@@ -142,6 +143,7 @@ function muatGame() {
             gameState = JSON.parse(savedData);
             if (gameState.durasiPisau === undefined) gameState.durasiPisau = 300;
             if (gameState.durasiKompor === undefined) gameState.durasiKompor = 300;
+            if (gameState.durasiPancingan === undefined) gameState.durasiPancingan = 750;
             if (!gameState.misiPapan) gameState.misiPapan = [];
             if (!gameState.misiAktif) gameState.misiAktif = [];
             if (gameState.mancingCount === undefined) gameState.mancingCount = 0;
@@ -682,7 +684,7 @@ function renderPasar() {
         html += `<div class="card"><div style="font-size:2.5rem;">${item.icon}</div><h3>${item.nama}</h3><p>Beli: <b>Rp. ${f.harga.toLocaleString('id-ID')}</b></p>${getInfoGrafikHarga(f.harga, hBeli)}<button onclick="bukaModalBeli('${id}', '${item.nama}', ${f.harga}, 'pasar')">Beli Pakan</button></div>`;
     }
 
-    // --- PERALATAN (ANTI DUPLIKAT BELI) ---
+    // --- PERALATAN (Pancingan Ditambahkan di Sini) ---
     if (GAME_DATABASE.alat) {
         html += `<h3 style="color: #60a5fa; grid-column:1/-1; margin-top:20px;">⚙️ Peralatan Kerja</h3>`;
         for (let idAlat in GAME_DATABASE.alat) {
@@ -698,7 +700,7 @@ function renderPasar() {
                     <div style="font-size:2.5rem;">${alat.icon}</div>
                     <h3>${alat.nama}</h3>
                     <p>Beli: <b>Rp. ${alat.hargaBeli.toLocaleString('id-ID')}</b></p>
-                    <p style="font-size:0.8rem; color:var(--text-muted);">Durability: 300x Pakai</p>
+                    <p style="font-size:0.8rem; color:var(--text-muted);">Durability: ${alat.durabilityMax}x Pakai</p>
                     ${tombolHTML}
                 </div>
             `;
@@ -725,7 +727,7 @@ function renderTokoBumbu() {
     if (!container) return;
     container.innerHTML = "";
 
-    let html = `<h3 style="color: #fbbf24; grid-column:1/-1;">🌶️ Toko Kelontong & Bumbu Dapur</h3>`;
+    let html = `<h3 style="color: #fbbf24; grid-column:1/-1;">🧂 Toko Kelontong & Bumbu Khusus (Non-Tanam)</h3>`;
     for (let id in GAME_DATABASE.bumbu) {
         let item = GAME_DATABASE.bumbu[id];
         let hBeli = item.hargaBeli || 200;
@@ -759,6 +761,10 @@ function renderTukangKayu() {
     let komporPenuh = durKompor >= 300;
     let punyaKompor = (gameState.tas['kompor'] || 0) > 0;
 
+    let durPancingan = gameState.durasiPancingan;
+    let pancinganPenuh = durPancingan >= 750;
+    let punyaPancingan = (gameState.tas['pancingan'] || 0) > 0;
+
     container.innerHTML = `
         <div class="card">
             <div style="font-size:2.5rem;">${itemKayu.icon}</div>
@@ -787,6 +793,16 @@ function renderTukangKayu() {
                 ${!punyaKompor ? 'Belum Punya Kompor' : (komporPenuh ? 'Kompor Masih Bagus' : 'Servis Kompor')}
             </button>
         </div>
+
+        <div class="card" style="border: 1px solid #10b981;">
+            <div style="font-size:2.5rem;">🎣</div>
+            <h3>Perbaiki Alat Pancing</h3>
+            <p>Durability: <b>${durPancingan}/750</b></p>
+            <p>Biaya: <b>Rp. 70.000</b></p>
+            <button onclick="servisPancingan()" style="background:${(!punyaPancingan || pancinganPenuh) ? '#334155' : '#059669'}; margin-top: 10px; ${(!punyaPancingan || pancinganPenuh) ? 'cursor:not-allowed;' : ''}">
+                ${!punyaPancingan ? 'Belum Punya Pancingan' : (pancinganPenuh ? 'Pancingan Masih Bagus' : 'Perbaiki Pancingan')}
+            </button>
+        </div>
     `;
 }
 
@@ -809,6 +825,28 @@ function servisKompor() {
         renderTukangKayu();
     } else {
         alert("⚠️ Uang tidak cukup untuk servis kompor!");
+    }
+}
+
+function servisPancingan() {
+    if ((gameState.tas['pancingan'] || 0) <= 0) {
+        alert("⚠️ Kamu belum memiliki Alat Pancing! Beli Alat Pancing terlebih dahulu di Pasar.");
+        return;
+    }
+    if (gameState.durasiPancingan >= 750) {
+        alert("⚠️ Alat pancing masih dalam kondisi prima!");
+        return;
+    }
+
+    let biaya = (GAME_DATABASE.alat && GAME_DATABASE.alat.pancingan && GAME_DATABASE.alat.pancingan.biayaServis) || 70000;
+    if (gameState.uang >= biaya) {
+        gameState.uang -= biaya;
+        gameState.durasiPancingan = 750;
+        updateHeaderUI();
+        tampilkanPopupNotifikasi("🎣 Pancingan Diperbaiki!", "Durability pancingan berhasil dipulihkan menjadi 750x pakai.", "neon-green");
+        renderTukangKayu();
+    } else {
+        alert("⚠️ Uang tidak cukup untuk servis pancingan!");
     }
 }
 
@@ -1003,7 +1041,6 @@ function mulaiMemasak(idResep) {
         if (gameState.tas[idBahan] <= 0) delete gameState.tas[idBahan];
     }
 
-    // Kurangi durability kompor
     gameState.durasiKompor -= 1;
 
     let totalMenitSekarang = getTotalMenitInGame(gameState.waktuHari, gameState.waktuJam, gameState.waktuMenit);
@@ -1161,6 +1198,9 @@ function renderSungai() {
     const container = document.getElementById("area-sungai");
     if (!container) return;
 
+    let punyaPancingan = (gameState.tas['pancingan'] || 0) > 0;
+    let durPancingan = gameState.durasiPancingan;
+
     if (gameState.mancingHari !== gameState.waktuHari) {
         gameState.mancingHari = gameState.waktuHari;
         gameState.mancingCount = 0;
@@ -1171,13 +1211,26 @@ function renderSungai() {
             <div style="font-size: 4rem; margin-bottom: 10px;">🌊</div>
             <h2>Area Memancing Desa</h2>
             <p style="color: var(--text-muted); margin-bottom: 10px;">Lemparkan pancingan untuk mendapatkan berbagai jenis ikan segar!</p>
-            <p style="color: #34d399; font-weight: bold; margin-bottom: 20px;">Semoga Beruntung 🍀✨</p>
-            <button onclick="mulaiMancing()" style="background: #2563eb; font-size: 1.1rem; padding: 12px 25px; cursor: pointer;">🎣 Lempar Pancingan</button>
+            ${punyaPancingan 
+                ? `<p style="color: #34d399; font-weight: bold; margin-bottom: 10px;">Durability Pancingan: ${durPancingan}/750</p>`
+                : `<p style="color: #f87171; font-weight: bold; margin-bottom: 10px;">⚠️ Belum Memiliki Alat Pancing! Beli di Pasar seharga Rp 150.000.</p>`
+            }
+            ${durPancingan <= 0 ? '<p style="color:#f87171; font-weight:bold; margin-bottom:10px;">Pancingan Rusak! Perbaiki di Tukang Kayu.</p>' : ''}
+            <button onclick="mulaiMancing()" style="background: ${(!punyaPancingan || durPancingan <= 0) ? '#334155' : '#2563eb'}; font-size: 1.1rem; padding: 12px 25px; cursor: pointer;" ${(!punyaPancingan || durPancingan <= 0) ? 'disabled' : ''}>🎣 Lempar Pancingan</button>
         </div>
     `;
 }
 
 function mulaiMancing() {
+    if ((gameState.tas['pancingan'] || 0) <= 0) {
+        alert("⚠️ Kamu belum memiliki Alat Pancing! Beli Alat Pancing di Pasar seharga Rp 150.000.");
+        return;
+    }
+    if (gameState.durasiPancingan <= 0) {
+        alert("⚠️ Alat pancing kamu rusak (durability 0)! Silakan perbaiki di Tukang Kayu.");
+        return;
+    }
+
     if (gameState.mancingHari !== gameState.waktuHari) {
         gameState.mancingHari = gameState.waktuHari;
         gameState.mancingCount = 0;
@@ -1225,7 +1278,7 @@ function mulaiMancing() {
 
     let elKuota = document.getElementById("info-kuota-mancing");
     if (elKuota) {
-        elKuota.innerHTML = `Semoga Beruntung 🍀✨<br><small style="color:#f87171;">Berhasil Hari Ini: ${gameState.mancingCount} Kali (Tingkat Kesulitan: ${tingkatBerhasil}/30 🔥)</small>`;
+        elKuota.innerHTML = `Durability Pancingan: ${gameState.durasiPancingan}/750<br><small style="color:#f87171;">Berhasil Hari Ini: ${gameState.mancingCount} Kali (Tingkat Kesulitan: ${tingkatBerhasil}/30 🔥)</small>`;
     }
 
     posisiBar = 0;
@@ -1246,6 +1299,9 @@ function tarikPancingan() {
     clearInterval(intervalMancing);
     let modal = document.getElementById("modal-mancing");
     if (modal) modal.style.display = "none";
+
+    // Kurangi Durability Pancingan
+    gameState.durasiPancingan -= 1;
 
     if (posisiBar >= zonaHijau.min && posisiBar <= zonaHijau.max) {
         if (!GAME_DATABASE.ikan) {
@@ -1292,14 +1348,15 @@ function tarikPancingan() {
 
         tampilkanPopupNotifikasi(
             `🐟 STRIKE! (${dataIkan.tingkatKesan})`, 
-            `Selamat! Kamu menangkap 1x ${dataIkan.icon || '🐟'} ${dataIkan.nama} (Harga Jual: Rp. ${dataIkan.hargaJual.toLocaleString('id-ID')})`, 
+            `Selamat! Kamu menangkap 1x ${dataIkan.icon || '🐟'} ${dataIkan.nama} (Durability: ${gameState.durasiPancingan}/750)`, 
             warnaNotif
         );
 
         renderTas();
     } else {
-        tampilkanPopupNotifikasi("❌ Lepas!", "HA~ HA~ HA~, ikannya kabur! Coba lagi.", "neon-amber");
+        tampilkanPopupNotifikasi("❌ Lepas!", `HA~ HA~ HA~, ikannya kabur! Coba lagi. (Durability: ${gameState.durasiPancingan}/750)`, "neon-amber");
     }
+    renderSungai();
 }
 
 // --- MODAL & PEMBELIAN ---
