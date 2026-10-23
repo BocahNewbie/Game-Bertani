@@ -1,5 +1,5 @@
 // ==========================================
-// MODULE BALAP KUDA (balap_kuda.js) - COMPLETE FIXED & UPDATED
+// MODULE BALAP KUDA (balap_kuda.js) - REAL-TIME STAMINA & DYNAMIC OVR DECAY (500M)
 // ==========================================
 
 let balapKudaState = {
@@ -11,12 +11,13 @@ let balapKudaState = {
     // State sementara untuk fitur Breeding
     indukJantanIdx: null,
     indukBetinaIdx: null,
-    pemulihanInterval: null
+    pemulihanInterval: null,
+    balapanInterval: null
 };
 
 const MAX_KAPASITAS_KUDA = 5;
-const COOLDOWN_BREEDING_HARI = 10; // Cooldown breeding 10 hari in-game
-const MIN_USIA_BREEDING_HARI = 25; // Anakan bisa breeding setelah 25 hari in-game
+const COOLDOWN_BREEDING_HARI = 10; 
+const MIN_USIA_BREEDING_HARI = 25; 
 
 // Konfigurasi Kelas, Syarat OVR, Biaya, dan Hadiah Juara 1, 2, 3
 const KONFIG_KELAS = {
@@ -63,7 +64,8 @@ const NAMA_KUDA_NPC = [
     "Pegasus", "Bintang", "Thunder", "Blaze", "Tornado", "Valkyrie", 
     "Titan", "Phantom", "Eclipse", "Byakko", "Dandan", "Kelp", 
     "Ares", "Apollo", "Hermes", "Comet", "Draco", "Orion", "Saber",
-    "Gatot", "Subroto", "Kevin", "Persa", "Dragon", "Windy", "Rainy"
+    "Gatot", "Subroto", "Kevin", "Persa", "Dragon", "Windy", "Rainy",
+    "Black", "White", "Kosah", "Pedro", "Pikti", "Ogas", "Mola", "Storm"
 ];
 
 // --- FUNGSI HELPER SYSTEM POPUP CUSTOM MODERN ---
@@ -72,13 +74,13 @@ function bukaModalCustom(judul, HTMLKonten) {
     if (modalExisting) modalExisting.remove();
 
     let modalHTML = `
-        <div id="custom-game-modal" style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.75); backdrop-filter:blur(4px); display:flex; align-items:center; justify-content:center; z-index:99999; padding:15px; animation:fadeIn 0.2s ease;">
-            <div style="background:#0f172a; border:1px solid #3b82f6; border-radius:12px; width:100%; max-width:520px; box-shadow:0 10px 25px rgba(0,0,0,0.8); overflow:hidden; color:#f8fafc;">
+        <div id="custom-game-modal" style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.8); backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center; z-index:99999; padding:15px; animation:fadeIn 0.2s ease;">
+            <div style="background:#0f172a; border:1px solid #3b82f6; border-radius:12px; width:100%; max-width:580px; box-shadow:0 10px 25px rgba(0,0,0,0.8); overflow:hidden; color:#f8fafc;">
                 <div style="padding:15px; background:#1e293b; border-bottom:1px solid #334155; display:flex; justify-content:space-between; align-items:center;">
                     <h3 style="margin:0; font-size:1.1rem; color:#38bdf8;">${judul}</h3>
                     <button onclick="tutupModalCustom()" style="background:none; border:none; color:#94a3b8; font-size:1.2rem; cursor:pointer;">✖</button>
                 </div>
-                <div style="padding:20px; max-height:80vh; overflow-y:auto;">
+                <div style="padding:20px; max-height:85vh; overflow-y:auto;">
                     ${HTMLKonten}
                 </div>
             </div>
@@ -88,6 +90,10 @@ function bukaModalCustom(judul, HTMLKonten) {
 }
 
 function tutupModalCustom() {
+    if (balapKudaState.balapanInterval) {
+        clearInterval(balapKudaState.balapanInterval);
+        balapKudaState.balapanInterval = null;
+    }
     let modal = document.getElementById("custom-game-modal");
     if (modal) modal.remove();
 }
@@ -105,11 +111,6 @@ function dialogKonfirmasiCustom(judul, pesan, callbackYa) {
         tutupModalCustom();
         callbackYa();
     };
-}
-
-// --- FUNGSI CEK JAM ARENA BUKA (24 JAM BUKA MURNI) ---
-function isArenaBuka() {
-    return true; // Dibuat selalu BUKA tanpa batasan waktu in-game
 }
 
 // --- HELPER PROSES PEMULIHAN STAMINA PASIF (+5 per 45 Menit In-Game) ---
@@ -151,7 +152,7 @@ function hitungHargaJualKuda(k) {
     let ovrAsli = hitungOverallKuda(k.stats);
     let hargaBase = 75000 + (ovrAsli * 150);
     if (k.isJuaraSS) {
-        hargaBase = Math.round(hargaBase * 1.18); // +18% jika Juara SS
+        hargaBase = Math.round(hargaBase * 1.18); 
     }
     return Math.round(hargaBase);
 }
@@ -161,7 +162,6 @@ function renderBalapKuda() {
     const container = document.getElementById("area-balap-kuda");
     if (!container) return;
 
-    // Simpan status elemen <details> mana saja yang sedang terbuka sebelum re-render
     let detailsOpenState = {};
     document.querySelectorAll('#area-balap-kuda details').forEach(el => {
         let kelasId = el.getAttribute('data-kelas');
@@ -170,13 +170,11 @@ function renderBalapKuda() {
         }
     });
 
-    // Bersihkan interval pemulihan pasif lama jika ada
     if (balapKudaState.pemulihanInterval) {
         clearInterval(balapKudaState.pemulihanInterval);
         balapKudaState.pemulihanInterval = null;
     }
 
-    // Inisialisasi struktur kandang jika belum ada
     if (!balapKudaState.kandangKuda) balapKudaState.kandangKuda = [];
     if (balapKudaState.kudaPemain && balapKudaState.kandangKuda.length === 0) {
         let kAwal = balapKudaState.kudaPemain;
@@ -184,10 +182,8 @@ function renderBalapKuda() {
         balapKudaState.kandangKuda.push(kAwal);
     }
 
-    // Jalankan kalkulasi pemulihan stamina pasif untuk seluruh kuda di kandang
     balapKudaState.kandangKuda.forEach(k => prosesPemulihanStaminaPasif(k));
 
-    // Paksa buat pasar kuda & lawan NPC baru jika belum ada data sama sekali atau hari berganti
     if (!balapKudaState.daftarPasarKuda || balapKudaState.daftarPasarKuda.length === 0 || balapKudaState.musimBalapHari !== gameState.waktuHari) {
         balapKudaState.musimBalapHari = gameState.waktuHari;
         generasiPasarKuda();
@@ -218,7 +214,6 @@ function renderBalapKuda() {
             </div>
         `;
     } else {
-        // Tampilan Pilihan Kuda Menggunakan Select Option (Mencegah Reset Scroll)
         html += `<div style="margin-bottom:15px; background:#1e293b; padding:10px; border-radius:8px;">
             <label style="font-size:0.85rem; color:#94a3b8; display:block; margin-bottom:5px;">🐴 Pilih Kuda yang Ingin Dilihat / Dikelola:</label>
             <select onchange="pilihKudaAktif(this.value)" style="width:100%; padding:10px; border-radius:6px; background:#0f172a; color:#fff; border:1px solid #3b82f6; font-size:0.95rem;">
@@ -230,10 +225,9 @@ function renderBalapKuda() {
             </select>
         </div>`;
 
-        // Tampilan Details Kuda Aktif
         let k = kudaAktif;
         let ovrAsli = hitungOverallKuda(k.stats);
-        let statE = hitungStatEfektif(k);
+        let statE = hitungStatEfektif(k, k.stamina);
         let ovrEfektif = hitungOverallKuda(statE);
 
         let statusPenaltiTeks = statE.penaltiPersen > 0 
@@ -345,7 +339,6 @@ function renderBalapKuda() {
 
     container.innerHTML = html;
 
-    // Timer Interval Realtime untuk Cek Pemulihan Stamina Pasif Berkelanjutan
     balapKudaState.pemulihanInterval = setInterval(() => {
         if (!balapKudaState.kandangKuda) return;
         balapKudaState.kandangKuda.forEach(k => prosesPemulihanStaminaPasif(k));
@@ -390,25 +383,25 @@ function konfirmasiJualKuda(index) {
     );
 }
 
-// --- LOGIKA HITUNG STAT & OVERALL ---
+// --- LOGIKA HITUNG STAT & OVERALL DENGAN PENURUNAN STAMINA & STRES ---
 function hitungOverallKuda(stats) {
     if (!stats) return 0;
     return Math.round((stats.kecepatan || 0) + (stats.dayaTahan || 0) + (stats.akselerasi || 0) + (stats.mental || 0) + (stats.kelincahan || 0));
 }
 
-function hitungStatEfektif(kuda) {
+function hitungStatEfektif(kuda, staminaAktif) {
     let s = kuda.stats;
     if (!s) return { kecepatan: 0, dayaTahan: 0, akselerasi: 0, mental: 0, kelincahan: 0, penaltiPersen: 0 };
-    
-    if (!kuda.isPemain && kuda.isPemain !== undefined) {
-        return { ...s, penaltiPersen: 0 };
-    }
 
-    let rasioStaminaKosong = 1 - ((kuda.stamina || 0) / (kuda.staminaMax || 100));
+    let curStamina = staminaAktif !== undefined ? staminaAktif : (kuda.stamina || 100);
+    let maxStamina = kuda.staminaMax || 100;
+
+    let rasioStaminaKosong = 1 - (curStamina / maxStamina);
     let rasioStres = (kuda.stres || 0) / 100;
 
-    let faktorPenalti = (rasioStaminaKosong * 0.35) + (rasioStres * 0.45);
-    let pengaliPerforma = Math.max(0.2, 1 - faktorPenalti);
+    // Penalti performa berbanding lurus dengan stamina yang habis + stres
+    let faktorPenalti = (rasioStaminaKosong * 0.45) + (rasioStres * 0.35);
+    let pengaliPerforma = Math.max(0.15, 1 - faktorPenalti);
 
     return {
         kecepatan: Math.round(s.kecepatan * pengaliPerforma),
@@ -436,7 +429,6 @@ function buatStatRandom(ovrMin, ovrMax) {
 function generasiLawanPerKelas() {
     balapKudaState.lawanPerKelas = {};
     let kelasList = ["D", "C", "B", "A", "S", "SS"];
-    
     let namaAcak = [...NAMA_KUDA_NPC].sort(() => Math.random() - 0.5);
 
     kelasList.forEach((kls, idx) => {
@@ -448,10 +440,15 @@ function generasiLawanPerKelas() {
             let nama = namaAcak[indexNama] + ` [NPC]`;
             let stats = buatStatRandom(cfg.ovrMin, cfg.ovrMax);
             let gender = Math.random() < 0.5 ? "Jantan" : "Betina";
+            let staminaMax = 80 + Math.floor(Math.random() * 40); 
+            
             balapKudaState.lawanPerKelas[kls].push({
                 nama: nama,
                 stats: stats,
                 gender: gender,
+                stamina: staminaMax,
+                staminaMax: staminaMax,
+                stres: Math.floor(Math.random() * 20),
                 isPemain: false
             });
         }
@@ -518,7 +515,7 @@ function beliKudaPasar(index) {
     );
 }
 
-// --- MODAL BREEDING MODERN & COOLDOWN + USIA ---
+// --- MODAL BREEDING MODERN ---
 function bukaModalBreedingModern() {
     balapKudaState.indukJantanIdx = null;
     balapKudaState.indukBetinaIdx = null;
@@ -639,11 +636,9 @@ function eksekusiBreeding() {
             let jamSekarang = parseInt(gameState.jam, 10) || 0;
             let menitSekarang = Number(gameState.menit) || 0;
 
-            // Atur CD 10 Hari untuk kedua Indukan
             jantan.terakhirBreedingHari = hariSekarang;
             betina.terakhirBreedingHari = hariSekarang;
 
-            // Hitung rata-rata + 10% bonus stat
             let calcStat = (s1, s2) => Math.round(((s1 + s2) / 2) * 1.10);
 
             let statsAnak = {
@@ -771,7 +766,7 @@ function latihKuda(statKey) {
     renderBalapKuda();
 }
 
-// --- MEKANIK SIMULASI BALAPAN & PEMILIHAN KUDA SEBELUM LOMBA ---
+// --- MEKANIK SIMULASI BALAPAN & ANIMASI LINTASAN 500M ---
 function dapatAksesKelasKuda(kuda, kelas) {
     if (!kuda) return false;
     let urutan = ["D", "C", "B", "A", "S", "SS"];
@@ -800,7 +795,7 @@ function pilihKudaSebelumBalapan(kelas) {
         </div>
         <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:20px;">
             ${listKudaBisa.map(k => {
-                let statE = hitungStatEfektif(k);
+                let statE = hitungStatEfektif(k, k.stamina);
                 let ovrE = hitungOverallKuda(statE);
                 let cukupStamina = k.stamina >= 30;
                 return `
@@ -839,7 +834,6 @@ function mulaiBalapanKelas(kelas, idxKuda) {
     }
 
     gameState.uang -= cfg.biayaDaftar;
-    k.stamina = Math.max(0, k.stamina - 30);
     k.stres = Math.min(100, k.stres + 15);
     if (typeof updateHeaderUI === "function") updateHeaderUI();
 
@@ -848,53 +842,219 @@ function mulaiBalapanKelas(kelas, idxKuda) {
         nama: npc.nama,
         stats: npc.stats,
         gender: npc.gender,
-        isPemain: false
+        staminaAwal: npc.staminaMax,
+        staminaCurrent: npc.staminaMax,
+        stres: npc.stres,
+        isPemain: false,
+        refObject: npc
     }));
 
     peserta.push({
         nama: k.nama + " (Kuda Kamu)",
         stats: k.stats,
         gender: k.gender,
-        stamina: k.stamina,
-        staminaMax: k.staminaMax,
+        staminaAwal: k.stamina,
+        staminaCurrent: k.stamina,
         stres: k.stres,
-        isPemain: true
-    });
+        isPemain: true,
+        refObject: k
+    }));
 
+    // Inisialisasi Kinerja Peserta
     peserta.forEach(p => {
-        let statEfektif = hitungStatEfektif(p);
-        
-        let poinKecepatan = (statEfektif.kecepatan * 1.2) + (statEfektif.akselerasi * 0.8);
-        let dayaTahanFactor = (statEfektif.dayaTahan * 0.9) + (statEfektif.kelincahan * 0.6);
-        let keberuntungan = (Math.random() * statEfektif.mental);
-
-        p.skorAkhir = Math.round(poinKecepatan + dayaTahanFactor + keberuntungan);
-        p.penaltiPersen = statEfektif.penaltiPersen || 0;
-        p.ovrDisplay = hitungOverallKuda(p.stats);
+        p.jarakTempuhMeter = 0;
+        p.checkpointTerakhir = 0; // Melacak per 40m
+        p.skorKinerjaAkumulatif = 0;
     });
 
-    peserta.sort((a, b) => b.skorAkhir - a.skorAkhir);
+    jalankanAnimasiBalapan500m(kelas, peserta, k);
+}
 
-    let posisiPemain = peserta.findIndex(p => p.isPemain) + 1;
+// --- ENGINE ANIMASI REAL-TIME LINTASAN 500M (STAMINA -5% PER 40M) ---
+function jalankanAnimasiBalapan500m(kelas, pesertaList, kudaPemainRef) {
+    let modalHTML = `
+        <div style="text-align:center;">
+            <div style="display:flex; justify-content:space-between; align-items:center; background:#1e293b; padding:10px 15px; border-radius:8px; margin-bottom:10px;">
+                <div>🏁 Lintasan: <b style="color:#38bdf8;">500 Meter</b></div>
+                <div>⏱️ Waktu: <b id="timer-balap" style="color:#fbbf24;">01:30</b></div>
+                <div>🚩 Jarak: <b id="jarak-pemain" style="color:#34d399;">0m / 500m</b></div>
+            </div>
+
+            <!-- UI Lintasan Balap Kuda -->
+            <div id="arena-lintasan-container" style="background:#022c22; border:2px solid #059669; border-radius:8px; padding:10px; position:relative; overflow-x:auto;">
+                <div style="position:absolute; right:15px; top:0; bottom:0; width:4px; background:repeating-linear-gradient(0deg, #fff, #fff 10px, #000 10px, #000 20px); z-index:5; box-shadow:0 0 10px #fff;"></div>
+                
+                <div id="wrapper-jalur-kuda" style="display:flex; flex-direction:column; gap:6px; min-width:480px;">
+                    ${pesertaList.map((p, idx) => `
+                        <div style="display:flex; align-items:center; background:#064e3b; padding:4px 8px; border-radius:6px; position:relative; border:1px solid ${p.isPemain ? '#38bdf8' : '#047857'};">
+                            <span style="font-size:0.75rem; width:85px; text-overflow:ellipsis; overflow:hidden; white-space:nowrap; text-align:left; color:${p.isPemain ? '#38bdf8' : '#cbd5e1'}; font-weight:${p.isPemain ? 'bold' : 'normal'};">
+                                ${p.isPemain ? '⭐ ' : ''}${p.nama.split(' ')[0]}
+                            </span>
+                            <div style="flex:1; position:relative; height:24px; background:rgba(0,0,0,0.3); border-radius:12px; margin-left:5px; overflow:hidden;">
+                                <div id="kuda-runner-${idx}" style="position:absolute; left:0%; top:50%; transform:translateY(-50%); font-size:1.1rem; transition:left 0.2s linear; display:flex; align-items:center;">
+                                    🏇
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+
+            <!-- Live Leaderboard Real-Time & Status OVR -->
+            <div style="margin-top:12px; background:#0f172a; padding:10px; border-radius:8px; border:1px solid #334155; text-align:left;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                    <span style="font-size:0.85rem; font-weight:bold; color:#fbbf24;">📊 Live Leaderboard & Stat Realtime:</span>
+                    <span style="font-size:0.75rem; color:#94a3b8;">📉 Stamina -5% / 40m</span>
+                </div>
+                <div id="live-leaderboard" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap:6px; font-size:0.75rem;">
+                    <!-- Terisi otomatis via JS -->
+                </div>
+            </div>
+        </div>
+    `;
+
+    bukaModalCustom(`🏁 Pertandingan Balap Kuda - Kelas ${kelas}`, modalHTML);
+
+    let DURASI_TOTAL_DETIK = 90; // 1 Menit 30 Detik
+    let totalFrame = DURASI_TOTAL_DETIK * 5; // Frame per 200ms
+    let frameSekarang = 0;
+
+    balapKudaState.balapanInterval = setInterval(() => {
+        frameSekarang++;
+
+        pesertaList.forEach((p, idx) => {
+            if (p.jarakTempuhMeter < 500) {
+                // 1. Hitung Stat Efektif & OVR Saat Ini berdasarkan Stamina Real-Time
+                let statE = hitungStatEfektif({ stats: p.stats, stres: p.stres }, p.staminaCurrent);
+                let ovrAktif = hitungOverallKuda(statE);
+
+                // 2. Faktor Kecepatan Berdasarkan Stat Efektif yang Sudah Terdegradasi
+                let dayaSpd = (statE.kecepatan * 0.45) + (statE.akselerasi * 0.35) + (statE.kelincahan * 0.2);
+                let baseMeterPerFrame = (500 / totalFrame) * (dayaSpd / 60); 
+                let luck = (Math.random() * (statE.mental / 40));
+
+                let pertambahanJarak = Math.max(0.2, baseMeterPerFrame + luck);
+                p.jarakTempuhMeter = Math.min(500, p.jarakTempuhMeter + pertambahanJarak);
+
+                // 3. Akumulasi Skor Kinerja untuk Menentukan Pemenang Akhir
+                p.skorKinerjaAkumulatif += (dayaSpd + luck);
+
+                // 4. PENURUNAN STAMINA 5% PER 40 METER
+                let kelipatan40m = Math.floor(p.jarakTempuhMeter / 40);
+                if (kelipatan40m > p.checkpointTerakhir) {
+                    let jumlahPenurunan = kelipatan40m - p.checkpointTerakhir;
+                    let penaltiStaminaPer40m = p.staminaAwal * 0.05; // 5% dari stamina awal per 40m
+                    
+                    p.staminaCurrent = Math.max(0, p.staminaCurrent - (penaltiStaminaPer40m * jumlahPenurunan));
+                    p.checkpointTerakhir = kelipatan40m;
+
+                    // Update stamina permanen pada objek referensi asli jika milik pemain
+                    if (p.isPemain && p.refObject) {
+                        p.refObject.stamina = Math.round(p.staminaCurrent);
+                    }
+                }
+            }
+        });
+
+        // Update Posisi Kuda di UI Lintasan
+        pesertaList.forEach((p, idx) => {
+            let elRunner = document.getElementById(`kuda-runner-${idx}`);
+            if (elRunner) {
+                let persenJarak = (p.jarakTempuhMeter / 500) * 100;
+                elRunner.style.left = `calc(${persenJarak}% - 20px)`;
+            }
+        });
+
+        // Update Timer & Meter Kuda Pemain
+        let detikSisa = Math.max(0, Math.ceil((totalFrame - frameSekarang) / 5));
+        let menitDisplay = String(Math.floor(detikSisa / 60)).padStart(2, '0');
+        let detikDisplay = String(detikSisa % 60).padStart(2, '0');
+        
+        let elTimer = document.getElementById("timer-balap");
+        if (elTimer) elTimer.innerText = `${menitDisplay}:${detikDisplay}`;
+
+        let indexPemain = pesertaList.findIndex(p => p.isPemain);
+        if (indexPemain !== -1) {
+            let elMeter = document.getElementById("jarak-pemain");
+            if (elMeter) elMeter.innerText = `${Math.round(pesertaList[indexPemain].jarakTempuhMeter)}m / 500m`;
+        }
+
+        // Live Leaderboard Realtime Update dengan Info OVR & Stamina
+        let rankingList = pesertaList.map((p) => {
+            let sEfektif = hitungStatEfektif({ stats: p.stats, stres: p.stres }, p.staminaCurrent);
+            return {
+                nama: p.nama,
+                jarak: p.jarakTempuhMeter,
+                stamina: Math.round(p.staminaCurrent),
+                ovrNow: hitungOverallKuda(sEfektif),
+                isPemain: p.isPemain
+            };
+        }).sort((a, b) => b.jarak - a.jarak);
+
+        let elBoard = document.getElementById("live-leaderboard");
+        if (elBoard) {
+            elBoard.innerHTML = rankingList.map((r, i) => `
+                <div style="background:#1e293b; padding:4px 6px; border-radius:4px; border:1px solid ${r.isPemain ? '#38bdf8' : '#334155'}; text-align:left;">
+                    <div style="color:${r.isPemain ? '#38bdf8' : '#f8fafc'}; font-weight:${r.isPemain ? 'bold' : 'normal'}; overflow:hidden; white-space:nowrap; text-overflow:ellipsis;">
+                        ${i+1}. ${r.nama.split(' ')[0]}
+                    </div>
+                    <div style="font-size:0.7rem; color:#94a3b8; display:flex; justify-content:space-between; margin-top:2px;">
+                        <span>📍 ${Math.round(r.jarak)}m</span>
+                        <span style="color:#fbbf24;">⚡ ${r.stamina}</span>
+                    </div>
+                    <div style="font-size:0.65rem; color:#34d399; margin-top:1px;">
+                        OVR: <b>${r.ovrNow}</b> Pts
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Cek jika semua kuda sudah menyentuh garis Finish (500m) atau Waktu Habis
+        let semuaSelesai = pesertaList.every(p => p.jarakTempuhMeter >= 500);
+        if (semuaSelesai || frameSekarang >= totalFrame) {
+            clearInterval(balapKudaState.balapanInterval);
+            balapKudaState.balapanInterval = null;
+
+            setTimeout(() => {
+                selesaikanHasilBalapan(kelas, pesertaList, kudaPemainRef);
+            }, 500);
+        }
+
+    }, 200); 
+}
+
+function selesaikanHasilBalapan(kelas, pesertaList, kudaPemainRef) {
+    let cfg = KONFIG_KELAS[kelas];
+
+    // Penentuan Juara Berdasarkan Jarak Tempuh & Skor Kinerja Akumulatif
+    pesertaList.sort((a, b) => {
+        if (b.jarakTempuhMeter !== a.jarakTempuhMeter) {
+            return b.jarakTempuhMeter - a.jarakTempuhMeter;
+        }
+        return b.skorKinerjaAkumulatif - a.skorKinerjaAkumulatif;
+    });
+
+    let posisiPemain = pesertaList.findIndex(p => p.isPemain) + 1;
     let urutanKelas = ["D", "C", "B", "A", "S", "SS"];
     let idxSekarang = urutanKelas.indexOf(kelas);
 
     if (posisiPemain === 1) {
         gameState.uang += cfg.hadiah.j1;
         if (kelas === "SS") {
-            k.isJuaraSS = true; // Tandai gelar Juara Kelas SS (+18% harga jual)
+            kudaPemainRef.isJuaraSS = true; 
         }
-        if (idxSekarang < urutanKelas.length - 1 && urutanKelas.indexOf(k.kelasMaks) === idxSekarang) {
-            k.kelasMaks = urutanKelas[idxSekarang + 1];
+        if (idxSekarang < urutanKelas.length - 1 && urutanKelas.indexOf(kudaPemainRef.kelasMaks) === idxSekarang) {
+            kudaPemainRef.kelasMaks = urutanKelas[idxSekarang + 1];
         }
     } else if (posisiPemain === 2) {
         gameState.uang += cfg.hadiah.j2;
     } else if (posisiPemain === 3) {
         gameState.uang += cfg.hadiah.j3;
     }
+
     if (typeof updateHeaderUI === "function") updateHeaderUI();
 
-    tampilkanHasilBalapanModal(kelas, peserta, posisiPemain);
+    tampilkanHasilBalapanModal(kelas, pesertaList, posisiPemain);
     renderBalapKuda();
 }
 
@@ -905,8 +1065,8 @@ function tampilkanHasilBalapanModal(kelas, pesertaSorted, posisiPemain) {
                 <tr style="border-bottom:1px solid #334155; color:#94a3b8;">
                     <th style="padding:6px; text-align:center;">Pos</th>
                     <th style="padding:6px; text-align:left;">Nama Kuda</th>
-                    <th style="padding:6px; text-align:center;">OVR</th>
-                    <th style="padding:6px; text-align:center;">Skor</th>
+                    <th style="padding:6px; text-align:center;">Sisa Stamina</th>
+                    <th style="padding:6px; text-align:center;">Jarak</th>
                 </tr>
             </thead>
             <tbody>`;
@@ -920,8 +1080,8 @@ function tampilkanHasilBalapanModal(kelas, pesertaSorted, posisiPemain) {
         modalTeks += `<tr style="${bgStyle} border-bottom:1px solid #1e293b;">
             <td style="padding:6px; text-align:center;">${piala}</td>
             <td style="padding:6px; color:${isPlayer ? '#60a5fa' : '#f8fafc'};">${p.nama} (${p.gender === "Jantan" ? "🩵" : "🩷"})</td>
-            <td style="padding:6px; text-align:center; color:#fbbf24;">${p.ovrDisplay}</td>
-            <td style="padding:6px; text-align:center;">${p.skorAkhir}</td>
+            <td style="padding:6px; text-align:center; color:#fbbf24;">⚡ ${Math.round(p.staminaCurrent)}</td>
+            <td style="padding:6px; text-align:center; color:#34d399;">${Math.round(p.jarakTempuhMeter)}m</td>
         </tr>`;
     });
 
