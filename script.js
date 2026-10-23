@@ -136,14 +136,13 @@ function resetHeaderNamaUI() {
     if (!container) return;
     let playerId = getIdPemainLocal() || "Registrasi...";
     let tombolSaveHTML = `<button onclick="simpanGame()" title="Simpan Ke Cloud" style="background: transparent; border: none; cursor: pointer; font-size: 1.1rem; margin-left: 5px;">💾</button>`;
-    let tombolLoadHTML = `<button onclick="muatDenganIdLain()" title="Login ID Pemain" style="background: transparent; border: none; cursor: pointer; font-size: 1rem; margin-left: 2px;">🔑</button>`;
     
+    // HANYA NAMA YANG BISA DIUBAH (TIDAK ADA TOMBOL / OPSIONAL GANTI ID)
     container.innerHTML = `
         <span id="label-nama">${gameState.namaPemain}</span> 
         <small style="color: #fbbf24; font-weight:bold; font-size:0.8rem; margin-left:3px;">[${playerId}]</small>
-        <button id="btn-edit-nama" onclick="ubahNama()" style="background: transparent; border: none; cursor: pointer; font-size: 1rem;">✏️</button>
+        <button id="btn-edit-nama" onclick="ubahNama()" title="Ubah Nama Tampilan" style="background: transparent; border: none; cursor: pointer; font-size: 1rem;">✏️</button>
         ${tombolSaveHTML}
-        ${tombolLoadHTML}
     `;
 }
 
@@ -178,7 +177,7 @@ function daftarkanPemainBaru() {
             renderSemuaTabUtama();
             tampilkanPopupNotifikasi(
                 "🎉 Akun Dibuat!", 
-                `ID Resmi Kamu: ${data.playerId}\nSimpan ID ini untuk muat progres di perangkat lain!`, 
+                `ID Resmi Kamu: ${data.playerId}`, 
                 "neon-green"
             );
         }
@@ -228,7 +227,7 @@ function simpanGame() {
 function muatGame() {
     let playerId = getIdPemainLocal();
     
-    // Jika belum ada ID sama sekali di lokal browser, lakukan pendaftaran otomatis
+    // Jika belum memiliki ID di lokal browser, buatkan ID urut baru via server
     if (!playerId) {
         daftarkanPemainBaru();
         return;
@@ -259,19 +258,11 @@ function muatGame() {
                 "neon-green"
             );
         } else {
-            // Jika ID lokal tidak ada di spreadsheet, daftarkan ulang
+            // Jika ID tidak valid di spreadsheet, daftarkan akun baru
             daftarkanPemainBaru();
         }
     })
     .catch(err => console.error("Error load:", err));
-}
-
-function muatDenganIdLain() {
-    let idBaru = prompt("Masukkan ID Pemain kamu (Contoh: ID2026170000):");
-    if (idBaru && idBaru.trim() !== "") {
-        localStorage.setItem("game_player_id", idBaru.trim().toUpperCase());
-        muatGame();
-    }
 }
 
 function renderSemuaTabUtama() {
