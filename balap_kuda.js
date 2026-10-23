@@ -1,5 +1,5 @@
 // ==========================================
-// MODULE BALAP KUDA (balap_kuda.js) - COMPLETE FIXED
+// MODULE BALAP KUDA (balap_kuda.js) - COMPLETE FIXED & UPDATED
 // ==========================================
 
 let balapKudaState = {
@@ -16,6 +16,8 @@ let balapKudaState = {
 
 const MAX_KAPASITAS_KUDA = 5;
 const COOLDOWN_ISTIRAHAT_JAM = 5; // Cooldown istirahat 5 jam in-game
+const COOLDOWN_BREEDING_HARI = 10; // Cooldown breeding 10 hari in-game
+const MIN_USIA_BREEDING_HARI = 25; // Anakan bisa breeding setelah 25 hari in-game
 
 // Konfigurasi Kelas, Syarat OVR, Biaya, dan Hadiah Juara 1, 2, 3
 const KONFIG_KELAS = {
@@ -108,14 +110,22 @@ function dialogKonfirmasiCustom(judul, pesan, callbackYa) {
 
 // --- FUNGSI CEK JAM ARENA BUKA (10.00 - 19.00) ---
 function isArenaBuka() {
-    let jamSekarang = parseInt(gameState.jam, 10);
+    let valJam = gameState.jam;
+    let jamSekarang = 0;
+
+    if (typeof valJam === 'string') {
+        jamSekarang = parseInt(valJam.split(':')[0].split('.')[0], 10);
+    } else {
+        jamSekarang = parseInt(valJam, 10);
+    }
+
     if (isNaN(jamSekarang)) jamSekarang = 0;
 
     // Arena buka mulai jam 10 (10:00) hingga sebelum jam 19 (18:59)
     return jamSekarang >= 10 && jamSekarang < 19;
 }
 
-// --- HELPER HITUNG SISA WAKTU COOLDOWN ---
+// --- HELPER HITUNG SISA WAKTU COOLDOWN ISTIRAHAT ---
 function getSisaCooldownInGame(k) {
     if (k.terakhirIstirahatHari === undefined || k.terakhirIstirahatHari === null) return 0;
 
@@ -136,6 +146,16 @@ function getSisaCooldownInGame(k) {
     let sisaMenit = Math.floor(sisaMenitTotal % 60);
 
     return { totalMenit: sisaMenitTotal, jam: sisaJam, menit: sisaMenit };
+}
+
+// --- HELPER HARGA JUAL KUDA ---
+function hitungHargaJualKuda(k) {
+    let ovrAsli = hitungOverallKuda(k.stats);
+    let hargaBase = 75000 + (ovrAsli * 150);
+    if (k.isJuaraSS) {
+        hargaBase = Math.round(hargaBase * 1.18); // +18% jika Juara SS
+    }
+    return Math.round(hargaBase);
 }
 
 // --- FUNGSI UTAMA / RENDER TAB ---
@@ -161,7 +181,9 @@ function renderBalapKuda() {
     // Inisialisasi struktur kandang jika belum ada
     if (!balapKudaState.kandangKuda) balapKudaState.kandangKuda = [];
     if (balapKudaState.kudaPemain && balapKudaState.kandangKuda.length === 0) {
-        balapKudaState.kandangKuda.push(balapKudaState.kudaPemain);
+        let kAwal = balapKudaState.kudaPemain;
+        if (kAwal.lahirHari === undefined) kAwal.lahirHari = 0;
+        balapKudaState.kandangKuda.push(kAwal);
     }
 
     // Paksa buat pasar kuda & lawan NPC baru jika belum ada data sama sekali atau hari berganti
@@ -197,20 +219,19 @@ function renderBalapKuda() {
             </div>
         `;
     } else {
-        // Tab Pemilihan Kuda di Kandang
-        html += `<div style="display:flex; gap:8px; overflow-x:auto; padding-bottom:10px; margin-bottom:15px;">`;
-        balapKudaState.kandangKuda.forEach((k, idx) => {
-            let isSelected = idx === balapKudaState.indexKudaAktif;
-            let iconGender = k.gender === "Jantan" ? "🩵" : "🩷";
-            html += `
-                <button onclick="pilihKudaAktif(${idx})" style="background:${isSelected ? '#2563eb' : '#1e293b'}; border:1px solid ${isSelected ? '#60a5fa' : '#334155'}; color:#fff; padding:8px 12px; border-radius:6px; cursor:pointer; white-space:nowrap; font-size:0.85rem;">
-                    ${iconGender} ${k.nama} [OVR: ${hitungOverallKuda(k.stats)}]
-                </button>
-            `;
-        });
-        html += `</div>`;
+        // Tampilan Pilihan Kuda Menggunakan Select Option (Mencegah Reset Scroll)
+        html += `<div style="margin-bottom:15px; background:#1e293b; padding:10px; border-radius:8px;">
+            <label style="font-size:0.85rem; color:#94a3b8; display:block; margin-bottom:5px;">🐴 Pilih Kuda yang Ingin Dilihat / Dikelola:</label>
+            <select onchange="pilihKudaAktif(this.value)" style="width:100%; padding:10px; border-radius:6px; background:#0f172a; color:#fff; border:1px solid #3b82f6; font-size:0.95rem;">
+                ${balapKudaState.kandangKuda.map((k, idx) => `
+                    <option value="${idx}" ${idx === balapKudaState.indexKudaAktif ? 'selected' : ''}>
+                        ${k.gender === "Jantan" ? "🩵" : "🩷"} ${k.nama} [OVR: ${hitungOverallKuda(k.stats)}] ${k.isJuaraSS ? '🏆 Juara SS' : ''}
+                    </option>
+                `).join('')}
+            </select>
+        </div>`;
 
-        // Tampilan Kuda Aktif
+        // Tampilan Details Kuda Aktif
         let k = kudaAktif;
         let ovrAsli = hitungOverallKuda(k.stats);
         let statE = hitungStatEfektif(k);
@@ -227,8 +248,9 @@ function renderBalapKuda() {
             ? `<span style="color:#f87171; font-size:0.85rem;">(📉 Penurunan Performa -${statE.penaltiPersen}% karena lelah/stres)</span>` 
             : `<span style="color:#34d399; font-size:0.85rem;">(✨ Performa Optimal 100%)</span>`;
 
-        let hargaJualEst = Math.round(ovrAsli * 75);
+        let hargaJualEst = hitungHargaJualKuda(k);
         let iconGenderText = k.gender === "Jantan" ? "🩵 Jantan" : "🩷 Betina";
+        let usiaHari = (gameState.waktuHari || 0) - (k.lahirHari || 0);
 
         html += `
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
@@ -237,8 +259,9 @@ function renderBalapKuda() {
                         🐎 ${k.nama} <small style="font-size:0.85rem; color:#94a3b8;">(${iconGenderText})</small>
                         <button onclick="bukaModalGantiNama()" style="background:none; border:none; cursor:pointer; font-size:0.9rem;" title="Ganti Nama">✏️</button>
                         <span style="color:#fbbf24; font-size:0.9rem;">[Kelas: ${k.kelasMaks}]</span>
+                        ${k.isJuaraSS ? '<span style="background:#eab308; color:#000; font-size:0.75rem; padding:2px 6px; border-radius:4px; font-weight:bold; margin-left:5px;">🏆 Legend SS</span>' : ''}
                     </h3>
-                    <p>OVR Asli: <b>${ovrAsli} Pts</b> | OVR Efektif: <b style="color:${statE.penaltiPersen > 0 ? '#f87171' : '#34d399'}; font-size:1.2rem;">${ovrEfektif} Pts</b> ${statusPenaltiTeks}</p>
+                    <p>Usia: <b>${usiaHari} Hari in-game</b> | OVR Asli: <b>${ovrAsli} Pts</b> | OVR Efektif: <b style="color:${statE.penaltiPersen > 0 ? '#f87171' : '#34d399'}; font-size:1.2rem;">${ovrEfektif} Pts</b> ${statusPenaltiTeks}</p>
                     <p>⚡ Stamina: <b>${k.stamina} / ${k.staminaMax}</b> | 🪨 Stres: <b style="color:${k.stres >= 80 ? '#f87171' : '#34d399'}">${k.stres} / 100</b></p>
                 </div>
                 <div style="display:flex; flex-wrap:wrap; gap:4px;">
@@ -266,7 +289,7 @@ function renderBalapKuda() {
     // 2. PANEL KAWIN KUDA (BREEDING MODERN)
     html += `<div class="card" style="grid-column: 1/-1; border: 1px solid #ec4899; background: #0f172a; text-align:center;">
         <h3 style="color:#f472b6; margin-top:0;">💕 Peternakan & Kawin Kuda (Breeding)</h3>
-        <p style="font-size:0.85rem; color:var(--text-muted);">Kawinkan 1 Kuda Jantan & 1 Kuda Betina milikmu untuk melahirkan keturunan baru dengan bonus <b>+10% Stat OVR</b>!</p>
+        <p style="font-size:0.85rem; color:var(--text-muted);">Kawinkan 1 Kuda Jantan & 1 Kuda Betina (Syarat: Usia minimal 25 hari & Cooldown 10 hari). Bonus <b>+10% Stat OVR</b>!</p>
         
         <div style="margin-top:15px;">
             <button onclick="bukaModalBreedingModern()" style="background:linear-gradient(135deg, #ec4899, #be185d); color:#fff; border:none; padding:12px 24px; border-radius:8px; font-weight:bold; cursor:pointer; font-size:1rem; box-shadow:0 4px 12px rgba(236, 72, 153, 0.3);">
@@ -281,13 +304,13 @@ function renderBalapKuda() {
     let urutanKelas = ["D", "C", "B", "A", "S", "SS"];
     urutanKelas.forEach(kls => {
         let cfg = KONFIG_KELAS[kls];
-        let kudaAktif = balapKudaState.kandangKuda[balapKudaState.indexKudaAktif];
-        let bisaIkut = kudaAktif && dapatAksesKelas(kls) && arenaBuka;
+        let adaKudaBisaIkut = balapKudaState.kandangKuda.some(k => dapatAksesKelasKuda(k, kls));
+        let bisaIkut = adaKudaBisaIkut && arenaBuka;
         let daftarLawan = balapKudaState.lawanPerKelas ? balapKudaState.lawanPerKelas[kls] || [] : [];
         let isOpen = detailsOpenState[kls] ? "open" : "";
         
         html += `
-            <div class="card" style="border: 1px solid ${bisaIkut ? '#10b981' : 'var(--border-color)'}; opacity: ${kudaAktif && dapatAksesKelas(kls) ? '1' : '0.6'}">
+            <div class="card" style="border: 1px solid ${bisaIkut ? '#10b981' : 'var(--border-color)'}; opacity: ${adaKudaBisaIkut ? '1' : '0.6'}">
                 <h3>🏆 Kelas ${kls}</h3>
                 <p style="font-size:0.8rem; color:var(--text-muted);">${cfg.nama}</p>
                 <p style="font-size:0.85rem;">Rata-rata OVR: <b>${cfg.ovrMin} - ${cfg.ovrMax}</b></p>
@@ -304,8 +327,8 @@ function renderBalapKuda() {
                     </ul>
                 </details>
 
-                <button onclick="mulaiBalapanKelas('${kls}')" style="background:${bisaIkut ? '#059669' : '#334155'}; width:100%; margin-top:10px;" ${!bisaIkut ? 'disabled' : ''}>
-                    ${!kudaAktif ? 'Butuh Kuda' : (!dapatAksesKelas(kls) ? 'Terkunci' : (!arenaBuka ? 'Tutup (10.00-19.00)' : 'Ikut Tanding'))}
+                <button onclick="pilihKudaSebelumBalapan('${kls}')" style="background:${bisaIkut ? '#059669' : '#334155'}; width:100%; margin-top:10px;" ${!bisaIkut ? 'disabled' : ''}>
+                    ${!adaKudaBisaIkut ? 'Tidak ada Kuda Layak' : (!arenaBuka ? 'Tutup (10.00-19.00)' : 'Ikut Tanding')}
                 </button>
             </div>
         `;
@@ -364,8 +387,9 @@ function renderBalapKuda() {
 
 // --- FUNGSI MANAJEMEN KANDANG & KUDA ---
 function pilihKudaAktif(index) {
-    if (balapKudaState.kandangKuda[index]) {
-        balapKudaState.indexKudaAktif = index;
+    let idx = parseInt(index, 10);
+    if (balapKudaState.kandangKuda[idx]) {
+        balapKudaState.indexKudaAktif = idx;
         renderBalapKuda();
     }
 }
@@ -374,10 +398,10 @@ function konfirmasiJualKuda(index) {
     let k = balapKudaState.kandangKuda[index];
     if (!k) return;
 
-    let hargaJual = Math.round(hitungOverallKuda(k.stats) * 75);
+    let hargaJual = hitungHargaJualKuda(k);
     dialogKonfirmasiCustom(
         "💰 Jual Kuda",
-        `Apakah kamu yakin ingin menjual <b>${k.nama}</b> seharga <b>Rp. ${hargaJual.toLocaleString('id-ID')}</b>?`,
+        `Apakah kamu yakin ingin menjual <b>${k.nama}</b> ${k.isJuaraSS ? '(Bonus Juara SS +18%)' : ''} seharga <b>Rp. ${hargaJual.toLocaleString('id-ID')}</b>?`,
         () => {
             gameState.uang += hargaJual;
             balapKudaState.kandangKuda.splice(index, 1);
@@ -433,12 +457,11 @@ function buatStatRandom(ovrMin, ovrMax) {
     };
 }
 
-// --- GENERASI LAWAN PER KELAS (7 LAWAN RANDOM DENGAN REFRESH) ---
+// --- GENERASI LAWAN PER KELAS ---
 function generasiLawanPerKelas() {
     balapKudaState.lawanPerKelas = {};
     let kelasList = ["D", "C", "B", "A", "S", "SS"];
     
-    // Acak daftar nama NPC agar selalu fresh tiap hari
     let namaAcak = [...NAMA_KUDA_NPC].sort(() => Math.random() - 0.5);
 
     kelasList.forEach((kls, idx) => {
@@ -467,7 +490,7 @@ function generasiPasarKuda() {
     for (let i = 0; i < 3; i++) {
         let nama = "Kuda " + namaAcak[i];
         let stats = buatStatRandom(80, 120);
-        let harga = 20000 + Math.round(hitungOverallKuda(stats) * 80);
+        let harga = 75000 + Math.round(hitungOverallKuda(stats) * 150);
         let gender = Math.random() < 0.5 ? "Jantan" : "Betina";
         balapKudaState.daftarPasarKuda.push({ nama, stats, harga, gender });
     }
@@ -500,8 +523,11 @@ function beliKudaPasar(index) {
                 terakhirIstirahatJam: null,
                 terakhirIstirahatHari: null,
                 terakhirIstirahatMenit: null,
+                terakhirBreedingHari: null,
+                lahirHari: gameState.waktuHari || 0,
                 kelasMaks: "D",
-                isPemain: true
+                isPemain: true,
+                isJuaraSS: false
             };
 
             balapKudaState.kandangKuda.push(kudaBaru);
@@ -515,31 +541,45 @@ function beliKudaPasar(index) {
     );
 }
 
-// --- MODAL BREEDING MODERN & FIX BUG KLIK ---
+// --- MODAL BREEDING MODERN & COOLDOWN + USIA ---
 function bukaModalBreedingModern() {
     balapKudaState.indukJantanIdx = null;
     balapKudaState.indukBetinaIdx = null;
 
+    let hariSekarang = gameState.waktuHari || 0;
     let listJantan = [];
     let listBetina = [];
 
     balapKudaState.kandangKuda.forEach((k, idx) => {
-        if (k.gender === "Jantan") listJantan.push({ ...k, originalIdx: idx });
-        if (k.gender === "Betina") listBetina.push({ ...k, originalIdx: idx });
+        let usiaHari = hariSekarang - (k.lahirHari || 0);
+        let sisaCdBreeding = k.terakhirBreedingHari !== undefined && k.terakhirBreedingHari !== null 
+            ? COOLDOWN_BREEDING_HARI - (hariSekarang - k.terakhirBreedingHari) 
+            : 0;
+
+        let layakBreeding = usiaHari >= MIN_USIA_BREEDING_HARI && sisaCdBreeding <= 0;
+        let infoKet = "";
+        if (usiaHari < MIN_USIA_BREEDING_HARI) infoKet = `⏳ Belum Cukup Usia (${usiaHari}/${MIN_USIA_BREEDING_HARI} Hari)`;
+        else if (sisaCdBreeding > 0) infoKet = `⏳ CD Breeding (${sisaCdBreeding} Hari)`;
+
+        let itemData = { ...k, originalIdx: idx, layak: layakBreeding, ket: infoKet };
+
+        if (k.gender === "Jantan") listJantan.push(itemData);
+        if (k.gender === "Betina") listBetina.push(itemData);
     });
 
     let konten = `
         <div style="text-align:center; margin-bottom:15px;">
-            <p style="font-size:0.85rem; color:#cbd5e1;">Pilih 1 Induk Jantan dan 1 Induk Betina untuk dikawinkan.</p>
+            <p style="font-size:0.85rem; color:#cbd5e1;">Pilih 1 Induk Jantan dan 1 Induk Betina untuk dikawinkan.<br><small style="color:#fbbf24;">(Syarat: Usia min. 25 hari & Cooldown 10 hari)</small></p>
         </div>
 
         <h4 style="color:#93c5fd; margin-bottom:8px;">🩵 Induk Jantan:</h4>
         <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap:8px; margin-bottom:15px;">
             ${listJantan.length === 0 ? '<p style="color:#94a3b8; font-size:0.8rem;">Tidak ada kuda jantan di kandang.</p>' : 
                 listJantan.map(k => `
-                    <div id="card-jantan-${k.originalIdx}" onclick="pilihIndukBreeding('jantan', ${k.originalIdx})" style="background:#1e293b; border:2px solid #334155; padding:8px; border-radius:8px; cursor:pointer; text-align:center;">
+                    <div id="card-jantan-${k.originalIdx}" onclick="${k.layak ? `pilihIndukBreeding('jantan', ${k.originalIdx})` : ''}" style="background:#1e293b; border:2px solid ${k.layak ? '#334155' : '#7f1d1d'}; opacity:${k.layak ? '1' : '0.6'}; padding:8px; border-radius:8px; cursor:${k.layak ? 'pointer' : 'not-allowed'}; text-align:center;">
                         <b style="font-size:0.85rem;">${k.nama}</b>
                         <div style="font-size:0.75rem; color:#fbbf24;">OVR: ${hitungOverallKuda(k.stats)}</div>
+                        ${!k.layak ? `<div style="font-size:0.7rem; color:#f87171; margin-top:2px;">${k.ket}</div>` : ''}
                     </div>
                 `).join('')
             }
@@ -549,9 +589,10 @@ function bukaModalBreedingModern() {
         <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap:8px; margin-bottom:20px;">
             ${listBetina.length === 0 ? '<p style="color:#94a3b8; font-size:0.8rem;">Tidak ada kuda betina di kandang.</p>' : 
                 listBetina.map(k => `
-                    <div id="card-betina-${k.originalIdx}" onclick="pilihIndukBreeding('betina', ${k.originalIdx})" style="background:#1e293b; border:2px solid #334155; padding:8px; border-radius:8px; cursor:pointer; text-align:center;">
+                    <div id="card-betina-${k.originalIdx}" onclick="${k.layak ? `pilihIndukBreeding('betina', ${k.originalIdx})` : ''}" style="background:#1e293b; border:2px solid ${k.layak ? '#334155' : '#7f1d1d'}; opacity:${k.layak ? '1' : '0.6'}; padding:8px; border-radius:8px; cursor:${k.layak ? 'pointer' : 'not-allowed'}; text-align:center;">
                         <b style="font-size:0.85rem;">${k.nama}</b>
                         <div style="font-size:0.75rem; color:#fbbf24;">OVR: ${hitungOverallKuda(k.stats)}</div>
+                        ${!k.layak ? `<div style="font-size:0.7rem; color:#f87171; margin-top:2px;">${k.ket}</div>` : ''}
                     </div>
                 `).join('')
             }
@@ -568,12 +609,16 @@ function bukaModalBreedingModern() {
 function pilihIndukBreeding(jenis, idx) {
     if (jenis === 'jantan') {
         balapKudaState.indukJantanIdx = idx;
-        document.querySelectorAll('[id^="card-jantan-"]').forEach(el => el.style.borderColor = '#334155');
+        document.querySelectorAll('[id^="card-jantan-"]').forEach(el => {
+            if (!el.style.cursor.includes('not-allowed')) el.style.borderColor = '#334155';
+        });
         let sel = document.getElementById(`card-jantan-${idx}`);
         if (sel) sel.style.borderColor = '#3b82f6';
     } else {
         balapKudaState.indukBetinaIdx = idx;
-        document.querySelectorAll('[id^="card-betina-"]').forEach(el => el.style.borderColor = '#334155');
+        document.querySelectorAll('[id^="card-betina-"]').forEach(el => {
+            if (!el.style.cursor.includes('not-allowed')) el.style.borderColor = '#334155';
+        });
         let sel = document.getElementById(`card-betina-${idx}`);
         if (sel) sel.style.borderColor = '#ec4899';
     }
@@ -613,6 +658,11 @@ function eksekusiBreeding() {
         `Kawinkan <b>${jantan.nama}</b> 🩵 & <b>${betina.nama}</b> 🩷 seharga <b>Rp. ${biayaKawin.toLocaleString('id-ID')}</b>?`,
         () => {
             gameState.uang -= biayaKawin;
+            let hariSekarang = gameState.waktuHari || 0;
+
+            // Atur CD 10 Hari untuk kedua Indukan
+            jantan.terakhirBreedingHari = hariSekarang;
+            betina.terakhirBreedingHari = hariSekarang;
 
             // Hitung rata-rata + 10% bonus stat
             let calcStat = (s1, s2) => Math.round(((s1 + s2) / 2) * 1.10);
@@ -628,7 +678,6 @@ function eksekusiBreeding() {
             let genderAnak = Math.random() < 0.5 ? "Jantan" : "Betina";
             let namaAnak = "Junior " + NAMA_KUDA_NPC[Math.floor(Math.random() * NAMA_KUDA_NPC.length)];
 
-            // Tentukan kelas tertinggi dari induk
             let urutanKelas = ["D", "C", "B", "A", "S", "SS"];
             let idxJantanKls = urutanKelas.indexOf(jantan.kelasMaks);
             let idxBetinaKls = urutanKelas.indexOf(betina.kelasMaks);
@@ -644,8 +693,11 @@ function eksekusiBreeding() {
                 terakhirIstirahatJam: null,
                 terakhirIstirahatHari: null,
                 terakhirIstirahatMenit: null,
+                terakhirBreedingHari: null,
+                lahirHari: hariSekarang, // Tersimpan hari kelahiran
                 kelasMaks: kelasMaksAnak,
-                isPemain: true
+                isPemain: true,
+                isJuaraSS: false
             };
 
             balapKudaState.kandangKuda.push(anakKuda);
@@ -660,6 +712,7 @@ function eksekusiBreeding() {
                     <p style="font-size:2.5rem; margin:10px 0;">🐎</p>
                     <p>Lahir seekor anak kuda: <b>${namaAnak}</b> (${genderAnak === "Jantan" ? "🩵 Jantan" : "🩷 Betina"})</p>
                     <p style="color:#fbbf24; font-size:1.1rem;">OVR Awal: <b>${ovrAnak} Pts</b> (+10% Bonus Stat Induk)</p>
+                    <p style="font-size:0.8rem; color:#94a3b8;">*Anakan baru bisa dikawinkan setelah berusia 25 hari in-game.</p>
                 </div>`
             );
 
@@ -703,13 +756,13 @@ function simpanNamaKudaBaru() {
     renderBalapKuda();
 }
 
-// --- MEKANIK LATIHAN & STRES ---
+// --- MEKANIK LATIHAN & STRES (20 STAMINA) ---
 function latihKuda(statKey) {
     let k = balapKudaState.kandangKuda[balapKudaState.indexKudaAktif];
     if (!k) return;
 
-    if (k.stamina < 30) {
-        bukaModalCustom("⚠️ Kuda Kelelahan", "<p>Stamina kuda kurang dari 30! Istirahatkan kudamu terlebih dahulu.</p>");
+    if (k.stamina < 20) {
+        bukaModalCustom("⚠️ Kuda Kelelahan", "<p>Stamina kuda kurang dari 20! Istirahatkan kudamu terlebih dahulu.</p>");
         return;
     }
 
@@ -718,7 +771,7 @@ function latihKuda(statKey) {
         return;
     }
 
-    k.stamina -= 20;
+    k.stamina -= 20; // Latihan sekarang hanya menghabiskan 20 stamina
     let penambahanStres = 20; 
     k.stres = Math.min(100, k.stres + penambahanStres);
 
@@ -766,16 +819,66 @@ function istirahatKuda() {
     renderBalapKuda();
 }
 
-// --- MEKANIK SIMULASI BALAPAN ---
-function dapatAksesKelas(kelas) {
+// --- MEKANIK SIMULASI BALAPAN & PEMILIHAN KUDA SEBELUM LOMBA ---
+function dapatAksesKelasKuda(kuda, kelas) {
+    if (!kuda) return false;
     let urutan = ["D", "C", "B", "A", "S", "SS"];
-    let k = balapKudaState.kandangKuda[balapKudaState.indexKudaAktif];
-    if (!k) return false;
-    return urutan.indexOf(kelas) <= urutan.indexOf(k.kelasMaks);
+    return urutan.indexOf(kelas) <= urutan.indexOf(kuda.kelasMaks);
 }
 
-function mulaiBalapanKelas(kelas) {
-    let k = balapKudaState.kandangKuda[balapKudaState.indexKudaAktif];
+function pilihKudaSebelumBalapan(kelas) {
+    let cfg = KONFIG_KELAS[kelas];
+
+    if (!isArenaBuka()) {
+        bukaModalCustom("🕒 Arena Tutup", "<p>Arena Balap Kuda hanya buka dari jam 10.00 hingga 19.00!</p>");
+        return;
+    }
+
+    let listKudaBisa = [];
+    balapKudaState.kandangKuda.forEach((k, idx) => {
+        if (dapatAksesKelasKuda(k, kelas)) {
+            listKudaBisa.push({ ...k, originalIdx: idx });
+        }
+    });
+
+    if (listKudaBisa.length === 0) {
+        bukaModalCustom("⚠️ Tidak Ada Kuda Layak", `<p>Tidak ada kuda di kandangmu yang berhak bertanding di Kelas ${kelas}!</p>`);
+        return;
+    }
+
+    let konten = `
+        <div style="margin-bottom:15px;">
+            <p style="font-size:0.85rem; color:#cbd5e1;">Pilih kuda yang akan kamu turunkan untuk berpacu di <b>Kelas ${kelas}</b>:</p>
+            <p style="font-size:0.8rem; color:#fbbf24;">Biaya Pendaftaran: <b>Rp. ${cfg.biayaDaftar.toLocaleString('id-ID')}</b></p>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:20px;">
+            ${listKudaBisa.map(k => {
+                let statE = hitungStatEfektif(k);
+                let ovrE = hitungOverallKuda(statE);
+                let cukupStamina = k.stamina >= 30;
+                return `
+                    <div style="background:#1e293b; border:1px solid ${cukupStamina ? '#334155' : '#7f1d1d'}; padding:10px; border-radius:8px; display:flex; justify-content:space-between; align-align:center;">
+                        <div>
+                            <b>${k.nama}</b> (${k.gender === 'Jantan' ? '🩵' : '🩷'})
+                            <div style="font-size:0.8rem; color:#94a3b8;">OVR Efektif: <b style="color:#34d399;">${ovrE} Pts</b> | Stamina: ${k.stamina}/${k.staminaMax}</div>
+                            ${!cukupStamina ? '<small style="color:#f87171;">Stamina kurang (Min. 30)</small>' : ''}
+                        </div>
+                        <button onclick="mulaiBalapanKelas('${kelas}', ${k.originalIdx})" style="background:${cukupStamina ? '#059669' : '#334155'}; color:#fff; border:none; padding:6px 12px; border-radius:6px; cursor:${cukupStamina ? 'pointer' : 'not-allowed'}; font-weight:bold;" ${!cukupStamina ? 'disabled' : ''}>
+                            Pilih Kuda
+                        </button>
+                    </div>
+                `;
+            }).join('')}
+        </div>
+    `;
+
+    bukaModalCustom(`🏇 Pilih Kuda - Kelas ${kelas}`, konten);
+}
+
+function mulaiBalapanKelas(kelas, idxKuda) {
+    tutupModalCustom();
+
+    let k = balapKudaState.kandangKuda[idxKuda];
     let cfg = KONFIG_KELAS[kelas];
 
     if (!isArenaBuka()) {
@@ -836,6 +939,9 @@ function mulaiBalapanKelas(kelas) {
 
     if (posisiPemain === 1) {
         gameState.uang += cfg.hadiah.j1;
+        if (kelas === "SS") {
+            k.isJuaraSS = true; // Tandai gelar Juara Kelas SS (+18% harga jual)
+        }
         if (idxSekarang < urutanKelas.length - 1 && urutanKelas.indexOf(k.kelasMaks) === idxSekarang) {
             k.kelasMaks = urutanKelas[idxSekarang + 1];
         }
