@@ -1,7 +1,7 @@
 // ==========================================
 // CONFIG & INTEGRASI GOOGLE APPS SCRIPT
 // ==========================================
-const URL_SCRIPT_DATABASE = "https://script.google.com/macros/s/AKfycbxmq440FWj9HXk5kckzjln-BSQ9rFVKvEmMzftJLeGKPF-u5Y83VE25PdoZaU1Qn7V9gQ/exec";
+const URL_SCRIPT_DATABASE = "https://script.google.com/macros/s/AKfycbwQpz2mhJKGI_vIulMmJMeuPNUWlCHdSs9KgILYYFjDah_LzXI7hVQj8TDKGE-jlxGOXw/exec";
 
 // --- MANAJEMEN AKUN LOKAL ---
 function getUsernameLocal() {
