@@ -5,10 +5,21 @@ const GAME_DATABASE = {
         bibit_cabai: { id: "bibit_cabai", hasilId: "cabai", nama: "Bibit Cabai", hargaBeli: 25, durasi: 1800, icon: "🌶️" },
         bibit_tomat: { id: "bibit_tomat", hasilId: "tomat", nama: "Bibit Tomat", hargaBeli: 26, durasi: 2700, icon: "🍅" },
         bibit_kol: { id: "bibit_kol", hasilId: "kol", nama: "Bibit Kol", hargaBeli: 10, durasi: 3600, icon: "🥬" },
+        bibit_terong: { id: "bibit_terong", hasilId: "terong", nama: "Bibit Terong", hargaBeli: 14, durasi: 3000, icon: "🍆" },
         bibit_kacang: { id: "bibit_kacang", hasilId: "kacang", nama: "Bibit Kacang", hargaBeli: 12, durasi: 43200, icon: "🥜" },
         bibit_bawang_merah: { id: "bibit_bawang_merah", hasilId: "bawang_merah", nama: "Bibit Bawang Merah", hargaBeli: 25, durasi: 43200, icon: "🧅" },
+        bibit_bawang_putih: { id: "bibit_bawang_putih", hasilId: "bawang_putih", nama: "Bibit Bawang Putih", hargaBeli: 28, durasi: 43200, icon: "🧄" },
         bibit_wortel: { id: "bibit_wortel", hasilId: "wortel", nama: "Bibit Wortel", hargaBeli: 18, durasi: 86400, icon: "🥕" },
-        bibit_apel: { id: "bibit_apel", hasilId: "apel", nama: "Bibit Apel", hargaBeli: 54, durasi: 259200, icon: "🍎" }
+        bibit_kentang: { id: "bibit_kentang", hasilId: "kentang", nama: "Bibit Kentang", hargaBeli: 22, durasi: 54000, icon: "🥔" },
+        bibit_brokoli: { id: "bibit_brokoli", hasilId: "brokoli", nama: "Bibit Brokoli", hargaBeli: 30, durasi: 72000, icon: "🥦" },
+        bibit_labu: { id: "bibit_labu", hasilId: "labu", nama: "Bibit Labu Kuning", hargaBeli: 35, durasi: 90000, icon: "🎃" },
+        bibit_stroberi: { id: "bibit_stroberi", hasilId: "stroberi", nama: "Bibit Stroberi", hargaBeli: 40, durasi: 100000, icon: "🍓" },
+        bibit_semangka: { id: "bibit_semangka", hasilId: "semangka", nama: "Bibit Semangka", hargaBeli: 45, durasi: 120000, icon: "🍉" },
+        bibit_melon: { id: "bibit_melon", hasilId: "melon", nama: "Bibit Melon", hargaBeli: 48, durasi: 130000, icon: "🍈" },
+        bibit_gandum: { id: "bibit_gandum", hasilId: "gandum", nama: "Bibit Gandum", hargaBeli: 15, durasi: 36000, icon: "🌾" },
+        bibit_apel: { id: "bibit_apel", hasilId: "apel", nama: "Bibit Apel", hargaBeli: 54, durasi: 259200, icon: "🍎" },
+        bibit_jeruk: { id: "bibit_jeruk", hasilId: "jeruk", nama: "Bibit Jeruk", hargaBeli: 60, durasi: 280000, icon: "🍊" },
+        bibit_anggur: { id: "bibit_anggur", hasilId: "anggur", nama: "Bibit Anggur", hargaBeli: 75, durasi: 300000, icon: "🍇" }
     },
     hasilPanen: {
         padi: { id: "padi", nama: "Padi", hargaJual: 15, icon: "🌾" },
@@ -16,10 +27,21 @@ const GAME_DATABASE = {
         cabai: { id: "cabai", nama: "Cabai", hargaJual: 36, icon: "🌶️" },
         tomat: { id: "tomat", nama: "Tomat", hargaJual: 39, icon: "🍅" },
         kol: { id: "kol", nama: "Kol", hargaJual: 27, icon: "🥬" },
+        terong: { id: "terong", nama: "Terong", hargaJual: 30, icon: "🍆" },
         kacang: { id: "kacang", nama: "Kacang", hargaJual: 43, icon: "🥜" },
         bawang_merah: { id: "bawang_merah", nama: "Bawang Merah", hargaJual: 55, icon: "🧅" },
+        bawang_putih: { id: "bawang_putih", nama: "Bawang Putih", hargaJual: 60, icon: "🧄" },
         wortel: { id: "wortel", nama: "Wortel", hargaJual: 57, icon: "🥕" },
-        apel: { id: "apel", nama: "Apel", hargaJual: 81, icon: "🍎" }
+        kentang: { id: "kentang", nama: "Kentang", hargaJual: 50, icon: "🥔" },
+        brokoli: { id: "brokoli", nama: "Brokoli", hargaJual: 68, icon: "🥦" },
+        labu: { id: "labu", nama: "Labu Kuning", hargaJual: 80, icon: "🎃" },
+        stroberi: { id: "stroberi", nama: "Stroberi", hargaJual: 90, icon: "🍓" },
+        semangka: { id: "semangka", nama: "Semangka", hargaJual: 105, icon: "🍉" },
+        melon: { id: "melon", nama: "Melon", hargaJual: 110, icon: "🍈" },
+        gandum: { id: "gandum", nama: "Gandum", hargaJual: 32, icon: "🌾" },
+        apel: { id: "apel", nama: "Apel", hargaJual: 81, icon: "🍎" },
+        jeruk: { id: "jeruk", nama: "Jeruk", hargaJual: 95, icon: "🍊" },
+        anggur: { id: "anggur", nama: "Anggur", hargaJual: 130, icon: "🍇" }
     },
     ternak: {
         ayam: { id: "ayam", nama: "Ayam", hargaBeli: 37000, hasilId: "telur_ayam", icon: "🐔" },
@@ -47,7 +69,8 @@ const GAME_DATABASE = {
     },
     alat: {
         pisau: { id: "pisau", nama: "Pisau Potong", hargaBeli: 35000, durabilityMax: 300, biayaAsah: 17000, icon: "🔪" },
-        kompor: { id: "kompor", nama: "Kompor Dapur", hargaBeli: 50000, durabilityMax: 300, biayaServis: 25000, icon: "🍳" }
+        kompor: { id: "kompor", nama: "Kompor Dapur", hargaBeli: 50000, durabilityMax: 300, biayaServis: 25000, icon: "🍳" },
+        pancingan: { id: "pancingan", nama: "Alat Pancing", hargaBeli: 150000, durabilityMax: 750, biayaServis: 70000, icon: "🎣" }
     },
     material: {
         kayu: { id: "kayu", nama: "Kayu", hargaBeli: 24, icon: "🪵" }
@@ -78,14 +101,16 @@ const GAME_DATABASE = {
         ikan_arwana: { id: "ikan_arwana", nama: "Ikan Arwana Merah", icon: "🐉", hargaJual: 6500, tingkatKesan: "Sangat Sulit" },
         ikan_pirarucu: { id: "ikan_pirarucu", nama: "Ikan Arapaima", icon: "🐳", hargaJual: 8000, tingkatKesan: "Sangat Sulit" }
     },
+    // HANYA ITEM KHUSUS YANG TIDAK BISA DITANAM
     bumbu: {
         garam: { id: "garam", nama: "Garam Dapur", icon: "🧂", hargaBeli: 200 },
         gula: { id: "gula", nama: "Gula Pasir", icon: "🍬", hargaBeli: 300 },
-        bawang_merah: { id: "bawang_merah", nama: "Bawang Merah", icon: "🧅", hargaBeli: 500 },
-        bawang_putih: { id: "bawang_putih", nama: "Bawang Putih", icon: "🧄", hargaBeli: 500 },
-        cabai: { id: "cabai", nama: "Cabai Rawit", icon: "🌶️", hargaBeli: 600 },
         minyak_goreng: { id: "minyak_goreng", nama: "Minyak Goreng", icon: "🍾", hargaBeli: 1200 },
-        kecap: { id: "kecap", nama: "Kecap Manis", icon: "🍶", hargaBeli: 800 }
+        kecap: { id: "kecap", nama: "Kecap Manis", icon: "🍶", hargaBeli: 800 },
+        merica: { id: "merica", nama: "Merica Bubuk", icon: "🧂", hargaBeli: 400 },
+        saus_tiram: { id: "saus_tiram", nama: "Saus Tiram", icon: "🍾", hargaBeli: 1500 },
+        terasi: { id: "terasi", nama: "Terasi Udang", icon: "🧱", hargaBeli: 500 },
+        santan: { id: "santan", nama: "Santan Kelapa", icon: "🥥", hargaBeli: 1000 }
     },
     resep: {
         sup_sayur: {
