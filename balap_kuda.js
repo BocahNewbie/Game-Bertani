@@ -17,7 +17,7 @@ let balapKudaState = {
 
 const MAX_KAPASITAS_KUDA = 5;
 const COOLDOWN_BREEDING_HARI = 10; 
-const MIN_USIA_BREEDING_HARI = 25; 
+const MIN_USIA_BREEDING_HARI = 15; 
 
 const KONFIG_KELAS = {
     "D": { nama: "Kelas D (Pemula)", ovrMin: 70, ovrMax: 230, biayaDaftar: 3000, hadiah: { j1: 20000, j2: 10000, j3: 5000 } },
@@ -33,7 +33,8 @@ const NAMA_KUDA_NPC = [
     "Pegasus", "Bintang", "Thunder", "Blaze", "Tornado", "Valkyrie", 
     "Titan", "Phantom", "Eclipse", "Byakko", "Dandan", "Kelp", 
     "Ares", "Apollo", "Hermes", "Comet", "Draco", "Orion", "Saber",
-    "Gatot", "Subroto", "Kevin", "Persa", "Dragon", "Windy", "Rainy"
+    "Gatot", "Subroto", "Kevin", "Persa", "Dragon", "Windy", "Rainy",
+    "Sobri", "Simp", "Sola", "Pria", "Pecin", "Ogah", "Storm"
 ];
 
 function bukaModalCustom(judul, HTMLKonten, tanpaTombolTutup = false) {
