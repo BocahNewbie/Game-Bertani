@@ -1,5 +1,5 @@
 // ==========================================
-// MODULE BALAP KUDA (balap_kuda.js) - REAL-TIME STAMINA & DYNAMIC OVR DECAY (500M)
+// MODULE BALAP KUDA (balap_kuda.js) - FIXED SYNTAX & 500M ANIMATION
 // ==========================================
 
 let balapKudaState = {
@@ -399,7 +399,6 @@ function hitungStatEfektif(kuda, staminaAktif) {
     let rasioStaminaKosong = 1 - (curStamina / maxStamina);
     let rasioStres = (kuda.stres || 0) / 100;
 
-    // Penalti performa berbanding lurus dengan stamina yang habis + stres
     let faktorPenalti = (rasioStaminaKosong * 0.45) + (rasioStres * 0.35);
     let pengaliPerforma = Math.max(0.15, 1 - faktorPenalti);
 
@@ -926,7 +925,6 @@ function jalankanAnimasiBalapan500m(kelas, pesertaList, kudaPemainRef) {
             if (p.jarakTempuhMeter < 500) {
                 // 1. Hitung Stat Efektif & OVR Saat Ini berdasarkan Stamina Real-Time
                 let statE = hitungStatEfektif({ stats: p.stats, stres: p.stres }, p.staminaCurrent);
-                let ovrAktif = hitungOverallKuda(statE);
 
                 // 2. Faktor Kecepatan Berdasarkan Stat Efektif yang Sudah Terdegradasi
                 let dayaSpd = (statE.kecepatan * 0.45) + (statE.akselerasi * 0.35) + (statE.kelincahan * 0.2);
