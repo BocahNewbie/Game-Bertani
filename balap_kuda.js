@@ -51,6 +51,13 @@ const KONFIG_KELAS = {
 
 const NAMA_KUDA_NPC = ["Baron", "Zeus", "Natto", "Basal", "Bergie", "Molam", "Shadow", "Pegasus", "Bintang", "Thunder", "Blaze", "Tornado", "Valkyrie", "Titan", "Phantom", "Eclipse", "Byakko", "Dandan", "Kelp"];
 
+// --- FUNGSI CEK JAM ARENA BUKA ---
+function isArenaBuka() {
+    let jamSekarang = Number(gameState.jam) || 0;
+    // Buka dari jam 10.00 hingga sebelum jam 19.00 (atau pas jam 19)
+    return jamSekarang >= 10 && jamSekarang <= 19;
+}
+
 // --- FUNGSI UTAMA / RENDER TAB ---
 function renderBalapKuda() {
     const container = document.getElementById("area-balap-kuda");
@@ -63,8 +70,9 @@ function renderBalapKuda() {
         generasiLawanPerKelas();
     }
 
-    let jamSekarang = gameState.jam || 0;
-    let arenaBuka = jamSekarang >= 10 && jamSekarang < 19;
+    let jamSekarang = Number(gameState.jam) || 0;
+    let hariSekarang = gameState.waktuHari || 0;
+    let arenaBuka = isArenaBuka();
 
     let html = `<div class="card" style="grid-column: 1/-1; padding: 20px; text-align: center;">
         <h2>🏇 Arena Balap Kuda Desa</h2>
@@ -85,6 +93,25 @@ function renderBalapKuda() {
         let statE = hitungStatEfektif(k);
         let ovrEfektif = hitungOverallKuda(statE);
 
+        // Cek Selisih Waktu Istirahat untuk Cooldown
+        let totalJamSekarang = (hariSekarang * 24) + jamSekarang;
+        let totalJamTerakhir = ((k.terakhirIstirahatHari || 0) * 24) + (k.terakhirIstirahatJam || 0);
+        let selisihJam = totalJamSekarang - totalJamTerakhir;
+        
+        let sedangCooldown = k.terakhirIstirahatHari !== undefined && selisihJam < 5;
+        let sisaCooldown = sedangCooldown ? Math.ceil(5 - selisihJam) : 0;
+
+        // Tombol istirahat di-disable jika sedang CD ATAU stamina penuh & stres 0
+        let butuhIstirahat = k.stamina < k.staminaMax || k.stres > 0;
+        let bisaIstirahat = !sedangCooldown && butuhIstirahat;
+
+        let teksTombolIstirahat = "💤 Istirahatkan Kuda";
+        if (sedangCooldown) {
+            teksTombolIstirahat = `⏳ Cooldown (${sisaCooldown} Jam)`;
+        } else if (!butuhIstirahat) {
+            teksTombolIstirahat = `✨ Kuda Prima (100%)`;
+        }
+
         let statusPenaltiTeks = statE.penaltiPersen > 0 
             ? `<span style="color:#f87171; font-size:0.85rem;">(📉 Penurunan Performa -${statE.penaltiPersen}% karena lelah/stres)</span>` 
             : `<span style="color:#34d399; font-size:0.85rem;">(✨ Performa Optimal 100%)</span>`;
@@ -98,14 +125,14 @@ function renderBalapKuda() {
                         <span style="color:#fbbf24; font-size:0.9rem;">[Kelas Tertinggi: ${k.kelasMaks}]</span>
                     </h3>
                     <p>OVR Asli: <b>${ovrAsli} Pts</b> | OVR Efektif: <b style="color:${statE.penaltiPersen > 0 ? '#f87171' : '#34d399'}; font-size:1.2rem;">${ovrEfektif} Pts</b> ${statusPenaltiTeks}</p>
-                    <p>⚡ Stamina: <b>${k.stamina} / ${k.staminaMax}</b> | 🪨 Stres: <b style="color:${k.stres >= 80 ? '#f87171' : '#34d399'}">${k.stres} / 100</b> (Max 5x Latihan)</p>
+                    <p>⚡ Stamina: <b>${k.stamina} / ${k.staminaMax}</b> | 🪨 Stres: <b style="color:${k.stres >= 80 ? '#f87171' : '#34d399'}">${k.stres} / 100</b></p>
                 </div>
                 <div>
                     <button onclick="latihKuda('kecepatan')" style="background:#2563eb; margin:2px;">🏃 Latih Kecepatan</button>
                     <button onclick="latihKuda('dayaTahan')" style="background:#2563eb; margin:2px;">🛡️ Latih Daya Tahan</button>
                     <button onclick="latihKuda('akselerasi')" style="background:#2563eb; margin:2px;">🚀 Latih Akselerasi</button>
                     <button onclick="latihKuda('kelincahan')" style="background:#2563eb; margin:2px;">🌀 Latih Kelincahan</button>
-                    <button onclick="istirahatKuda()" style="background:#059669; margin:2px;">💤 Istirahatkan Kuda (CD 5 Jam)</button>
+                    <button onclick="istirahatKuda()" style="background:${bisaIstirahat ? '#059669' : '#334155'}; margin:2px;" ${!bisaIstirahat ? 'disabled' : ''}>${teksTombolIstirahat}</button>
                 </div>
             </div>
             <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap:10px; margin-top:15px; background:#101622; padding:10px; border-radius:8px; font-size:0.85rem;">
@@ -318,12 +345,12 @@ function latihKuda(statKey) {
     }
 
     if (k.stres >= 100) {
-        alert("⚠️ Kuda mencapai batas maksimal stres (100)! Kuda sudah berlatih 5x, istirahatkan kuda terlebih dahulu.");
+        alert("⚠️ Kuda mencapai batas maksimal stres (100)! Kuda kelelahan, istirahatkan kuda terlebih dahulu.");
         return;
     }
 
     k.stamina -= 30;
-    let penambahanStres = 20; // Tepat 20 per latihan agar bisa 5x (5 x 20 = 100)
+    let penambahanStres = 20; 
     k.stres = Math.min(100, k.stres + penambahanStres);
 
     let penambahanStat = Math.floor(Math.random() * 2) + 1; 
@@ -363,7 +390,7 @@ function istirahatKuda() {
     if (!k) return;
 
     let hariSekarang = gameState.waktuHari || 0;
-    let jamSekarang = gameState.jam || 0;
+    let jamSekarang = Number(gameState.jam) || 0;
 
     let totalJamSekarang = (hariSekarang * 24) + jamSekarang;
     let totalJamTerakhir = ((k.terakhirIstirahatHari || 0) * 24) + (k.terakhirIstirahatJam || 0);
@@ -371,7 +398,7 @@ function istirahatKuda() {
     let selisihJam = totalJamSekarang - totalJamTerakhir;
 
     if (k.terakhirIstirahatHari !== undefined && selisihJam < 5) {
-        let sisa = 5 - selisihJam;
+        let sisa = Math.ceil(5 - selisihJam);
         alert(`⚠️ Kuda belum bisa istirahat! Masih dalam cooldown (${sisa} jam in-game lagi).`);
         return;
     }
@@ -397,8 +424,7 @@ function mulaiBalapanKelas(kelas) {
     let k = balapKudaState.kudaPemain;
     let cfg = KONFIG_KELAS[kelas];
 
-    let jamSekarang = gameState.jam || 0;
-    if (jamSekarang < 10 || jamSekarang >= 19) {
+    if (!isArenaBuka()) {
         alert("⚠️ Arena Balap Kuda hanya buka dari jam 10.00 hingga 19.00!");
         return;
     }
