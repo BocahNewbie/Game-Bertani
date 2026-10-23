@@ -1,16 +1,11 @@
 // ==========================================
 // CONFIG & INTEGRASI GOOGLE APPS SCRIPT
 // ==========================================
-const URL_SCRIPT_DATABASE = "https://script.google.com/macros/s/AKfycbzLqWdFj9Kk-U-p3gN88zDrmX-0xAn41f5R3v4_j5w1/exec";
+const URL_SCRIPT_DATABASE = "https://script.google.com/macros/s/AKfycbxmq440FWj9HXk5kckzjln-BSQ9rFVKvEmMzftJLeGKPF-u5Y83VE25PdoZaU1Qn7V9gQ/exec";
 
-// Fungsi untuk mendapatkan atau membuat ID Pemain Otomatis
-function getIdPemain() {
-    let id = localStorage.getItem("game_player_id");
-    if (!id) {
-        id = "PLAYER-" + Math.random().toString(36).substring(2, 8).toUpperCase();
-        localStorage.setItem("game_player_id", id);
-    }
-    return id;
+// Mengambil ID yang tersimpan di browser
+function getIdPemainLocal() {
+    return localStorage.getItem("game_player_id");
 }
 
 let gameState = {
@@ -139,13 +134,13 @@ function batalUbahNama() { resetHeaderNamaUI(); }
 function resetHeaderNamaUI() {
     let container = document.querySelector(".player-info");
     if (!container) return;
-    let playerId = getIdPemain();
+    let playerId = getIdPemainLocal() || "Registrasi...";
     let tombolSaveHTML = `<button onclick="simpanGame()" title="Simpan Ke Cloud" style="background: transparent; border: none; cursor: pointer; font-size: 1.1rem; margin-left: 5px;">💾</button>`;
-    let tombolLoadHTML = `<button onclick="muatDenganIdLain()" title="Masukan/Ganti ID Pemain" style="background: transparent; border: none; cursor: pointer; font-size: 1rem; margin-left: 2px;">🔑</button>`;
+    let tombolLoadHTML = `<button onclick="muatDenganIdLain()" title="Login ID Pemain" style="background: transparent; border: none; cursor: pointer; font-size: 1rem; margin-left: 2px;">🔑</button>`;
     
     container.innerHTML = `
         <span id="label-nama">${gameState.namaPemain}</span> 
-        <small style="color: var(--text-muted); font-size:0.75rem; margin-left:3px;">(${playerId})</small>
+        <small style="color: #fbbf24; font-weight:bold; font-size:0.8rem; margin-left:3px;">[${playerId}]</small>
         <button id="btn-edit-nama" onclick="ubahNama()" style="background: transparent; border: none; cursor: pointer; font-size: 1rem;">✏️</button>
         ${tombolSaveHTML}
         ${tombolLoadHTML}
@@ -153,10 +148,51 @@ function resetHeaderNamaUI() {
 }
 
 // ==========================================
-// FUNGSI SIMPAN & MUAT VIA GOOGLE SPREADSHEET
+// FUNGSI REGISTRASI, SIMPAN & MUAT DARI SERVER
 // ==========================================
+
+function daftarkanPemainBaru() {
+    tampilkanPopupNotifikasi("⏳ Menghubungkan Server...", "Membuat ID Pemain resmi dari Spreadsheet...", "neon-blue");
+
+    let payload = {
+        action: "register",
+        playerName: gameState.namaPemain,
+        gameState: gameState,
+        horseState: (typeof balapKudaState !== 'undefined') ? balapKudaState : {}
+    };
+
+    fetch(URL_SCRIPT_DATABASE, {
+        method: "POST",
+        body: JSON.stringify(payload)
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === "success") {
+            localStorage.setItem("game_player_id", data.playerId);
+            gameState = data.gameState;
+            if (typeof balapKudaState !== 'undefined' && data.horseState) {
+                balapKudaState = data.horseState;
+            }
+            updateHeaderUI();
+            resetHeaderNamaUI();
+            renderSemuaTabUtama();
+            tampilkanPopupNotifikasi(
+                "🎉 Akun Dibuat!", 
+                `ID Resmi Kamu: ${data.playerId}\nSimpan ID ini untuk muat progres di perangkat lain!`, 
+                "neon-green"
+            );
+        }
+    })
+    .catch(err => console.error("Error register:", err));
+}
+
 function simpanGame() {
-    let playerId = getIdPemain();
+    let playerId = getIdPemainLocal();
+    if (!playerId) {
+        daftarkanPemainBaru();
+        return;
+    }
+
     tampilkanPopupNotifikasi("⏳ Menyimpan...", "Sedang mengunggah data ke Spreadsheet...", "neon-blue");
 
     let payload = {
@@ -176,11 +212,11 @@ function simpanGame() {
         if (data.status === "success") {
             tampilkanPopupNotifikasi(
                 "☁️ Tersimpan di Cloud!", 
-                `ID Pemain kamu: ${playerId}\nGunakan ID ini jika ingin memuat permainan di HP/browser lain!`, 
+                `Data milik [${playerId}] berhasil diperbarui di Spreadsheet!`, 
                 "neon-green"
             );
         } else {
-            alert("⚠️ Gagal menyimpan data ke Spreadsheet.");
+            alert("⚠️ Gagal menyimpan data. ID tidak ditemukan di Spreadsheet.");
         }
     })
     .catch(err => {
@@ -190,8 +226,14 @@ function simpanGame() {
 }
 
 function muatGame() {
-    let playerId = getIdPemain();
+    let playerId = getIdPemainLocal();
     
+    // Jika belum ada ID sama sekali di lokal browser, lakukan pendaftaran otomatis
+    if (!playerId) {
+        daftarkanPemainBaru();
+        return;
+    }
+
     let payload = {
         action: "load",
         playerId: playerId
@@ -213,18 +255,19 @@ function muatGame() {
             renderSemuaTabUtama();
             tampilkanPopupNotifikasi(
                 "✨ Data Dimuat!", 
-                `Selamat datang kembali, ${gameState.namaPemain}! (ID: ${playerId})`, 
+                `Selamat datang kembali, ${gameState.namaPemain}! [${playerId}]`, 
                 "neon-green"
             );
         } else {
-            console.log("Pemain baru atau ID belum terdaftar. Menggunakan data awal.");
+            // Jika ID lokal tidak ada di spreadsheet, daftarkan ulang
+            daftarkanPemainBaru();
         }
     })
     .catch(err => console.error("Error load:", err));
 }
 
 function muatDenganIdLain() {
-    let idBaru = prompt("Masukkan ID Pemain kamu (Contoh: PLAYER-A1B2C3):");
+    let idBaru = prompt("Masukkan ID Pemain kamu (Contoh: ID2026170000):");
     if (idBaru && idBaru.trim() !== "") {
         localStorage.setItem("game_player_id", idBaru.trim().toUpperCase());
         muatGame();
