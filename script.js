@@ -3,9 +3,13 @@
 // ==========================================
 const URL_SCRIPT_DATABASE = "https://script.google.com/macros/s/AKfycbxmq440FWj9HXk5kckzjln-BSQ9rFVKvEmMzftJLeGKPF-u5Y83VE25PdoZaU1Qn7V9gQ/exec";
 
-// Mengambil ID yang tersimpan di browser
-function getIdPemainLocal() {
-    return localStorage.getItem("game_player_id");
+// --- MANAJEMEN AKUN LOKAL ---
+function getUsernameLocal() {
+    return localStorage.getItem("game_username");
+}
+
+function getPasswordLocal() {
+    return localStorage.getItem("game_password");
 }
 
 let gameState = {
@@ -106,7 +110,7 @@ function refreshTabAktif(tabId) {
     if (tabId === 'tab-misi') renderPapanMisi();
     if (tabId === 'tab-toko-bumbu') renderTokoBumbu();
     if (tabId === 'tab-dapur') renderDapur();
-    if (tabId === 'tab-balap-kuda') renderBalapKuda();
+    if (tabId === 'tab-balap-kuda' && typeof renderBalapKuda === 'function') renderBalapKuda();
 }
 
 function ubahNama() {
@@ -134,61 +138,167 @@ function batalUbahNama() { resetHeaderNamaUI(); }
 function resetHeaderNamaUI() {
     let container = document.querySelector(".player-info");
     if (!container) return;
-    let playerId = getIdPemainLocal() || "Registrasi...";
+    let username = getUsernameLocal() || "Guest";
     let tombolSaveHTML = `<button onclick="simpanGame()" title="Simpan Ke Cloud" style="background: transparent; border: none; cursor: pointer; font-size: 1.1rem; margin-left: 5px;">💾</button>`;
-    
-    // HANYA NAMA YANG BISA DIUBAH (TIDAK ADA TOMBOL / OPSIONAL GANTI ID)
+    let tombolLogoutHTML = `<button onclick="logoutPemain()" title="Keluar Akun" style="background: transparent; border: none; cursor: pointer; font-size: 1rem; margin-left: 5px;">🚪</button>`;
+
     container.innerHTML = `
         <span id="label-nama">${gameState.namaPemain}</span> 
-        <small style="color: #fbbf24; font-weight:bold; font-size:0.8rem; margin-left:3px;">[${playerId}]</small>
+        <small style="color: #fbbf24; font-weight:bold; font-size:0.8rem; margin-left:3px;">[@${username}]</small>
         <button id="btn-edit-nama" onclick="ubahNama()" title="Ubah Nama Tampilan" style="background: transparent; border: none; cursor: pointer; font-size: 1rem;">✏️</button>
         ${tombolSaveHTML}
+        ${tombolLogoutHTML}
     `;
 }
 
+function logoutPemain() {
+    if (confirm("Apakah kamu yakin ingin keluar dari akun ini?")) {
+        localStorage.removeItem("game_username");
+        localStorage.removeItem("game_password");
+        location.reload();
+    }
+}
+
 // ==========================================
-// FUNGSI REGISTRASI, SIMPAN & MUAT DARI SERVER
+// POPUP AUTH, REGISTER & LOGIN
 // ==========================================
 
-function daftarkanPemainBaru() {
-    tampilkanPopupNotifikasi("⏳ Menghubungkan Server...", "Membuat ID Pemain...", "neon-blue");
+function bukaModalAuth() {
+    let modalExisting = document.getElementById("modal-auth-game");
+    if (modalExisting) modalExisting.remove();
 
-    let payload = {
-        action: "register",
-        playerName: gameState.namaPemain,
-        gameState: gameState,
-        horseState: (typeof balapKudaState !== 'undefined') ? balapKudaState : {}
-    };
+    let modalHTML = `
+        <div id="modal-auth-game" class="modal-overlay" style="display:flex; z-index:99999;">
+            <div class="modal-card neon-blue" style="max-width:380px; width:100%; text-align:center;">
+                <h2 id="auth-title" style="margin-bottom:10px;">🔐 Login Peternak</h2>
+                <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:15px;">
+                    <input type="text" id="auth-username" placeholder="Username" style="padding:10px; border-radius:6px; background:#101622; color:#fff; border:1px solid var(--border-color);">
+                    <input type="password" id="auth-password" placeholder="Password" style="padding:10px; border-radius:6px; background:#101622; color:#fff; border:1px solid var(--border-color);">
+                    <input type="text" id="auth-player-name" placeholder="Nama Karakter (Khusus Daftar)" style="padding:10px; border-radius:6px; background:#101622; color:#fff; border:1px solid var(--border-color); display:none;">
+                </div>
+                
+                <div id="auth-btn-container" style="display:flex; flex-direction:column; gap:8px;">
+                    <button onclick="prosesLogin()" style="background:#059669; color:#fff; padding:10px; border-radius:6px; font-weight:bold; cursor:pointer;">Masuk (Login)</button>
+                    <button onclick="toggleFormAuth(true)" style="background:transparent; color:#60a5fa; border:none; cursor:pointer; font-size:0.85rem;">Belum punya akun? Buat Akun Baru</button>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+}
+
+function toggleFormAuth(isRegister) {
+    let title = document.getElementById("auth-title");
+    let inputName = document.getElementById("auth-player-name");
+    let btnContainer = document.getElementById("auth-btn-container");
+
+    if (isRegister) {
+        title.innerText = "📝 Buat Akun Baru";
+        inputName.style.display = "block";
+        btnContainer.innerHTML = `
+            <button onclick="prosesRegister()" style="background:#2563eb; color:#fff; padding:10px; border-radius:6px; font-weight:bold; cursor:pointer;">Daftar Sekarang</button>
+            <button onclick="toggleFormAuth(false)" style="background:transparent; color:#60a5fa; border:none; cursor:pointer; font-size:0.85rem;">Sudah punya akun? Login</button>
+        `;
+    } else {
+        title.innerText = "🔐 Login Peternak";
+        inputName.style.display = "none";
+        btnContainer.innerHTML = `
+            <button onclick="prosesLogin()" style="background:#059669; color:#fff; padding:10px; border-radius:6px; font-weight:bold; cursor:pointer;">Masuk (Login)</button>
+            <button onclick="toggleFormAuth(true)" style="background:transparent; color:#60a5fa; border:none; cursor:pointer; font-size:0.85rem;">Belum punya akun? Buat Akun Baru</button>
+        `;
+    }
+}
+
+function prosesLogin() {
+    let user = document.getElementById("auth-username").value.trim();
+    let pass = document.getElementById("auth-password").value.trim();
+
+    if (!user || !pass) {
+        alert("⚠️ Username dan Password harus diisi!");
+        return;
+    }
+
+    tampilkanPopupNotifikasi("⏳ Memeriksa...", "Sedang melakukan verifikasi login...", "neon-blue");
 
     fetch(URL_SCRIPT_DATABASE, {
         method: "POST",
-        body: JSON.stringify(payload)
+        body: JSON.stringify({ action: "login", username: user, password: pass })
     })
     .then(res => res.json())
     .then(data => {
         if (data.status === "success") {
-            localStorage.setItem("game_player_id", data.playerId);
+            localStorage.setItem("game_username", data.username);
+            localStorage.setItem("game_password", pass);
             gameState = data.gameState;
             if (typeof balapKudaState !== 'undefined' && data.horseState) {
                 balapKudaState = data.horseState;
             }
+            let modal = document.getElementById("modal-auth-game");
+            if (modal) modal.remove();
+
             updateHeaderUI();
             resetHeaderNamaUI();
             renderSemuaTabUtama();
-            tampilkanPopupNotifikasi(
-                "🎉 Akun Dibuat!", 
-                `ID Resmi Kamu: ${data.playerId}`, 
-                "neon-green"
-            );
+            tampilkanPopupNotifikasi("🎉 Login Berhasil!", `Selamat datang kembali, ${gameState.namaPemain}!`, "neon-green");
+        } else {
+            alert("⚠️ " + (data.message || "Gagal login!"));
         }
     })
-    .catch(err => console.error("Error register:", err));
+    .catch(err => alert("⚠️ Gagal terhubung ke server!"));
+}
+
+function prosesRegister() {
+    let user = document.getElementById("auth-username").value.trim();
+    let pass = document.getElementById("auth-password").value.trim();
+    let name = document.getElementById("auth-player-name").value.trim() || "Pak Tani";
+
+    if (!user || !pass) {
+        alert("⚠️ Username dan Password tidak boleh kosong!");
+        return;
+    }
+
+    tampilkanPopupNotifikasi("⏳ Membuat Akun...", "Sedang me-registrasi akun baru...", "neon-blue");
+
+    let tempGameState = { ...gameState, namaPemain: name };
+
+    fetch(URL_SCRIPT_DATABASE, {
+        method: "POST",
+        body: JSON.stringify({
+            action: "register",
+            username: user,
+            password: pass,
+            playerName: name,
+            gameState: tempGameState,
+            horseState: (typeof balapKudaState !== 'undefined') ? balapKudaState : {}
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === "success") {
+            localStorage.setItem("game_username", data.username);
+            localStorage.setItem("game_password", pass);
+            gameState = data.gameState;
+            if (typeof balapKudaState !== 'undefined' && data.horseState) {
+                balapKudaState = data.horseState;
+            }
+            let modal = document.getElementById("modal-auth-game");
+            if (modal) modal.remove();
+
+            updateHeaderUI();
+            resetHeaderNamaUI();
+            renderSemuaTabUtama();
+            tampilkanPopupNotifikasi("🎉 Akun Dibuat!", `Selamat bermain, ${gameState.namaPemain}!`, "neon-green");
+        } else {
+            alert("⚠️ " + (data.message || "Gagal membuat akun!"));
+        }
+    })
+    .catch(err => alert("⚠️ Gagal terhubung ke server!"));
 }
 
 function simpanGame() {
-    let playerId = getIdPemainLocal();
-    if (!playerId) {
-        daftarkanPemainBaru();
+    let username = getUsernameLocal();
+    if (!username) {
+        bukaModalAuth();
         return;
     }
 
@@ -196,7 +306,7 @@ function simpanGame() {
 
     let payload = {
         action: "save",
-        playerId: playerId,
+        username: username,
         playerName: gameState.namaPemain,
         gameState: gameState,
         horseState: (typeof balapKudaState !== 'undefined') ? balapKudaState : {}
@@ -209,38 +319,26 @@ function simpanGame() {
     .then(res => res.json())
     .then(data => {
         if (data.status === "success") {
-            tampilkanPopupNotifikasi(
-                "☁️ Tersimpan!", 
-                `Data milik kamu berhasil diperbarui!`, 
-                "neon-green"
-            );
+            tampilkanPopupNotifikasi("☁️ Tersimpan!", `Progres game kamu berhasil disimpan!`, "neon-green");
         } else {
-            alert("⚠️ Gagal menyimpan data. ID tidak ditemukan.");
+            alert("⚠️ Gagal menyimpan data.");
         }
     })
-    .catch(err => {
-        console.error("Error save:", err);
-        alert("⚠️ Kesalahan koneksi saat menyimpan data.");
-    });
+    .catch(err => alert("⚠️ Kesalahan koneksi saat menyimpan data."));
 }
 
 function muatGame() {
-    let playerId = getIdPemainLocal();
+    let user = getUsernameLocal();
+    let pass = getPasswordLocal();
     
-    // Jika belum memiliki ID di lokal browser, buatkan ID urut baru via server
-    if (!playerId) {
-        daftarkanPemainBaru();
+    if (!user || !pass) {
+        bukaModalAuth();
         return;
     }
 
-    let payload = {
-        action: "load",
-        playerId: playerId
-    };
-
     fetch(URL_SCRIPT_DATABASE, {
         method: "POST",
-        body: JSON.stringify(payload)
+        body: JSON.stringify({ action: "login", username: user, password: pass })
     })
     .then(res => res.json())
     .then(data => {
@@ -252,14 +350,8 @@ function muatGame() {
             updateHeaderUI();
             resetHeaderNamaUI();
             renderSemuaTabUtama();
-            tampilkanPopupNotifikasi(
-                "✨ Data Dimuat!", 
-                `Selamat datang kembali, ${gameState.namaPemain}!`, 
-                "neon-green"
-            );
         } else {
-            // Jika ID tidak valid di spreadsheet, daftarkan akun baru
-            daftarkanPemainBaru();
+            bukaModalAuth();
         }
     })
     .catch(err => console.error("Error load:", err));
@@ -1794,13 +1886,11 @@ setInterval(() => {
         if (idTab === 'tab-kandang') renderKandang();
         if (idTab === 'tab-misi') renderPapanMisi();
         if (idTab === 'tab-dapur') renderDapur();        
-        // 🔹 TAMBAHKAN KODE INI DI BAWAH 'tab-dapur'
         if (idTab === 'tab-balap-kuda' && typeof renderBalapKuda === 'function') {
             renderBalapKuda();
         }
     }
 }, 1500);
-
 
 // --- STARTUP LOGIC ---
 window.onload = function() {
