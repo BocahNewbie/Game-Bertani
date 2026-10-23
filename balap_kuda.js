@@ -56,15 +56,20 @@ function renderBalapKuda() {
     const container = document.getElementById("area-balap-kuda");
     if (!container) return;
 
-    // Paksa buat pasar kuda jika belum ada data sama sekali atau hari berganti
+    // Paksa buat pasar kuda & lawan NPC baru jika belum ada data sama sekali atau hari berganti
     if (!balapKudaState.daftarPasarKuda || balapKudaState.daftarPasarKuda.length === 0 || balapKudaState.musimBalapHari !== gameState.waktuHari) {
         balapKudaState.musimBalapHari = gameState.waktuHari;
         generasiPasarKuda();
+        generasiLawanPerKelas();
     }
+
+    let jamSekarang = gameState.jam || 0;
+    let arenaBuka = jamSekarang >= 10 && jamSekarang < 19;
 
     let html = `<div class="card" style="grid-column: 1/-1; padding: 20px; text-align: center;">
         <h2>🏇 Arena Balap Kuda Desa</h2>
         <p style="color: var(--text-muted);">Latih kudamu, atur stamina & stres, lalu jadilah juara di setiap kelas!</p>
+        <p style="font-size:0.9rem; margin-top:5px;">🕒 Jam Operasional Balap: <b>10.00 - 19.00</b> | Status Saat Ini: <b style="color:${arenaBuka ? '#34d399' : '#f87171'}">${arenaBuka ? 'BUKA' : 'TUTUP'}</b></p>
     </div>`;
 
     // 1. TAMPILAN KUDA PEMAIN
@@ -87,16 +92,20 @@ function renderBalapKuda() {
         html += `
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
                 <div>
-                    <h3>🐎 ${k.nama} <span style="color:#fbbf24;">[Kelas Tertinggi: ${k.kelasMaks}]</span></h3>
+                    <h3>
+                        🐎 ${k.nama} 
+                        <button onclick="gantiNamaKuda()" style="background:none; border:none; cursor:pointer; font-size:0.9rem;" title="Ganti Nama">✏️</button>
+                        <span style="color:#fbbf24; font-size:0.9rem;">[Kelas Tertinggi: ${k.kelasMaks}]</span>
+                    </h3>
                     <p>OVR Asli: <b>${ovrAsli} Pts</b> | OVR Efektif: <b style="color:${statE.penaltiPersen > 0 ? '#f87171' : '#34d399'}; font-size:1.2rem;">${ovrEfektif} Pts</b> ${statusPenaltiTeks}</p>
-                    <p>⚡ Stamina: <b>${k.stamina} / ${k.staminaMax}</b> | 🪨 Stres: <b style="color:${k.stres > 50 ? '#f87171' : '#34d399'}">${k.stres} / 100</b></p>
+                    <p>⚡ Stamina: <b>${k.stamina} / ${k.staminaMax}</b> | 🪨 Stres: <b style="color:${k.stres >= 80 ? '#f87171' : '#34d399'}">${k.stres} / 100</b> (Max 5x Latihan)</p>
                 </div>
                 <div>
                     <button onclick="latihKuda('kecepatan')" style="background:#2563eb; margin:2px;">🏃 Latih Kecepatan</button>
                     <button onclick="latihKuda('dayaTahan')" style="background:#2563eb; margin:2px;">🛡️ Latih Daya Tahan</button>
                     <button onclick="latihKuda('akselerasi')" style="background:#2563eb; margin:2px;">🚀 Latih Akselerasi</button>
                     <button onclick="latihKuda('kelincahan')" style="background:#2563eb; margin:2px;">🌀 Latih Kelincahan</button>
-                    <button onclick="istirahatKuda()" style="background:#059669; margin:2px;">💤 Istirahatkan Kuda</button>
+                    <button onclick="istirahatKuda()" style="background:#059669; margin:2px;">💤 Istirahatkan Kuda (CD 5 Jam)</button>
                 </div>
             </div>
             <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap:10px; margin-top:15px; background:#101622; padding:10px; border-radius:8px; font-size:0.85rem;">
@@ -111,15 +120,16 @@ function renderBalapKuda() {
     html += `</div>`;
 
     // 2. TAMPILAN PERLOMBAAN KELAS
-    html += `<h3 style="grid-column: 1/-1; color: #fbbf24; margin-top: 15px;">🏆 Arena Pertandingan Kelas</h3>`;
+    html += `<h3 style="grid-column: 1/-1; color: #fbbf24; margin-top: 15px;">🏆 Arena Pertandingan Kelas (8 Peserta)</h3>`;
     
     let urutanKelas = ["D", "C", "B", "A", "S", "SS"];
     urutanKelas.forEach(kls => {
         let cfg = KONFIG_KELAS[kls];
-        let bisaIkut = balapKudaState.kudaPemain && dapatAksesKelas(kls);
+        let bisaIkut = balapKudaState.kudaPemain && dapatAksesKelas(kls) && arenaBuka;
+        let daftarLawan = balapKudaState.lawanPerKelas ? balapKudaState.lawanPerKelas[kls] || [] : [];
         
         html += `
-            <div class="card" style="border: 1px solid ${bisaIkut ? '#10b981' : 'var(--border-color)'}; opacity: ${bisaIkut ? '1' : '0.6'}">
+            <div class="card" style="border: 1px solid ${bisaIkut ? '#10b981' : 'var(--border-color)'}; opacity: ${dapatAksesKelas(kls) ? '1' : '0.6'}">
                 <h3>🏆 Kelas ${kls}</h3>
                 <p style="font-size:0.8rem; color:var(--text-muted);">${cfg.nama}</p>
                 <p style="font-size:0.85rem;">Rata-rata OVR: <b>${cfg.ovrMin} - ${cfg.ovrMax}</b></p>
@@ -128,8 +138,16 @@ function renderBalapKuda() {
                     🥈 J2: Rp. ${cfg.hadiah.j2.toLocaleString('id-ID')}<br>
                     🥉 J3: Rp. ${cfg.hadiah.j3.toLocaleString('id-ID')}
                 </p>
+                
+                <details style="margin-top:10px; font-size:0.8rem; background:#0f172a; padding:6px; border-radius:5px;">
+                    <summary style="cursor:pointer; color:#60a5fa;"><b>📋 Daftar 7 Lawan NPC</b></summary>
+                    <ul style="padding-left:15px; margin-top:5px; text-align:left;">
+                        ${daftarLawan.map(npc => `<li><b>${npc.nama}</b> - OVR: <span style="color:#fbbf24">${hitungOverallKuda(npc.stats)} Pts</span></li>`).join('')}
+                    </ul>
+                </details>
+
                 <button onclick="mulaiBalapanKelas('${kls}')" style="background:${bisaIkut ? '#059669' : '#334155'}; width:100%; margin-top:10px;" ${!bisaIkut ? 'disabled' : ''}>
-                    ${!balapKudaState.kudaPemain ? 'Butuh Kuda' : (!dapatAksesKelas(kls) ? 'Terkunci (Juarai Kelas Sebelum)' : 'Ikut Tanding')}
+                    ${!balapKudaState.kudaPemain ? 'Butuh Kuda' : (!dapatAksesKelas(kls) ? 'Terkunci' : (!arenaBuka ? 'Tutup (10.00-19.00)' : 'Ikut Tanding'))}
                 </button>
             </div>
         `;
@@ -200,12 +218,33 @@ function buatStatRandom(ovrMin, ovrMax) {
     };
 }
 
+// --- GENERASI LAWAN PER KELAS (7 NPC PER KELAS) ---
+function generasiLawanPerKelas() {
+    balapKudaState.lawanPerKelas = {};
+    let kelasList = ["D", "C", "B", "A", "S", "SS"];
+    
+    kelasList.forEach(kls => {
+        let cfg = KONFIG_KELAS[kls];
+        balapKudaState.lawanPerKelas[kls] = [];
+        
+        // Buat 7 NPC
+        for (let i = 0; i < 7; i++) {
+            let nama = NAMA_KUDA_NPC[(i + kls.charCodeAt(0)) % NAMA_KUDA_NPC.length] + ` [NPC]`;
+            let stats = buatStatRandom(cfg.ovrMin, cfg.ovrMax);
+            balapKudaState.lawanPerKelas[kls].push({
+                nama: nama,
+                stats: stats,
+                isPemain: false
+            });
+        }
+    });
+}
+
 // --- MEKANIK PASAR KUDA (OVR MAKSIMAL 130) ---
 function generasiPasarKuda() {
     balapKudaState.daftarPasarKuda = [];
     for (let i = 0; i < 3; i++) {
         let nama = "Kuda " + NAMA_KUDA_NPC[Math.floor(Math.random() * NAMA_KUDA_NPC.length)];
-        // Dibuat OVR antara 80 hingga 120 (tidak lebih dari 130)
         let stats = buatStatRandom(80, 120);
         let harga = 20000 + Math.round(hitungOverallKuda(stats) * 80);
         balapKudaState.daftarPasarKuda.push({ nama, stats, harga });
@@ -230,6 +269,8 @@ function beliKudaPasar(index) {
         stamina: 100,
         staminaMax: 100,
         stres: 0,
+        terakhirIstirahatJam: -99,
+        terakhirIstirahatHari: -1,
         kelasMaks: "D",
         isPemain: true
     };
@@ -237,6 +278,32 @@ function beliKudaPasar(index) {
     balapKudaState.daftarPasarKuda.splice(index, 1);
     updateHeaderUI();
     tampilkanPopupNotifikasi("🎉 Kuda Baru!", `Kamu berhasil membeli ${item.nama}!`, "neon-green");
+    renderBalapKuda();
+}
+
+// --- FUNGSI GANTI NAMA KUDA PEMAIN ---
+function gantiNamaKuda() {
+    let k = balapKudaState.kudaPemain;
+    if (!k) return;
+
+    let namaBaru = prompt("Masukkan nama baru untuk kudamu:", k.nama);
+    if (namaBaru === null) return;
+
+    namaBaru = namaBaru.trim();
+    if (namaBaru === "") {
+        alert("⚠️ Nama kuda tidak boleh kosong!");
+        return;
+    }
+
+    if (namaBaru.length > 20) {
+        alert("⚠️ Nama kuda maksimal 20 karakter!");
+        return;
+    }
+
+    let namaLama = k.nama;
+    k.nama = namaBaru;
+
+    tampilkanPopupNotifikasi("✏️ Nama Kuda Diubah", `Nama kuda berhasil diubah dari ${namaLama} menjadi ${namaBaru}!`, "neon-green");
     renderBalapKuda();
 }
 
@@ -250,17 +317,21 @@ function latihKuda(statKey) {
         return;
     }
 
+    if (k.stres >= 100) {
+        alert("⚠️ Kuda mencapai batas maksimal stres (100)! Kuda sudah berlatih 5x, istirahatkan kuda terlebih dahulu.");
+        return;
+    }
+
     k.stamina -= 30;
-    let penambahanStres = Math.floor(Math.random() * 11) + 20;
+    let penambahanStres = 20; // Tepat 20 per latihan agar bisa 5x (5 x 20 = 100)
     k.stres = Math.min(100, k.stres + penambahanStres);
 
     let penambahanStat = Math.floor(Math.random() * 2) + 1; 
 
-    if (k.stres > 70) {
-        penambahanStat = Math.random() < 0.5 ? 0 : 1;
+    if (k.stres >= 100) {
         tampilkanPopupNotifikasi(
             "⚠️ Kuda Sangat Stres!", 
-            "Kuda kelelahan dan stres berat! Latihan menjadi tidak efektif.", 
+            "Kuda mencapai batas maksimal latihan! Segera istirahatkan kudamu.", 
             "neon-amber"
         );
     } else {
@@ -291,9 +362,26 @@ function istirahatKuda() {
     let k = balapKudaState.kudaPemain;
     if (!k) return;
 
+    let hariSekarang = gameState.waktuHari || 0;
+    let jamSekarang = gameState.jam || 0;
+
+    let totalJamSekarang = (hariSekarang * 24) + jamSekarang;
+    let totalJamTerakhir = ((k.terakhirIstirahatHari || 0) * 24) + (k.terakhirIstirahatJam || 0);
+
+    let selisihJam = totalJamSekarang - totalJamTerakhir;
+
+    if (k.terakhirIstirahatHari !== undefined && selisihJam < 5) {
+        let sisa = 5 - selisihJam;
+        alert(`⚠️ Kuda belum bisa istirahat! Masih dalam cooldown (${sisa} jam in-game lagi).`);
+        return;
+    }
+
     k.stamina = k.staminaMax;
-    k.stres = Math.max(0, k.stres - 50);
-    tampilkanPopupNotifikasi("💤 Kuda Beristirahat", "Stamina pulih penuh dan tingkat stres berkurang drastis!", "neon-green");
+    k.stres = 0;
+    k.terakhirIstirahatHari = hariSekarang;
+    k.terakhirIstirahatJam = jamSekarang;
+
+    tampilkanPopupNotifikasi("💤 Kuda Beristirahat", "Stamina pulih penuh dan tingkat stres kembali ke 0!", "neon-green");
     renderBalapKuda();
 }
 
@@ -308,6 +396,12 @@ function dapatAksesKelas(kelas) {
 function mulaiBalapanKelas(kelas) {
     let k = balapKudaState.kudaPemain;
     let cfg = KONFIG_KELAS[kelas];
+
+    let jamSekarang = gameState.jam || 0;
+    if (jamSekarang < 10 || jamSekarang >= 19) {
+        alert("⚠️ Arena Balap Kuda hanya buka dari jam 10.00 hingga 19.00!");
+        return;
+    }
 
     if (k.stamina < 30) {
         alert("⚠️ Stamina kuda kurang untuk mengikuti balapan (Min. 30)!");
@@ -324,16 +418,15 @@ function mulaiBalapanKelas(kelas) {
     k.stres = Math.min(100, k.stres + 15);
     updateHeaderUI();
 
-    let peserta = [];
-    for (let i = 0; i < 6; i++) {
-        let statsNpc = buatStatRandom(cfg.ovrMin, cfg.ovrMax);
-        peserta.push({
-            nama: NAMA_KUDA_NPC[i % NAMA_KUDA_NPC.length] + ` [NPC]`,
-            stats: statsNpc,
-            isPemain: false
-        });
-    }
+    // Mengambil 7 lawan NPC yang sudah digenerasi
+    let lawanNpcList = balapKudaState.lawanPerKelas[kelas] || [];
+    let peserta = lawanNpcList.map(npc => ({
+        nama: npc.nama,
+        stats: npc.stats,
+        isPemain: false
+    }));
 
+    // Menambahkan Kuda Pemain (Total 8 Peserta)
     peserta.push({
         nama: k.nama + " (Kuda Kamu)",
         stats: k.stats,
@@ -350,63 +443,65 @@ function mulaiBalapanKelas(kelas) {
         let dayaTahanFactor = (statEfektif.dayaTahan * 0.9) + (statEfektif.kelincahan * 0.6);
         let keberuntungan = (Math.random() * statEfektif.mental);
 
-        p.skorAkhir = poinKecepatan + dayaTahanFactor + keberuntungan;
+        p.skorAkhir = Math.round(poinKecepatan + dayaTahanFactor + keberuntungan);
         p.penaltiPersen = statEfektif.penaltiPersen || 0;
+        p.ovrDisplay = hitungOverallKuda(p.stats);
     });
 
     peserta.sort((a, b) => b.skorAkhir - a.skorAkhir);
 
     let posisiPemain = peserta.findIndex(p => p.isPemain) + 1;
-    let juara1 = peserta[0];
     let urutanKelas = ["D", "C", "B", "A", "S", "SS"];
     let idxSekarang = urutanKelas.indexOf(kelas);
 
-    let pemainPeserta = peserta.find(p => p.isPemain);
-    let infoPenaltiTeks = (pemainPeserta && pemainPeserta.penaltiPersen > 10) 
-        ? `\n⚠️ Performa kudamu turun ${pemainPeserta.penaltiPersen}% karena lelah/stres!` 
-        : "";
-
+    // Proses Hadiah jika meraih peringkat 1-3
     if (posisiPemain === 1) {
-        let hadiahUang = cfg.hadiah.j1;
-        gameState.uang += hadiahUang;
-        updateHeaderUI();
-
+        gameState.uang += cfg.hadiah.j1;
         if (idxSekarang < urutanKelas.length - 1 && urutanKelas.indexOf(k.kelasMaks) === idxSekarang) {
             k.kelasMaks = urutanKelas[idxSekarang + 1];
         }
-
-        tampilkanPopupNotifikasi(
-            "🥇 JUARA 1 BALAPAN!", 
-            `Selamat! Kudamu meraih Juara 1 di Kelas ${kelas}! Hadiah: Rp. ${hadiahUang.toLocaleString('id-ID')}${infoPenaltiTeks}`, 
-            "neon-green"
-        );
     } else if (posisiPemain === 2) {
-        let hadiahUang = cfg.hadiah.j2;
-        gameState.uang += hadiahUang;
-        updateHeaderUI();
-
-        tampilkanPopupNotifikasi(
-            "🥈 JUARA 2 BALAPAN!", 
-            `Luar biasa! Kudamu finish di posisi 2 di Kelas ${kelas}! Hadiah: Rp. ${hadiahUang.toLocaleString('id-ID')}${infoPenaltiTeks}`, 
-            "neon-blue"
-        );
+        gameState.uang += cfg.hadiah.j2;
     } else if (posisiPemain === 3) {
-        let hadiahUang = cfg.hadiah.j3;
-        gameState.uang += hadiahUang;
-        updateHeaderUI();
-
-        tampilkanPopupNotifikasi(
-            "🥉 JUARA 3 BALAPAN!", 
-            `Bagus! Kudamu finish di posisi 3 di Kelas ${kelas}! Hadiah: Rp. ${hadiahUang.toLocaleString('id-ID')}${infoPenaltiTeks}`, 
-            "neon-amber"
-        );
-    } else {
-        tampilkanPopupNotifikasi(
-            `Hasil Balapan Kelas ${kelas}`, 
-            `Kudamu finish di posisi ke-${posisiPemain}. Juara 1 diraih oleh ${juara1.nama}!${infoPenaltiTeks}`, 
-            "neon-amber"
-        );
+        gameState.uang += cfg.hadiah.j3;
     }
+    updateHeaderUI();
+
+    // Tampilkan Modal Peringkat Hasil Balapan 1 - 8
+    tampilkanHasilBalapanModal(kelas, peserta, posisiPemain);
 
     renderBalapKuda();
+}
+
+function tampilkanHasilBalapanModal(kelas, pesertaSorted, posisiPemain) {
+    let modalTeks = `<div style="max-height:350px; overflow-y:auto; text-align:left;">
+        <table style="width:100%; border-collapse:collapse; font-size:0.85rem;">
+            <thead>
+                <tr style="border-bottom:1px solid #334155; color:#94a3b8;">
+                    <th style="padding:6px; text-align:center;">Pos</th>
+                    <th style="padding:6px; text-align:left;">Nama Kuda</th>
+                    <th style="padding:6px; text-align:center;">OVR</th>
+                    <th style="padding:6px; text-align:center;">Skor</th>
+                </tr>
+            </thead>
+            <tbody>`;
+
+    pesertaSorted.forEach((p, idx) => {
+        let pos = idx + 1;
+        let isPlayer = p.isPemain;
+        let bgStyle = isPlayer ? "background:rgba(59,130,246,0.2); font-weight:bold;" : "";
+        let piala = pos === 1 ? '🥇 ' : (pos === 2 ? '🥈 ' : (pos === 3 ? '🥉 ' : `${pos}. `));
+        
+        modalTeks += `<tr style="${bgStyle} border-bottom:1px solid #1e293b;">
+            <td style="padding:6px; text-align:center;">${piala}</td>
+            <td style="padding:6px; color:${isPlayer ? '#60a5fa' : '#f8fafc'};">${p.nama}</td>
+            <td style="padding:6px; text-align:center; color:#fbbf24;">${p.ovrDisplay}</td>
+            <td style="padding:6px; text-align:center;">${p.skorAkhir}</td>
+        </tr>`;
+    });
+
+    modalTeks += `</tbody></table></div>`;
+
+    let judul = `🏆 Hasil Balapan Kelas ${kelas} (Posisi Ke-${posisiPemain})`;
+    tampilkanPopupNotifikasi(judul, modalTeks, posisiPemain <= 3 ? "neon-green" : "neon-amber");
 }
