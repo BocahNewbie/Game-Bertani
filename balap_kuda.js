@@ -348,10 +348,14 @@ function renderBalapKuda() {
 
     container.innerHTML = html;
 
+    // PERBAIKAN: Hanya update teks angka stamina secara presisi tanpa re-render HTML penuh
     balapKudaState.pemulihanInterval = setInterval(() => {
-        if (!balapKudaState.kandangKuda) return;
+        if (!balapKudaState.kandangKuda || balapKudaState.kandangKuda.length === 0) return;
+        
+        // 1. Jalankan proses pemulihan pasif
         balapKudaState.kandangKuda.forEach(k => prosesPemulihanStaminaPasif(k));
         
+        // 2. Cukup perbarui angka stamina elemen aktif jika ada, TANPA renderBalapKuda()
         let kAktif = balapKudaState.kandangKuda[balapKudaState.indexKudaAktif];
         if (kAktif) {
             let elStamina = document.getElementById("display-stamina-kuda");
@@ -360,7 +364,6 @@ function renderBalapKuda() {
             }
         }
     }, 2000);
-}
 
 // --- FUNGSI MANAJEMEN KANDANG & KUDA ---
 function pilihKudaAktif(index) {
