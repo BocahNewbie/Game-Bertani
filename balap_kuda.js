@@ -865,7 +865,7 @@ function mulaiBalapanKelas(kelas, idxKuda) {
         stres: k.stres,
         isPemain: true,
         refObject: k
-    });
+    }));
 
     peserta.forEach(p => {
         p.jarakTempuhMeter = 0;
