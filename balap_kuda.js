@@ -13,43 +13,43 @@ let balapKudaState = {
 const KONFIG_KELAS = {
     "D": { 
         nama: "Kelas D (Pemula)",   
-        ovrMin: 100, ovrMax: 200, 
+        ovrMin: 70, ovrMax: 230, 
         biayaDaftar: 3000,
         hadiah: { j1: 20000, j2: 10000, j3: 5000 }
     },
     "C": { 
         nama: "Kelas C (Amatir)",   
-        ovrMin: 201, ovrMax: 350, 
+        ovrMin: 231, ovrMax: 390, 
         biayaDaftar: 10000,
         hadiah: { j1: 50000, j2: 30000, j3: 15000 }
     },
     "B": { 
         nama: "Kelas B (Pro)",      
-        ovrMin: 351, ovrMax: 500, 
+        ovrMin: 391, ovrMax: 550, 
         biayaDaftar: 27000,
         hadiah: { j1: 150000, j2: 75000, j3: 35000 }
     },
     "A": { 
         nama: "Kelas A (Elite)",    
-        ovrMin: 501, ovrMax: 700, 
+        ovrMin: 551, ovrMax: 710, 
         biayaDaftar: 70000,
         hadiah: { j1: 350000, j2: 175000, j3: 85000 }
     },
     "S": { 
         nama: "Kelas S (Master)",   
-        ovrMin: 701, ovrMax: 900, 
+        ovrMin: 711, ovrMax: 980, 
         biayaDaftar: 150000,
         hadiah: { j1: 800000, j2: 400000, j3: 200000 }
     },
     "SS": { 
         nama: "Kelas SS (Legend)",  
-        ovrMin: 901, ovrMax: 1200,
+        ovrMin: 981, ovrMax: 1500,
         biayaDaftar: 450000,
         hadiah: { j1: 2500000, j2: 1250000, j3: 600000 }
     }
 };
 
-const NAMA_KUDA_NPC = ["Baron", "Zeus", "Shadow", "Pegasus", "Bintang", "Thunder", "Blaze", "Tornado", "Valkyrie", "Titan", "Phantom", "Eclipse", "Byakko", "Dandan", "Kelp"];
+const NAMA_KUDA_NPC = ["Baron", "Zeus", "Natto", "Basal", "Bergie", "Molam", "Shadow", "Pegasus", "Bintang", "Thunder", "Blaze", "Tornado", "Valkyrie", "Titan", "Phantom", "Eclipse", "Byakko", "Dandan", "Kelp"];
 
 // --- FUNGSI UTAMA / RENDER TAB ---
 function renderBalapKuda() {
