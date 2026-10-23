@@ -1,5 +1,5 @@
 // ==========================================
-// MODULE BALAP KUDA (balap_kuda.js) - FIXED SYNTAX & 500M ANIMATION
+// MODULE BALAP KUDA (balap_kuda.js) - STAMINA CONSUMPTION & TOP 3 FINISH LOGIC
 // ==========================================
 
 let balapKudaState = {
@@ -12,7 +12,8 @@ let balapKudaState = {
     indukJantanIdx: null,
     indukBetinaIdx: null,
     pemulihanInterval: null,
-    balapanInterval: null
+    balapanInterval: null,
+    isBalapanBerjalan: false
 };
 
 const MAX_KAPASITAS_KUDA = 5;
@@ -69,16 +70,20 @@ const NAMA_KUDA_NPC = [
 ];
 
 // --- FUNGSI HELPER SYSTEM POPUP CUSTOM MODERN ---
-function bukaModalCustom(judul, HTMLKonten) {
+function bukaModalCustom(judul, HTMLKonten, tanpaTombolTutup = false) {
     let modalExisting = document.getElementById("custom-game-modal");
     if (modalExisting) modalExisting.remove();
+
+    let tombolTutupHTML = tanpaTombolTutup 
+        ? `<span style="font-size:0.8rem; color:#f87171; font-weight:bold;">🔒 Balapan Bertanding...</span>`
+        : `<button onclick="tutupModalCustom()" style="background:none; border:none; color:#94a3b8; font-size:1.2rem; cursor:pointer;">✖</button>`;
 
     let modalHTML = `
         <div id="custom-game-modal" style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.8); backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center; z-index:99999; padding:15px; animation:fadeIn 0.2s ease;">
             <div style="background:#0f172a; border:1px solid #3b82f6; border-radius:12px; width:100%; max-width:580px; box-shadow:0 10px 25px rgba(0,0,0,0.8); overflow:hidden; color:#f8fafc;">
                 <div style="padding:15px; background:#1e293b; border-bottom:1px solid #334155; display:flex; justify-content:space-between; align-items:center;">
                     <h3 style="margin:0; font-size:1.1rem; color:#38bdf8;">${judul}</h3>
-                    <button onclick="tutupModalCustom()" style="background:none; border:none; color:#94a3b8; font-size:1.2rem; cursor:pointer;">✖</button>
+                    ${tombolTutupHTML}
                 </div>
                 <div style="padding:20px; max-height:85vh; overflow-y:auto;">
                     ${HTMLKonten}
@@ -90,6 +95,10 @@ function bukaModalCustom(judul, HTMLKonten) {
 }
 
 function tutupModalCustom() {
+    if (balapKudaState.isBalapanBerjalan) {
+        return; // Tidak bisa ditutup manual saat pertandingan berjalan
+    }
+
     if (balapKudaState.balapanInterval) {
         clearInterval(balapKudaState.balapanInterval);
         balapKudaState.balapanInterval = null;
@@ -399,8 +408,10 @@ function hitungStatEfektif(kuda, staminaAktif) {
     let rasioStaminaKosong = 1 - (curStamina / maxStamina);
     let rasioStres = (kuda.stres || 0) / 100;
 
-    let faktorPenalti = (rasioStaminaKosong * 0.45) + (rasioStres * 0.35);
-    let pengaliPerforma = Math.max(0.15, 1 - faktorPenalti);
+    // Daya tahan mengurangi tingkat keparahan penalti performa
+    let reduksiPenaltiDayaTahan = Math.min(0.25, (s.dayaTahan || 10) / 400); 
+    let faktorPenalti = Math.max(0, ((rasioStaminaKosong * 0.45) + (rasioStres * 0.35)) - reduksiPenaltiDayaTahan);
+    let pengaliPerforma = Math.max(0.12, 1 - faktorPenalti);
 
     return {
         kecepatan: Math.round(s.kecepatan * pengaliPerforma),
@@ -843,6 +854,7 @@ function mulaiBalapanKelas(kelas, idxKuda) {
         gender: npc.gender,
         staminaAwal: npc.staminaMax,
         staminaCurrent: npc.staminaMax,
+        staminaMax: npc.staminaMax,
         stres: npc.stres,
         isPemain: false,
         refObject: npc
@@ -854,28 +866,32 @@ function mulaiBalapanKelas(kelas, idxKuda) {
         gender: k.gender,
         staminaAwal: k.stamina,
         staminaCurrent: k.stamina,
+        staminaMax: k.staminaMax,
         stres: k.stres,
         isPemain: true,
         refObject: k
-    });
+    }));
 
     // Inisialisasi Kinerja Peserta
     peserta.forEach(p => {
         p.jarakTempuhMeter = 0;
-        p.checkpointTerakhir = 0; // Melacak per 40m
+        p.kecepatanInstan = 0;
+        p.sudahFinis = false;
+        p.urutanFinis = null;
         p.skorKinerjaAkumulatif = 0;
     });
 
+    balapKudaState.isBalapanBerjalan = true;
     jalankanAnimasiBalapan500m(kelas, peserta, k);
 }
 
-// --- ENGINE ANIMASI REAL-TIME LINTASAN 500M (STAMINA -5% PER 40M) ---
+// --- ENGINE ANIMASI REAL-TIME LINTASAN 500M (BERHENTI KETIKA 3 JUARA FINIS) ---
 function jalankanAnimasiBalapan500m(kelas, pesertaList, kudaPemainRef) {
     let modalHTML = `
         <div style="text-align:center;">
             <div style="display:flex; justify-content:space-between; align-items:center; background:#1e293b; padding:10px 15px; border-radius:8px; margin-bottom:10px;">
                 <div>🏁 Lintasan: <b style="color:#38bdf8;">500 Meter</b></div>
-                <div>⏱️ Waktu: <b id="timer-balap" style="color:#fbbf24;">01:30</b></div>
+                <div>🏆 Status: <b id="status-juara-finis" style="color:#fbbf24;">Mencari 3 Juara Finis</b></div>
                 <div>🚩 Jarak: <b id="jarak-pemain" style="color:#34d399;">0m / 500m</b></div>
             </div>
 
@@ -903,7 +919,7 @@ function jalankanAnimasiBalapan500m(kelas, pesertaList, kudaPemainRef) {
             <div style="margin-top:12px; background:#0f172a; padding:10px; border-radius:8px; border:1px solid #334155; text-align:left;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
                     <span style="font-size:0.85rem; font-weight:bold; color:#fbbf24;">📊 Live Leaderboard & Stat Realtime:</span>
-                    <span style="font-size:0.75rem; color:#94a3b8;">📉 Stamina -5% / 40m</span>
+                    <span style="font-size:0.75rem; color:#94a3b8;">📉 Konsumsi Stamina Dynamic</span>
                 </div>
                 <div id="live-leaderboard" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap:6px; font-size:0.75rem;">
                     <!-- Terisi otomatis via JS -->
@@ -912,44 +928,46 @@ function jalankanAnimasiBalapan500m(kelas, pesertaList, kudaPemainRef) {
         </div>
     `;
 
-    bukaModalCustom(`🏁 Pertandingan Balap Kuda - Kelas ${kelas}`, modalHTML);
+    // Modal dibuka TANPA TOMBOL TUTUP agar tidak bisa di-close saat berjalan
+    bukaModalCustom(`🏁 Pertandingan Balap Kuda - Kelas ${kelas}`, modalHTML, true);
 
-    let DURASI_TOTAL_DETIK = 90; // 1 Menit 30 Detik
-    let totalFrame = DURASI_TOTAL_DETIK * 5; // Frame per 200ms
-    let frameSekarang = 0;
+    let daftarFinis = [];
 
     balapKudaState.balapanInterval = setInterval(() => {
-        frameSekarang++;
-
         pesertaList.forEach((p, idx) => {
-            if (p.jarakTempuhMeter < 500) {
-                // 1. Hitung Stat Efektif & OVR Saat Ini berdasarkan Stamina Real-Time
-                let statE = hitungStatEfektif({ stats: p.stats, stres: p.stres }, p.staminaCurrent);
+            if (!p.sudahFinis) {
+                // 1. Hitung Stat Efektif & OVR
+                let statE = hitungStatEfektif({ stats: p.stats, stres: p.stres, staminaMax: p.staminaMax }, p.staminaCurrent);
 
-                // 2. Faktor Kecepatan Berdasarkan Stat Efektif yang Sudah Terdegradasi
-                let dayaSpd = (statE.kecepatan * 0.45) + (statE.akselerasi * 0.35) + (statE.kelincahan * 0.2);
-                let baseMeterPerFrame = (500 / totalFrame) * (dayaSpd / 60); 
-                let luck = (Math.random() * (statE.mental / 40));
+                // 2. Akselerasi dan Kecepatan Lari Instan Berdasarkan Stat Efektif & Mental
+                let targetKecepatan = (statE.kecepatan * 0.40) + (statE.akselerasi * 0.35) + (statE.kelincahan * 0.25);
+                let mentalBoost = (Math.random() * (statE.mental / 35));
 
-                let pertambahanJarak = Math.max(0.2, baseMeterPerFrame + luck);
+                p.kecepatanInstan = Math.min(targetKecepatan + mentalBoost, targetKecepatan * 1.15);
+
+                // Pertambahan Jarak Tempuh Meter per Frame
+                let pertambahanJarak = Math.max(0.15, p.kecepatanInstan / 25);
                 p.jarakTempuhMeter = Math.min(500, p.jarakTempuhMeter + pertambahanJarak);
+                p.skorKinerjaAkumulatif += p.kecepatanInstan;
 
-                // 3. Akumulasi Skor Kinerja untuk Menentukan Pemenang Akhir
-                p.skorKinerjaAkumulatif += (dayaSpd + luck);
+                // 3. PENGURANGAN STAMINA DYNAMIC SESUAI KECEPATAN & RESISTANSI DAYA TAHAN
+                // Kecepatan tinggi memakan stamina lebih banyak, Daya tahan tinggi menghemat stamina
+                let pengaliKecepatan = p.kecepatanInstan / 30; 
+                let efisiensiDayaTahan = Math.max(0.35, 1 - (statE.dayaTahan / 300)); 
+                let staminaTerkuras = (0.28 * pengaliKecepatan) * efisiensiDayaTahan;
 
-                // 4. PENURUNAN STAMINA 5% PER 40 METER
-                let kelipatan40m = Math.floor(p.jarakTempuhMeter / 40);
-                if (kelipatan40m > p.checkpointTerakhir) {
-                    let jumlahPenurunan = kelipatan40m - p.checkpointTerakhir;
-                    let penaltiStaminaPer40m = p.staminaAwal * 0.05; // 5% dari stamina awal per 40m
-                    
-                    p.staminaCurrent = Math.max(0, p.staminaCurrent - (penaltiStaminaPer40m * jumlahPenurunan));
-                    p.checkpointTerakhir = kelipatan40m;
+                p.staminaCurrent = Math.max(0, p.staminaCurrent - staminaTerkuras);
 
-                    // Update stamina permanen pada objek referensi asli jika milik pemain
-                    if (p.isPemain && p.refObject) {
-                        p.refObject.stamina = Math.round(p.staminaCurrent);
-                    }
+                // Simpan pengurangan stamina permanen jika milik pemain
+                if (p.isPemain && p.refObject) {
+                    p.refObject.stamina = Math.round(p.staminaCurrent);
+                }
+
+                // 4. CEK CONDITION JUARA FINIS
+                if (p.jarakTempuhMeter >= 500) {
+                    p.sudahFinis = true;
+                    daftarFinis.push(p);
+                    p.urutanFinis = daftarFinis.length;
                 }
             }
         });
@@ -963,13 +981,9 @@ function jalankanAnimasiBalapan500m(kelas, pesertaList, kudaPemainRef) {
             }
         });
 
-        // Update Timer & Meter Kuda Pemain
-        let detikSisa = Math.max(0, Math.ceil((totalFrame - frameSekarang) / 5));
-        let menitDisplay = String(Math.floor(detikSisa / 60)).padStart(2, '0');
-        let detikDisplay = String(detikSisa % 60).padStart(2, '0');
-        
-        let elTimer = document.getElementById("timer-balap");
-        if (elTimer) elTimer.innerText = `${menitDisplay}:${detikDisplay}`;
+        // Update Meter Kuda Pemain & Status Juara Finis
+        let elStatusJuara = document.getElementById("status-juara-finis");
+        if (elStatusJuara) elStatusJuara.innerText = `Juara Finis: ${daftarFinis.length}/3`;
 
         let indexPemain = pesertaList.findIndex(p => p.isPemain);
         if (indexPemain !== -1) {
@@ -979,22 +993,29 @@ function jalankanAnimasiBalapan500m(kelas, pesertaList, kudaPemainRef) {
 
         // Live Leaderboard Realtime Update dengan Info OVR & Stamina
         let rankingList = pesertaList.map((p) => {
-            let sEfektif = hitungStatEfektif({ stats: p.stats, stres: p.stres }, p.staminaCurrent);
+            let sEfektif = hitungStatEfektif({ stats: p.stats, stres: p.stres, staminaMax: p.staminaMax }, p.staminaCurrent);
             return {
                 nama: p.nama,
                 jarak: p.jarakTempuhMeter,
                 stamina: Math.round(p.staminaCurrent),
                 ovrNow: hitungOverallKuda(sEfektif),
-                isPemain: p.isPemain
+                isPemain: p.isPemain,
+                sudahFinis: p.sudahFinis,
+                posFinis: p.urutanFinis
             };
-        }).sort((a, b) => b.jarak - a.jarak);
+        }).sort((a, b) => {
+            if (a.sudahFinis && b.sudahFinis) return a.posFinis - b.posFinis;
+            if (a.sudahFinis) return -1;
+            if (b.sudahFinis) return 1;
+            return b.jarak - a.jarak;
+        });
 
         let elBoard = document.getElementById("live-leaderboard");
         if (elBoard) {
             elBoard.innerHTML = rankingList.map((r, i) => `
                 <div style="background:#1e293b; padding:4px 6px; border-radius:4px; border:1px solid ${r.isPemain ? '#38bdf8' : '#334155'}; text-align:left;">
                     <div style="color:${r.isPemain ? '#38bdf8' : '#f8fafc'}; font-weight:${r.isPemain ? 'bold' : 'normal'}; overflow:hidden; white-space:nowrap; text-overflow:ellipsis;">
-                        ${i+1}. ${r.nama.split(' ')[0]}
+                        ${r.sudahFinis ? `🏆 #${r.posFinis} ` : `${i+1}. `}${r.nama.split(' ')[0]}
                     </div>
                     <div style="font-size:0.7rem; color:#94a3b8; display:flex; justify-content:space-between; margin-top:2px;">
                         <span>📍 ${Math.round(r.jarak)}m</span>
@@ -1007,15 +1028,15 @@ function jalankanAnimasiBalapan500m(kelas, pesertaList, kudaPemainRef) {
             `).join('');
         }
 
-        // Cek jika semua kuda sudah menyentuh garis Finish (500m) atau Waktu Habis
-        let semuaSelesai = pesertaList.every(p => p.jarakTempuhMeter >= 500);
-        if (semuaSelesai || frameSekarang >= totalFrame) {
+        // BERHENTI KETIKA SUDAH ADA 3 JUARA FINIS
+        if (daftarFinis.length >= 3) {
             clearInterval(balapKudaState.balapanInterval);
             balapKudaState.balapanInterval = null;
+            balapKudaState.isBalapanBerjalan = false;
 
             setTimeout(() => {
                 selesaikanHasilBalapan(kelas, pesertaList, kudaPemainRef);
-            }, 500);
+            }, 600);
         }
 
     }, 200); 
@@ -1024,12 +1045,14 @@ function jalankanAnimasiBalapan500m(kelas, pesertaList, kudaPemainRef) {
 function selesaikanHasilBalapan(kelas, pesertaList, kudaPemainRef) {
     let cfg = KONFIG_KELAS[kelas];
 
-    // Penentuan Juara Berdasarkan Jarak Tempuh & Skor Kinerja Akumulatif
+    // Penentuan Urutan Hasil Akhir: Kuda Finis Lebih Dulu Ditampilkan di Atas
     pesertaList.sort((a, b) => {
-        if (b.jarakTempuhMeter !== a.jarakTempuhMeter) {
-            return b.jarakTempuhMeter - a.jarakTempuhMeter;
+        if (a.sudahFinis && b.sudahFinis) {
+            return a.urutanFinis - b.urutanFinis;
         }
-        return b.skorKinerjaAkumulatif - a.skorKinerjaAkumulatif;
+        if (a.sudahFinis) return -1;
+        if (b.sudahFinis) return 1;
+        return b.jarakTempuhMeter - a.jarakTempuhMeter;
     });
 
     let posisiPemain = pesertaList.findIndex(p => p.isPemain) + 1;
@@ -1086,5 +1109,5 @@ function tampilkanHasilBalapanModal(kelas, pesertaSorted, posisiPemain) {
     modalTeks += `</tbody></table></div>`;
 
     let judul = `🏆 Hasil Balapan Kelas ${kelas} (Posisi Ke-${posisiPemain})`;
-    bukaModalCustom(judul, modalTeks);
+    bukaModalCustom(judul, modalTeks, false); // Setelah balapan selesai, modal baru bisa ditutup biasa
 }
