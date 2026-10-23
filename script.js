@@ -1,3 +1,18 @@
+// ==========================================
+// CONFIG & INTEGRASI GOOGLE APPS SCRIPT
+// ==========================================
+const URL_SCRIPT_DATABASE = "https://script.google.com/macros/s/AKfycbzLqWdFj9Kk-U-p3gN88zDrmX-0xAn41f5R3v4_j5w1/exec";
+
+// Fungsi untuk mendapatkan atau membuat ID Pemain Otomatis
+function getIdPemain() {
+    let id = localStorage.getItem("game_player_id");
+    if (!id) {
+        id = "PLAYER-" + Math.random().toString(36).substring(2, 8).toUpperCase();
+        localStorage.setItem("game_player_id", id);
+    }
+    return id;
+}
+
 let gameState = {
     namaPemain: "Pak Tani",
     uang: 1500,
@@ -124,37 +139,113 @@ function batalUbahNama() { resetHeaderNamaUI(); }
 function resetHeaderNamaUI() {
     let container = document.querySelector(".player-info");
     if (!container) return;
-    let tombolSaveHTML = `<button onclick="simpanGame()" title="Simpan Progres" style="background: transparent; border: none; cursor: pointer; font-size: 1.1rem; margin-left: 5px;">💾</button>`;
+    let playerId = getIdPemain();
+    let tombolSaveHTML = `<button onclick="simpanGame()" title="Simpan Ke Cloud" style="background: transparent; border: none; cursor: pointer; font-size: 1.1rem; margin-left: 5px;">💾</button>`;
+    let tombolLoadHTML = `<button onclick="muatDenganIdLain()" title="Masukan/Ganti ID Pemain" style="background: transparent; border: none; cursor: pointer; font-size: 1rem; margin-left: 2px;">🔑</button>`;
+    
     container.innerHTML = `
         <span id="label-nama">${gameState.namaPemain}</span> 
+        <small style="color: var(--text-muted); font-size:0.75rem; margin-left:3px;">(${playerId})</small>
         <button id="btn-edit-nama" onclick="ubahNama()" style="background: transparent; border: none; cursor: pointer; font-size: 1rem;">✏️</button>
         ${tombolSaveHTML}
+        ${tombolLoadHTML}
     `;
 }
 
+// ==========================================
+// FUNGSI SIMPAN & MUAT VIA GOOGLE SPREADSHEET
+// ==========================================
 function simpanGame() {
-    localStorage.setItem("game_bertani_save_v2", JSON.stringify(gameState));
-    tampilkanPopupNotifikasi("💾 Progres Disimpan!", "Data permainan berhasil disimpan.", "neon-green");
+    let playerId = getIdPemain();
+    tampilkanPopupNotifikasi("⏳ Menyimpan...", "Sedang mengunggah data ke Spreadsheet...", "neon-blue");
+
+    let payload = {
+        action: "save",
+        playerId: playerId,
+        playerName: gameState.namaPemain,
+        gameState: gameState,
+        horseState: (typeof balapKudaState !== 'undefined') ? balapKudaState : {}
+    };
+
+    fetch(URL_SCRIPT_DATABASE, {
+        method: "POST",
+        body: JSON.stringify(payload)
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === "success") {
+            tampilkanPopupNotifikasi(
+                "☁️ Tersimpan di Cloud!", 
+                `ID Pemain kamu: ${playerId}\nGunakan ID ini jika ingin memuat permainan di HP/browser lain!`, 
+                "neon-green"
+            );
+        } else {
+            alert("⚠️ Gagal menyimpan data ke Spreadsheet.");
+        }
+    })
+    .catch(err => {
+        console.error("Error save:", err);
+        alert("⚠️ Kesalahan koneksi saat menyimpan ke Spreadsheet.");
+    });
 }
 
 function muatGame() {
-    let savedData = localStorage.getItem("game_bertani_save_v2");
-    if (savedData) {
-        try {
-            gameState = JSON.parse(savedData);
-            if (gameState.durasiPisau === undefined) gameState.durasiPisau = 300;
-            if (gameState.durasiKompor === undefined) gameState.durasiKompor = 300;
-            if (gameState.durasiPancingan === undefined) gameState.durasiPancingan = 750;
-            if (!gameState.misiPapan) gameState.misiPapan = [];
-            if (!gameState.misiAktif) gameState.misiAktif = [];
-            if (gameState.mancingCount === undefined) gameState.mancingCount = 0;
-            if (gameState.mancingHari === undefined) gameState.mancingHari = gameState.waktuHari;
-            if (!gameState.prosesMasak) gameState.prosesMasak = [];
-        } catch (e) {
-            console.error("Gagal parse save data:", e);
+    let playerId = getIdPemain();
+    
+    let payload = {
+        action: "load",
+        playerId: playerId
+    };
+
+    fetch(URL_SCRIPT_DATABASE, {
+        method: "POST",
+        body: JSON.stringify(payload)
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === "success") {
+            gameState = data.gameState;
+            if (typeof balapKudaState !== 'undefined' && data.horseState) {
+                balapKudaState = data.horseState;
+            }
+            updateHeaderUI();
+            resetHeaderNamaUI();
+            renderSemuaTabUtama();
+            tampilkanPopupNotifikasi(
+                "✨ Data Dimuat!", 
+                `Selamat datang kembali, ${gameState.namaPemain}! (ID: ${playerId})`, 
+                "neon-green"
+            );
+        } else {
+            console.log("Pemain baru atau ID belum terdaftar. Menggunakan data awal.");
         }
+    })
+    .catch(err => console.error("Error load:", err));
+}
+
+function muatDenganIdLain() {
+    let idBaru = prompt("Masukkan ID Pemain kamu (Contoh: PLAYER-A1B2C3):");
+    if (idBaru && idBaru.trim() !== "") {
+        localStorage.setItem("game_player_id", idBaru.trim().toUpperCase());
+        muatGame();
     }
-    updateHeaderUI();
+}
+
+function renderSemuaTabUtama() {
+    renderLahan();
+    renderKandang();
+    renderSupermarket();
+    renderPasar();
+    renderTokoBumbu();
+    renderJagal();
+    renderTukangKayu();
+    renderPengepul();
+    renderTas();
+    renderWikipedia();
+    renderSungai();
+    renderDapur();
+    renderPapanMisi();
+    if (typeof renderBalapKuda === 'function') renderBalapKuda();
 }
 
 function updateHeaderUI() {
@@ -685,7 +776,6 @@ function renderPasar() {
         html += `<div class="card"><div style="font-size:2.5rem;">${item.icon}</div><h3>${item.nama}</h3><p>Beli: <b>Rp. ${f.harga.toLocaleString('id-ID')}</b></p>${getInfoGrafikHarga(f.harga, hBeli)}<button onclick="bukaModalBeli('${id}', '${item.nama}', ${f.harga}, 'pasar')">Beli Pakan</button></div>`;
     }
 
-    // --- PERALATAN (Pancingan Ditambahkan di Sini) ---
     if (GAME_DATABASE.alat) {
         html += `<h3 style="color: #60a5fa; grid-column:1/-1; margin-top:20px;">⚙️ Peralatan Kerja</h3>`;
         for (let idAlat in GAME_DATABASE.alat) {
@@ -1301,7 +1391,6 @@ function tarikPancingan() {
     let modal = document.getElementById("modal-mancing");
     if (modal) modal.style.display = "none";
 
-    // Kurangi Durability Pancingan
     gameState.durasiPancingan -= 1;
 
     if (posisiBar >= zonaHijau.min && posisiBar <= zonaHijau.max) {
@@ -1493,7 +1582,6 @@ function konfirmasiBeli() {
     let jml = parseInt(document.getElementById("input-jumlah-beli").value) || 1;
     let total = jml * transaksiAktif.hargaSatuan;
 
-    // Proteksi Pembelian Equipment Ganda
     if (GAME_DATABASE.alat && GAME_DATABASE.alat[transaksiAktif.idItem]) {
         if ((gameState.tas[transaksiAktif.idItem] || 0) > 0) {
             alert(`⚠️ Kamu sudah memiliki ${transaksiAktif.namaItem}!`);
@@ -1680,29 +1768,10 @@ window.onload = function() {
     muatGame();
     resetHeaderNamaUI();
 
-    tampilkanPopupNotifikasi(
-        `Hallo ${gameState.namaPemain}! 👋`, 
-        `Selamat Datang Kembali ke dalam Game. Have Fun! 🎮🌾✨`, 
-        "neon-green"
-    );
-
     if (gameState.misiPapan.length === 0) {
         generasiMisiOtomatis();
         generasiMisiOtomatis();
     }
     
-    renderLahan();
-    renderKandang();
-    renderSupermarket();
-    renderPasar();
-    renderTokoBumbu();
-    renderJagal();
-    renderTukangKayu();
-    renderPengepul();
-    renderTas();
-    renderWikipedia();
-    renderSungai();
-    renderDapur();
-    renderPapanMisi();
-    renderBalapKuda();
+    renderSemuaTabUtama();
 };
