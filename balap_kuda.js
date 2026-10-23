@@ -27,8 +27,8 @@ function renderBalapKuda() {
     const container = document.getElementById("area-balap-kuda");
     if (!container) return;
 
-    // Generasi pasar kuda jika hari berganti
-    if (balapKudaState.musimBalapHari !== gameState.waktuHari) {
+    // Pastikan pasar kuda selalu terisi jika masih kosong atau hari berganti
+    if (!balapKudaState.daftarPasarKuda || balapKudaState.daftarPasarKuda.length === 0 || balapKudaState.musimBalapHari !== gameState.waktuHari) {
         balapKudaState.musimBalapHari = gameState.waktuHari;
         generasiPasarKuda();
     }
@@ -51,16 +51,16 @@ function renderBalapKuda() {
         html += `
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
                 <div>
-                    <h3>🐎 ${k.nama} <span style="color:#fbbf24;">[Kelas Tertinggi Ditembus: ${k.kelasMaks}]</span></h3>
+                    <h3>🐎 ${k.nama} <span style="color:#fbbf24;">[Kelas Tertinggi: ${k.kelasMaks}]</span></h3>
                     <p>Overall Rating (OVR): <b style="color:#34d399; font-size:1.2rem;">${ovr} Pts</b></p>
                     <p>⚡ Stamina: <b>${k.stamina} / ${k.staminaMax}</b> | 🪨 Stres: <b style="color:${k.stres > 50 ? '#f87171' : '#34d399'}">${k.stres} / 100</b></p>
                 </div>
                 <div>
-                    <button onclick="latihKuda('kecepatan')" style="background:#2563eb; margin:2px;">🏃 Latih Kecepatan (+Stat)</button>
+                    <button onclick="latihKuda('kecepatan')" style="background:#2563eb; margin:2px;">🏃 Latih Kecepatan</button>
                     <button onclick="latihKuda('dayaTahan')" style="background:#2563eb; margin:2px;">🛡️ Latih Daya Tahan</button>
                     <button onclick="latihKuda('akselerasi')" style="background:#2563eb; margin:2px;">🚀 Latih Akselerasi</button>
                     <button onclick="latihKuda('kelincahan')" style="background:#2563eb; margin:2px;">🌀 Latih Kelincahan</button>
-                    <button onclick="istirahatKuda()" style="background:#059669; margin:2px;">💤 Istirahatkan Kuda (-Stres)</button>
+                    <button onclick="istirahatKuda()" style="background:#059669; margin:2px;">💤 Istirahatkan Kuda</button>
                 </div>
             </div>
             <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap:10px; margin-top:15px; background:#101622; padding:10px; border-radius:8px; font-size:0.85rem;">
@@ -115,18 +115,19 @@ function renderBalapKuda() {
 
 // --- LOGIKA HITUNG STAT & OVERALL ---
 function hitungOverallKuda(stats) {
-    return Math.round(stats.kecepatan + stats.dayaTahan + stats.akselerasi + stats.mental + stats.kelincahan);
+    if (!stats) return 0;
+    return Math.round((stats.kecepatan || 0) + (stats.dayaTahan || 0) + (stats.akselerasi || 0) + (stats.mental || 0) + (stats.kelincahan || 0));
 }
 
 function buatStatRandom(ovrMin, ovrMax) {
     let targetOvr = Math.floor(Math.random() * (ovrMax - ovrMin + 1)) + ovrMin;
     let bagian = targetOvr / 5;
     return {
-        kecepatan: Math.round(bagian + (Math.random() * 10 - 5)),
-        dayaTahan: Math.round(bagian + (Math.random() * 10 - 5)),
-        akselerasi: Math.round(bagian + (Math.random() * 10 - 5)),
-        mental: Math.round(bagian + (Math.random() * 10 - 5)),
-        kelincahan: Math.round(bagian + (Math.random() * 10 - 5))
+        kecepatan: Math.max(10, Math.round(bagian + (Math.random() * 10 - 5))),
+        dayaTahan: Math.max(10, Math.round(bagian + (Math.random() * 10 - 5))),
+        akselerasi: Math.max(10, Math.round(bagian + (Math.random() * 10 - 5))),
+        mental: Math.max(10, Math.round(bagian + (Math.random() * 10 - 5))),
+        kelincahan: Math.max(10, Math.round(bagian + (Math.random() * 10 - 5)))
     };
 }
 
@@ -179,11 +180,11 @@ function latihKuda(statKey) {
     }
 
     k.stamina -= 20;
-    k.stres += Math.floor(Math.random() * 12) + 8; // Tambah stres 8-20
+    k.stres += Math.floor(Math.random() * 12) + 8;
 
-    let penambahan = Math.floor(Math.random() * 4) + 2; // +2 - 5 stat
+    let penambahan = Math.floor(Math.random() * 4) + 2;
     if (k.stres > 70) {
-        penambahan = 1; // Efek latihan memburuk jika stres tinggi
+        penambahan = 1;
         tampilkanPopupNotifikasi("⚠️ Kuda Stres Tinggi!", "Latihan tidak efektif karena kuda sangat stres!", "neon-amber");
     }
 
@@ -230,7 +231,7 @@ function mulaiBalapanKelas(kelas) {
     k.stres += 15;
     updateHeaderUI();
 
-    // Generate 6 Peserta NPC
+    // Generate 6 Peserta NPC (Status acak sesuai kelas)
     let peserta = [];
     for (let i = 0; i < 6; i++) {
         let statsNpc = buatStatRandom(cfg.ovrMin, cfg.ovrMax);
@@ -241,7 +242,7 @@ function mulaiBalapanKelas(kelas) {
         });
     }
 
-    // Tambah Kuda Pemain sebagai peserta ke-7
+    // Tambahkan Kuda Pemain sebagai peserta ke-7
     peserta.push({
         nama: k.nama + " (Kuda Kamu)",
         stats: k.stats,
@@ -259,7 +260,7 @@ function mulaiBalapanKelas(kelas) {
         p.skorAkhir = poinKecepatan + dayaTahanFactor + keberuntungan;
     });
 
-    // Urutkan Pemenang
+    // Urutkan Pemenang berdasarkan skor tertinggi
     peserta.sort((a, b) => b.skorAkhir - a.skorAkhir);
 
     let posisiPemain = peserta.findIndex(p => p.isPemain) + 1;
@@ -272,7 +273,7 @@ function mulaiBalapanKelas(kelas) {
         gameState.uang += cfg.hadiah;
         updateHeaderUI();
 
-        // Naik Kelas jika menjuarai kelas tertinggi saat ini
+        // Buka akses kelas berikutnya jika menjuarai kelas tertinggi saat ini
         if (idxSekarang < urutanKelas.length - 1 && urutanKelas.indexOf(k.kelasMaks) === idxSekarang) {
             k.kelasMaks = urutanKelas[idxSekarang + 1];
         }
