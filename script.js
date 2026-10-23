@@ -1,7 +1,7 @@
 // ==========================================
 // CONFIG & INTEGRASI GOOGLE APPS SCRIPT
 // ==========================================
-const URL_SCRIPT_DATABASE = "https://script.google.com/macros/s/AKfycbzmFZ_fYtAIV-7JVXL6CRSvj-xfxo5KwoKqMLNoQFFcOwmpJPVaQdDnoyvH1J-BIZMj0g/exec";
+const URL_SCRIPT_DATABASE = "https://script.google.com/macros/s/AKfycbxmq440FWj9HXk5kckzjln-BSQ9rFVKvEmMzftJLeGKPF-u5Y83VE25PdoZaU1Qn7V9gQ/exec";
 
 // --- MANAJEMEN AKUN LOKAL ---
 function getUsernameLocal() {
@@ -46,14 +46,14 @@ let posisiBar = 0;
 let arahBar = 1;
 let zonaHijau = { min: 20, max: 45 };
 
-const DAFTAR_NAMA_NPC = ["Pak RT", "Chef Jaka", "Ibu Ros", "Paman Douglas", "Mbak Maya", "Pak Dokter"];
+const DAFTAR_NAMA_NPC = ["Pak RT", "Chef Jaka", "Ibu Ros", "Paman Sam", "Mbak Maya", "Pak Dokter"];
 
 function getNamaMusim(hari) {
     let siklusHari = ((hari - 1) % 128) + 1;
-    if (siklusHari <= 32) return { nama: "Musim Semi", icon: "🌸" };
-    if (siklusHari <= 64) return { nama: "Musim Panas", icon: "☀️" };
-    if (siklusHari <= 96) return { nama: "Musim Gugur", icon: "🍁" };
-    return { nama: "Musim Dingin", icon: "❄️" };
+    if (siklusHari <= 32) return { nama: "Spring (Musim Semi)", icon: "🌸" };
+    if (siklusHari <= 64) return { nama: "Summer (Musim Panas)", icon: "☀️" };
+    if (siklusHari <= 96) return { nama: "Autumn (Musim Gugur)", icon: "🍁" };
+    return { nama: "Winter (Musim Dingin)", icon: "❄️" };
 }
 
 function getFluktuasiItem(idItem, baseHarga) {
@@ -160,7 +160,7 @@ function logoutPemain() {
 }
 
 // ==========================================
-// POPUP AUTH, REGISTER & LOGIN
+// POPUP AUTH, REGISTER & LOGIN (PERBAIKAN ID)
 // ==========================================
 
 function bukaModalAuth() {
@@ -174,7 +174,7 @@ function bukaModalAuth() {
                 <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:15px;">
                     <input type="text" id="auth-username" placeholder="Username" style="padding:10px; border-radius:6px; background:#101622; color:#fff; border:1px solid var(--border-color);">
                     <input type="password" id="auth-password" placeholder="Password" style="padding:10px; border-radius:6px; background:#101622; color:#fff; border:1px solid var(--border-color);">
-                    <input type="text" id="auth-player-name" placeholder="Nama Karakter (Khusus Daftar)" style="padding:10px; border-radius:6px; background:#101622; color:#fff; border:1px solid var(--border-color); display:none;">
+                    <input type="text" id="auth-player-name" placeholder="Nama Karakter (Contoh: Pak Tani)" style="padding:10px; border-radius:6px; background:#101622; color:#fff; border:1px solid var(--border-color); display:none;">
                 </div>
                 
                 <div id="auth-btn-container" style="display:flex; flex-direction:column; gap:8px;">
