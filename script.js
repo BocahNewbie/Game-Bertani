@@ -151,7 +151,7 @@ function resetHeaderNamaUI() {
 // ==========================================
 
 function daftarkanPemainBaru() {
-    tampilkanPopupNotifikasi("⏳ Menghubungkan Server...", "Membuat ID Pemain resmi dari Spreadsheet...", "neon-blue");
+    tampilkanPopupNotifikasi("⏳ Menghubungkan Server...", "Membuat ID Pemain...", "neon-blue");
 
     let payload = {
         action: "register",
@@ -192,7 +192,7 @@ function simpanGame() {
         return;
     }
 
-    tampilkanPopupNotifikasi("⏳ Menyimpan...", "Sedang mengunggah data ke Spreadsheet...", "neon-blue");
+    tampilkanPopupNotifikasi("⏳ Menyimpan...", "Sedang mengunggah data...", "neon-blue");
 
     let payload = {
         action: "save",
@@ -210,17 +210,17 @@ function simpanGame() {
     .then(data => {
         if (data.status === "success") {
             tampilkanPopupNotifikasi(
-                "☁️ Tersimpan di Cloud!", 
-                `Data milik [${playerId}] berhasil diperbarui di Spreadsheet!`, 
+                "☁️ Tersimpan!", 
+                `Data milik [${playerId}] berhasil diperbarui!`, 
                 "neon-green"
             );
         } else {
-            alert("⚠️ Gagal menyimpan data. ID tidak ditemukan di Spreadsheet.");
+            alert("⚠️ Gagal menyimpan data. ID tidak ditemukan.");
         }
     })
     .catch(err => {
         console.error("Error save:", err);
-        alert("⚠️ Kesalahan koneksi saat menyimpan ke Spreadsheet.");
+        alert("⚠️ Kesalahan koneksi saat menyimpan data.");
     });
 }
 
