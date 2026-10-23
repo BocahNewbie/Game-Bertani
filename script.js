@@ -96,6 +96,7 @@ function refreshTabAktif(tabId) {
     if (tabId === 'tab-misi') renderPapanMisi();
     if (tabId === 'tab-toko-bumbu') renderTokoBumbu();
     if (tabId === 'tab-dapur') renderDapur();
+    if (tabId === 'tab-balap-kuda') renderBalapKuda();
 }
 
 function ubahNama() {
@@ -1703,4 +1704,5 @@ window.onload = function() {
     renderSungai();
     renderDapur();
     renderPapanMisi();
+    renderBalapKuda();
 };
