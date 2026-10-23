@@ -1793,9 +1793,14 @@ setInterval(() => {
         if (idTab === 'tab-lahan') renderLahan();
         if (idTab === 'tab-kandang') renderKandang();
         if (idTab === 'tab-misi') renderPapanMisi();
-        if (idTab === 'tab-dapur') renderDapur();
+        if (idTab === 'tab-dapur') renderDapur();        
+        // 🔹 TAMBAHKAN KODE INI DI BAWAH 'tab-dapur'
+        if (idTab === 'tab-balap-kuda' && typeof renderBalapKuda === 'function') {
+            renderBalapKuda();
+        }
     }
 }, 1500);
+
 
 // --- STARTUP LOGIC ---
 window.onload = function() {
