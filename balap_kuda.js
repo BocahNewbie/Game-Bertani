@@ -200,13 +200,14 @@ function buatStatRandom(ovrMin, ovrMax) {
     };
 }
 
-// --- MEKANIK PASAR KUDA ---
+// --- MEKANIK PASAR KUDA (OVR MAKSIMAL 130) ---
 function generasiPasarKuda() {
     balapKudaState.daftarPasarKuda = [];
     for (let i = 0; i < 3; i++) {
         let nama = "Kuda " + NAMA_KUDA_NPC[Math.floor(Math.random() * NAMA_KUDA_NPC.length)];
-        let stats = buatStatRandom(80, 180);
-        let harga = 35000 + Math.round(hitungOverallKuda(stats) * 80);
+        // Dibuat OVR antara 80 hingga 120 (tidak lebih dari 130)
+        let stats = buatStatRandom(80, 120);
+        let harga = 20000 + Math.round(hitungOverallKuda(stats) * 80);
         balapKudaState.daftarPasarKuda.push({ nama, stats, harga });
     }
 }
