@@ -1,5 +1,5 @@
 // ==========================================
-// MODULE BALAP KUDA (balap_kuda.js) - FIXED
+// MODULE BALAP KUDA (balap_kuda.js) - COMPLETE FIXED
 // ==========================================
 
 let balapKudaState = {
@@ -21,37 +21,37 @@ const COOLDOWN_ISTIRAHAT_JAM = 5; // Cooldown istirahat 5 jam in-game
 const KONFIG_KELAS = {
     "D": { 
         nama: "Kelas D (Pemula)",   
-        ovrMin: 50, ovrMax: 200, 
+        ovrMin: 70, ovrMax: 230, 
         biayaDaftar: 3000,
         hadiah: { j1: 20000, j2: 10000, j3: 5000 }
     },
     "C": { 
         nama: "Kelas C (Amatir)",   
-        ovrMin: 201, ovrMax: 360, 
+        ovrMin: 231, ovrMax: 390, 
         biayaDaftar: 10000,
         hadiah: { j1: 50000, j2: 30000, j3: 15000 }
     },
     "B": { 
         nama: "Kelas B (Pro)",      
-        ovrMin: 361, ovrMax: 500, 
+        ovrMin: 391, ovrMax: 550, 
         biayaDaftar: 27000,
         hadiah: { j1: 150000, j2: 75000, j3: 35000 }
     },
     "A": { 
         nama: "Kelas A (Elite)",    
-        ovrMin: 501, ovrMax: 710, 
+        ovrMin: 551, ovrMax: 710, 
         biayaDaftar: 70000,
         hadiah: { j1: 350000, j2: 175000, j3: 85000 }
     },
     "S": { 
         nama: "Kelas S (Master)",   
-        ovrMin: 711, ovrMax: 1180, 
+        ovrMin: 711, ovrMax: 980, 
         biayaDaftar: 150000,
         hadiah: { j1: 800000, j2: 400000, j3: 200000 }
     },
     "SS": { 
         nama: "Kelas SS (Legend)",  
-        ovrMin: 1181, ovrMax: 1700,
+        ovrMin: 981, ovrMax: 1500,
         biayaDaftar: 450000,
         hadiah: { j1: 2500000, j2: 1250000, j3: 600000 }
     }
@@ -108,12 +108,11 @@ function dialogKonfirmasiCustom(judul, pesan, callbackYa) {
 
 // --- FUNGSI CEK JAM ARENA BUKA (10.00 - 19.00) ---
 function isArenaBuka() {
-    let jamSekarang = Number(gameState.jam) || 0;
-    let menitSekarang = Number(gameState.menit) || 0;
-    let totalMenit = (jamSekarang * 60) + menitSekarang;
+    let jamSekarang = parseInt(gameState.jam, 10);
+    if (isNaN(jamSekarang)) jamSekarang = 0;
 
-    // Arena buka tepat dari jam 10:00 (600 menit) sampai 19:00 (1140 menit)
-    return totalMenit >= 600 && totalMenit < 1140;
+    // Arena buka mulai jam 10 (10:00) hingga sebelum jam 19 (18:59)
+    return jamSekarang >= 10 && jamSekarang < 19;
 }
 
 // --- HELPER HITUNG SISA WAKTU COOLDOWN ---
@@ -121,7 +120,7 @@ function getSisaCooldownInGame(k) {
     if (k.terakhirIstirahatHari === undefined || k.terakhirIstirahatHari === null) return 0;
 
     let hariSekarang = Number(gameState.waktuHari) || 0;
-    let jamSekarang = Number(gameState.jam) || 0;
+    let jamSekarang = parseInt(gameState.jam, 10) || 0;
     let menitSekarang = Number(gameState.menit) || 0;
 
     let totalMenitSekarang = (hariSekarang * 24 * 60) + (jamSekarang * 60) + menitSekarang;
@@ -144,6 +143,15 @@ function renderBalapKuda() {
     const container = document.getElementById("area-balap-kuda");
     if (!container) return;
 
+    // Simpan status elemen <details> mana saja yang sedang terbuka sebelum re-render
+    let detailsOpenState = {};
+    document.querySelectorAll('#area-balap-kuda details').forEach(el => {
+        let kelasId = el.getAttribute('data-kelas');
+        if (kelasId) {
+            detailsOpenState[kelasId] = el.open;
+        }
+    });
+
     // Bersihkan interval timer countdown lama jika ada
     if (balapKudaState.cooldownInterval) {
         clearInterval(balapKudaState.cooldownInterval);
@@ -163,7 +171,6 @@ function renderBalapKuda() {
         generasiLawanPerKelas();
     }
 
-    let jamSekarang = Number(gameState.jam) || 0;
     let arenaBuka = isArenaBuka();
 
     let html = `<div class="card" style="grid-column: 1/-1; padding: 20px; text-align: center;">
@@ -263,7 +270,7 @@ function renderBalapKuda() {
         
         <div style="margin-top:15px;">
             <button onclick="bukaModalBreedingModern()" style="background:linear-gradient(135deg, #ec4899, #be185d); color:#fff; border:none; padding:12px 24px; border-radius:8px; font-weight:bold; cursor:pointer; font-size:1rem; box-shadow:0 4px 12px rgba(236, 72, 153, 0.3);">
-                🧬 Pilih Indukan & Mulai Breeding (Rp 15.000)
+                🧬 Pilih Indukan & Mulai Breeding (Rp 95.000)
             </button>
         </div>
     </div>`;
@@ -277,6 +284,7 @@ function renderBalapKuda() {
         let kudaAktif = balapKudaState.kandangKuda[balapKudaState.indexKudaAktif];
         let bisaIkut = kudaAktif && dapatAksesKelas(kls) && arenaBuka;
         let daftarLawan = balapKudaState.lawanPerKelas ? balapKudaState.lawanPerKelas[kls] || [] : [];
+        let isOpen = detailsOpenState[kls] ? "open" : "";
         
         html += `
             <div class="card" style="border: 1px solid ${bisaIkut ? '#10b981' : 'var(--border-color)'}; opacity: ${kudaAktif && dapatAksesKelas(kls) ? '1' : '0.6'}">
@@ -289,7 +297,7 @@ function renderBalapKuda() {
                     🥉 J3: Rp. ${cfg.hadiah.j3.toLocaleString('id-ID')}
                 </p>
                 
-                <details style="margin-top:10px; font-size:0.8rem; background:#0f172a; padding:6px; border-radius:5px;">
+                <details data-kelas="${kls}" ${isOpen} style="margin-top:10px; font-size:0.8rem; background:#0f172a; padding:6px; border-radius:5px;">
                     <summary style="cursor:pointer; color:#60a5fa;"><b>📋 Daftar 7 Lawan NPC</b></summary>
                     <ul style="padding-left:15px; margin-top:5px; text-align:left;">
                         ${daftarLawan.map((npc, i) => `<li><b>${i+1}. ${npc.nama}</b> (${npc.gender === "Jantan" ? "🩵" : "🩷"}) - OVR: <span style="color:#fbbf24">${hitungOverallKuda(npc.stats)} Pts</span></li>`).join('')}
@@ -326,7 +334,7 @@ function renderBalapKuda() {
 
     container.innerHTML = html;
 
-    // Timer Countdown Realtime untuk Tombol Cooldown
+    // Timer Countdown HANYA memperbarui isi teks tombol tanpa re-render seluruh halaman
     if (kudaAktif) {
         balapKudaState.cooldownInterval = setInterval(() => {
             let btn = document.getElementById("btn-istirahat-kuda");
@@ -550,7 +558,7 @@ function bukaModalBreedingModern() {
         </div>
 
         <button id="btn-eksekusi-breeding" onclick="eksekusiBreeding()" style="background:#db2777; color:#fff; width:100%; border:none; padding:10px; border-radius:8px; font-weight:bold; cursor:pointer; opacity:0.5;" disabled>
-            💖 Kawinkan (Rp. 15.000)
+            💖 Kawinkan (Rp. 95.000)
         </button>
     `;
 
@@ -592,7 +600,7 @@ function eksekusiBreeding() {
     let jantan = balapKudaState.kandangKuda[idxJ];
     let betina = balapKudaState.kandangKuda[idxB];
 
-    let biayaKawin = 15000;
+    let biayaKawin = 95000;
     if (gameState.uang < biayaKawin) {
         tutupModalCustom();
         bukaModalCustom("⚠️ Uang Tidak Cukup", `<p>Biaya perawatan & kawin kuda membutuhkan Rp. ${biayaKawin.toLocaleString('id-ID')}!</p>`);
@@ -710,7 +718,7 @@ function latihKuda(statKey) {
         return;
     }
 
-    k.stamina -= 30;
+    k.stamina -= 20;
     let penambahanStres = 20; 
     k.stres = Math.min(100, k.stres + penambahanStres);
 
@@ -728,7 +736,7 @@ function latihKuda(statKey) {
         kelincahan: "Kelincahan"
     }[statKey] || statKey;
 
-    bukaModalCustom("🏃 Latihan Selesai", `<p><b>${k.nama}</b> berhasil melatih ${namaStat}: <b>+${penambahanStat} Pts</b>! (Stamina -30, Stres +${penambahanStres})</p>`);
+    bukaModalCustom("🏃 Latihan Selesai", `<p><b>${k.nama}</b> berhasil melatih ${namaStat}: <b>+${penambahanStat} Pts</b>! (Stamina -20, Stres +${penambahanStres})</p>`);
 
     renderBalapKuda();
 }
@@ -745,7 +753,7 @@ function istirahatKuda() {
     }
 
     let hariSekarang = Number(gameState.waktuHari) || 0;
-    let jamSekarang = Number(gameState.jam) || 0;
+    let jamSekarang = parseInt(gameState.jam, 10) || 0;
     let menitSekarang = Number(gameState.menit) || 0;
 
     k.stamina = k.staminaMax;
